@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 10:44:32 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 13:07:55 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -161,6 +161,7 @@ def getFontSettings():
 
 class Gui(Ui, _Gui):
     """Top class for the GUI interface
+    _Gui contains methods shared between V3 and V4
     """
 
     _hasGui = True
@@ -171,14 +172,10 @@ class Gui(Ui, _Gui):
         Ui.__init__(self, application)
 
         self._fontSettings = FontSettings(application.preferences)
+        self._colourScheme = self._getColourScheme()
+        self._styleSheet = self._getStyleSheet(self._colourScheme)
 
-        # defined by _setColourSchemeAndStyleSheet()
-        self._styleSheet = None
-        self._colourScheme = None
-        self._setColourSchemeAndStyleSheet(application.args, application.preferences)
-
-        # Get menu definitions;
-        # _getMenuDefs() subclassed by various application-specific Gui's
+        # Get menu definitions; _getMenuDefs() subclassed by various application-specific Gui's
         self._menuDefs = self._getMenuDefs()
 
         self._initQtApp()
@@ -202,7 +199,8 @@ class Gui(Ui, _Gui):
 
         self.qtApp = Application(self.application.applicationName,
                                  self.application.applicationVersion,
-                                 organizationName='CCPN', organizationDomain='ccpn.ac.uk')
+                                 organizationName='CCPN',
+                                 organizationDomain='ccpn.ac.uk')
 
         # patch for icon sizes in menus, etc.
         styles = QtWidgets.QStyleFactory()
@@ -211,41 +209,6 @@ class Gui(Ui, _Gui):
 
         # read the current system-fonts
         getSystemFonts()
-
-    def _getMenuDefs(self):
-        """:return the MenuDefs instance
-        Subclassed for modification in various AnalysisAssign, AnalysisScreen, ... programmes
-        """
-        from ccpn.ui.gui.menus.MenuDefs import getMenuDefs
-        return getMenuDefs()
-
-    def _setColourSchemeAndStyleSheet(self, args, preferences):
-        """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences
-        """
-        from ccpn.framework.PathsAndUrls import widgetsPath
-
-        if args.darkColourScheme:
-            colourScheme = DARK
-        elif args.lightColourScheme:
-            colourScheme = LIGHT
-        else:
-            colourScheme = preferences.general.colourScheme
-
-        if colourScheme is None:
-            raise RuntimeError('invalid colourScheme')
-        self._colourScheme = colourScheme
-
-        _qssPath = widgetsPath / ('%sStyleSheet.qss' % colourScheme.capitalize())
-        with _qssPath.open(mode='r') as fp:
-            styleSheet = fp.read()
-
-        if platform.system() == 'Linux':
-            _qssPath = widgetsPath / ('%sAdditionsLinux.qss' % colourScheme.capitalize())
-            with _qssPath.open(mode='r') as fp:
-                additions = fp.read()
-            styleSheet += additions
-
-        self._styleSheet = styleSheet
 
     def initialize(self, mainWindow, project):
         """UI operations done after every project load/create
@@ -404,7 +367,7 @@ class Gui(Ui, _Gui):
         except Exception as e:
             getLogger().warning(f'Error restoring current.strip: {e}')
 
-    # GWV 07/08/2024: copied from Framewrok
+    # GWV 07/08/2024: copied from Framework
     def _correctColours(self):
         """Autocorrect all colours that are too close to the background colour
         """

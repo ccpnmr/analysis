@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-20 08:54:30 +0100 (Tue, August 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 13:07:55 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -104,6 +104,9 @@ class Arguments:
     debug3_backup_thread = False
     skipUserPreferences = False
     projectPath = None
+    darkColourScheme = None
+    lightColourScheme = None
+
     _skipUpdates = False
 
     def __init__(self, projectPath=None, **kwds):

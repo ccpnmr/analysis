@@ -1,5 +1,6 @@
 import os
 import subprocess
+import platform
 
 from ccpn.ui.gui.widgets import MessageDialog
 
@@ -9,6 +10,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
 from ccpn.util.decorators import logCommand
 
+from ccpn.ui.gui.guiSettings import LIGHT, DARK
+
 
 
 class _Gui(object):
@@ -16,6 +19,45 @@ class _Gui(object):
     All methods, to be retained for a 4.x refactored version
     """
 
+    def _getMenuDefs(self):
+        """:return the MenuDefs instance
+        Subclassed for modification in various AnalysisAssign, AnalysisScreen, ... programmes
+        """
+        from ccpn.ui.gui.menus.MenuDefs import getMenuDefs
+        return getMenuDefs()
+
+    def _getColourScheme(self) -> str:
+        """get the colourScheme as determined by arguments --dark, --light or preferences
+        """
+        _app = self.application
+        if _app.args.darkColourScheme:
+            colourScheme = DARK
+        elif _app.args.lightColourScheme:
+            colourScheme = LIGHT
+        else:
+            colourScheme = _app.preferences.general.colourScheme
+
+        if colourScheme is None:
+            raise RuntimeError('invalid colourScheme')
+
+        return colourScheme
+
+    def _getStyleSheet(self, colourScheme: str) -> str:
+        """Get the stylesheet
+        """
+        from ccpn.framework.PathsAndUrls import widgetsPath
+
+        _qssPath = widgetsPath / ('%sStyleSheet.qss' % colourScheme.capitalize())
+        with _qssPath.open(mode='r') as fp:
+            styleSheet = fp.read()
+
+        if platform.system() == 'Linux':
+            _qssPath = widgetsPath / ('%sAdditionsLinux.qss' % colourScheme.capitalize())
+            with _qssPath.open(mode='r') as fp:
+                additions = fp.read()
+            styleSheet += additions
+
+        return styleSheet
 
     #-----------------------------------------------------------------------------------------
     # Spectrum

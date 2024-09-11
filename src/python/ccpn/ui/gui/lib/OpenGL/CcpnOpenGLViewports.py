@@ -84,13 +84,16 @@ class GLViewports(object):
 
             ratio = self._devicePixelRatio
 
+            w = max(int(wi * ratio), 2)
+            h = max(int(he * ratio), 2)
             GL.glViewport(int(l * ratio),
                           int((b - 1) * ratio),
-                          max(int(wi * ratio), 2),
-                          max(int(he * ratio), 2))
+                          w, h)
+
+            return w, h
 
         else:
-            raise RuntimeError('Error: viewport %s does not exist' % name)
+            raise RuntimeError(f'Error: viewport {name} does not exist')
 
     def getViewport(self, name):
         # change to the named viewport
@@ -114,7 +117,7 @@ class GLViewports(object):
             return viewportDimensions(l, b, max(wi, 1), max(he, 1))
 
         else:
-            raise RuntimeError('Error: viewport %s does not exist' % name)
+            raise RuntimeError(f'Error: viewport {name} does not exist')
 
     def getViewportFromWH(self, name, width, height):
         # change to the named viewport
@@ -138,7 +141,7 @@ class GLViewports(object):
             return viewportDimensions(l, b, max(wi, 1), max(he, 1))
 
         else:
-            raise RuntimeError('Error: viewport %s does not exist' % name)
+            raise RuntimeError(f'Error: viewport {name} does not exist')
 
     def clearViewports(self):
         """Clear all the current viewports

@@ -1272,8 +1272,15 @@ class DimensionsTab(Widget):
         specOrder = tuple(self.spectrum._preferredAxisOrdering[:self.spectrum.dimensionCount]) \
             if self.spectrum._preferredAxisOrdering is not None else None
 
-        axisCodeTexts = tuple([ss.text() for ss in self.axisCodeEdits])
+        axisCodeTexts = tuple(ss.text() for ss in self.axisCodeEdits)
         ll = ['<None>']
+
+        if self.spectrum.dimensionCount == 1:
+            # a bit of a hack, but, for 1d the specOrder is saved as (0,) or (1,) which is potentially dangerous
+            #   but is changed to (0, 1) or (1, 0) for the popup
+            axisCodeTexts += ('intensity',)
+            if len(specOrder) == 1:
+                specOrder += (1-specOrder[0],)
 
         # add permutations for the axes
         axisPerms = permutations([axisCode for axisCode in axisCodeTexts])
@@ -1293,12 +1300,23 @@ class DimensionsTab(Widget):
         if item:
             index = self.preferredAxisOrderPulldown.getIndex()
 
-            axisOrder = tuple(permutations(list(range(len(spectrum.axisCodes)))))
-            value = tuple(axisOrder[index - 1])
-            if value != spectrum._preferredAxisOrdering:
-                return partial(self._setSpectrumOrdering, spectrum, value)
+            axisCodes = spectrum.axisCodes
+            if self.spectrum.dimensionCount > 1:
+                axisOrder = tuple(permutations(list(range(len(axisCodes)))))
+                value = tuple(axisOrder[index - 1])
+                if value != spectrum._preferredAxisOrdering:
+                    return partial(self._setSpectrumOrdering, spectrum, value)
 
-    def _setSpectrumOrdering(self, spectrum, value):
+            else:
+                axisCodes += ['intensity']
+
+                axisOrder = tuple(permutations(list(range(len(axisCodes)))))
+                value = tuple(axisOrder[index - 1])
+                if value != spectrum._preferredAxisOrdering:
+                    return partial(self._setSpectrumOrdering, spectrum, value[:1])  # only store the first value
+
+    @staticmethod
+    def _setSpectrumOrdering(spectrum, value):
         """Set the preferred axis ordering from the pullDown selection
         """
         spectrum._preferredAxisOrdering = value
@@ -1515,9 +1533,8 @@ class DimensionsTab(Widget):
                 # self.minAliasingPullDowns[i].setIndex(int(_close))
                 self.minAliasingPullDowns[i].setIndex(-self.aliasInds[i][0])
 
-            if self.spectrum.dimensionCount > 1:
-                self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
-                self._populatePreferredOrder()
+            self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
+            self._populatePreferredOrder()
 
             self._populateExperimentType()
             self._populateReferenceDimensions()

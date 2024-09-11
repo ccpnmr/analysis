@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-11 13:07:27 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-11 14:44:29 +0100 (Wed, September 11, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -80,15 +80,13 @@ Drop items into each box:
     single collection, containing at least one restraintTable, or
     single structureData, or
     many restraintTables.
-    
 Drop items into gearbox area;
-    combination of:
+    these can be a combination of:
         structureData,
         collections,
         restraintTables.
-        
 Items not compatible with a single comparison-set
-are be separated into comparison-sets
+will be separated into comparison-sets
 """
 
 

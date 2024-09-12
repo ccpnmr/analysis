@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 10:40:58 +0100 (Thu, September 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-12 11:00:44 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -57,13 +57,14 @@ class FontSizes(DataEnum):
     MAXIMUM = 3.0, 'maximum, triple default size'
 
 
-class FontSettings():
+class FontSettings(dict):
     """A class to maintain font definitions as derived from preferences;
     generate a dict of ((fontName, size, bold, italic), Font-instance) pairs
     """
     def __init__(self, preferences):
 
-        self.defaultFonts = {}
+        super().__init__()
+
         for fontNum, fontName in enumerate((DEFAULTFONT, CONSOLEFONT, SIDEBARFONT, TABLEFONT, SEQUENCEGRAPHFONT)):
             _fontAttr = 'font{}'.format(fontNum)
             fontString = _readFontFromAppearances(_fontAttr, preferences)
@@ -84,7 +85,7 @@ class FontSettings():
                     newFont.fromString(','.join(fontList))
                     newFont.setBold(bold)
                     newFont.setItalic(italic)
-                    self.defaultFonts[(fontName, fontSize.name, bold, italic)] = newFont
+                    self[(fontName, fontSize.name, bold, italic)] = newFont
 
         except Exception as es:
             getLogger().warning('Reverting to default font {}'.format(es))
@@ -94,25 +95,27 @@ class FontSettings():
             for ii, fontSize in enumerate(FontSizes):
                 thisSize = DEFAULTFONTSIZE * fontSize.value
 
+                # Make all combinations of bold and italic
                 for bold, italic in product((False, True), repeat=2):
                     newFont = Font(name, int(thisSize))
                     newFont.setBold(bold)
                     newFont.setItalic(italic)
-                    self.defaultFonts[(fontName, fontSize.name, bold, italic)] = newFont
+                    self[(fontName, fontSize.name, bold, italic)] = newFont
 
     def getFont(self, name=DEFAULTFONT, size='MEDIUM', bold=False, italic=False):
         try:
-            if bold and italic and (name, size, bold, italic) in self.defaultFonts:
-                return self.defaultFonts[(name, size, bold, italic)]
-            elif bold and (name, size, bold, italic) in self.defaultFonts:
-                return self.defaultFonts[(name, size, bold, italic)]
-            elif italic and (name, size, bold, italic) in self.defaultFonts:
-                return self.defaultFonts[(name, size, bold, italic)]
+            # GWV 12/9/2024: simplified
+            if bold or italic and (name, size, bold, italic) in self:
+                return self[(name, size, bold, italic)]
+            # elif bold and (name, size, bold, italic) in self:
+            #     return self[(name, size, bold, italic)]
+            # elif italic and (name, size, bold, italic) in self:
+            #     return self[(name, size, bold, italic)]
+            else:
+                return self[(name, size, False, False)]
 
-            return self.defaultFonts[(name, size, False, False)]
-
-        except Exception as es:
-            getLogger().warning('Font ({}, {}, {}, {}) not found'.format(name, size, bold, italic))
+        except KeyError as es:
+            getLogger().warning(f'Font ({name}, {size}, {bold}, {italic}) not found')
             return Font(DEFAULTFONTNAME, DEFAULTFONTSIZE)
 
 

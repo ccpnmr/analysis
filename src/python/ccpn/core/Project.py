@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 14:34:52 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-12 13:54:36 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -3594,3 +3594,4 @@ def _loadV2Project(application, path: str | Path) -> Project:
         archiver.makeArchive(name=f'{project.name}_importedFromV2', overwrite=True)
 
     return project
+

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 11:48:51 +0100 (Thu, September 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-12 13:54:36 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1287,6 +1287,7 @@ class Gui(Ui, _Gui_V3_V4):
         return self._showModule(StructureTableModule, position=position, relativeTo=relativeTo,
                                 selection=structureEnsemble)
 
+    @logCommand('ui.')
     def showChemicalShiftMapping(self, position: str = 'top', relativeTo = None):
         """Show the ChemicalShiftMapping module
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
@@ -1295,6 +1296,16 @@ class Gui(Ui, _Gui_V3_V4):
         from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
         return self._showModule(ChemicalShiftMappingGuiModule, position=position, relativeTo=relativeTo)
 
+    @logCommand('ui.')
+    def showRelaxationModule(self, position: str = 'top', relativeTo = None):
+        """Show the Relaxation module
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
+        """
+        from ccpn.ui.gui.modules.experimentAnalysis.RelaxationGuiModule import RelaxationGuiModule
+        return self._showModule(RelaxationGuiModule, position=position, relativeTo=relativeTo)
+
+    @logCommand('ui.')
     def showNotesEditor(self, position: str = 'top', relativeTo = None, note=None):
         """Show the Notes editor module
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
@@ -1347,15 +1358,18 @@ class Gui(Ui, _Gui_V3_V4):
     #-----------------------------------------------------------------------------------------
 
     @logCommand('ui.')
-    def newMacroEditor(self, path=None, position='top'):
-        """Open a new Module to edit macros
+    def showMacroEditor(self, path=None, position='top', relativeTo = None):
+        """Open a the macro editor
+        :param path: optional path to python file
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
         """
         # local to prevent circular import
         from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 
         path = str(path) if path is not None else None
         macroEditor = MacroEditor(mainWindow=self.mainWindow, filePath=path, restore=False)
-        self.mainWindow._addModule(macroEditor, position=position)
+        self.mainWindow._addModule(macroEditor, position=position, relativeTo=relativeTo)
         return macroEditor
 
     @logCommand('ui.')

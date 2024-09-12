@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 11:48:51 +0100 (Thu, September 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-12 13:54:36 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -89,11 +89,10 @@ from ccpn.framework.PathsAndUrls import \
     tipOfTheDayConfig, \
     ccpnCodePath, \
     CCPN_DIRECTORY_SUFFIX
-
 from ccpn.framework.lib.resources.Resources import Resources
+
 # from ccpn.ui.gui.Gui import Gui
 # from ccpn.ui.gui.GuiBase import GuiBase
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
@@ -1350,60 +1349,61 @@ class Framework(NotifierBase):
         """
         return self.ui.loadSpectra(*paths)
 
-    @staticmethod
-    def _finaliseV2Upgrade(project):
-        """Final step of upgrading from v2 to v3 projects.
-        """
-        # Copy all the internal validationStores to v3-dataTables
-        import pandas as pd
-        from collections import OrderedDict
-        from xml.sax.saxutils import escape
-
-        getLogger().debug(f'Finalise upgrade v2-v3')
-        fields = ['_ID', 'className', 'createdBy', 'guid', 'name',
-                  'packageName', 'packageShortName',
-                  'qualifiedName', 'structureEnsemble']
-        columns = ['serial', 'context', 'keyword', 'keywordDefinition',
-                   'figOfMerit', 'textValue', 'intValue', 'floatValue',
-                   'booleanValue', 'details']
-        wrp = project._wrappedData
-        vStores = list(wrp.validationStores)
-        for vs in vStores:
-            out = []
-            for vr in vs.validationResults:
-                out.append([str(val) if not hasattr(val, '_ID') else val.name
-                            for col in columns
-                            for val in [getattr(vr, col, '')]])
-            df = pd.DataFrame(out, columns=columns)
-            dTable = project.newDataTable(name=vs.name, data=df)
-            # think that internally is using a dict and losing order :|
-            meta = [(k, str(val)) if not hasattr(val, '_ID') else (k, val.name)
-                    for k in fields
-                    for val in [getattr(vs, k, '')]]
-            if sft := getattr(vs, 'software', ''):
-                # try and convert the software information to something serializable
-                meta.append(('software',
-                             ':'.join(map(lambda _ss: escape(str(_ss)),
-                                          filter(None, [sft.name, sft.version, sft.details, sft.tasks,
-                                                        sft.vendorName, sft.vendorAddress,
-                                                        sft.vendorWebAddress])))))
-            dTable.updateMetadata(OrderedDict(meta))
-            getLogger().debug(f'extracting dataTable {vs.name} for {vs.className}')
-            vs.delete()
-
-        columns = ['serial', 'name',
-                   'generationType', 'nmrConstraintStore',
-                   'details']
-        out = []
-        for sg in wrp.structureGenerations:
-            out.append([str(val) if not hasattr(val, '_ID') else val.name
-                        for col in columns
-                        for val in [getattr(sg, col, '')]])
-            sg.delete()
-        df = pd.DataFrame(out, columns=columns)
-        dTable = project.newDataTable(name='structureGenerations', data=df)
-        dTable.updateMetadata({'name': 'structureGenerations'})
-        getLogger().debug(f'extracting dataTable structureGenerations')
+    # GWV 12/09/2024: to ProjectLib
+    # @staticmethod
+    # def _finaliseV2Upgrade(project):
+    #     """Final step of upgrading from v2 to v3 projects.
+    #     """
+    #     # Copy all the internal validationStores to v3-dataTables
+    #     import pandas as pd
+    #     from collections import OrderedDict
+    #     from xml.sax.saxutils import escape
+    #
+    #     getLogger().debug(f'Finalise upgrade v2-v3')
+    #     fields = ['_ID', 'className', 'createdBy', 'guid', 'name',
+    #               'packageName', 'packageShortName',
+    #               'qualifiedName', 'structureEnsemble']
+    #     columns = ['serial', 'context', 'keyword', 'keywordDefinition',
+    #                'figOfMerit', 'textValue', 'intValue', 'floatValue',
+    #                'booleanValue', 'details']
+    #     wrp = project._wrappedData
+    #     vStores = list(wrp.validationStores)
+    #     for vs in vStores:
+    #         out = []
+    #         for vr in vs.validationResults:
+    #             out.append([str(val) if not hasattr(val, '_ID') else val.name
+    #                         for col in columns
+    #                         for val in [getattr(vr, col, '')]])
+    #         df = pd.DataFrame(out, columns=columns)
+    #         dTable = project.newDataTable(name=vs.name, data=df)
+    #         # think that internally is using a dict and losing order :|
+    #         meta = [(k, str(val)) if not hasattr(val, '_ID') else (k, val.name)
+    #                 for k in fields
+    #                 for val in [getattr(vs, k, '')]]
+    #         if sft := getattr(vs, 'software', ''):
+    #             # try and convert the software information to something serializable
+    #             meta.append(('software',
+    #                          ':'.join(map(lambda _ss: escape(str(_ss)),
+    #                                       filter(None, [sft.name, sft.version, sft.details, sft.tasks,
+    #                                                     sft.vendorName, sft.vendorAddress,
+    #                                                     sft.vendorWebAddress])))))
+    #         dTable.updateMetadata(OrderedDict(meta))
+    #         getLogger().debug(f'extracting dataTable {vs.name} for {vs.className}')
+    #         vs.delete()
+    #
+    #     columns = ['serial', 'name',
+    #                'generationType', 'nmrConstraintStore',
+    #                'details']
+    #     out = []
+    #     for sg in wrp.structureGenerations:
+    #         out.append([str(val) if not hasattr(val, '_ID') else val.name
+    #                     for col in columns
+    #                     for val in [getattr(sg, col, '')]])
+    #         sg.delete()
+    #     df = pd.DataFrame(out, columns=columns)
+    #     dTable = project.newDataTable(name='structureGenerations', data=df)
+    #     dTable.updateMetadata({'name': 'structureGenerations'})
+    #     getLogger().debug(f'extracting dataTable structureGenerations')
 
     def _loadV2Project(self, path) -> list[Project]:
         """Actual V2 project loader
@@ -1412,6 +1412,7 @@ class Framework(NotifierBase):
         CCPNINTERNAL: called from CcpNmrV2ProjectDataLoader
         """
         from ccpn.core.Project import _loadV2Project
+        from ccpn.core.lib.ProjectLib import _finaliseV2Upgrade
 
         try:
             project = _loadV2Project(application=self, path=path)
@@ -1420,7 +1421,7 @@ class Framework(NotifierBase):
         else:
             self._closeProject()  # always close old project AFTER valid load
             self._initialiseProject(project)  # This also sets the linkages
-            self._finaliseV2Upgrade(project)
+            _finaliseV2Upgrade(project)
             return [project]
         return []
 
@@ -1490,9 +1491,10 @@ class Framework(NotifierBase):
         """Load python file path into the macro editor
         CCPNINTERNAL: called from PythonDataLoader
         """
-        mainWindow = self.mainWindow
-        macroEditor = MacroEditor(mainWindow=mainWindow, filePath=str(path))
-        mainWindow.moduleArea.addModule(macroEditor, position='top', relativeTo=mainWindow.moduleArea)
+        if self.hasGui:
+            self.ui.showMacroEditor(path=path)
+        else:
+            raise RuntimeError(f'Cannot load Python file {path}')
         return []
 
     def _loadHtmlFile(self, path):
@@ -2454,7 +2456,7 @@ class Framework(NotifierBase):
     #     self.ui.mainWindow.toggleConsole()
 
     @deprecated('Use ui.showChemicalShiftMapping to access the latest implementation')
-    def showChemicalShiftMapping(self, position: str = 'top', relativeTo: CcpnModule = None):
+    def showChemicalShiftMapping(self, position: str = 'top', relativeTo = None):
         return self.ui.showChemicalShiftMapping(position=position)
 
     # GWV 02/04/24: to ui
@@ -2468,15 +2470,16 @@ class Framework(NotifierBase):
     #     mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
     #     return cs
 
-    def showRelaxationModule(self, position: str = 'top', relativeTo: CcpnModule = None):
-        from ccpn.ui.gui.modules.experimentAnalysis.RelaxationGuiModule import RelaxationGuiModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        relGuiModule = RelaxationGuiModule(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(relGuiModule, position=position, relativeTo=relativeTo)
-        return relGuiModule
+    # GWV 12/9/2024: Moved to Gui.py
+    # def showRelaxationModule(self, position: str = 'top', relativeTo: CcpnModule = None):
+    #     from ccpn.ui.gui.modules.experimentAnalysis.RelaxationGuiModule import RelaxationGuiModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     relGuiModule = RelaxationGuiModule(mainWindow=mainWindow)
+    #     mainWindow.moduleArea.addModule(relGuiModule, position=position, relativeTo=relativeTo)
+    #     return relGuiModule
 
     # GWV 5/2/24: to GuiBase
     # def toggleCrosshairAll(self):

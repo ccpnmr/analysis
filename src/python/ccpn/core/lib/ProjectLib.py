@@ -8,8 +8,9 @@ from __future__ import annotations
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -17,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:47 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-12 13:54:36 +0100 (Thu, September 12, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,7 +37,6 @@ from ccpn.util import Logging
 from ccpn.util.Path import aPath
 
 from ccpn.framework.Application import getApplication
-
 from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY, CCPN_DIRECTORY_SUFFIX, CCPN_LOGS_DIRECTORY
 
 from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
@@ -91,6 +91,7 @@ def isV2project(path) -> bool:
     # so we assume it to be a V2 project directory.
     return True
 
+
 def createLogger(project, now=''):
     """Create a logger for project
     Adapted from Api.py
@@ -107,3 +108,70 @@ def createLogger(project, now=''):
                                   )
 
     return logger
+
+
+def _finaliseV2Upgrade(project):
+    """Final step of upgrading from v2 to v3 projects.
+    Copy all the internal validationStores to v3-dataTables
+    """
+    import pandas as pd
+    from collections import OrderedDict
+    from xml.sax.saxutils import escape
+
+    Logging.getLogger().debug(f'Finalise upgrade v2-v3')
+    fields = ['_ID', 'className', 'createdBy', 'guid', 'name',
+              'packageName', 'packageShortName',
+              'qualifiedName', 'structureEnsemble'
+    ]
+    columns = ['serial', 'context', 'keyword', 'keywordDefinition',
+               'figOfMerit', 'textValue', 'intValue', 'floatValue',
+               'booleanValue', 'details'
+    ]
+    wrp = project._wrappedData
+
+    # loop over the validationStores
+    vStores = list(wrp.validationStores)
+    for vs in vStores:
+        out = []
+        for vr in vs.validationResults:
+            out.append([str(val) if not hasattr(val, '_ID') else val.name
+                        for col in columns
+                        for val in [getattr(vr, col, '')]])
+        df = pd.DataFrame(out, columns=columns)
+
+        # create the new DataTable
+        dTable = project.newDataTable(name=vs.name, data=df)
+
+        # think that internally is using a dict and losing order :|
+        meta = [(k, str(val)) if not hasattr(val, '_ID') else (k, val.name)
+                for k in fields
+                for val in [getattr(vs, k, '')]
+        ]
+        if sft := getattr(vs, 'software', ''):
+            # try and convert the software information to something serializable
+            meta.append(('software',
+                         ':'.join(map(lambda _ss: escape(str(_ss)),
+                                      filter(None, [sft.name, sft.version, sft.details, sft.tasks,
+                                                    sft.vendorName, sft.vendorAddress,
+                                                    sft.vendorWebAddress])))))
+        dTable.updateMetadata(OrderedDict(meta))
+        Logging.getLogger().debug(f'Extracted V2-{vs.className} into {dTable}')
+        vs.delete()
+
+    # Extract V2 structureGenerations info
+    columns = ['serial', 'name',
+               'generationType', 'nmrConstraintStore',
+               'details'
+    ]
+
+    out = []
+    for sg in wrp.structureGenerations:
+        out.append([str(val) if not hasattr(val, '_ID') else val.name
+                    for col in columns
+                    for val in [getattr(sg, col, '')]])
+        sg.delete()
+
+    df = pd.DataFrame(out, columns=columns)
+    dTable = project.newDataTable(name='structureGenerations', data=df)
+    dTable.updateMetadata({'name': 'structureGenerations'})
+    Logging.getLogger().debug(f'Extracted V2-structureGenerations into {dTable}')

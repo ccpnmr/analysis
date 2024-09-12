@@ -79,7 +79,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 11:48:51 +0100 (Thu, September 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-12 13:54:36 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -244,7 +244,7 @@ class MenusDefs(Menu, _ApplicationProperties):
 
          Separator(),
          Action(VIEW_CHEMICAL_SHIFT_MAPPING, self._showChemicalShiftMappingCallback, shortcut='cm'),
-         Action("Relaxation Analysis (Beta)", app.showRelaxationModule, shortcut='ra'),
+         Action("Relaxation Analysis (Beta)", self._showRelaxationModuleCallback, shortcut='ra'),
          Action("Notes Editor", self._showNotesEditorCallback, shortcut='no'),
 
          Separator(),
@@ -983,6 +983,11 @@ class MenusDefs(Menu, _ApplicationProperties):
         """
         self.ui.showChemicalShiftMapping()
 
+    def _showRelaxationModuleCallback(self):
+        """Callback to show relaxation module
+        """
+        self.ui.showRelaxationModule()
+
     def _showNotesEditorCallback(self):
         """Callback to show Notes editor module
         """
@@ -1029,7 +1034,7 @@ class MenusDefs(Menu, _ApplicationProperties):
     def _showMacroEditorCallback(self):
         """Displays macro editor. Just handing down to ui for now
         """
-        self.ui.newMacroEditor()
+        self.ui.showMacroEditor()
 
     def _openMacroCallback(self, directory=None):
         """ Select macro file and on MacroEditor.

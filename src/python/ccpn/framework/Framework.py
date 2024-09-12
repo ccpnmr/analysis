@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 14:59:18 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-12 11:48:51 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2285,22 +2285,23 @@ class Framework(NotifierBase):
     #     MessageDialog.showNYI(parent=self.mainWindow)
     #     # pass
 
-    @logCommand('application.')
-    def showNotesEditor(self, position: str = 'bottom', relativeTo: CcpnModule = None,
-                        note=None, selectFirstItem=False):
-        """Displays Notes Editing Table
-        """
-        from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-
-        notesEditorModule = NotesEditorModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(notesEditorModule, position=position, relativeTo=relativeTo)
-        if note:
-            notesEditorModule.selectNote(note)
-        return notesEditorModule
+    # GWV 12/09/2024; moved to Gui.py
+    # @logCommand('application.')
+    # def showNotesEditor(self, position: str = 'bottom', relativeTo: CcpnModule = None,
+    #                     note=None, selectFirstItem=False):
+    #     """Displays Notes Editing Table
+    #     """
+    #     from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #
+    #     notesEditorModule = NotesEditorModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(notesEditorModule, position=position, relativeTo=relativeTo)
+    #     if note:
+    #         notesEditorModule.selectNote(note)
+    #     return notesEditorModule
 
     # GWV 3/4/24 : moved to Gui.py
     # @logCommand('application.')

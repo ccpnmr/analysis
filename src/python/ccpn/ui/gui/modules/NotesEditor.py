@@ -2,8 +2,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-08 12:38:21 +0100 (Wed, May 08, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-12 11:48:51 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -24,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets
+
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Label import Label
@@ -31,16 +33,17 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NotePulldown
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.Note import Note
-from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.Button import Button
 
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.Note import Note
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
-logger = getLogger()
+from ccpn.util.Logging import getLogger
+
 
 DEFAULTSPACING = (0, 0)
 DEFAULTMARGINS = (0, 0, 0, 0)  # l, t, r, b
@@ -57,6 +60,8 @@ class NotesEditorModule(CcpnModule):
     className = 'NotesEditorModule'
     attributeName = 'notes'  # self.project.notes
     _includeInLastSeen = False
+
+    _labelWidth = 50
 
     def __init__(self, mainWindow=None, name='Notes Editor',
                  note=None, selectFirstItem=False):
@@ -89,6 +94,7 @@ class NotesEditorModule(CcpnModule):
 
         if note is not None:
             self.selectNote(note)
+
         elif selectFirstItem:
             self.noWidget.selectFirstItem()
 
@@ -109,11 +115,16 @@ class NotesEditorModule(CcpnModule):
 
         row += 1
         self.noWidget = NotePulldown(parent=self._widgetFrame,
-                                     mainWindow=self.mainWindow, default=None,
-                                     grid=(row, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                     mainWindow=self.mainWindow,
+                                     default=None,
+                                     grid=(row, 0), gridSpan=(1, 1), minimumWidths=(self._labelWidth, 100),
                                      showSelectName=True,
                                      sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                      callback=self._selectionPulldownCallback)
+        self.newNoteButton = Button(parent=self._widgetFrame, text='New Note', callback=self._newNoteCallback,
+                                    grid=(row,1), margins=(10,2,10,2),
+                                    tipText='Create a new note'
+                                    )
 
         row += 1
         self.spacer = Spacer(self._widgetFrame, 5, 5,
@@ -127,14 +138,19 @@ class NotesEditorModule(CcpnModule):
         self.noteWidget.hide()
 
         nRow = 1
-        self.label1 = Label(self.noteWidget, text='name', grid=(nRow, 0), vAlign='c', hAlign='r')
-        self.lineEdit1 = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 2), vAlign='top', textAlignment='l',
+        self.label1 = Label(self.noteWidget, text='name', grid=(nRow, 0),
+                            minimumWidth=self._labelWidth,
+                            vAlign='c', hAlign='r')
+        self.lineEdit1 = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 1),
+                                  vAlign='top', textAlignment='l',
                                   backgroundText='> Enter name <')
         self.lineEdit1.editingFinished.connect(self._applyNote)  # *1
 
         nRow += 1
-        self.labelComment = Label(self.noteWidget, text='comment', grid=(nRow, 0), vAlign='c', hAlign='r')
-        self.lineEditComment = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 2), vAlign='top',
+        self.labelComment = Label(self.noteWidget, text='comment', grid=(nRow, 0),
+                                  minimumWidth=self._labelWidth,
+                                  vAlign='c', hAlign='r')
+        self.lineEditComment = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 6), vAlign='top',
                                         textAlignment='l', backgroundText='> Optional <')
         self.lineEditComment.editingFinished.connect(self._applyNote)  # *1
 
@@ -193,17 +209,23 @@ class NotesEditorModule(CcpnModule):
                 if openNew:
                     _openItemObject(self.mainWindow, others)
 
+    def _newNoteCallback(self):
+        """Callback when pressing the New note button
+        """
+        _note = self.project.newNote()
+        self.selectNote(_note)
+
     def selectNote(self, note=None):
         """
         Manually select a Note from the pullDown
         """
         if note is None:
-            # logger.warning('select: No Note selected')
+            # getLogger().warning('select: No Note selected')
             # raise ValueError('select: No Note selected')
             self.noWidget.selectFirstItem()
         else:
             if not isinstance(note, Note):
-                logger.warning('select: Object is not of type Note')
+                getLogger().warning('select: Object is not of type Note')
                 raise TypeError('select: Object is not of type Note')
             else:
                 if note.pid in self.noWidget.textList:

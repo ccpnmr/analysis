@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 10:40:58 +0100 (Thu, September 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-12 11:48:51 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1294,6 +1294,18 @@ class Gui(Ui, _Gui_V3_V4):
         """
         from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
         return self._showModule(ChemicalShiftMappingGuiModule, position=position, relativeTo=relativeTo)
+
+    def showNotesEditor(self, position: str = 'top', relativeTo = None, note=None):
+        """Show the Notes editor module
+        :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
+        :param relativeTo: module relative to which position is applied.
+        :param note: optional note to display
+        """
+        from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
+        _module = self._showModule(NotesEditorModule, position=position, relativeTo=relativeTo)
+        if note:
+            _module.selectNote(note)
+        return _module
 
     #-----------------------------------------------------------------------------------------
     # Molecules

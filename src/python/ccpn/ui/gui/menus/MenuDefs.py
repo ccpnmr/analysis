@@ -79,7 +79,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 16:16:56 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-12 11:48:51 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -245,7 +245,7 @@ class MenusDefs(Menu, _ApplicationProperties):
          Separator(),
          Action(VIEW_CHEMICAL_SHIFT_MAPPING, self._showChemicalShiftMappingCallback, shortcut='cm'),
          Action("Relaxation Analysis (Beta)", app.showRelaxationModule, shortcut='ra'),
-         Action("Notes Editor", partial(app.showNotesEditor, selectFirstItem=True), shortcut='no'),
+         Action("Notes Editor", self._showNotesEditorCallback, shortcut='no'),
 
          Separator(),
          Menu("In Active SpectrumDisplay",
@@ -982,6 +982,11 @@ class MenusDefs(Menu, _ApplicationProperties):
         """Callback to show Chemical shift mapping module
         """
         self.ui.showChemicalShiftMapping()
+
+    def _showNotesEditorCallback(self):
+        """Callback to show Notes editor module
+        """
+        self.ui.showNotesEditor()
 
     #-----------------------------------------------------------------------------------------
     # Molecules -->

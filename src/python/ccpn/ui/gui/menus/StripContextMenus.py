@@ -19,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-26 14:29:04 +0100 (Wed, June 26, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-12 08:50:02 +0100 (Thu, September 12, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -428,7 +428,7 @@ def _editPeakAssignmentItem():
     _app = getApplication()
     return _SCMitem(name='Edit Peak Assignments',
                     typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignments',
-                    callback=_app.showPeakAssigner, shortcut='AP')
+                    callback=_app.ui.showPeakAssigner, shortcut='AP')
 
 
 # def _viewPeakOnTableItem(strip):

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-10 17:28:09 +0100 (Tue, September 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-12 08:50:02 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1230,10 +1230,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #     pass
 
     def _addModule(self, module, position='top', relativeTo=None):
-        """Add module to the moduleArea
+        """Add module to the moduleArea; just pass the call on to moduleArea
         """
-        # if relativeTo is None:
-        #     relativeTo = self.moduleArea
+        # setting relativeTo default is done in modeuleArea.addModule
         self.moduleArea.addModule(module, position=position, relativeTo=relativeTo)
 
     def _closeMainWindowModules(self):

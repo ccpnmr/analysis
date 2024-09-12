@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 16:16:56 +0100 (Wed, September 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-12 10:40:58 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,9 @@ from ccpn.framework.lib.DataLoaders.DataLoaderABC import _checkPathForDataLoader
 
 from ccpn.core.lib.ContextManagers import (
     notificationEchoBlocking, catchExceptions,
-    logCommandManager, undoStackBlocking, busyHandler)
+    logCommandManager, undoStackBlocking, busyHandler
+)
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
 
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui import Layout
@@ -62,7 +64,6 @@ from ccpn.ui.gui.guiSettings import FontSettings, consoleStyle
 from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.util.Logging import getLogger
-from ccpn.util import Logging
 from ccpn.util import Register
 from ccpn.util.Path import aPath, Path
 from ccpn.util.decorators import logCommand
@@ -98,42 +99,26 @@ def _ccpnExceptionhook(ccpnType, value, tback):
 
     sys.__excepthook__(ccpnType, value, tback)
 
-
 sys.excepthook = _ccpnExceptionhook
 
+#-----------------------------------------------------------------------------------------
+# un/suppress QT messages
+#-----------------------------------------------------------------------------------------
+def _qtMessageHandler(*errors):
+    for err in errors:
+        getLogger().warning(f'{consoleStyle.fg.red}QT error: {err}{consoleStyle.reset}')
+
+QtCore.qInstallMessageHandler(_qtMessageHandler)
 
 #-----------------------------------------------------------------------------------------
-
-
-def qtMessageHandler(*errors):
-    for err in errors:
-        Logging.getLogger().warning(f'{consoleStyle.fg.red}QT error: {err}{consoleStyle.reset}')
-
-
-# un/suppress messages
-QtCore.qInstallMessageHandler(qtMessageHandler)
-
-# REMOVEDEBUG = r'\(\w+\.\w+:\d+\)$'
-REMOVEDEBUG = r'\(\S+\.\w+:\d+\)$'
 
 MAXITEMLOGGING = 4
 MAXITEMLOADING = 5
 MAXITEMDEPTH = 5
 
-
-#=========================================================================================
-# Gui
-#=========================================================================================
-
-def getFontSettings():
-    """:return the font settings object, intialised by Gui or None if non-gui
-    """
-    app = getApplication()
-    if app.hasGui:
-        return app.ui._fontSettings
-    else:
-        return None
-
+#-----------------------------------------------------------------------------------------
+# Gui Class
+#-----------------------------------------------------------------------------------------
 
 class Gui(Ui, _Gui_V3_V4):
     """Top class for the GUI interface
@@ -147,7 +132,7 @@ class Gui(Ui, _Gui_V3_V4):
         # sets self.mainWindow (None), self.application and self.pluginModules
         Ui.__init__(self, application)
 
-        self._fontSettings = FontSettings(application.preferences)
+        self._fontSettings = FontSettings(application.preferences)  # used by getFontSettings in Font.py
         self._colourScheme = self._getColourScheme()
         self._styleSheet = self._getStyleSheet(self._colourScheme)
 
@@ -439,7 +424,9 @@ class Gui(Ui, _Gui_V3_V4):
         """Echo commands strings, one by one, to logger
         and store them in internal list for perusal
         """
-        logger = Logging.getLogger()
+        REMOVEDEBUG = r'\(\S+\.\w+:\d+\)$'
+
+        logger = getLogger()
         for command in commands:
             logger.echoInfo(command)
 
@@ -487,9 +474,14 @@ class Gui(Ui, _Gui_V3_V4):
     # Helper methods
     #-----------------------------------------------------------------------------------------
 
-    def _queryChoices(self, dataLoader):
-        """Query the user about his/her choice to import/new/cancel
+    def _queryChoices(self, dataLoader: DataLoaderABC) -> tuple[DataLoaderABC, bool, bool]:
+        """Query the user about his/her choice to import/new/cancel;
+        set dataLoader.createNewProject
+        :return (dataLoader, createNewProject:bool, ignore:bool) tuple
         """
+        if not isinstance(dataLoader, DataLoaderABC):
+            raise TypeError(f'Invalid dataLoader; got instance of {type(dataLoader)}')
+
         choices = ('Import', 'New project', 'Cancel')
         choice = MessageDialog.showMulti(
                 f'Load {dataLoader.dataFormat}',
@@ -515,7 +507,7 @@ class Gui(Ui, _Gui_V3_V4):
 
         return (dataLoader, createNewProject, ignore)
 
-    def _getDataLoader(self, path, formatFilter=None, droppedOnSideBar=False):
+    def _getDataLoader(self, path, formatFilter=None, droppedOnSideBar=False) -> tuple[DataLoaderABC, bool, bool]:
         """Get dataLoader for path (or None if not present), optionally only testing for
         dataFormats defined in filter.
         Allows for reporting or checking through popups.
@@ -541,21 +533,22 @@ class Gui(Ui, _Gui_V3_V4):
         if not _path.exists():
             raise RuntimeError(f'Path "{path}" does not exist')
 
+        # get list of possible loaders;
         _loaders = _checkPathForDataLoader(path=path, formatFilter=formatFilter)
-        dataLoader = None
-        # log errors
-        errMsg = None
+        if len(_loaders) == 0:
+            raise RuntimeError(f'Unknown error finding a loader for {path}')
 
-        if len(_loaders) > 0 and _loaders[-1].isValid:
+
+        # check the _loaders
+        if _loaders[-1].isValid:
             # there is a valid one; use that
             dataLoader = _loaders[-1]
-
-        elif len(_loaders) > 0:
-            # We always get a loader back; report it here
-            errMsg = f'{_loaders[-1].dataFormat} loader reported:\n\n{_loaders[-1].errorString}'
+            errMsg = None
 
         else:
-            raise RuntimeError(f'Unknown error finding a loader for {path}')
+            dataLoader = None
+            # We always get a loader back; report it here
+            errMsg = f'{_loaders[-1].dataFormat} loader reported:\n\n{_loaders[-1].errorString}'
 
         # raise error if needed
         if errMsg:
@@ -564,7 +557,6 @@ class Gui(Ui, _Gui_V3_V4):
 
         createNewProject = dataLoader.createNewProject
         ignore = False
-
         path = dataLoader.path
 
         # Check that the path does not contain a bottom-level space
@@ -669,8 +661,8 @@ class Gui(Ui, _Gui_V3_V4):
         elif dataLoader.dataFormat == StarDataLoader.dataFormat and dataLoader:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
             if dataLoader and not ignore:
-                title = 'New project from NmrStar' if createNewProject else \
-                    'Import from NmrStar'
+                title = 'New project from NmrStar' if createNewProject \
+                         else 'Import from NmrStar'
                 dataLoader.getDataBlock()  # this will read and parse the file
                 popup = StarImporterPopup(dataLoader=dataLoader,
                                           parent=self.mainWindow,

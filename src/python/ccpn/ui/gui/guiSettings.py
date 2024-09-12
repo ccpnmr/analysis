@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-22 17:22:13 +0100 (Wed, May 22, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-12 10:40:58 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,9 @@ class FontSizes(DataEnum):
 
 
 class FontSettings():
-
+    """A class to maintain font definitions as derived from preferences;
+    generate a dict of ((fontName, size, bold, italic), Font-instance) pairs
+    """
     def __init__(self, preferences):
 
         self.defaultFonts = {}
@@ -108,6 +110,7 @@ class FontSettings():
                 return self.defaultFonts[(name, size, bold, italic)]
 
             return self.defaultFonts[(name, size, False, False)]
+
         except Exception as es:
             getLogger().warning('Font ({}, {}, {}, {}) not found'.format(name, size, bold, italic))
             return Font(DEFAULTFONTNAME, DEFAULTFONTSIZE)

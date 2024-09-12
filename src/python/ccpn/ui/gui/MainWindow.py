@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 08:50:02 +0100 (Thu, September 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-12 18:01:00 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -29,13 +29,14 @@ __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
 
 import os
 import time
+from copy import deepcopy
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import pyqtSlot
 
-from ccpn.util import Logging
-from ccpn.core.Project import Project
+from ccpn.util.Logging import getLogger
 
+from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 
@@ -45,12 +46,13 @@ from ccpn.framework.Preferences import getPreferences, USE_NATIVE_MENUS
 from ccpn.ui._implementation.Window import Window as _CoreClassMainWindow
 
 from ccpn.ui.gui import guiSettings
+from ccpn.ui.gui.guiSettings import getColours
 
-from ccpn.ui.gui.lib.mouseEvents import SELECT, PICK, MouseModes, \
-    setCurrentMouseMode, getCurrentMouseMode
+from ccpn.ui.gui.lib.mouseEvents import \
+    SELECT, PICK, MouseModes, setCurrentMouseMode, getCurrentMouseMode
 from ccpn.ui.gui.lib import GuiStrip
 from ccpn.ui.gui.lib.Shortcuts import Shortcuts
-from ccpn.ui.gui.guiSettings import getColours
+from ccpn.ui.gui import Layout
 
 from ccpn.ui.gui.widgets.PlotterWidget import plotter
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -64,13 +66,11 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager, showInfo, showError
-from ccpn.util.Common import camelCaseToString
 
-from ccpn.util.Logging import getLogger
+from ccpn.util.Common import camelCaseToString
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
 
-#from collections import OrderedDict
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
 
@@ -116,12 +116,10 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
 
-        # Layout
-        layout = self.layout()
-        if layout is not None:
-            layout.setContentsMargins(0, 0, 0, 0)
-            layout.setSpacing(0)
-        # logger.debug2('GuiMainWindow: layout: %s' % layout)
+        # QMainWindow Layout
+        if (_layout := self.layout()) is not None:
+            _layout.setContentsMargins(0, 0, 0, 0)
+            _layout.setSpacing(0)
 
         self.setGeometry(200, 40, 1100, 900)
 
@@ -139,6 +137,9 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         self._hiddenModules = CcpnModuleArea(mainWindow=self)
         self._hiddenModules.setVisible(False)
+
+        # Module layouts
+        self._layout = Layout.ModuleLayout()
 
         # Python console module; defined upon first time Class initialisation. Either by toggleConsole or Restoring layouts
         self.pythonConsoleModule = None
@@ -412,22 +413,17 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self.statusBar().showMessage(msg)
         msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
 
-        # self._fillRecentProjectsMenu()
         self.pythonConsole.setProject(project)
         self._updateWindowTitle()
-        # if self.application.project.isTemporary:
-        #     self.getMenuAction('File->Archive').setEnabled(False)
-        # else:
-        #     self.getMenuAction('File->Archive').setEnabled(True)
 
-        from copy import deepcopy
 
         self._spectrumModuleLayouts = self.moduleLayouts = None
 
         # get the project layout as soon as mainWindow is initialised
         if self.application.preferences.general.restoreLayoutOnOpening:
             try:
-                if _mLayouts := self.application._getUserLayout():
+                # if _mLayouts := self.application._getUserLayout():
+                if _mLayouts := self._layout.loadFromProject():
                     self.moduleLayouts = _mLayouts
                     self._spectrumModuleLayouts = deepcopy(self.moduleLayouts)
 
@@ -2640,7 +2636,7 @@ class MainWindow(_CoreClassMainWindow, GuiMainWindow):
     """GUI main window, corresponds to OS window"""
 
     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
-        logger = Logging.getLogger()
+        logger = getLogger()
         logger.debug3(f'MainWindow>> project: {project}')
         logger.debug3(f'MainWindow>> project.application: {project.application}')
 

@@ -79,7 +79,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 13:54:36 +0100 (Thu, September 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-12 18:01:00 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -535,7 +535,7 @@ class MenusDefs(Menu, _ApplicationProperties):
 
     def _restoreLastSavedLayoutCallback(self):
         self.ui.mainWindow.moduleArea._closeAll()
-        Layout.restoreLayout(self.ui.mainWindow, self.application.layout, restoreSpectrumDisplay=True)
+        Layout.restoreLayout(self.ui.mainWindow, restoreSpectrumDisplay=True)
 
     def _restoreLayoutFromFileCallback(self):
         if (path := _getOpenLayoutPath(self.mainWindow)) is None:

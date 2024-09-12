@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-17 11:54:50 +0100 (Sat, August 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-12 18:01:00 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -33,19 +33,24 @@ import glob
 import json
 import sys
 from collections import OrderedDict as od
+from copy import deepcopy
+
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Logging import getLogger
-from ccpn.util.Path import aPath
+from ccpn.util.Path import aPath, Path
+from ccpn.util.decorators import singleton
 # from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY
+from ccpn.framework.Application import getApplication, _ApplicationProperties
 
 
 StateDirName = CCPN_STATE_DIRECTORY
 DefaultLayoutFileName = 'Layout.json'
 Warning = "warning"
 WarningMessage = "Warning. Any changes in this file will be overwritten when saving a new layout."
+
 General = "general"
 ApplicationName = "applicationName"  # type: str
 ApplicationVersion = "applicationVersion"
@@ -58,7 +63,7 @@ LayoutState = "layoutState"
 TitleText = 'LayoutFile'
 Title = "Title"
 
-DefaultLayoutFile = {
+defaultLayoutDict = {
     Title           : TitleText,
     Warning         : WarningMessage,
     General         : {
@@ -70,10 +75,89 @@ DefaultLayoutFile = {
     GuiModules      : [],
     FileNames       : [],
     LayoutState     : {}
-    }
+}
 
 METADATA = '_metadata'
 MODULES = 'modules'
+
+
+
+
+def _getLayout():
+    """Get the location of the layout dict from the application/mainwindow
+    Intermediate until properly refactored
+    """
+    # _app = getApplication()
+    # if not _app.hasGui:
+    #     raise RuntimeError(f'_getLayout(): Application does not have a Gui')
+    # return _app.mainWindow._layout
+    _layout = ModuleLayout()
+    return _layout.layout
+
+
+def _setLayout(value):
+    """Set the location of the layout dict to value
+    Intermediate until properly refactored
+    """
+    # _app = getApplication()
+    # if not _app.hasGui:
+    #     raise RuntimeError(f'_getLayout(): Application does not have a Gui')
+    # _app.mainWindow._layout = value
+    _layout = ModuleLayout()
+    _layout.layout = value
+
+
+@singleton
+class ModuleLayout(_ApplicationProperties):
+    """Class holding module layout information
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.layout: dict = defaultLayoutDict
+
+    def setDefaultLayout(self) -> dict:
+        """Set the layout to the default
+        :return the default layout
+        """
+        self.layout = deepcopy(defaultLayoutDict)
+        self.updateGeneral()
+        return self.layout
+
+    def updateGeneral(self):
+        """Update the the dict
+        """
+        self.layout[Title] = TitleText
+        self.layout[Warning] = WarningMessage
+        self.layout[General][ApplicationName] = self.application.applicationName
+        self.layout[General][ApplicationVersion] = self.application.applicationVersion
+        self.layout[General][LayoutVersionName] = LayoutVersion
+
+    def loadFromJson(self, path) -> dict:
+        """Load the layout from json file
+        :return the layout dict
+        """
+        if not isinstance(path, (str, Path)):
+            raise TypeError(f'ModuleLayout.loadFromJson(): expected str or Path instance, got {type(path)}')
+
+        _path = aPath(path)
+        if _path.suffix != '.json':
+            raise FileNotFoundError(f'ModuleLayout.loadFromJson(): expected json file, got {path}')
+        if not _path.exists():
+            raise FileNotFoundError(f'ModuleLayout.loadFromJson(): {path} does not exist')
+
+        with path.open(mode='r') as fp:
+            self.layout = json.load(fp, object_hook=AttrDict)
+
+        return self.layout
+
+    def loadFromProject(self) -> dict:
+        """Load the layout from the project file
+        :return the layout dict
+        """
+        _path = self.project.statePath / DefaultLayoutFileName
+        return self.loadFromJson(_path)
+
 
 
 def _createLayoutFile(application):
@@ -84,16 +168,16 @@ def _createLayoutFile(application):
 
         path = aPath(application.statePath) / DefaultLayoutFileName
 
-        if General in DefaultLayoutFile:
-            if ApplicationName in DefaultLayoutFile[General]:
-                DefaultLayoutFile[General][ApplicationName] = application.applicationName
-            if ApplicationVersion in DefaultLayoutFile[General]:
-                DefaultLayoutFile[General][ApplicationVersion] = application.applicationVersion
-            if LayoutVersionName in DefaultLayoutFile[General]:
-                DefaultLayoutFile[General][LayoutVersionName] = LayoutVersion
+        if General in defaultLayoutDict:
+            if ApplicationName in defaultLayoutDict[General]:
+                defaultLayoutDict[General][ApplicationName] = application.applicationName
+            if ApplicationVersion in defaultLayoutDict[General]:
+                defaultLayoutDict[General][ApplicationVersion] = application.applicationVersion
+            if LayoutVersionName in defaultLayoutDict[General]:
+                defaultLayoutDict[General][LayoutVersionName] = LayoutVersion
 
         with open(path, "w") as file:
-            json.dump(DefaultLayoutFile, file, sort_keys=False, indent=4, separators=(',', ': '))
+            json.dump(defaultLayoutDict, file, sort_keys=False, indent=4, separators=(',', ': '))
 
     except (PermissionError, FileNotFoundError):
         getLogger().debug('Folder may be read-only')
@@ -199,29 +283,30 @@ def _updateWarning(mainWindow, layout):
 
 
 def _checkLayoutFormat(mainWindow, layout):
+
     if not isinstance(layout, dict):
         # assume that this is a 'future' format and remove metadata
         getLogger().warning('Layout is not the correct format, converting to a dict')
 
-        newLayout = DefaultLayoutFile.copy()
+        newLayout = defaultLayoutDict.copy()
         if General in newLayout:
             if ApplicationName in newLayout[General]:
                 newLayout[General][ApplicationName] = mainWindow.application.applicationName
             if ApplicationVersion in newLayout[General]:
                 newLayout[General][ApplicationVersion] = mainWindow.application.applicationVersion
 
-        mainWindow.application.layout = newLayout
+        _setLayout(newLayout)
 
-    return mainWindow.application.layout
+    return _getLayout()
 
 
 def updateSavedLayout(mainWindow):
     """
-    Updates the application.layout Dict
+    Updates the layout Dict
     :param mainWindow: needed to get application
     :return: an up to date layout dictionary with the current state of GuiModules
     """
-    layout = mainWindow.application.layout
+    layout = _getLayout()
     layout = _checkLayoutFormat(mainWindow, layout)
 
     _updateGeneral(mainWindow, layout)
@@ -243,7 +328,7 @@ def saveLayoutToJson(mainWindow, jsonFilePath=None):
             getLogger().debug('SaveLayout skipped: Project is read-only')
 
         updateSavedLayout(mainWindow)
-        layout = mainWindow.application.layout
+        layout = _getLayout()
         if not jsonFilePath:
             jsonFilePath = fetchLayoutFile(mainWindow.application)
 
@@ -416,18 +501,25 @@ def _openSpectrumDisplays(mainWindow, spectrumDisplaysState):
     """
     project = mainWindow.project
     with undoStackBlocking() as _:  # Do not add to undo/redo stack
+
         for dd in spectrumDisplaysState:
+
             spectrumDisplayKeys = ["displayAxisCodes", "axisOrder", "title",
                                    "positions", "widths", "units", "stripDirection", "is1D"]
             fd = {i: dd.get(i) for i in spectrumDisplayKeys}
+
             spectraPids = dd.get("spectra")
             spectra = [project.getByPid(p) for p in spectraPids if project.getByPid(p)]
+
             stripsZoomStates = dd.get("stripsZoomStates")
+
             if len(spectra) > 0:
-                sd = mainWindow.newSpectrumDisplay(spectra[0], axisCodes=fd.get('displayAxisCodes'),
+                sd = mainWindow.newSpectrumDisplay(spectra[0],
+                                                   axisCodes=fd.get('displayAxisCodes'),
                                                    stripDirection=fd.get('stripDirection'))
                 for sp in spectra[1:]:
                     sd.displaySpectrum(sp)
+
                 if len(stripsZoomStates) > 0:
                     if len(sd.strips) > 0:
                         sd.strips[0].restoreZoomFromState(stripsZoomStates[0])
@@ -435,15 +527,15 @@ def _openSpectrumDisplays(mainWindow, spectrumDisplaysState):
                             newStrip = sd.addStrip()
                             newStrip.restoreZoomFromState(stripState)
             else:
-                project.newSpectrumDisplay(axisCodes=fd.get('displayAxisCodes'),
-                                           stripDirection=fd.get('stripDirection'))
+                mainWindow.newSpectrumDisplay(axisCodes=fd.get('displayAxisCodes'),
+                                              stripDirection=fd.get('stripDirection'))
 
 
-def restoreLayout(mainWindow, layout, restoreSpectrumDisplay=False):
+def restoreLayout(mainWindow, restoreSpectrumDisplay=False):
     ## import all the ccpnModules classes specific for the application.
     # mainWindow.moduleArea._closeAll()
 
-    layout = _checkLayoutFormat(mainWindow, layout)
+    layout = _checkLayoutFormat(mainWindow, _getLayout())
     if restoreSpectrumDisplay:
         if SpectrumDisplays in layout:
             _openSpectrumDisplays(mainWindow, layout[SpectrumDisplays])

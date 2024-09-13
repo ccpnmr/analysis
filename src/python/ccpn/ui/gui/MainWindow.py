@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-03 15:54:54 +0100 (Wed, July 03, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-09-13 15:21:58 +0100 (Fri, September 13, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -387,6 +387,12 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             self.getMenuAction('File->Archive').setEnabled(False)
         else:
             self.getMenuAction('File->Archive').setEnabled(True)
+
+        # sets working path to current path if required
+        if (genPrefs := self.application.preferences.general).useProjectPath == 'Alongside':
+            genPrefs.userWorkingPath = project.projectPath.parent.asString()
+        elif genPrefs.useProjectPath == 'Inside':
+            genPrefs.userWorkingPath = project.projectPath.asString()
 
         from copy import deepcopy
 

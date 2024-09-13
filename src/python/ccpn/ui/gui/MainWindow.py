@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 18:01:00 +0100 (Thu, September 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-13 14:53:30 +0100 (Fri, September 13, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -70,6 +70,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager, show
 from ccpn.util.Common import camelCaseToString
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
+from ccpn.util.Path import Path, aPath
 
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
@@ -123,7 +124,6 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         self.setGeometry(200, 40, 1100, 900)
 
-        # GuiWindow.__init__(self, application)
         self.application = application
         # self.current : defined as a property derived from self.application
         # self._project set by model; and there is a property self.project
@@ -139,7 +139,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._hiddenModules.setVisible(False)
 
         # Module layouts
-        self._layout = Layout.ModuleLayout()
+        self._initLayout()
 
         # Python console module; defined upon first time Class initialisation. Either by toggleConsole or Restoring layouts
         self.pythonConsoleModule = None
@@ -148,16 +148,13 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         # IPythonConsole namespace; filled in _setupWindow() and
         self.namespace = {}
 
-        # logger.debug('GuiMainWindow.moduleArea: layout: %s' % self.moduleArea.layout)  ## pyqtgraph object
-
-        # self.setCentralWidget(self.moduleArea)
         self._shortcutsDict = {}
 
         setWidgetFont(self, )
 
         self._setupWindow()
         self._setupMenus()
-        self._initProject()
+        self._initProject(self.project)
         self._setShortcuts(mainWindow=self)
         self._setUserShortcuts(preferences=self.application.preferences, mainWindow=self)
         self._setMouseMode(SELECT)
@@ -189,6 +186,57 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         # hide the window here and make visible later
         self.hide()
+
+    #-----------------------------------------------------------------------------------------
+    # Properties
+    #-----------------------------------------------------------------------------------------
+
+    @property
+    def spectrumDisplays(self) -> list:
+        """Return list of SpectrumDisplay instances
+        """
+        # STUB for now; inserted by model
+        return []
+
+    @property
+    def strips(self) -> list:
+        """Return list of Strip instances
+        """
+        # STUB for now; inserted by model
+        return []
+
+    @property
+    def axes(self) -> list:
+        """Return list of Axis instances
+        """
+        # STUB for now; inserted by model
+        return []
+
+    @property
+    def modules(self):
+        """Return tuple of modules currently displayed
+        """
+        return tuple(self.moduleArea.ccpnModules)
+
+    @property
+    def ui(self):
+        """The application.ui instance; eg. the gui
+        """
+        return self.application.ui
+
+    @property
+    def project(self) -> Project:
+        """The current project"""
+        #NB this linkage is set by the model (for now)
+        return self._project
+
+    @property
+    def current(self):
+        """:return the Current instance
+        """
+        return self.application.current
+
+    #-----------------------------------------------------------------------------------------
 
     def show(self):
         super().show()
@@ -290,23 +338,24 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._lastKeyStatus = Label(textColour='grey')
         self.statusBar().addPermanentWidget(self._lastKeyStatus, 0)
 
-    @property
-    def ui(self):
-        """The application.ui instance; eg. the gui
-        """
-        return self.application.ui
-
-    @property
-    def project(self) -> Project:
-        """The current project"""
-        #NB this linkage is set by the model (for now)
-        return self._project
-
-    @property
-    def current(self):
-        """:return the Current instance
-        """
-        return self.application.current
+    # GWV moved upward
+    # @property
+    # def ui(self):
+    #     """The application.ui instance; eg. the gui
+    #     """
+    #     return self.application.ui
+    #
+    # @property
+    # def project(self) -> Project:
+    #     """The current project"""
+    #     #NB this linkage is set by the model (for now)
+    #     return self._project
+    #
+    # @property
+    # def current(self):
+    #     """:return the Current instance
+    #     """
+    #     return self.application.current
 
     def makeDisabledFileIcon(self, icon):
         return icon
@@ -347,11 +396,12 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             if hasattr(spectrumDisplay, '_bottomGLAxis'):
                 spectrumDisplay._bottomGLAxis.refreshDevicePixelRatio()
 
-    @property
-    def modules(self):
-        """Return tuple of modules currently displayed
-        """
-        return tuple(self.moduleArea.ccpnModules)
+    # GWV moved upward
+    # @property
+    # def modules(self):
+    #     """Return tuple of modules currently displayed
+    #     """
+    #     return tuple(self.moduleArea.ccpnModules)
 
     def _setupNotifiers(self):
         """Setup notifiers connecting gui to current and project
@@ -398,40 +448,29 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         event.ignore()
 
-    def _initProject(self):
+    def _initProject(self, project):
         """
         Puts relevant information from the project into the appropriate places in the main window.
         """
-        project = self.application.project
-        isNew = project.isNew
-
-        path = project.path
         self.namespace['project'] = project
         self.namespace['runMacro'] = self.pythonConsole._runMacro
 
-        msg = path + (' created' if isNew else ' opened')
+        path = project.path
+        msg = path + (' created' if project.isNew else ' opened')
         self.statusBar().showMessage(msg)
-        msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
 
         self.pythonConsole.setProject(project)
         self._updateWindowTitle()
 
+        self._loadLayoutFromFile(reportErrors=False)
 
-        self._spectrumModuleLayouts = self.moduleLayouts = None
-
-        # get the project layout as soon as mainWindow is initialised
-        if self.application.preferences.general.restoreLayoutOnOpening:
-            try:
-                # if _mLayouts := self.application._getUserLayout():
-                if _mLayouts := self._layout.loadFromProject():
-                    self.moduleLayouts = _mLayouts
-                    self._spectrumModuleLayouts = deepcopy(self.moduleLayouts)
-
-            except (PermissionError):
-                getLogger().debug2('MainWindow._initProject restoring Layouts: Folder may be read-only')
-
-            except (FileNotFoundError):
-                getLogger().debug2('MainWindow._initProject restoring Layouts: File not found')
+        # self._spectrumModuleLayouts = self.moduleLayouts = None
+        #
+        # # get the project layout as soon as mainWindow is initialised
+        # if self.application.preferences.general.restoreLayoutOnOpening:
+        #     if (_mLayouts := self._loadLayoutFromFile(reportErrors=False)) is not None:
+        #         self.moduleLayouts = _mLayouts
+        #         self._spectrumModuleLayouts = deepcopy(self.moduleLayouts)
 
     def _updateWindowTitle(self):
         """
@@ -607,7 +646,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         return self.pythonConsoleModule
 
     #---------------------------------------------------------------------------------------------
-    # Menu's
+    # Menu and shortcut's
     #---------------------------------------------------------------------------------------------
 
     def _setupMenus(self):
@@ -1224,6 +1263,82 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     #
     # def clearLogFile(self):
     #     pass
+
+    #-----------------------------------------------------------------------------------------
+    # Layout's
+    #-----------------------------------------------------------------------------------------
+
+    def _initLayout(self):
+        """Initialise the ModuleLayout object
+        """
+        self._layout = Layout.ModuleLayout()
+
+    def _getLayoutDict(self) -> dict:
+        """:return a deepcopy of the layout dict
+        Backward compatibility with previous code
+        #CCPNINTERNAL: used is GuiSpectrumDisplay.restoreSpectrumState
+        """
+        return deepcopy(self._layout.layout)
+
+    def _loadLayoutFromFile(self, path: (str, Path, None) = None, reportErrors: bool = True) -> (dict, None):
+        """Load the layout from file path
+        :param path: path to valid layout file; if None defaults to project location
+        :param reportErrors: flag to report the errors via a popup
+        :return the layout dict or None on error
+        """
+        if path is None:
+            path = self._layout.getProjectLayoutPath()
+
+        if not isinstance(path, (str, Path)):
+            if reportErrors:
+                MessageDialog.showError('_loadLayoutFromFile', f'Invalid type; {path = }')
+            return None
+
+        try:
+            _layoutDict = self._layout.loadFromJson(path=path)
+        except (PermissionError, FileNotFoundError) as es:
+            getLogger().error(f'_loadLayoutFromFile(): {es}')
+            if reportErrors:
+                MessageDialog.showError('_loadLayoutFromFile',
+                                        f'{path} might not accessible\n{es}')
+            return None
+
+        return _layoutDict
+
+    def _saveLayoutToFile(self, path: (str, Path, None) = None, reportErrors: bool = True):
+        """Save the layout to file path
+        :param path: path to valid layout file; if None defaults to project location
+        :param reportErrors: flag to report the errors via a popup
+        """
+        if path is None:
+            path = self._layout.getProjectLayoutPath()
+
+        if not isinstance(path, (str, Path)):
+            if reportErrors:
+                MessageDialog.showError('_saveLayoutToFile', f'Invalid type; {path = }')
+            return
+
+        try:
+            self._layout.saveToJson(path=path)
+        except (PermissionError, FileNotFoundError) as es:
+            getLogger().error(f'_saveLayoutToFile(): {es}')
+            if reportErrors:
+                MessageDialog.showError('_saveLayoutToFile',
+                                        f'{path} might be readOnly\n{es}')
+
+    def _restoreLayout(self, restoreSpectrumDisplays=True):
+        """Restore the layouts from the current layout settings
+        """
+        if self._layout is None:
+            raise RuntimeError(f'_restoreLayout(): layout is undefined')
+
+        self.moduleArea._closeAll()
+        Layout.restoreLayout(self, self._layout.layout,
+                             restoreSpectrumDisplays=restoreSpectrumDisplays)
+
+    #-----------------------------------------------------------------------------------------
+    # Modules
+    #-----------------------------------------------------------------------------------------
 
     def _addModule(self, module, position='top', relativeTo=None):
         """Add module to the moduleArea; just pass the call on to moduleArea

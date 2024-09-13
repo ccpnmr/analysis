@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 13:54:36 +0100 (Thu, September 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-13 14:53:30 +0100 (Fri, September 13, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -181,22 +181,10 @@ class Gui(Ui, _Gui_V3_V4):
             getLogger().warning('Impossible to restore SpectrumDisplays')
 
         try:
-            if preferences.general.restoreLayoutOnOpening and \
-                    mainWindow.moduleLayouts:
-                Layout.restoreLayout(mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
+            if preferences.general.restoreLayoutOnOpening:
+                Layout.restoreLayout(mainWindow, mainWindow._layout.layout, restoreSpectrumDisplays=False)
         except Exception as e:
             getLogger().warning(f'Impossible to restore Layout {e}')
-
-        # New LayoutManager implementation; awaiting completion
-        # try:
-        #     from ccpn.framework.LayoutManager import LayoutManager
-        #     layout = LayoutManager(mainWindow)
-        #     path = self.statePath / 'Layout.json'
-        #     layout.restoreState(path)
-        #     layout.saveState()
-        #
-        # except Exception as es:
-        #     getLogger().warning('Error restoring layout: %s' % es)
 
         # check that the top moduleArea is correctly formed - strange special case when all modules have
         #   been moved to tempAreas
@@ -693,7 +681,7 @@ class Gui(Ui, _Gui_V3_V4):
         return (dataLoader, createNewProject, ignore)
 
     #-----------------------------------------------------------------------------------------
-    # Project and loading data related methods
+    # File, Project and loading data related methods
     #-----------------------------------------------------------------------------------------
 
     @logCommand('application.')
@@ -1128,6 +1116,29 @@ class Gui(Ui, _Gui_V3_V4):
         return result
 
     @logCommand('ui.')
+    def saveLayoutToFile(self, path: (str, Path, None) = None):
+        """Save the layout to file path
+        :param path: path to valid layout file; queried if None
+        """
+        if path is None:
+            path = _getSaveLayoutPath(self.mainWindow)
+        if path is None:
+            return
+        self.mainWindow._saveLayoutToFile(path=path)
+
+    @logCommand('ui.')
+    def restoreLayoutFromFile(self, path: (str, Path, None) = None):
+        """Restore the layout from file path
+        :param path: path to valid layout file; queried if None
+        """
+        if path is None:
+            path = _getOpenLayoutPath(self.mainWindow)
+        if path is None:
+            return
+        self.mainWindow._loadLayoutFromFile(path=path)
+        self.mainWindow._restoreLayout()
+
+    @logCommand('ui.')
     def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
         """Make a strip plot from peaks or nmrChains
         """
@@ -1389,3 +1400,50 @@ class Gui(Ui, _Gui_V3_V4):
 
         # use application to run the macro
         self.application.runMacro(path)
+
+
+#-----------------------------------------------------------------------------------------
+# Helper code
+#-----------------------------------------------------------------------------------------
+
+def _getOpenLayoutPath(mainWindow):
+    """Opens a saved Layout as dialog box and gets directory specified in the
+    file dialog.
+    :return selected path or None
+    """
+    from ccpn.ui.gui.widgets.FileDialog import LayoutsFileDialog
+
+    fType = 'JSON (*.json)'
+    dialog = LayoutsFileDialog(parent=mainWindow, acceptMode='open', fileFilter=fType)
+    dialog._show()
+    path = dialog.selectedFile()
+    return path or None
+
+
+def _getSaveLayoutPath(mainWindow):
+    """Opens save Layout as dialog box and gets directory specified in the
+    file dialog.
+    :return selected path or None
+    """
+    from ccpn.ui.gui.widgets.FileDialog import LayoutsFileDialog
+    from ccpn.ui.gui.Layout import JSON_SUFFIX
+
+    fType = 'JSON (*.json)'
+    dialog = LayoutsFileDialog(parent=mainWindow, acceptMode='save', fileFilter=fType)
+    dialog._show()
+    newPath = dialog.selectedFile()
+    if not newPath:
+        return None
+
+    newPath = aPath(newPath)
+    if newPath.exists():
+        # should not really need to check the second and third condition above, only
+        # the Qt dialog stupidly insists a directory exists before you can select it
+        # so if it exists but is empty then don't bother asking the question
+        title = 'Overwrite path'
+        msg = 'Path "%s" already exists, continue?' % newPath
+        if not MessageDialog.showYesNo(title, msg):
+            return None
+
+    newPath.assureSuffix(JSON_SUFFIX)
+    return newPath

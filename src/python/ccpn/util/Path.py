@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-13 10:23:04 +0100 (Fri, September 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-13 14:53:30 +0100 (Fri, September 13, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -409,12 +409,12 @@ class Path(_Path_):
         """
         _dirs = []
         _p = self.parent
-        while p != p.root and not p.exists():
-            _dirs.append(p.name)
-            p = p.parent
+        while _p != _p.root and not _p.exists():
+            _dirs.append(_p.name)
+            _p = _p.parent
         # need to create in reversed order
         _dirs = _dirs[::-1]
-        p.fetchDir(*_dirs)
+        _p.fetchDir(*_dirs)
 
     def fetchDir(self, *dirNames) -> Path:
         """Return and (if needed) create all dirNames relative to self

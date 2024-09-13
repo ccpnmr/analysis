@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-21 14:08:49 +0100 (Fri, June 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-13 14:53:30 +0100 (Fri, September 13, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -496,8 +496,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """Update the state of spectrumDisplay from the project layout OR from preferences if not found
         """
         # populate settings widget
-        if self.application.preferences.general.restoreLayoutOnOpening and \
-                self.mainWindow.moduleLayouts:
+        if self.application.preferences.general.restoreLayoutOnOpening:
 
             try:
                 # not very clean - need to separate into an attribute dict
@@ -556,8 +555,8 @@ class GuiSpectrumDisplay(CcpnModule):
     def restoreSpectrumState(self, discard=False):
         """Restore the state for this widget
         """
-        if self.mainWindow._spectrumModuleLayouts:
-            return self.mainWindow.moduleArea.restoreModuleState(self.mainWindow._spectrumModuleLayouts, self, discard=discard)
+        _layoutDict = self.mainWindow._getLayoutDict()
+        return self.mainWindow.moduleArea.restoreModuleState(_layout=_layoutDict, module=self, discard=discard)
 
     def _updateStripsFromSettings(self):
 

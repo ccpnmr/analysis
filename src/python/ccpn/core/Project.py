@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 13:54:36 +0100 (Thu, September 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-13 14:53:30 +0100 (Fri, September 13, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1071,7 +1071,7 @@ class Project(AbstractWrapperObject):
         """Return true if the project is new
         """
         # NOTE:ED - based on original check in _initProject
-        return self._wrappedData.root.isModified
+        return self._isNew
 
     @property
     def isTemporary(self):
@@ -2696,7 +2696,7 @@ class Project(AbstractWrapperObject):
 
     def _loadLayout(self, path: (str, Path), subType: str):
         # this is a GUI only function call. Please move to the appropriate location on 3.1
-        self.application._restoreLayoutFromFile(path)
+        self.application.ui._loadLayoutFromFile(path)
 
     def _loadExcelFile(self, path: (str, Path)) -> list:
         """Load data from a Excel file.

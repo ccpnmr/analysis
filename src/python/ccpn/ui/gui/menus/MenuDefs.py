@@ -79,7 +79,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 18:01:00 +0100 (Thu, September 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-13 14:53:30 +0100 (Fri, September 13, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -522,31 +522,22 @@ class MenusDefs(Menu, _ApplicationProperties):
                                    'Project restored as %s' % newProject.path)
 
     def _saveLayoutCallback(self):
-        Layout.updateSavedLayout(self.ui.mainWindow)
-        getLogger().info('Layout saved')
-
-    def _saveLayoutAsCallback(self):
-        path = _getSaveLayoutPath(self.mainWindow)
-        try:
-            Layout.saveLayoutToJson(self.mainWindow, jsonFilePath=path)
-            getLogger().info('Layout saved to %s' % path)
-        except Exception as es:
-            getLogger().warning('Impossible to save layout. %s' % es)
+        self.mainWindow._saveLayoutToFile()
 
     def _restoreLastSavedLayoutCallback(self):
-        self.ui.mainWindow.moduleArea._closeAll()
-        Layout.restoreLayout(self.ui.mainWindow, restoreSpectrumDisplay=True)
+        self.mainWindow._loadLayoutFromFile()
+        self.mainWindow._restoreLayout()
+
+    def _saveLayoutAsCallback(self):
+        self.ui.saveLayoutToFile()
 
     def _restoreLayoutFromFileCallback(self):
-        if (path := _getOpenLayoutPath(self.mainWindow)) is None:
-            return
-        self.application._restoreLayoutFromFile(path)
+        self.ui.restoreLayoutFromFile()
 
     def _showProjectSummaryPopup(self):
         """Show the Project summary popup.
         """
         from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
-
         popup = ProjectSummaryPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, modal=True)
         # popup.show()
         # popup.raise_()
@@ -1264,49 +1255,6 @@ class MenusDefs(Menu, _ApplicationProperties):
 
 # end class #-----------------------------------------------------------------------------
 
-#-----------------------------------------------------------------------------------------
-# Helper code
-#-----------------------------------------------------------------------------------------
-
-def _getOpenLayoutPath(mainWindow):
-    """Opens a saved Layout as dialog box and gets directory specified in the
-    file dialog.
-    :return selected path or None
-    """
-
-    fType = 'JSON (*.json)'
-    dialog = LayoutsFileDialog(parent=mainWindow, acceptMode='open', fileFilter=fType)
-    dialog._show()
-    path = dialog.selectedFile()
-    return path or None
-
-
-def _getSaveLayoutPath(mainWindow):
-    """Opens save Layout as dialog box and gets directory specified in the
-    file dialog.
-    :return selected path or None
-    """
-
-    jsonType = '.json'
-    fType = 'JSON (*.json)'
-    dialog = LayoutsFileDialog(parent=mainWindow, acceptMode='save', fileFilter=fType)
-    dialog._show()
-    newPath = dialog.selectedFile()
-    if not newPath:
-        return None
-
-    newPath = aPath(newPath)
-    if newPath.exists():
-        # should not really need to check the second and third condition above, only
-        # the Qt dialog stupidly insists a directory exists before you can select it
-        # so if it exists but is empty then don't bother asking the question
-        title = 'Overwrite path'
-        msg = 'Path "%s" already exists, continue?' % newPath
-        if not MessageDialog.showYesNo(title, msg):
-            return None
-
-    newPath.assureSuffix(jsonType)
-    return newPath
 
 #-----------------------------------------------------------------------------------------
 # Various small helper functions for menu actions dynamic settings;
@@ -1337,7 +1285,7 @@ def _fillFilePredefinedLayoutsCallback(node) -> list:
     _app = getApplication()
 
     _files = Layout._getPredefinedLayouts()
-    _defs = [Action(f.basename, partial(_app._restoreLayoutFromFile, f)) for f in _files]
+    _defs = [Action(f.basename, partial(_app.mainWindow._restoreLayoutFromFile, f)) for f in _files]
     return _defs
 
 

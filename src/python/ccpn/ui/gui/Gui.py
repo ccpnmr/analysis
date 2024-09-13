@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-13 14:53:30 +0100 (Fri, September 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-13 15:14:33 +0100 (Fri, September 13, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -182,9 +182,9 @@ class Gui(Ui, _Gui_V3_V4):
 
         try:
             if preferences.general.restoreLayoutOnOpening:
-                Layout.restoreLayout(mainWindow, mainWindow._layout.layout, restoreSpectrumDisplays=False)
+                Layout.restoreLayout(mainWindow, mainWindow._getLayoutDict(), restoreSpectrumDisplays=False)
         except Exception as e:
-            getLogger().warning(f'Impossible to restore Layout {e}')
+            getLogger().warning(f'Unable to restore Layout {e}')
 
         # check that the top moduleArea is correctly formed - strange special case when all modules have
         #   been moved to tempAreas

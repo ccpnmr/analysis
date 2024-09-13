@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-13 14:53:30 +0100 (Fri, September 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-13 15:14:33 +0100 (Fri, September 13, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -109,8 +109,6 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         super(Shortcuts, self).__init__()
         super(QtWidgets.QMainWindow, self).__init__()
 
-        logger = getLogger()
-
         # format = QtGui.QSurfaceFormat()
         # format.setSwapInterval(0)
         # QtGui.QSurfaceFormat.setDefaultFormat(format)
@@ -138,8 +136,8 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         self._hiddenModules = CcpnModuleArea(mainWindow=self)
         self._hiddenModules.setVisible(False)
 
-        # Module layouts
-        self._initLayout()
+        # init Module layout dict
+        self._initModuleLayout()
 
         # Python console module; defined upon first time Class initialisation. Either by toggleConsole or Restoring layouts
         self.pythonConsoleModule = None
@@ -150,7 +148,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
 
         self._shortcutsDict = {}
 
-        setWidgetFont(self, )
+        setWidgetFont(widget=self )
 
         self._setupWindow()
         self._setupMenus()
@@ -1268,17 +1266,17 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     # Layout's
     #-----------------------------------------------------------------------------------------
 
-    def _initLayout(self):
+    def _initModuleLayout(self):
         """Initialise the ModuleLayout object
         """
-        self._layout = Layout.ModuleLayout()
+        self._moduleLayout = Layout.ModuleLayout()
 
     def _getLayoutDict(self) -> dict:
         """:return a deepcopy of the layout dict
         Backward compatibility with previous code
         #CCPNINTERNAL: used is GuiSpectrumDisplay.restoreSpectrumState
         """
-        return deepcopy(self._layout.layout)
+        return deepcopy(self._moduleLayout.layout)
 
     def _loadLayoutFromFile(self, path: (str, Path, None) = None, reportErrors: bool = True) -> (dict, None):
         """Load the layout from file path
@@ -1287,7 +1285,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         :return the layout dict or None on error
         """
         if path is None:
-            path = self._layout.getProjectLayoutPath()
+            path = self._moduleLayout.getProjectLayoutPath()
 
         if not isinstance(path, (str, Path)):
             if reportErrors:
@@ -1295,7 +1293,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             return None
 
         try:
-            _layoutDict = self._layout.loadFromJson(path=path)
+            _layoutDict = self._moduleLayout.loadFromJson(path=path)
         except (PermissionError, FileNotFoundError) as es:
             getLogger().error(f'_loadLayoutFromFile(): {es}')
             if reportErrors:
@@ -1311,7 +1309,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
         :param reportErrors: flag to report the errors via a popup
         """
         if path is None:
-            path = self._layout.getProjectLayoutPath()
+            path = self._moduleLayout.getProjectLayoutPath()
 
         if not isinstance(path, (str, Path)):
             if reportErrors:
@@ -1319,7 +1317,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             return
 
         try:
-            self._layout.saveToJson(path=path)
+            self._moduleLayout.saveToJson(path=path)
         except (PermissionError, FileNotFoundError) as es:
             getLogger().error(f'_saveLayoutToFile(): {es}')
             if reportErrors:
@@ -1329,11 +1327,12 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     def _restoreLayout(self, restoreSpectrumDisplays=True):
         """Restore the layouts from the current layout settings
         """
-        if self._layout is None:
-            raise RuntimeError(f'_restoreLayout(): layout is undefined')
+        if self._moduleLayout is None:
+            raise RuntimeError(f'_restoreLayout(): moduleLayout is undefined')
 
         self.moduleArea._closeAll()
-        Layout.restoreLayout(self, self._layout.layout,
+        Layout.restoreLayout(mainWindow=self,
+                             layout=self._getLayoutDict(),
                              restoreSpectrumDisplays=restoreSpectrumDisplays)
 
     #-----------------------------------------------------------------------------------------

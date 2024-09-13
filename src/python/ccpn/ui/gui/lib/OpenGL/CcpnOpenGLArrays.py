@@ -5,8 +5,9 @@ GL routines used to draw vertex buffer objects (VBOs)
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-15 12:57:12 +0000 (Fri, March 15, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__dateModified__ = "$dateModified: 2024-09-13 15:11:29 +0100 (Fri, September 13, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1102,6 +1103,17 @@ class _GLVertexArray:
 
     def __del__(self):
         """Delete vertex buffer objects on deletion
+        """
+        """
+        occasionally :(
+        Exception ignored in: <function _GLVertexArray.__del__ at 0x1721830a0>
+        Traceback (most recent call last):
+          File "/Users/ejb66/Projects/AnalysisV3/src/python/ccpn/ui/gui/lib/OpenGL/CcpnOpenGLArrays.py", line 1106, in __del__
+            if not (self._GLContext and self._GLContext.isValid()):
+        RuntimeError: wrapped C/C++ object of type Gui1dWidget has been deleted
+        
+        is _cleanGarbageCollector interferring?
+        need a weakref as a QObject?
         """
         if not (self._GLContext and self._GLContext.isValid()):
             return

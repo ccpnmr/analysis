@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:23:05 +0100 (Fri, August 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-13 15:20:23 +0100 (Fri, September 13, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -451,6 +451,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self._currentNumApplies += 1
         self._revertButton.setEnabled(True)
         return True
+
+    def _cleanupDialog(self):
+        super()._cleanupDialog()
+        if self._availableFontTable:
+            self._availableFontTable.close()
 
     def reject(self) -> None:
         # revert the dialog paths

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-04 18:51:19 +0100 (Wed, September 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-13 15:20:23 +0100 (Fri, September 13, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -90,10 +90,6 @@ class TableABC(QtWidgets.QTableView):
                     QTableView:focus {
                         border-color: palette(highlight);
                     }
-                    QTableView::item {
-                        padding-top: %(_CELL_PADDING)spx;
-                        padding-bottom: %(_CELL_PADDING)spx;
-                    }
                     """
 
     # NOTE:ED overrides QtCore.Qt.ForegroundRole - keep
@@ -133,6 +129,7 @@ class TableABC(QtWidgets.QTableView):
     defaultSortColumn = 0  # allow the use of integer or string/tuple values here
     defaultSortOrder = QtCore.Qt.AscendingOrder
     _newFocus = False
+    _disableNewFocus = False
 
     def __init__(self, parent, *, df=None,
                  multiSelect=True, selectRows=True,
@@ -273,8 +270,8 @@ class TableABC(QtWidgets.QTableView):
 
     def _setStyle(self):
         self._checkPalette()
-        QtWidgets.QApplication.instance().sigPaletteChanged.connect(partial(QtCore.QTimer.singleShot, 0,
-                                                                            self._checkPalette))
+        self._signalTarget = partial(QtCore.QTimer.singleShot, 0, self._checkPalette)
+        QtWidgets.QApplication.instance().sigPaletteChanged.connect(self._signalTarget)
 
     def _checkPalette(self, *args):
         """Update palette in response to palette change event.
@@ -484,6 +481,9 @@ class TableABC(QtWidgets.QTableView):
                 })
 
     def _close(self):
+        self.close()
+
+    def close(self):
         """Clean up the notifiers
         """
         if self._droppedNotifier:
@@ -495,6 +495,9 @@ class TableABC(QtWidgets.QTableView):
                 header.customContextMenuRequested.disconnect(self._raiseHeaderContextMenu)
         with suppress(Exception):
             self.customContextMenuRequested.disconnect(self._raiseTableContextMenu)
+        with suppress(Exception):
+            QtWidgets.QApplication.instance().sigPaletteChanged.disconnect(self._signalTarget)
+        super().close()
 
     #=========================================================================================
     # Properties
@@ -767,7 +770,9 @@ class TableABC(QtWidgets.QTableView):
     def focusInEvent(self, e: QtGui.QFocusEvent) -> None:
         """Handle grabbing focus - disable first mouse-click from clearing current selection.
         """
-        self._newFocus = self.viewport().underMouse() and bool(QtGui.QGuiApplication.mouseButtons())
+        self._newFocus = (self.viewport().underMouse() and
+                          bool(QtGui.QGuiApplication.mouseButtons()) and
+                          not self._disableNewFocus)
         super().focusInEvent(e)
 
     def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:

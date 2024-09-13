@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-13 15:20:23 +0100 (Fri, September 13, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -116,10 +116,6 @@ class ValidateSpectraTable(Table):
                                                         stop: 0 palette(highlight), 
                                                         stop: 1 palette(base)
                                                     );
-                    }
-                    QTableView::item {
-                        padding-top: %(_CELL_PADDING)spx;
-                        padding-bottom: %(_CELL_PADDING)spx;
                     }
                     QHeaderView::section {
                         background-color: transparent;

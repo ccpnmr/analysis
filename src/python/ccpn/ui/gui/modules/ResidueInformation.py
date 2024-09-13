@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:21:56 +0100 (Fri, August 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-13 15:20:23 +0100 (Fri, September 13, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,6 +45,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.PulldownListsForObjects import ChainPulldown
 from ccpn.ui.gui.widgets.SequenceWidget import SequenceWidget
 from ccpn.ui.gui.widgets.table.Table import Table
+from ccpn.ui.gui.widgets.table._TableDelegates import _TableDelegateABC
 from ccpn.ui.gui.lib.StripLib import navigateToNmrResidueInDisplay, navigateToNmrAtomsInStrip
 from ccpn.util.Logging import getLogger
 from ccpn.util.UpdateScheduler import UpdateScheduler
@@ -302,7 +303,7 @@ class ResidueInformation(CcpnModule):
                 if 0 <= rr < len(checkResidues):
                     if checkResidues[rr] is not None:
                         if checkResidues[rr].nmrResidue is not None:
-                            self._residueTable.setBackground(i, rr, QtGui.QColor('mediumseagreen'))
+                            self._residueTable.setBackground(i, rr, QtGui.QColor('seagreen'))
 
     def _residueClicked(self, residue):
         """Handle cicking a residue in the table
@@ -375,6 +376,8 @@ class ResidueInformation(CcpnModule):
         """
         if self.chainPulldown:
             self.chainPulldown.unRegister()
+        if self._residueTable:
+            self._residueTable._close()
         super()._closeModule()
 
     #=========================================================================================
@@ -417,6 +420,35 @@ class ResidueInformation(CcpnModule):
 # _ResidueTable
 #=========================================================================================
 
+class _HighlightDelegate(_TableDelegateABC):
+    def paint(self, painter, option, index):
+        """Paint the contents of the cell.
+        """
+        focus = (option.state & QtWidgets.QStyle.State_HasFocus)
+        option.state = option.state & ~QtWidgets.QStyle.State_HasFocus
+
+        painter.save()
+        pal = QtGui.QPalette()
+        if (option.state & QtWidgets.QStyle.State_Selected):
+            # fade the background by modifying the background colour
+            if back := index.data(QtCore.Qt.BackgroundRole):
+                h, s, l, a = back.getHslF()
+                back.setHslF(h, 1.0, l, a)
+                # colour isn't defined if the background uses a qlineargradient :|
+                back = self._mergeColors(back, pal.base().color(), 0.5, 0.5)
+                option.palette.setColor(QtGui.QPalette.Highlight, back)
+
+        # bypass any other subclasses
+        QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
+
+        if focus:
+            painter.setClipRect(option.rect)
+            self._focusPen.setColor(pal.highlight().color())
+            painter.setPen(self._focusPen)
+            painter.drawRect(option.rect)
+        painter.restore()
+
+
 class _ResidueTable(Table):
     # strip the colours to make a transparent table
     styleSheet = """QTableView {
@@ -425,17 +457,12 @@ class _ResidueTable(Table):
                         border-width: 0px;
                         border-radius: 2px;
                         selection-background-color: transparent;
-                        selection-color: palette(window);
-                    }
-                    QTableView::item {
-                        padding-top: 2px;
-                        padding-bottom: 2px;
-                    }
-                    QHeaderView::section {
-                        background-color: transparent;
-                        border: 0px;
+                        selection-color: palette(text);
+                        color: palette(text);
                     }
                     """
+    defaultTableDelegate = _HighlightDelegate
+    _disableNewFocus = True  # allow instant click on table
 
     def __init__(self, parent, grid, gridSpan, selectionCallback, actionCallback):
         super().__init__(parent, showVerticalHeader=False, showHorizontalHeader=False,

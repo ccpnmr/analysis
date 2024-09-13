@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-06 11:32:59 +0100 (Fri, September 06, 2024) $"
-__version__ = "$Revision: 3.2.6 $"
+__dateModified__ = "$dateModified: 2024-09-13 15:20:23 +0100 (Fri, September 13, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -730,10 +730,6 @@ class _ColourDelegate(QtWidgets.QStyledItemDelegate):
     Subclasses the paint method to remove the focus dotted outline,
     and adds a colour overlay for background coloured cells.
     """
-    # NOTE:ED - this is required as setting the borders in the styleSheet disables the use of BackgroundRole in the table-model
-    #   so need this alternative to add padding to the left of the cell :|
-    _leftPadding = '  '  # 2 spaces should be enough
-
     _focusBorderWidth = 1
     _focusPen = None
 

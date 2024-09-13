@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-06 11:32:59 +0100 (Fri, September 06, 2024) $"
-__version__ = "$Revision: 3.2.6 $"
+__dateModified__ = "$dateModified: 2024-09-13 15:20:23 +0100 (Fri, September 13, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -193,10 +193,6 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
 class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
     """Handle the setting of data when editing the table
     """
-    # NOTE:ED - this is required as setting the borders in the styleSheet disables the use of BackgroundRole in the table-model
-    #   so need this alternative to add padding to the left of the cell :|
-    _leftPadding = '  '  # 2 spaces should be enough
-
     _focusBorderWidth = 1
     _focusPen = None
 
@@ -206,21 +202,13 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
         self._parent = parent
         self.customWidget = None
 
-        # set the colours
+        # set the default colour
         self._focusPen = QtGui.QPen(QtGui.QPalette().highlight(), 2)
-        self._highlightColour = QtGui.QColor('#f8f088')
 
         # double the line-widths accounts for the device-pixel-ratio
         self._focusBorderWidth = focusBorderWidth
         self._focusPen.setWidthF(focusBorderWidth * 2.0)
         self._focusPen.setJoinStyle(QtCore.Qt.MiterJoin)  # square ends
-
-    def displayText(self, value, locale: QtCore.QLocale) -> str:
-        """Add padding for editable cells.
-        """
-        value = super().displayText(value, locale)
-
-        return (self._leftPadding + value)
 
     @staticmethod
     def _mergeColors(color1, color2, weight1=0.5, weight2=0.5):
@@ -259,7 +247,7 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
         # if option.state & QtWidgets.QStyle.State_Selected:
         #     # fade the background by modifying the background colour
         #     # - ensures that different coloured backgrounds are still visible
-        #     col1 = self._highlightColour  # pal.highlight().color()
+        #     col1 = pal.highlight().color()
         #     col2 = pal.light().color()
         #     mergeCol = self._mergeColors(col1, col2, 0.5, 0.5)
         #     if back := index.data(QtCore.Qt.BackgroundRole):

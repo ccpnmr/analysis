@@ -56,9 +56,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-09-03 16:26:24 +0100 (Tue, September 03, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-16 16:56:38 +0100 (Mon, September 16, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -4561,7 +4561,7 @@ class CcpnGLWidget(QOpenGLWidget):
         yOff = self.pixelY * self.mouseString.height
         ox, oy = self._ensureOnScreen(mx, my, xLOff=-xOff, yBOff=-yOff)
         self.mouseStringDQ.setStringOffset((ox, oy))
-        self.mouseStringDQ.updateTextArrayVBOAttribs()
+        self.mouseStringDQ.pushTextArrayVBOAttribs()
 
     def buildMouseCoords(self, refresh=False):
         def valueToRatio(val, x0, x1):

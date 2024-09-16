@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:21:55 +0100 (Fri, August 23, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-09-05 15:47:46 +0100 (Thu, September 05, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1512,6 +1512,9 @@ class BorderOverlay(QtWidgets.QWidget):
 #=========================================================================================
 
 class CcpnTableModule(CcpnModule):
+    """Module to be used for Table GUI's.
+    Implemented to allow hiddenColumn saving.
+    """
     def __init__(self, mainWindow, name, *args, **kwds):
         super().__init__(mainWindow=mainWindow, name=name, *args, **kwds)
 

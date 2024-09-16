@@ -1114,6 +1114,7 @@ class GuiNdWidget(CcpnGLWidget):
             #             index += 2
 
             # NOTE:ED - new bit
+            self.mouseCoordDQ = None
             if self._firstVisible and self._matchingIsotopeCodes:
                 # idx = self._firstVisible.dimensionIndices
                 # spec = self._firstVisible.spectrum
@@ -1123,18 +1124,19 @@ class GuiNdWidget(CcpnGLWidget):
                 # yaxisType = mTypes[idx[1]]
 
                 # extra zero/double-quantum axes
-                if (0 < xaxisType.value < yaxisType.value < 3):
-                    if len(xPosList) == 1 and len(yPosList) == 1:
-                        xPosList.append(yPosList[0])
-                    if len(xPosList) == 2:
+                if (0 < xaxisType.value < yaxisType.value < 3):                # single double quantum (double y coord)
+                    if len(xPosList) == 1 and len(yPosList) == 1:              # should always be true? (sanity check)
+                        xPosList.append(yPosList[0])                           # y position to list
+                    if len(xPosList) == 2:                                     # should always be true? (sanity check)
                         # y is the double-quantum axis
-                        xx = xPosList[1] - xPosList[0]
-                        x, _y = self._scaleAxisToRatio([xx, 0])
-                        if all(abs(x - val) > self.deltaX for val in foundX):
-                            foundX.append(x)
-                            vertices.extend([x, 1.0, x, 0.0])
-                            indices.extend([index, index + 1])
-                            index += 2
+                        xx = xPosList[1] - xPosList[0]                         # y-x (y added prev)
+                        self.mouseCoordDQ = (xx, yPosList[0], 0)               # create dqCoord flags
+                        x, _y = self._scaleAxisToRatio([xx, 0])                # openGL scaling
+                        if all(abs(x - val) > self.deltaX for val in foundX):  # checks not overlapping
+                            foundX.append(x)                                   # previous cursor flag
+                            vertices.extend([x, 1.0, x, 0.0])                  # add the line to the array
+                            indices.extend([index, index + 1])                 # indices array update
+                            index += 2                                         # vertArray index
 
                 elif (0 < yaxisType.value < xaxisType.value < 3):
                     if len(xPosList) == 1 and len(yPosList) == 1:
@@ -1142,6 +1144,8 @@ class GuiNdWidget(CcpnGLWidget):
                     if len(yPosList) == 2:
                         # x is the double-quantum axis
                         yy = yPosList[0] - yPosList[1]
+                        self.mouseCoordDQ = (xPosList[0], yy, 1)
+                        print(self.mouseCoordDQ)
                         _x, y = self._scaleAxisToRatio([0, yy])
                         if all(abs(y - val) > self.deltaY for val in foundY):
                             foundY.append(y)

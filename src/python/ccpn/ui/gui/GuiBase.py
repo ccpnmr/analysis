@@ -421,6 +421,60 @@
 #         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
 #         self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
 #
+    # def _importNefCallback(self):
+    #     """menu callback; use ui.loadData to do the lifting
+    #     """
+    #     from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+    #
+    #     # self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
+    #     self._loadDataIgnoreExtension(NefDataLoader)
+    #
+    # def _loadNMRStarFileCallback(self):
+    #     """menu callback; use ui.loadData to do the lifting
+    #     """
+    #     from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
+    #
+    #     # self.ui.loadData(formatFilter=(StarDataLoader.dataFormat,))
+    #     self._loadDataIgnoreExtension(StarDataLoader)
+    #
+    # def _loadDataIgnoreExtension(self, dataLoader=None) -> list:
+    #     """Load the data defined by dataLoader, provides file dialog.
+    #
+    #     :param dataLoader: Data Loader used to import data
+    #     :return: a list of loaded objects
+    #     """
+    #     from ccpn.ui.gui.widgets import FileDialog
+    #     if not dataLoader:
+    #         getLogger().debug('Load failed no DataLoader provided')
+    #         return
+    #
+    #     dialog = FileDialog.DataFileDialog(parent=self.mainWindow, acceptMode='load')
+    #     dialog._show()
+    #     if (path := dialog.selectedFile()) is None:
+    #         return []
+    #     paths = [path]
+    #
+    #     dataLoaders = []
+    #     for path in paths:
+    #         _path = aPath(path)
+    #         if not _path.exists():
+    #             txt = f'"{path}" does not exist'
+    #             getLogger().warning(txt)
+    #             MessageDialog.showError('Load Data', txt, parent=self)
+    #             continue
+    #         # loads data using the provided dataLoader
+    #         dataLoaders.append(dataLoader(path))
+    #
+    #     # unmodified from GUI line 830
+    #     objs = self.ui.application._loadData(dataLoaders)
+    #     if len(objs) == 0:
+    #         _pp = ','.join(f'"{p}"' for p in paths)
+    #         txt = f'No objects were loaded from {_pp}'
+    #         getLogger().warning(txt)
+    #         MessageDialog.showError('Load Data', txt, parent=self.mainWindow)
+    #
+    #     return objs
+    #
 #     def _exportNEFCallback(self):
 #         """
 #         Export the current project as a Nef file

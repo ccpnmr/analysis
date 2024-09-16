@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-13 15:20:23 +0100 (Fri, September 13, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-09-13 15:21:58 +0100 (Fri, September 13, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,6 +35,7 @@ from functools import partial
 from copy import deepcopy, copy
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD, LORENTZIANMETHOD
 from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
+from ccpn.core.lib.DataStore import DataStore
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
@@ -73,7 +74,7 @@ from ccpn.util.Colour import (spectrumColours, addNewColour, coloursFromHue, fil
                               fillColourPulldown, colourNameNoSpace, _setColourPulldown)
 from ccpn.util.UserPreferences import UserPreferences
 # from ccpn.util.Common import camelCaseToString
-from ccpn.util.Path import aPath
+from ccpn.util.Path import aPath, Path
 from ccpn.util.Constants import AXISUNITS
 from ccpn.framework.Translation import languages
 from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath
@@ -120,6 +121,11 @@ ShowMaxLines = OrderedDict([
     ('Half', 0.5),
     ('All', 1.0)
     ])
+
+# Options dict for userWorkingPath. If changed the respective match cases need to
+# be changed to reflect this. (_enableUserWorkingPath _setWorkingPathDataStore)
+OPTIONS_DICT = {0: "User-defined", 1: "Alongside", 2: "Inside"}
+INV_OPTIONS_DICT = dict(map(reversed, OPTIONS_DICT.items()))
 
 
 def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, userWorkingPath=None):
@@ -586,13 +592,22 @@ class PreferencesPopup(CcpnDialogMainWidget):
         #====== Paths ======
         row += 1
         _makeLine(parent, grid=(row, 0), text="Paths")
+        self.workingPathDataStore = None
 
         row += 1
-        self.useProjectPathBox = _makeCheckBox(parent, row=row, text="Application uses project path",
-                                               callback=partial(self._queueToggleGeneralOptions, 'useProjectPath'),
-                                               toolTip='Set the application working path to the project folder on loading')
+        # self.useProjectPathBox = _makeCheckBox(parent, row=row, text="Application uses project path",
+        #                                        callback=partial(self._queueToggleGeneralOptions, 'useProjectPath'),
+        #                                        toolTip='Set the application working path to the project folder on loading')
 
+        self.userWorkingPathRadioLabel = _makeLabel(parent, "Application working path rule", grid=(row, 0), )
+
+        self.userWorkingPathRadio = RadioButtons(parent,
+                                                 texts=OPTIONS_DICT.values(),
+                                                 direction='h',
+                                                 grid=(row, 1),
+                                                 callback=self._queueRadioWorkingPath)
         row += 1
+
         self.userWorkingPathLabel = _makeLabel(parent, "Application working path ", grid=(row, 0), )
         self.userWorkingPathData = PathEdit(parent, grid=(row, 1), vAlign='t')
         self.userWorkingPathData.setMinimumWidth(LineEditsMinimumWidth)
@@ -1101,8 +1116,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.backupSaveEnabledBox.setChecked(self.preferences.general.backupSaveEnabled)
         self.backupSaveCountData.setValue(self.preferences.general.backupSaveCount)
 
-        self.userWorkingPathData.setText(self.preferences.general.userWorkingPath)
-        self.useProjectPathBox.setChecked(self.preferences.general.useProjectPath)
+        # not needed setting the index sets path.
+        # self.userWorkingPathData.setText(self.preferences.general.userWorkingPath)
+        self.userWorkingPathRadio.setIndex(INV_OPTIONS_DICT[self.preferences.general.useProjectPath])
 
         self.userLayoutsPathData.setText(self.preferences.general.userLayoutsPath)
         self.auxiliaryFilesData.setText(self.preferences.general.auxiliaryFilesPath)
@@ -1967,13 +1983,26 @@ class PreferencesPopup(CcpnDialogMainWidget):
     @queueStateChange(_verifyPopupApply)
     def _queueSetUserWorkingPath(self, _value):
         value = self.userWorkingPathData.get()
-        if value != self.preferences.general.userWorkingPath:
-            return partial(self._setUserWorkingPath, value)
+        option = OPTIONS_DICT[self.userWorkingPathRadio.getIndex()]
+        self._setWorkingPathDataStore(option, _value)
 
-    def _setUserWorkingPath(self, value):
-        self.preferences.general.userWorkingPath = value
+        if value != self.preferences.general.userWorkingPath:
+            return self._setUserWorkingPath
+
+    def _setUserWorkingPath(self):
+        """ Sets the user working path and sets the dialog initial path
+        .. note:: Working path setting is based purely on the current state
+        of the radio buttons
+        """
+        option = OPTIONS_DICT[self.userWorkingPathRadio.getIndex()]
+        path = self.workingPathDataStore.path
+
+        if option == "User-defined":  # saves user set result in preferences dict
+            self.preferences.general.userSetWorkingPath = path.asString()
+
+        self.preferences.general.userWorkingPath = path.asString()
         dialog = ProjectFileDialog(parent=self)
-        dialog.initialPath = aPath(value).filepath
+        dialog.initialPath = path
 
     def _getUserWorkingPath(self):
         currentDataPath = aPath(self.userWorkingPathData.text() or '~')
@@ -1985,8 +2014,49 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.userWorkingPathData.setText(directory[0])
 
     def _enableUserWorkingPath(self):
-        value = self.useProjectPathBox.get()
-        self.userWorkingPathData.enableWidget(not value)
+        """Enables/disables the userWorkingPath based on radio button
+        .. note:: Calls _setDataStore() to change the userWorkingPath text
+        """
+        option = OPTIONS_DICT[self.userWorkingPathRadio.getIndex()]
+        self._setWorkingPathDataStore(option)
+        match option:
+            case "User-defined":
+                self.userWorkingPathData.enableWidget(True)
+                self.userWorkingPathButton.setEnabled(True)
+            case "Alongside" | "Inside":
+                self.userWorkingPathData.enableWidget(False)
+                self.userWorkingPathButton.setEnabled(False)
+            case _:
+                raise RuntimeError(f'Invalid choice returned; This should not happen')
+
+        self.userWorkingPathData.set(self.workingPathDataStore.path.asString())
+
+    def _setWorkingPathDataStore(self, option: str = None, path: str|Path = None):
+        """Set the dataStore to path based on option
+
+        If option is user-defined and path is provided workingPathDataStore
+        is always set to Path, else it is set to previously written user-defined
+        text.
+        """
+        if option is None:
+            option = OPTIONS_DICT[self.userWorkingPathRadio.getIndex()]
+
+        match option:
+            case "User-defined":
+                # If path is passed as arg user is writing data
+                # else get from prefs as its radio button change.
+                if path:
+                    self.workingPathDataStore = DataStore.newFromPath(
+                            path=aPath(self.userWorkingPathData.text()))
+                else:
+                    self.workingPathDataStore = DataStore.newFromPath(
+                            path=aPath(self.preferences.general.userSetWorkingPath))
+            case "Alongside":
+                self.workingPathDataStore = DataStore.newFromPath(path=Path(self.project.path).parent)
+            case "Inside":
+                self.workingPathDataStore = DataStore.newFromPath(path=Path(self.project.path))
+            case _:  # All other cases raise error.
+                raise RuntimeError(f'Invalid choice returned; This should not happen')
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetAuxiliaryFilesPath(self, _value):
@@ -2139,15 +2209,25 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.colourScheme = value
 
     @queueStateChange(_verifyPopupApply)
+    def _queueRadioWorkingPath(self):
+        option = OPTIONS_DICT[self.userWorkingPathRadio.getIndex()]
+        self._enableUserWorkingPath()
+        if option != self.preferences.general.useProjectPath:
+            self._changeRadioWorkingPath(option)
+
+    def _changeRadioWorkingPath(self, option):
+        self.preferences.general.useProjectPath = option
+
+    @queueStateChange(_verifyPopupApply)
     def _queueToggleGeneralOptions(self, option, checked):
         """Toggle a general checkbox option in the preferences
         Requires the parameter to be called 'option' so that the decorator gives it a unique name
         in the internal updates dict
         """
-        if option == 'useProjectPath':
-            self._enableUserWorkingPath()
+        # if option == 'useProjectPath':
+        #     self._enableUserWorkingPath()
 
-        elif option == 'autoSetDataPath':
+        if option == 'autoSetDataPath':
             self._enableUserDataPath()
 
         # elif option == 'autoBackupEnabled':

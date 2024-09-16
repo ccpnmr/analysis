@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:23:05 +0100 (Fri, August 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-16 10:12:12 +0100 (Mon, September 16, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -101,7 +101,6 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
         # self.setCloseButton(callback=self.reject, text=self._buttonCancel, tipText='Close Dialog')
         # self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
         #
-        # self._postInit()
         # self._applyButton = self.getButton(self.APPLYBUTTON)
         # self._applyButton.setEnabled(True)
         # self._cancelButton = self.getButton(self.CLOSEBUTTON)

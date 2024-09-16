@@ -105,8 +105,9 @@ In GuiMainWindow.__init__
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -115,8 +116,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-09 17:33:38 +0100 (Thu, May 09, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-16 18:02:18 +0100 (Mon, September 16, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -512,7 +513,8 @@ class MenusDefs(list):
         """
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
 
-        self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
+        # self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
+        self._loadDataIgnoreExtension(NefDataLoader)
 
     def _exportNEFCallback(self):
         """
@@ -557,7 +559,46 @@ class MenusDefs(list):
         """
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
 
-        self.ui.loadData(formatFilter=(StarDataLoader.dataFormat,))
+        # self.ui.loadData(formatFilter=(StarDataLoader.dataFormat,))
+        self._loadDataIgnoreExtension(StarDataLoader)
+
+    def _loadDataIgnoreExtension(self, dataLoader=None) -> list | None:
+        """Load the data defined by dataLoader, provides file dialog.
+
+        :param dataLoader: Data Loader used to import data
+        :return: a list of loaded objects
+        """
+        from ccpn.ui.gui.widgets import FileDialog
+        if not dataLoader:
+            getLogger().debug('Load failed no DataLoader provided')
+            return
+
+        dialog = FileDialog.DataFileDialog(parent=self.mainWindow, acceptMode='load')
+        dialog._show()
+        if (path := dialog.selectedFile()) is None:
+            return []
+        paths = [path]
+
+        dataLoaders = []
+        for path in paths:
+            _path = aPath(path)
+            if not _path.exists():
+                txt = f'"{path}" does not exist'
+                getLogger().warning(txt)
+                MessageDialog.showError('Load Data', txt, parent=self)
+                continue
+            # loads data using the provided dataLoader
+            dataLoaders.append(dataLoader(path))
+
+        # unmodified from GUI line 830
+        objs = self.ui.application._loadData(dataLoaders)
+        if len(objs) == 0:
+            _pp = ','.join(f'"{p}"' for p in paths)
+            txt = f'No objects were loaded from {_pp}'
+            getLogger().warning(txt)
+            MessageDialog.showError('Load Data', txt, parent=self.mainWindow)
+
+        return objs
 
     def _saveCallback(self):
         """The project save callback"""

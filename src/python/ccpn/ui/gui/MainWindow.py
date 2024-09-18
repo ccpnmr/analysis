@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-09-13 15:21:58 +0100 (Fri, September 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-18 17:06:57 +0100 (Wed, September 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -656,9 +656,11 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
             text = 'Use menu "Spectrum --> Validate paths..." Or "VP" shortcut to correct\n\n'
             text += 'Please inspect file path(s) for:\n'
             for sp in badSpectra:  # these can be >1000 lines message. Added in a scrollable area.
-                text += '%s\n' % str(sp)
+                text += f'{str(sp)}\n'
             title = 'Detected invalid Spectrum file paths'
-            MessageDialog.showWarning(title=title, message=text, scrollableMessage=True)
+            MessageDialog.showWarning(title=title, message=text, scrollableMessage=True,
+                                      dontShowEnabled=True, defaultResponse=None,
+                                      popupId=f'{self.__class__.__name__}BadSpectra')
 
     def _showNefPopup(self, dataLoader):
         """Helper function; it allows the user to select the elements

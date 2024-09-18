@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-13 14:53:30 +0100 (Fri, September 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-18 19:15:57 +0100 (Wed, September 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -53,6 +53,7 @@ from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSa
 from ccpn.core.lib.ProjectLib import createLogger
 from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
     inactivity, logCommandManager, ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSimple, notificationEchoBlocking
+from ccpn.core.lib.XmlLoader import XmlLoader
 
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
@@ -943,14 +944,14 @@ class Project(AbstractWrapperObject):
     # Implementation methods
     #-----------------------------------------------------------------------------------------
 
-    def __init__(self, xmlLoader, name=None) -> Project:
+    def __init__(self, xmlLoader: XmlLoader, name: str = None) -> Project:
         """ Init for Project object using data from xmlLoader
-        NB Project is NOT complete before the _initProject function is run.
-        :param path: Path to the project; name is extracted from it
+        :param xmlLoader: XmlLoader object
         :param name: Optional name; taken from xmlLoader if None
         :return Project instance
+
+        NB Project is NOT complete before the _initProject function is run.
         """
-        from ccpn.core.lib.XmlLoader import XmlLoader
 
         if not isinstance(xmlLoader, XmlLoader):
             raise ValueError(f'Expected XmlLoader instance, got {xmlLoader}')
@@ -1534,8 +1535,6 @@ class Project(AbstractWrapperObject):
            :param overwrite: flag to overwrite if path exists
            :param copySubDirectories: flag to set the copying of the project's subdirectories
         """
-        from ccpn.core.lib.XmlLoader import XmlLoader
-
         _oldPath = aPath(self.path)
         _newPath = aPath(newPath).assureSuffix(CCPN_DIRECTORY_SUFFIX)
         if _newPath.exists() and overwrite:
@@ -3435,11 +3434,11 @@ def _newProject(application, name: str, path: Path, isTemporary: bool = False) -
     """Make new project, putting underlying data storage (API project) at path
     :return Project instance
     """
-    from ccpn.core.lib.XmlLoader import XmlLoader
     from ccpn.core.lib.ProjectSaveHistory import newProjectSaveHistory
 
-    # creates the project save-folder
-    xmlLoader = XmlLoader(path=path, name=name, create=True)
+    # creates the project folder
+    _path = aPath(path).absolute()
+    xmlLoader = XmlLoader(path=_path, name=name, create=True)
     # writes the new ccpnv3-folder contents
     xmlLoader.newProject(initGraphics=application.hasGui, overwrite=True)
 
@@ -3469,10 +3468,9 @@ def _loadV3Project(application, path: str) -> Project:
     """Load the V3-project defined by path
     :return Project instance
     """
-    from ccpn.core.lib.XmlLoader import XmlLoader
     from ccpn.core.lib.ProjectArchiver import ProjectArchiver
 
-    _path = aPath(path)
+    _path = aPath(path).absolute()
     if not _path.exists():
         raise ValueError(f'Path {_path} does not exist')
 
@@ -3516,11 +3514,11 @@ def _loadV2Project(application, path: str | Path) -> Project:
     :param path: the path to a V2 project
     :return Project instance
     """
-    from ccpn.core.lib.XmlLoader import XmlLoader
+    # from ccpn.core.lib.XmlLoader import XmlLoader
     from ccpn.core._implementation.updates.update_v2 import updateProject_fromV2
     from ccpn.core.lib.ProjectArchiver import ProjectArchiver
 
-    _path = aPath(path)
+    _path = aPath(path).absolute()
     if not _path.exists():
         raise ValueError(f'Path {_path} does not exist')
 

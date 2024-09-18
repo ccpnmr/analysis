@@ -305,6 +305,9 @@
         },
         "_NewChemicalShiftTableMerge": {
             "dontShowPopup": false
+        },
+        "MainWindowBadSpectra": {
+            "dontShowPopup": false
         }
     },
     "tables"           : {

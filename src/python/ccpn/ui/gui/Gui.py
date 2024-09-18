@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-13 15:14:33 +0100 (Fri, September 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-18 14:14:00 +0100 (Wed, September 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -62,6 +62,7 @@ from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
 # This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
 from ccpn.ui.gui.guiSettings import FontSettings, consoleStyle
 from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.lib.TipOfTheDayManager import TipOfTheDayManager
 
 from ccpn.util.Logging import getLogger
 from ccpn.util import Register
@@ -143,6 +144,8 @@ class Gui(Ui, _Gui_V3_V4):
 
         # read the current system-fonts
         getSystemFonts()
+
+        self._tipOfTheDayManager = TipOfTheDayManager(gui=self, preferences=application.preferences)
 
     def initialize(self, mainWindow, project):
         """UI operations done after every project load/create
@@ -371,7 +374,7 @@ class Gui(Ui, _Gui_V3_V4):
         """Start the UI
         """
         self._makeActiveWindow()
-        self.application._initTipOfTheDay()
+        self._tipOfTheDayManager.start()
 
         # check whether to skip the execution loop for testing with mainWindow
         import builtins
@@ -1401,6 +1404,19 @@ class Gui(Ui, _Gui_V3_V4):
         # use application to run the macro
         self.application.runMacro(path)
 
+    #-----------------------------------------------------------------------------------------
+    # help
+    #-----------------------------------------------------------------------------------------
+
+    def _showTipOfTheDay(self):
+        """Helper function to show tip of the day, called from MenuDefs
+        """
+        self._tipOfTheDayManager._displayTipOfTheDay(standalone=True)
+
+    def _showKeyConcepts(self):
+        """Helper function to show key concepts, called from MenuDefs
+        """
+        self._tipOfTheDayManager._displayKeyConcepts()
 
 #-----------------------------------------------------------------------------------------
 # Helper code

@@ -4,19 +4,20 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: varioustoxins $"
-__dateModified__ = "$dateModified: 2022-03-06 11:05:17 +0000 (Sun, March 06, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-18 14:14:00 +0100 (Wed, September 18, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -41,8 +42,7 @@ from PyQt5.QtGui import QPixmap, QBrush, QColor, QPainter
 from PyQt5.QtWidgets import QApplication, QWizard, QWizardPage, QCheckBox, QPushButton, QLabel, QGridLayout, \
     QSizePolicy, QFrame, QTextBrowser, QGraphicsScene, QGraphicsView
 
-from ccpn.framework.PathsAndUrls import tipOfTheDayConfig
-
+from ccpn.framework.PathsAndUrls import ccpnConfigPath
 
 HJSON_ERROR = hjson.HjsonDecodeError
 
@@ -83,7 +83,6 @@ MAX_ORDER = sys.maxsize
 STYLE_FILE = 'style_file'
 
 TIPS_SETUP = None
-DEFAULT_CONFIG_PATH = 'tipConfig.hjson'
 
 
 def loadTipsSetup(path: Path, tip_paths: Optional[List[Path]] = None):
@@ -110,10 +109,12 @@ def loadTipsSetup(path: Path, tip_paths: Optional[List[Path]] = None):
     TIPS_SETUP = setup
 
 
-def _load_default_setup_if_required():
-    global TIPS_SETUP
-    if TIPS_SETUP is None:
-        TIPS_SETUP = loadTipsSetup(DEFAULT_CONFIG_PATH)
+# def _load_default_setup_if_required():
+#     # local importr to avoid cycles
+#     from ccpn.ui.gui.lib.TipOfTheDayManager import tipOfTheDayConfigPath
+#     global TIPS_SETUP
+#     if TIPS_SETUP is None:
+#         TIPS_SETUP = loadTipsSetup(tipOfTheDayConfigPath)
 
 
 
@@ -326,7 +327,9 @@ class TipOfTheDayWindow(QWizard):
 
     def __init__(self, parent=None, seen_perma_ids=(), dont_show_tips=False, standalone=False, mode=MODE_TIP_OF_THE_DAY):
 
-        _load_default_setup_if_required()
+        if TIPS_SETUP is None:
+            raise RuntimeError(f'Error starting TipOfTheDay: tips are not loaded')
+        # _load_default_setup_if_required()
 
         super(TipOfTheDayWindow, self).__init__(parent=parent)
 

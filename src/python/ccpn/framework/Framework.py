@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-13 14:53:30 +0100 (Fri, September 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-18 14:14:00 +0100 (Wed, September 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -86,7 +86,6 @@ from ccpn.framework.Translation import translator
 from ccpn.framework.Preferences import Preferences, USER_PLUGIN_PATH
 from ccpn.framework.PathsAndUrls import \
     userCcpnMacroPath, \
-    tipOfTheDayConfig, \
     ccpnCodePath, \
     CCPN_DIRECTORY_SUFFIX
 from ccpn.framework.lib.resources.Resources import Resources
@@ -107,9 +106,9 @@ from ccpn.util.decorators import logCommand
 logger = getLogger()
 
 #-----------------------------------------------------------------------------------------
-# how frequently to check if license dialog has closed when waiting to show the tip of the day
-WAIT_EVENT_LOOP_EMPTY = 0
-WAIT_LICENSE_DIALOG_CLOSE_TIME = 100
+# # how frequently to check if license dialog has closed when waiting to show the tip of the day
+# WAIT_EVENT_LOOP_EMPTY = 0
+# WAIT_LICENSE_DIALOG_CLOSE_TIME = 100
 
 _DEBUG = False
 
@@ -222,14 +221,8 @@ class Framework(NotifierBase):
         # language; (requires self.args and self.preferences)
         self._language = self._setLanguage()
 
-        # self.layout = None  # initialised by self._getUserLayout
-
         # set by _updateAutoBackup(), called from  _startApplication()
         self._autoBackupThread = None
-
-        self._tip_of_the_day = None
-        self._initial_show_timer = None
-        self._key_concepts = None
 
         # initialised in _startApplication
         self._registrationDict = {}
@@ -917,109 +910,109 @@ class Framework(NotifierBase):
     #     getLogger().warning(f'Error restoring current.strip: {e}')
 
     #-----------------------------------------------------------------------------------------
-
-    def _initTipOfTheDay(self):
-        # GST slightly complicated as we have to wait for any license or other
-        # startup dialogs to close before we display tip of the day
-        loadTipsSetup(tipOfTheDayConfig, [ccpnCodePath])
-        self._tip_of_the_day_wait_dialogs = (RegisterPopup,)
-        self._startupShowTipofTheDay()
-
-    def _startupShowTipofTheDay(self):
-        if self._shouldDisplayTipOfTheDay():
-            self._initial_show_timer = QTimer(parent=self._mainWindow)
-            self._initial_show_timer.timeout.connect(self._startupDisplayTipOfTheDayCallback)
-            self._initial_show_timer.setInterval(0)
-            self._initial_show_timer.start()
-
-    def _canTipOfTheDayShow(self):
-        result = True
-        for widget in QApplication.topLevelWidgets():
-            if isinstance(widget, self._tip_of_the_day_wait_dialogs) and widget.isVisible():
-                result = False
-                break
-        return result
-
-    def _startupDisplayTipOfTheDayCallback(self):
-
-        is_first_time_tip_of_the_day = self.preferences['general'].setdefault('firstTimeShowKeyConcepts', True)
-
-        # GST this waits till any inhibiting dialogs aren't show and then awaits till the event loop is empty
-        # effectively it swaps between waiting for WAIT_LICENSE_DIALOG_CLOSE_TIME or until the event loop is empty
-        if not self._canTipOfTheDayShow() or self._initial_show_timer.interval() == WAIT_LICENSE_DIALOG_CLOSE_TIME:
-            if self._initial_show_timer.interval() == WAIT_EVENT_LOOP_EMPTY:
-                self._initial_show_timer.setInterval(WAIT_LICENSE_DIALOG_CLOSE_TIME)
-            else:
-                self._initial_show_timer.setInterval(WAIT_EVENT_LOOP_EMPTY)
-
-            self._initial_show_timer.start()
-        else:
-            # this should only happen when the event loop is empty...
-            if is_first_time_tip_of_the_day:
-                self._displayKeyConcepts()
-                self.preferences['general']['firstTimeShowKeyConcepts'] = False
-            else:
-                try:
-                    self._displayTipOfTheDay()
-                except Exception as e:
-                    self._initial_show_timer.stop()
-                    self._initial_show_timer.deleteLater()
-                    self._initial_show_timer = None
-                    raise e
-
-            if self._initial_show_timer:
-                self._initial_show_timer.stop()
-                self._initial_show_timer.deleteLater()
-                self._initial_show_timer = None
-
-    def _displayKeyConcepts(self):
-        if not self._key_concepts:
-            self._key_concepts = TipOfTheDayWindow(mode=MODE_KEY_CONCEPTS)
-        self._key_concepts.show()
-        self._key_concepts.raise_()
-
-    def _displayTipOfTheDay(self, standalone=False):
-
-        # tip of the day allocated standalone already
-        if self._tip_of_the_day and standalone and self._tip_of_the_day.isStandalone():
-            self._tip_of_the_day.show()
-            self._tip_of_the_day.raise_()
-
-        # tip of the day hanging around from startup
-        elif self._tip_of_the_day and standalone and not self._tip_of_the_day.isStandalone():
-
-            self._tip_of_the_day.hide()
-            self._tip_of_the_day.deleteLater()
-            self._tip_of_the_day = None
-
-        if not self._tip_of_the_day:
-            dont_show_tips = not self.preferences['general']['showTipOfTheDay']
-
-            seen_tip_list = []
-            # if not standalone:
-            seen_tip_list = self.preferences['general']['seenTipsOfTheDay']
-
-            self._tip_of_the_day = TipOfTheDayWindow(dont_show_tips=dont_show_tips,
-                                                     seen_perma_ids=seen_tip_list, standalone=standalone)
-            self._tip_of_the_day.dont_show.connect(self._tip_of_the_day_dont_show_callback)
-            # if not standalone:
-            self._tip_of_the_day.seen_tips.connect(self._tip_of_the_day_seen_tips_callback)
-
-            self._tip_of_the_day.show()
-            self._tip_of_the_day.raise_()
-
-    def _tip_of_the_day_dont_show_callback(self, dont_show):
-        self.preferences['general']['showTipOfTheDay'] = not dont_show
-
-    def _tip_of_the_day_seen_tips_callback(self, seen_tips):
-        seen_tip_list = self.preferences['general']['seenTipsOfTheDay']
-        previous_seen_tips = set(seen_tip_list)
-        previous_seen_tips.update(seen_tips)
-        seen_tip_list.clear()
-        seen_tip_list.extend(previous_seen_tips)
-
-    def _shouldDisplayTipOfTheDay(self):
-        return self.preferences['general'].setdefault('showTipOfTheDay', True)
+    # GWV 18/9/2024: code now in gui.lib.TipOfTheDayManager
+    # def _initTipOfTheDay(self):
+    #     # GST slightly complicated as we have to wait for any license or other
+    #     # startup dialogs to close before we display tip of the day
+    #     loadTipsSetup(tipOfTheDayConfig, [ccpnCodePath])
+    #     self._tip_of_the_day_wait_dialogs = (RegisterPopup,)
+    #     self._startupShowTipofTheDay()
+    #
+    # def _startupShowTipofTheDay(self):
+    #     if self._shouldDisplayTipOfTheDay():
+    #         self._initial_show_timer = QTimer(parent=self._mainWindow)
+    #         self._initial_show_timer.timeout.connect(self._startupDisplayTipOfTheDayCallback)
+    #         self._initial_show_timer.setInterval(0)
+    #         self._initial_show_timer.start()
+    #
+    # def _canTipOfTheDayShow(self):
+    #     result = True
+    #     for widget in QApplication.topLevelWidgets():
+    #         if isinstance(widget, self._tip_of_the_day_wait_dialogs) and widget.isVisible():
+    #             result = False
+    #             break
+    #     return result
+    #
+    # def _startupDisplayTipOfTheDayCallback(self):
+    #
+    #     is_first_time_tip_of_the_day = self.preferences['general'].setdefault('firstTimeShowKeyConcepts', True)
+    #
+    #     # GST this waits till any inhibiting dialogs aren't show and then awaits till the event loop is empty
+    #     # effectively it swaps between waiting for WAIT_LICENSE_DIALOG_CLOSE_TIME or until the event loop is empty
+    #     if not self._canTipOfTheDayShow() or self._initial_show_timer.interval() == WAIT_LICENSE_DIALOG_CLOSE_TIME:
+    #         if self._initial_show_timer.interval() == WAIT_EVENT_LOOP_EMPTY:
+    #             self._initial_show_timer.setInterval(WAIT_LICENSE_DIALOG_CLOSE_TIME)
+    #         else:
+    #             self._initial_show_timer.setInterval(WAIT_EVENT_LOOP_EMPTY)
+    #
+    #         self._initial_show_timer.start()
+    #     else:
+    #         # this should only happen when the event loop is empty...
+    #         if is_first_time_tip_of_the_day:
+    #             self._displayKeyConcepts()
+    #             self.preferences['general']['firstTimeShowKeyConcepts'] = False
+    #         else:
+    #             try:
+    #                 self._displayTipOfTheDay()
+    #             except Exception as e:
+    #                 self._initial_show_timer.stop()
+    #                 self._initial_show_timer.deleteLater()
+    #                 self._initial_show_timer = None
+    #                 raise e
+    #
+    #         if self._initial_show_timer:
+    #             self._initial_show_timer.stop()
+    #             self._initial_show_timer.deleteLater()
+    #             self._initial_show_timer = None
+    #
+    # def _displayKeyConcepts(self):
+    #     if not self._key_concepts:
+    #         self._key_concepts = TipOfTheDayWindow(mode=MODE_KEY_CONCEPTS)
+    #     self._key_concepts.show()
+    #     self._key_concepts.raise_()
+    #
+    # def _displayTipOfTheDay(self, standalone=False):
+    #
+    #     # tip of the day allocated standalone already
+    #     if self._tip_of_the_day and standalone and self._tip_of_the_day.isStandalone():
+    #         self._tip_of_the_day.show()
+    #         self._tip_of_the_day.raise_()
+    #
+    #     # tip of the day hanging around from startup
+    #     elif self._tip_of_the_day and standalone and not self._tip_of_the_day.isStandalone():
+    #
+    #         self._tip_of_the_day.hide()
+    #         self._tip_of_the_day.deleteLater()
+    #         self._tip_of_the_day = None
+    #
+    #     if not self._tip_of_the_day:
+    #         dont_show_tips = not self.preferences['general']['showTipOfTheDay']
+    #
+    #         seen_tip_list = []
+    #         # if not standalone:
+    #         seen_tip_list = self.preferences['general']['seenTipsOfTheDay']
+    #
+    #         self._tip_of_the_day = TipOfTheDayWindow(dont_show_tips=dont_show_tips,
+    #                                                  seen_perma_ids=seen_tip_list, standalone=standalone)
+    #         self._tip_of_the_day.dont_show.connect(self._tip_of_the_day_dont_show_callback)
+    #         # if not standalone:
+    #         self._tip_of_the_day.seen_tips.connect(self._tip_of_the_day_seen_tips_callback)
+    #
+    #         self._tip_of_the_day.show()
+    #         self._tip_of_the_day.raise_()
+    #
+    # def _tip_of_the_day_dont_show_callback(self, dont_show):
+    #     self.preferences['general']['showTipOfTheDay'] = not dont_show
+    #
+    # def _tip_of_the_day_seen_tips_callback(self, seen_tips):
+    #     seen_tip_list = self.preferences['general']['seenTipsOfTheDay']
+    #     previous_seen_tips = set(seen_tip_list)
+    #     previous_seen_tips.update(seen_tips)
+    #     seen_tip_list.clear()
+    #     seen_tip_list.extend(previous_seen_tips)
+    #
+    # def _shouldDisplayTipOfTheDay(self):
+    #     return self.preferences['general'].setdefault('showTipOfTheDay', True)
 
     #-----------------------------------------------------------------------------------------
     # Project related methods

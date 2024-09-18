@@ -3,6 +3,12 @@ The menus are specified by a (recursive) Menu's (i.e. lists) composed of either
 Action, Separator, Section, Menu or DynamicMenu instances (see _MenuItems for
 their definitions).
 
+Note: For Actions: Use a callback function defined as a methof of MenuDefs and pass on
+      the action from there.
+      This avoid the (V3) situation in that the MainWindow has not yet been defined,
+      when initialising the MenuDefs; i.e. ui.mainWindow is None on initialisation of
+      the MenuDefs instance, but is defined the moment the callback is executed.
+
 ---------------------------------------------------------------------------------------
 
 This code replaces <= 3.2.4 code:
@@ -79,7 +85,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-13 14:53:30 +0100 (Fri, September 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-18 14:14:00 +0100 (Wed, September 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -366,9 +372,9 @@ class MenusDefs(Menu, _ApplicationProperties):
         DynamicMenu('How-Tos', callback=_fillHelpHowtosCallback),
 
         Section('Handies'),
-        Action("Tip of the Day", partial(app._displayTipOfTheDay, standalone=True)),
-        Action("Key Concepts", app._displayKeyConcepts),
-        Action("Show Shortcuts", self._showShortcuts),
+        Action("Tip of the Day", self._showTipOfTheDayCallback),
+        Action("Key Concepts", self._showKeyConceptsCallback),
+        Action("Show Shortcuts", self._showShortcutsCallback),
 
         Section('CCPN web pages'),
         Action("Homepage", self._showAboutCcpn),
@@ -606,7 +612,7 @@ class MenusDefs(Menu, _ApplicationProperties):
         else:
             from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
 
-            popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra,
+            popup = ValidateSpectraPopup(mainWindow=self.ui.mainWindow, spectra=spectra,
                                          defaultSelected=defaultSelected)
             popup.exec_()
 
@@ -1067,23 +1073,25 @@ class MenusDefs(Menu, _ApplicationProperties):
         """Displays Forum in a module.
         """
         from ccpn.framework.PathsAndUrls import ccpnForum
-
         self.ui._showHtmlFile("Analysis Version-3 Forum", ccpnForum)
 
-    def _showShortcuts(self):
-        from ccpn.framework.PathsAndUrls import shortcutsPath
+    def _showTipOfTheDayCallback(self):
+        self.ui._showTipOfTheDay()
 
+    def _showKeyConceptsCallback(self):
+        self.ui._showKeyConcepts()
+
+    def _showShortcutsCallback(self):
+        from ccpn.framework.PathsAndUrls import shortcutsPath
         self.ui._systemOpen(shortcutsPath)
 
     def _showAboutPopup(self):
         from ccpn.ui.gui.popups.AboutPopup import AboutPopup
-
         popup = AboutPopup(parent=self.ui.mainWindow)
         popup.exec_()
 
     def _showAboutCcpn(self):
         from ccpn.framework.PathsAndUrls import ccpnUrl
-
         self.ui._showHtmlFile("About CCPN", ccpnUrl)
 
     def _showRegisterPopup(self):
@@ -1093,7 +1101,6 @@ class MenusDefs(Menu, _ApplicationProperties):
 
     def _showCcpnLicense(self):
         from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
-
         self.ui._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
 
     #-----------------------------------------------------------------------------------------

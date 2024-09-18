@@ -96,6 +96,8 @@ class Substance(AbstractWrapperObject):
     _ReferenceSpectraPids = '_ReferenceSpectraPids'
     _REFERENCESPECTRA = 'referenceSpectra'
 
+    _ignoreNewApiObjectCallback = True
+
     # CCPN properties
     @property
     def _apiSubstance(self) -> ApiRefComponent:
@@ -907,9 +909,12 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
     else:
         raise ValueError("Substance type %s not recognised" % substanceType)
 
-    result = self._data2Obj[apiResult]
-    if result is None:
+    if (result := Substance._newInstanceFromApiData(apiObj=apiResult, project=self)) is None:
         raise RuntimeError('Unable to generate new Substance item')
+
+    # result = self._data2Obj[apiResult]
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Substance item')
 
     return result
 
@@ -938,11 +943,15 @@ def _fetchNefSubstance(self: Project, sequence: typing.Sequence[dict], name: str
 
     apiMolecule = MoleculeModify.createMoleculeFromNef(apiNmrProject.root, name, sequence)
 
-    result = self._data2Obj[
-        apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule)
-    ]
-    if result is None:
+    mol = apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule)
+    if (result := Substance._newInstanceFromApiData(apiObj=mol, project=self)) is None:
         raise RuntimeError('Unable to generate new Nef Substance item')
+
+    # result = self._data2Obj[
+    #     apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule)
+    # ]
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Nef Substance item')
 
     return result
 
@@ -1027,10 +1036,13 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
     apiMolecule.details = comment
 
     mol = apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule, labeling=apiLabeling)
-    result = self._data2Obj[mol]
-
-    if result is None:
+    # TODO test
+    if (result := Substance._newInstanceFromApiData(apiObj=mol, project=self)) is None:
         raise RuntimeError('Unable to generate new PolymerSubstance item')
+
+    # result = self._data2Obj[mol]
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new PolymerSubstance item')
 
     result.userCode = userCode
 

@@ -63,6 +63,8 @@ class StructureEnsemble(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiStructureEnsemble._metaclass.qualifiedName()
 
+    _ignoreNewApiObjectCallback = True
+
     #=========================================================================================
     # CCPN properties
     #=========================================================================================
@@ -263,9 +265,13 @@ def _newStructureEnsemble(self: Project, name: str = None, data: EnsembleData = 
         params['name'] = name
 
     newApiStructureEnsemble = nmrProject.root.newStructureEnsemble(**params)
-    result = self._data2Obj[newApiStructureEnsemble]
-    if result is None:
+
+    if (result := StructureEnsemble._newInstanceFromApiData(apiObj=newApiStructureEnsemble, project=self)) is None:
         raise RuntimeError('Unable to generate new StructureEnsemble item')
+
+    # result = self._data2Obj[newApiStructureEnsemble]
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new StructureEnsemble item')
 
     # if serial is not None:
     #     try:

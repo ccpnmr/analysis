@@ -60,6 +60,8 @@ class Note(AbstractWrapperObject):
     # Internal NameSpace
     _COMMENT = 'comment'
 
+    _ignoreNewApiObjectCallback = True
+
     #=========================================================================================
     # CCPN properties
     #=========================================================================================
@@ -215,9 +217,12 @@ def _newNote(self: Project, name: str = None, text: str = None, comment: str = N
             raise TypeError("Note text must be a string")
 
     apiNote = self._wrappedData.newNote(text=text, name=name)
-    result = self._data2Obj.get(apiNote)
-    if result is None:
+
+    if (result := Note._newInstanceFromApiData(apiObj=apiNote, project=self)) is None:
         raise RuntimeError('Unable to generate new Note item')
+    # result = self._data2Obj.get(apiNote)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Note item')
 
     result.comment = comment
 

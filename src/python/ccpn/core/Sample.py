@@ -71,6 +71,8 @@ class Sample(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiSample._metaclass.qualifiedName()
 
+    _ignoreNewApiObjectCallback = True
+
     # internal namespace
     _AMOUNTUNITS = 'amountUnits'
     _IONICSTRENGTHUNITS = 'ionicStrengthUnits'
@@ -554,9 +556,12 @@ def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength:
                                             batchIdentifier=batchIdentifier,
                                             plateIdentifier=plateIdentifier, rowPosition=rowNumber,
                                             colPosition=columnNumber, details=comment)
-    result = self._data2Obj.get(newApiSample)
-    if result is None:
+    #TODO DT Test
+    if (result := Sample._newInstanceFromApiData(apiObj=newApiSample, project=self)) is None:
         raise RuntimeError('Unable to generate new Sample item')
+    # result = self._data2Obj.get(newApiSample)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Sample item')
 
     result.amountUnits = amountUnits
     result.ionicStrengthUnits = ionicStrengthUnits

@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-10 17:06:23 +0100 (Fri, May 10, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:17 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -63,6 +63,8 @@ class Window(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiWindow._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
 
     #=========================================================================================
 
@@ -703,9 +705,12 @@ def _newWindow(self: Project, title: str = None, position: tuple = (), size: tup
     if size:
         newApiWindow.size = size
 
-    result = self._data2Obj.get(newApiWindow)
-    if result is None:
+    if (result := Window._newInstanceFromApiData(apiObj=newApiWindow, project=self)) is None:
         raise RuntimeError('Unable to generate new Window item')
+
+    # result = self._data2Obj.get(newApiWindow)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Window item')
 
     return result
 

@@ -4,9 +4,9 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-06-29 16:27:44 +0100 (Thu, June 29, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:14 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -56,6 +56,8 @@ class Atom(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiAtom._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
 
     # CCPN properties
     @property
@@ -288,9 +290,13 @@ def _newAtom(self: Residue, name: str, elementSymbol: str = None) -> 'Atom':
         elementSymbol = name2ElementSymbol(name)
 
     apiAtom = self._wrappedData.newAtom(name=name, elementSymbol=elementSymbol)
+
     result = self._project._data2Obj[apiAtom]
     if result is None:
         raise RuntimeError('Unable to generate new Atom item')
+    #
+    # if (result := Atom._newInstanceFromApiData(apiObj=apiAtom)) is None:
+    #     raise RuntimeError('Unable to generate new Atom item')
 
     apiAtom.expandNewAtom()
 

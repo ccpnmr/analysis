@@ -88,6 +88,8 @@ class SpectrumGroup(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiSpectrumGroup._metaclass.qualifiedName()
 
+    _ignoreNewApiObjectCallback = True
+
     # internal namespace
     _COMMENT = 'comment'
     _SERIES = 'series'
@@ -630,9 +632,12 @@ def _newSpectrumGroup(self: Project, name: str, spectra=(), **kwds) -> SpectrumG
         spectra = [getByPid(x) if isinstance(x, str) else x for x in spectra]
 
     apiSpectrumGroup = self._wrappedData.newSpectrumGroup(name=name)
-    result = self._data2Obj.get(apiSpectrumGroup)
-    if result is None:
+    if (result := SpectrumGroup._newInstanceFromApiData(apiObj=apiSpectrumGroup, project=self)) is None:
         raise RuntimeError('Unable to generate new SpectrumGroup item')
+
+    # result = self._data2Obj.get(apiSpectrumGroup)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new SpectrumGroup item')
 
     if spectra:
         result.spectra = spectra

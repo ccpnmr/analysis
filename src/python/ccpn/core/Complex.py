@@ -201,7 +201,10 @@ def _newComplex(self: Project, name: str = None, chains=(), comment: str = None)
         getByPid = self._project.getByPid
         chains = [getByPid(x) if isinstance(x, str) else x for x in chains]
 
-    result = self._data2Obj.get(self._wrappedData.molSystem.newChainGroup(name=name))
+    # result = self._data2Obj.get(self._wrappedData.molSystem.newChainGroup(name=name))
+    # TODO DT test
+    apiComplex = self._wrappedData.molSystem.newChainGroup(name=name)
+    result = Complex._newInstanceFromApiData(apiObj=apiComplex, project=self)
     if result is None:
         raise RuntimeError('Unable to generate new Complex item')
 

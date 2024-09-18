@@ -114,6 +114,8 @@ class NmrResidue(AbstractWrapperObject):
     # Number of fields that comprise the object's pid; Used to get parent id's
     _numberOfIdFields = 2
 
+    _ignoreNewApiObjectCallback = True
+
     #=========================================================================================
     # CCPN properties
     #=========================================================================================
@@ -1578,9 +1580,13 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
     # Create ResonanceGroup
     dd['sequenceCode'] = sequenceCode
     apiResonanceGroup = nmrProject.newResonanceGroup(**dd)
-    result = self._project._data2Obj.get(apiResonanceGroup)
-    if result is None:
+
+    if (result := NmrResidue._newInstanceFromApiData(apiObj=apiResonanceGroup)) is None:
         raise RuntimeError('Unable to generate new NmrResidue item')
+
+    # result = self._project._data2Obj.get(apiResonanceGroup)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new NmrResidue item')
 
     if serial is not None:
         try:

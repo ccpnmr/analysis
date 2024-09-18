@@ -77,6 +77,8 @@ class NmrAtom(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.Resonance._metaclass.qualifiedName()
 
+    _ignoreNewApiObjectCallback = True
+
     # Internal NameSpace
     _AMBIGUITYCODE = '_ambiguityCode'
     _ORIGINALNAME = '_originalName'
@@ -688,8 +690,11 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
     dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': UnknownIsotopeCode, 'name': _name}
     obj = apiNmrProject.newResonance(**dd)
 
-    if (result := self._project._data2Obj.get(obj)) is None:
+    if (result := NmrAtom._newInstanceFromApiData(apiObj=obj)) is None:
         raise RuntimeError('Unable to generate new NmrAtom item')
+
+    # if (result := self._project._data2Obj.get(obj)) is None:
+    #     raise RuntimeError('Unable to generate new NmrAtom item')
 
     # Check/set isotopeCode; it has to be set after the creation to avoid API errors.
     result._setIsotopeCode(isotopeCode)

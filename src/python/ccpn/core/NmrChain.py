@@ -82,6 +82,8 @@ class NmrChain(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiNmrChain._metaclass.qualifiedName()
 
+    _ignoreNewApiObjectCallback = True
+
     #=========================================================================================
     # CCPN properties
     #=========================================================================================
@@ -552,9 +554,13 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
     dd = {'code': shortName, 'isConnected': isConnected, 'label': label, 'details': comment}
 
     newApiNmrChain = nmrProject.newNmrChain(**dd)
-    result = self._data2Obj.get(newApiNmrChain)
-    if result is None:
+
+    if (result := NmrChain._newInstanceFromApiData(apiObj=newApiNmrChain, project=self)) is None:
         raise RuntimeError('Unable to generate new NmrChain item')
+
+    # result = self._data2Obj.get(newApiNmrChain)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new NmrChain item')
 
     if serial is not None:
         try:

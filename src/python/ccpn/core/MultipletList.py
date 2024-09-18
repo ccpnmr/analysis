@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:17:10 +0000 (Thu, March 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:15 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -68,6 +68,8 @@ class MultipletList(PMIListABC):
 
     # internal namespace
     _MULTIPLETAVERAGING = 'multipletAveraging'
+
+    _ignoreNewApiObjectCallback = True
 
     #=========================================================================================
     # CCPN properties
@@ -220,9 +222,13 @@ def _newMultipletList(self: Spectrum, title: str = None, comment: str = None,
 
     apiDataSource = self._apiDataSource
     apiMultipletList = apiDataSource.newMultipletList(**dd)
-    result = self._project._data2Obj.get(apiMultipletList)
-    if result is None:
+
+    if (result := MultipletList._newInstanceFromApiData(apiObj=apiMultipletList)) is None:
         raise RuntimeError('Unable to generate new MultipletList item')
+
+    # result = self._project._data2Obj.get(apiMultipletList)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new MultipletList item')
 
     # set non-api attributes
     if meritColour is not None:

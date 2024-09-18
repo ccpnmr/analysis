@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:25 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:15 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -74,6 +74,8 @@ class Peak(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.Peak._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
 
     # Internal. Used as temporary holder during time-consuming and recursive peak routines.
     _tempAssignment = 0
@@ -1407,9 +1409,12 @@ def _newPeak(self: PeakList, *, height: float = None, volume: float = None,
                                   heightError=heightError, volumeError=volumeError,
                                   figOfMerit=figureOfMerit, clusterId=clusterId,
                                   annotation=annotation, details=comment)
-    result = self._project._data2Obj.get(apiPeak)
-    if result is None:
+    if (result := Peak._newInstanceFromApiData(apiObj=apiPeak)) is None:
         raise RuntimeError('Unable to generate new Peak item')
+
+    # result = self._project._data2Obj.get(apiPeak)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Peak item')
 
     apiPeakDims = apiPeak.sortedPeakDims()
     if ppmPositions:
@@ -1473,9 +1478,13 @@ def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, heigh
 
     apiPeakList = self._apiPeakList
     apiPeak = apiPeakList.newPeak()
-    result = self._project._data2Obj.get(apiPeak)
-    if result is None:
+
+    if (result := Peak._newInstanceFromApiData(apiObj=apiPeak)) is None:
         raise RuntimeError('Unable to generate new Peak item')
+
+    # result = self._project._data2Obj.get(apiPeak)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Peak item')
 
     apiDataSource = self.spectrum._apiDataSource
     apiDataDims = apiDataSource.sortedDataDims()

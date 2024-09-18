@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:46 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:15 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -183,6 +183,8 @@ class Model(AbstractWrapperObject):
     # Sentinel, to check if modelData view object has been created
     _modelData = None
 
+    _ignoreNewApiObjectCallback = True
+
     # CCPN properties
     @property
     def _apiModel(self) -> ApiModel:
@@ -286,9 +288,11 @@ def _newModel(self: StructureEnsemble, label: str = None, comment: str = None) -
     structureEnsemble = self._wrappedData
 
     newApiModel = structureEnsemble.newModel(name=label, details=comment)
-    result = self._project._data2Obj.get(newApiModel)
-    if result is None:
+    if (result := Model._newInstanceFromApiData(apiObj=newApiModel, project=self._project)) is None:
         raise RuntimeError('Unable to generate new Model item')
+    # result = self._project._data2Obj.get(newApiModel)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Model item')
 
     return result
 

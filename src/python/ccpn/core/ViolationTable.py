@@ -77,6 +77,8 @@ class ViolationTable(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiViolationTable._metaclass.qualifiedName()
 
+    _ignoreNewApiObjectCallback = True
+
     # CCPN properties
     @property
     def _apiViolationTable(self) -> ApiViolationTable:
@@ -349,10 +351,14 @@ def _newViolationTable(self: StructureData, name: str = None, data: Optional[Vio
     apiParent = self._wrappedData
 
     apiViolationTable = apiParent.newViolationTable(name=name, details=comment)
-    result = self._project._data2Obj.get(apiViolationTable)
-
-    if result is None:
+    #TODO DT test
+    if (result := ViolationTable._newInstanceFromApiData(apiObj=apiViolationTable, project=self._project)) is None:
         raise RuntimeError('Unable to generate new ViolationTable item')
+
+    # result = self._project._data2Obj.get(apiViolationTable)
+    #
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new ViolationTable item')
 
     # set the data and back-link
     result._wrappedData.data = data

@@ -65,6 +65,8 @@ class StructureData(AbstractWrapperObject):
     _MoleculeFilePath = '_MoleculeFilePath'  # old
     _MOLECULEFILEPATH = 'moleculeFilePath'  # current
 
+    _ignoreNewApiObjectCallback = True
+
     #=========================================================================================
     # CCPN properties
     #=========================================================================================
@@ -552,10 +554,14 @@ def _newStructureData(self: Project, name: str = None, title: str = None, progra
                                                                   creationDate=creationDate,
                                                                   uuid=uuid,
                                                                   details=comment)
-    result = self._data2Obj.get(apiNmrConstraintStore)
 
-    if result is None:
+    if (result := StructureData._newInstanceFromApiData(apiObj=apiNmrConstraintStore, project=self)) is None:
         raise RuntimeError('Unable to generate new StructureData item')
+
+    # result = self._data2Obj.get(apiNmrConstraintStore)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new StructureData item')
+
     if moleculeFilePath:
         result.moleculeFilePath = moleculeFilePath
     return result

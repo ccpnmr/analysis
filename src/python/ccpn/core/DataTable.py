@@ -74,6 +74,8 @@ class DataTable(AbstractWrapperObject):
     #: List of child classes.
     _childClasses = []
 
+    _ignoreNewApiObjectCallback = True
+
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiDataTable._metaclass.qualifiedName()
 
@@ -323,9 +325,13 @@ def _newDataTable(self: Project, name: str = None, data: Optional[TableFrame] = 
     apiParent = self._wrappedData
 
     apiDataTable = apiParent.newDataTable(name=name, details=comment)
-    result = self._project._data2Obj.get(apiDataTable)
-    if result is None:
+
+    if (result := DataTable._newInstanceFromApiData(apiObj=apiDataTable, project=self)) is None:
         raise RuntimeError('Unable to generate new DataTable item')
+
+    # result = self._project._data2Obj.get(apiDataTable)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new DataTable item')
 
     # set the data and back-link
     result._wrappedData.data = data

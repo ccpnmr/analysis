@@ -80,6 +80,8 @@ class SpectrumDisplay(AbstractWrapperObject):
     _ISOTOPECODES_KEY = '_isotopeCodes'
     _DIMENSIONTYPES_KEY = '_dimensionTypes'
 
+    # _ignoreNewApiObjectCallback = True
+
     INTENSITY = 'intensity'  # used for 1D intensity (Y) axis
 
     #-----------------------------------------------------------------------------------------
@@ -833,8 +835,12 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
     # Create Boundstrip/Nostrip display and first strip
     apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
-    if (display := project._data2Obj.get(apiSpectrumDisplay)) is None:
+
+    if (display := SpectrumDisplay._newInstanceFromApiData(apiObj=apiSpectrumDisplay, project=project)) is None:
         raise RuntimeError('Unable to generate new SpectrumDisplay')
+
+    # if (display := project._data2Obj.get(apiSpectrumDisplay)) is None:
+    #     raise RuntimeError('Unable to generate new SpectrumDisplay')
 
     # may need to set other values here, guarantees before strip generation;
     # however, do this without any callbacks, as various objects have set CHANGE, CREATE notifiers

@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-21 16:17:11 +0000 (Thu, March 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:15 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -59,6 +59,8 @@ class Restraint(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = NmrConstraint.AbstractConstraint._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
 
     #=========================================================================================
     # CCPN properties
@@ -355,9 +357,15 @@ def _newRestraint(self: RestraintTable, figureOfMerit: float = None, comment: st
             dd['peaks'] = apiPeaks
 
     apiRestraint = self._wrappedData.newGenericConstraint(**dd)
-    result = self._project._data2Obj.get(apiRestraint)
-    if result is None:
+
+    #TODO DT test
+
+    if (result := Restraint._newInstanceFromApiData(apiObj=apiRestraint, project=self._project)) is None:
         raise RuntimeError('Unable to generate new Restraint item')
+
+    # result = self._project._data2Obj.get(apiRestraint)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Restraint item')
 
     return result
 

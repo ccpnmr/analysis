@@ -3,9 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:05 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-05-13 17:02:16 +0100 (Mon, May 13, 2024) $"
+__version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -63,6 +63,8 @@ class _PeakCluster(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = apiPeakCluster._metaclass.qualifiedName()
+    # TODO DT: test
+    _ignoreNewApiObjectCallback = True
 
     # CCPN properties
     @property
@@ -196,9 +198,12 @@ def _newPeakCluster(self: Project, peaks: Sequence[Union['Peak', str]] = None, a
         apiPeakCluster = apiParent.newPeakCluster(clusterType='multiplet',
                                                   annotation=annotation)
 
-    result = self._project._data2Obj.get(apiPeakCluster)
-    if result is None:
+    if (result := _PeakCluster._newInstanceFromApiData(apiObj=apiPeakCluster, project=self._project)) is None:
         raise RuntimeError('Unable to generate new _PeakCluster item')
+
+    # result = self._project._data2Obj.get(apiPeakCluster)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new _PeakCluster item')
 
     return result
 

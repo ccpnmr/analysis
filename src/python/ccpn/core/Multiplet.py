@@ -148,6 +148,8 @@ class Multiplet(AbstractWrapperObject):
     # the attribute name used by current
     _currentAttributeName = 'multiplets'
 
+    _ignoreNewApiObjectCallback = True
+
     # CCPN properties
     @property
     def _apiMultiplet(self) -> ApiMultiplet:
@@ -826,9 +828,11 @@ def _newAPIMultiplet(self: MultipletList,
 
     apiParent = self._apiMultipletList
     apiMultiplet = apiParent.newMultiplet(multipletType='multiplet', **dd)
-    result = self._project._data2Obj.get(apiMultiplet)
-    if result is None:
+    if (result := Multiplet._newInstanceFromApiData(apiObj=apiMultiplet)) is None:
         raise RuntimeError('Unable to generate new Multiplet item')
+    # result = self._project._data2Obj.get(apiMultiplet)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new Multiplet item')
 
     return result
 

@@ -69,6 +69,8 @@ class RestraintTable(AbstractWrapperObject):
     #TODO: this needs to be explicit here
     restraintTypes = tuple(coreConstants.constraintListType2ItemLength.keys())
 
+    _ignoreNewApiObjectCallback = True
+
     def __init__(self, project, wrappedData):
 
         # NB The name will only be unique within the StructureData.
@@ -450,9 +452,12 @@ def _newRestraintTable(self: StructureData, restraintType, name: str = None, ori
                                                      tensorChainCode=tensorChainCode,
                                                      tensorSequenceCode=tensorSequenceCode,
                                                      tensorResidueType=tensorResidueType)
-    result = self._project._data2Obj.get(obj)
-    if result is None:
+    # TODO DT test
+    if (result := RestraintTable._newInstanceFromApiData(apiObj=obj, project=self._project)) is None:
         raise RuntimeError('Unable to generate new RestraintTable item')
+    # result = self._project._data2Obj.get(obj)
+    # if result is None:
+    #     raise RuntimeError('Unable to generate new RestraintTable item')
 
     kwargs.pop('serial', None)
     for k, v in kwargs.items():

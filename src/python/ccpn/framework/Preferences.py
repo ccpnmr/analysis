@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 16:42:21 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-09-18 12:03:12 +0100 (Wed, September 18, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -74,7 +74,7 @@ class Preferences(AttrDict):
     def __init__(self, application, userPreferences=True):
         super().__init__()
 
-        self._applicationVersion = str(application.applicationVersion)
+        # self._applicationVersion = str(application.applicationVersion) # removed to fix order of operations
         self._lastPath = None
 
         if not userPreferencesDirectory.exists():
@@ -86,6 +86,8 @@ class Preferences(AttrDict):
         if userPreferences:
             self._getUserPreferences()
 
+        # needs to be after user prefs are loaded as this is always true
+        self._applicationVersion = str(application.applicationVersion)
         self._overrideDefaults(self)
 
     def _readPreferencesFile(self, path):
@@ -116,6 +118,7 @@ class Preferences(AttrDict):
         """Read the user preferences file, updating the current values
         """
         if _prefs := self._readPreferencesFile(userPreferencesPath):
+            _prefs["_lastPath"] = self._lastPath  # forces correct path
             self._recursiveUpdate(theDict=self, updateDict=_prefs)
         # just some patches to the data
         self.recentMacros = uniquify(self.recentMacros)

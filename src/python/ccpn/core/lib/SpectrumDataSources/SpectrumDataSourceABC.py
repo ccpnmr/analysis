@@ -94,7 +94,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-30 16:39:18 +0100 (Tue, July 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-18 14:14:27 +0100 (Wed, September 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2377,7 +2377,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         # complete; hence some explicit slicing
         _ndims = self.dimensionCount
         if _ndims == 0:
-            raise RuntimeError('Cannot make inforString: Number of dimensions = 0')
+            raise RuntimeError('Cannot make infoString: Number of dimensions = 0')
         _dims = " x ".join(["%s (%s)" % (c, p) for p,c in zip(self.pointCounts[0:_ndims], self.axisCodes[0:_ndims])])
         txt = f'{self.dimensionCount}D - {_dims}'
         return txt

@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 15:44:52 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-18 14:14:27 +0100 (Wed, September 18, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -720,10 +720,10 @@ class ValidateSpectraPopup(CcpnDialog):
     Class to generate a popup to validate the paths of the (selected) spectra.
     """
 
-    def __init__(self, parent=None, mainWindow=None, spectra=None,
+    def __init__(self, mainWindow=None, spectra=None,
                  title='Validate Spectra Paths', defaultSelected=ALL_SPECTRA, **kwds):
 
-        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
+        super().__init__(parent=mainWindow._widget, setLayout=True, windowTitle=title, **kwds)
         self.setMinimumHeight(600)
         self.setMinimumWidth(1000)
 

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:47 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -38,7 +38,7 @@ from ccpn.core.StructureData import StructureData
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
 
-# TODO TEST new api object.
+
 class Data(AbstractWrapperObject):
     """Object storing links to the data structures (PeakLists, Spectra, StructureEnsembles etc.)
     connected to a given StructureData, and their associated calculation parameters."""
@@ -228,13 +228,8 @@ def _newData(self: StructureData, name: str, attachedObjectPid: str = None,
                     % (attachedObject, attachedObjectPid))
 
     apiData = self._wrappedData.newData(name=name, attachedObjectPid=attachedObjectPid)
-
     if (result := Data._newInstanceFromApiData(apiObj=apiData)) is None:
         raise RuntimeError('Unable to generate new Data item')
-
-    # result = project._data2Obj.get(apiData)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new Data item')
 
     return result
 

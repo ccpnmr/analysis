@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-23 13:55:40 +0100 (Tue, July 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:47 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -111,6 +111,7 @@ _ChemicalShiftListFrame.register()
 
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
 from ccpn.core._implementation.updates.update_3_0_4 import _updateChemicalShiftList_3_0_4_to_3_1_0
+
 
 # define the default chemical-shift-list name
 DEFAULT_CHEMICALSHIFTLIST = 'default'
@@ -530,8 +531,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             return self._data.loc[uniqueId]
         except Exception as es:
-            raise ValueError(
-                f'{self.className}._getByUniqueId: error getting row, uniqueId {uniqueId} in {self}  -  {es}') from None
+            raise ValueError(f'{self.className}._getByUniqueId: error getting row, uniqueId '
+                             f'{uniqueId} in {self}  -  {es}') from None
 
     def _getAttribute(self, uniqueId, name, attribType):
         """Get the named attribute from the chemicalShift with supplied uniqueId
@@ -543,8 +544,8 @@ class ChemicalShiftList(AbstractWrapperObject):
             _val = self._data.at[uniqueId, name]
             return None if (_val is None or (_val != _val)) else attribType(_val)
         except Exception as es:
-            raise ValueError(
-                f'{self.className}._getAttribute: error getting attribute {name} in {self}  -  {es}') from None
+            raise ValueError(f'{self.className}._getAttribute: error getting attribute '
+                             f'{name} in {self}  -  {es}') from None
 
     def _setAttribute(self, uniqueId, name, value):
         """Set the attribute of the chemicalShift with the supplied uniqueId
@@ -552,8 +553,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             self._data.at[uniqueId, name] = value
         except Exception as es:
-            raise ValueError(
-                f'{self.className}._setAttribute: error setting attribute {name} in {self}  -  {es}') from None
+            raise ValueError(f'{self.className}._setAttribute: error setting attribute '
+                             f'{name} in {self}  -  {es}') from None
 
     def _getAttributes(self, uniqueId, startName, endName, attribTypes):
         """Get the named attributes from the chemicalShift with supplied uniqueId
@@ -567,8 +568,8 @@ class ChemicalShiftList(AbstractWrapperObject):
                          zip(_val, attribTypes))
 
         except Exception as es:
-            raise ValueError(
-                f'{self.className}._getAttributes: error getting attributes {startName}|{endName} in {self}  -  {es}') from None
+            raise ValueError(f'{self.className}._getAttributes: error getting attributes '
+                             f'{startName}|{endName} in {self}  -  {es}') from None
 
     def _setAttributes(self, uniqueId, startName, endName, value):
         """Set the attributes of the chemicalShift with the supplied uniqueId
@@ -576,8 +577,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             self._data.loc[uniqueId, startName:endName] = value
         except Exception as es:
-            raise ValueError(
-                f'{self.className}._setAttributes: error setting attributes {startName}|{endName} in {self}  -  {es}') from None
+            raise ValueError(f'{self.className}._setAttributes: error setting attributes '
+                             f'{startName}|{endName} in {self}  -  {es}') from None
 
     def _undoRedoShifts(self, shifts):
         """update the shifts after undo/redo
@@ -884,8 +885,8 @@ class ChemicalShiftList(AbstractWrapperObject):
             # raise an error if there are any assigned peaks
             _val = _shs[0]
             if _val.assignedPeaks:
-                raise ValueError(
-                    f'{self.className}.deleteChemicalShift: cannot delete chemicalShift with assigned peaks')
+                raise ValueError(f'{self.className}.deleteChemicalShift: '
+                                 f'cannot delete chemicalShift with assigned peaks')
 
             self._deleteChemicalShiftObject(rows)
 
@@ -992,7 +993,6 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
           'details': comment}
 
     apiChemicalShiftList = self._wrappedData.newShiftList(**dd)
-    # _ignoreNewApiObjectCallback is True, so we explicitly create the V3 object
     if (result := ChemicalShiftList._newInstanceFromApiData(apiChemicalShiftList, project=self)) is None:
         raise RuntimeError('Unable to generate new ChemicalShiftList')
 

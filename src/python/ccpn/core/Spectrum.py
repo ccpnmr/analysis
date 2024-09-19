@@ -54,9 +54,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-30 15:31:16 +0100 (Tue, July 30, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -3335,7 +3335,7 @@ class Spectrum(AbstractWrapperObject):
                                              path=path,
                                              dataFormat=Hdf5SpectrumDataSource.dataFormat,
                                              tag='fromPseudo')
-                    _spectra.append( (sp, seriesValue) )
+                    _spectra.append((sp, seriesValue))
 
                     seriesValue += seriesIncrement
 
@@ -3776,11 +3776,9 @@ class Spectrum(AbstractWrapperObject):
         """Delete Spectrum
         """
         with undoBlock():
-
             self._finaliseAction('delete')
 
             with undoStackBlocking() as addUndoItem:
-
                 self._deleteSpectrumMetaData()
                 addUndoItem(undo=self._saveSpectrumMetaData,
                             redo=self._deleteSpectrumMetaData
@@ -3821,7 +3819,6 @@ class Spectrum(AbstractWrapperObject):
 
             # delete the _wrappedData
             self._delete()
-
 
     # def _deleteChild(self, child):
     #     """Delete child object
@@ -4128,9 +4125,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
                                                 dataType='processed'
                                                 )
     # Done with api generation; Create the Spectrum object
-    spectrum = Spectrum._newInstanceFromApiData(apiObj=apiDataSource, project=project)
-
-    if spectrum is None:
+    if (spectrum := Spectrum._newInstanceFromApiData(apiObj=apiDataSource, project=project)) is None:
         raise RuntimeError("Something went wrong creating a new Spectrum instance!")
     spectrum._apiExperiment = apiExperiment
 

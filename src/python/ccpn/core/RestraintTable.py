@@ -4,8 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Morgan Hayward, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Daniel Thompson",
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -452,12 +452,8 @@ def _newRestraintTable(self: StructureData, restraintType, name: str = None, ori
                                                      tensorChainCode=tensorChainCode,
                                                      tensorSequenceCode=tensorSequenceCode,
                                                      tensorResidueType=tensorResidueType)
-    # TODO DT test
     if (result := RestraintTable._newInstanceFromApiData(apiObj=obj, project=self._project)) is None:
         raise RuntimeError('Unable to generate new RestraintTable item')
-    # result = self._project._data2Obj.get(obj)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new RestraintTable item')
 
     kwargs.pop('serial', None)
     for k, v in kwargs.items():
@@ -467,11 +463,3 @@ def _newRestraintTable(self: StructureData, restraintType, name: str = None, ori
             self.project._logger.warning("Could not set %s to %s" % (k, v))
 
     return result
-
-# # Notifiers:
-# for clazz in ApiAbstractConstraintList._metaclass.getNonAbstractSubtypes():
-#     className = clazz.qualifiedName()
-#     Project._apiNotifiers.extend(
-#             (('_finaliseApiRename', {}, className, 'setName'),
-#              )
-#             )

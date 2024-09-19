@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:47 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -201,25 +201,16 @@ def _newComplex(self: Project, name: str = None, chains=(), comment: str = None)
         getByPid = self._project.getByPid
         chains = [getByPid(x) if isinstance(x, str) else x for x in chains]
 
-    # result = self._data2Obj.get(self._wrappedData.molSystem.newChainGroup(name=name))
-    # TODO DT test
     apiComplex = self._wrappedData.molSystem.newChainGroup(name=name)
-    result = Complex._newInstanceFromApiData(apiObj=apiComplex, project=self)
-    if result is None:
+    if (result := Complex._newInstanceFromApiData(apiObj=apiComplex, project=self)) is None:
         raise RuntimeError('Unable to generate new Complex item')
 
     if comment:
         result.comment = comment
-
     if chains:
         result.chains = chains
 
     return result
-
-
-#EJB 20181205 moved to Project
-# Project.newComplex = _newComplex
-# del _newComplex
 
 
 # reverse link Chain.complexes

@@ -4,8 +4,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-13 17:02:16 +0100 (Mon, May 13, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -325,6 +326,7 @@ class RestraintContribution(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
@@ -359,21 +361,13 @@ def _newRestraintContribution(self: Restraint, targetValue: float = None, error:
                lowerLimit=lowerLimit, additionalUpperLimit=additionalUpperLimit,
                additionalLowerLimit=additionalLowerLimit, scale=scale,
                isDistanceDependent=isDistanceDependent, combinationId=combinationId)
-    # TODO DT test
     if (result := RestraintContribution._newInstanceFromApiData(apiObj=obj, project=self._project)) is None:
         raise RuntimeError('Unable to generate new RestraintContribution item')
-    # result = self._project._data2Obj.get(obj)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new RestraintContribution item')
 
     result.restraintItems = restraintItems
 
     return result
 
-
-#EJB 20181206: moved to Restraint
-# Restraint.newRestraintContribution = _newRestraintContribution
-# del _newRestraintContribution
 
 # Notifiers:
 # Change RestraintContribution when Api RestraintItems are created or deleted
@@ -392,12 +386,3 @@ def _fixedResonance2AtomId(fixedResonance: NmrConstraint.FixedResonance) -> str:
     """Utility function - get AtomId from FixedResonance """
     tags = ('chainCode', 'sequenceCode', 'residueType', 'name')
     return Pid.createId(*(getattr(fixedResonance, tag) for tag in tags))
-
-#EJB 20181122: moved to _finaliseAction
-# # Change constraint when ConstraintContribution is creted, deleted, or changed
-# RestraintContribution._setupCoreNotifier('create', AbstractWrapperObject._finaliseRelatedObject,
-#                                          {'pathToObject': 'restraint', 'action': 'change'})
-# RestraintContribution._setupCoreNotifier('delete', AbstractWrapperObject._finaliseRelatedObject,
-#                                          {'pathToObject': 'restraint', 'action': 'change'})
-# RestraintContribution._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
-#                                          {'pathToObject': 'restraint', 'action': 'change'})

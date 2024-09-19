@@ -4,8 +4,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-13 17:02:16 +0100 (Mon, May 13, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:49 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -169,6 +170,7 @@ class _PeakCluster(AbstractWrapperObject):
             for pk in pks:
                 self._wrappedData.removePeak(pk._wrappedData)
 
+
 #===========================================================================================
 # new<Object> and other methods
 # Call appropriate routines in their respective locations
@@ -201,12 +203,4 @@ def _newPeakCluster(self: Project, peaks: Sequence[Union['Peak', str]] = None, a
     if (result := _PeakCluster._newInstanceFromApiData(apiObj=apiPeakCluster, project=self._project)) is None:
         raise RuntimeError('Unable to generate new _PeakCluster item')
 
-    # result = self._project._data2Obj.get(apiPeakCluster)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new _PeakCluster item')
-
     return result
-
-#EJB 20181205: moved to Project
-# PeakCluster._parentClass.newPeakCluster = _newPeakCluster
-# del _newPeakCluster

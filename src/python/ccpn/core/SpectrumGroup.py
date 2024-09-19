@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-17 17:03:21 +0100 (Wed, July 17, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -58,9 +58,9 @@ class SeriesTypes(DataEnum):
         :return:  dict
         """
         dd = {
-            SeriesTypes.FLOAT.description : float,
+            SeriesTypes.FLOAT.description  : float,
             SeriesTypes.INTEGER.description: int,
-            SeriesTypes.STRING.description: str,
+            SeriesTypes.STRING.description : str,
             }
         return dd
 
@@ -259,7 +259,6 @@ class SpectrumGroup(AbstractWrapperObject):
             for spectrum in self.spectra:
                 spectrum.deleteAllPeakLists()
 
-
     @property
     def series(self) -> Tuple[Any, ...]:
         """Returns a tuple of series items for the attached spectra
@@ -420,7 +419,8 @@ class SpectrumGroup(AbstractWrapperObject):
                         targetPeakList.symbolColour = spectrum.positiveContourColour
                     if pickPeaks:
                         # **pickerKwargs
-                        ppmRegions = dict(zip(spectrum.axisCodes, spectrum.spectrumLimits))  #could be restricted picking
+                        ppmRegions = dict(
+                                zip(spectrum.axisCodes, spectrum.spectrumLimits))  #could be restricted picking
                         spectrum.pickPeaks(peakList=targetPeakList, positiveThreshold=spectrum.positiveContourBase,
                                            **ppmRegions)
                     peakLists.append(targetPeakList)
@@ -428,7 +428,8 @@ class SpectrumGroup(AbstractWrapperObject):
 
     def copyAndCollectPeaksInSeries(self, sourcePeakList, refit=False, useSliceColour=True,
                                     newTargetPeakList=False, topCollectionName=None,
-                                    progressHandlerTitle='Busy...', progressHandlerText='Copying and refitting peaks', ):
+                                    progressHandlerTitle='Busy...',
+                                    progressHandlerText='Copying and refitting peaks', ):
         """
         Given a source PeakList with peaks, copy all peaks in-place to each spectrum of the series.
         Peaks are then grouped together in new collections.
@@ -461,7 +462,8 @@ class SpectrumGroup(AbstractWrapperObject):
                         progress.setValue(i)
                         for peakList in peakLists:
                             newPeak = peak.copyTo(peakList)
-                            collectionName = _getCollectionNameForPeak(newPeak)  #not from Peak to avoid copying wrong assignments.
+                            collectionName = _getCollectionNameForPeak(
+                                    newPeak)  #not from Peak to avoid copying wrong assignments.
                             newPeak.height = newPeak.spectrum.getHeight(newPeak.position)
                             if refit:
                                 newPeak.fit(fitMethod=fitMethod, keepPosition=True)
@@ -512,10 +514,10 @@ class SpectrumGroup(AbstractWrapperObject):
                                                            useSliceColour=useSliceColour)
                 ## do the matches
                 peakMatcher = PeakMatcher(sourcePeakList=sourcePeakList,
-                                                    targetPeakLists=peakLists,
-                                                    spectrumGroup=self,
-                                                    cloneAssignment=copyAssignment,
-                                                    ** kwargs)
+                                          targetPeakLists=peakLists,
+                                          spectrumGroup=self,
+                                          cloneAssignment=copyAssignment,
+                                          **kwargs)
 
                 collectionPeaks = peakMatcher.matchPeaks()
                 topCollection = _makeCollectionsOfPeaks(self.project, collectionPeaks, topCollectionName)
@@ -583,8 +585,12 @@ class SpectrumGroup(AbstractWrapperObject):
         result = super()._restoreObject(project, apiObj)
 
         for namespace, param, newVar in [(SPECTRUMGROUP, SPECTRUMGROUPCOMMENT, cls._COMMENT),
-                                         (SPECTRUMGROUP, SPECTRUMGROUPPOSITIVECONTOURCOLOUR, cls._POSITIVECONTOURCOLOUR),
-                                         (SPECTRUMGROUP, SPECTRUMGROUPNEGATIVECONTOURCOLOUR, cls._NEGATIVECONTOURCOLOUR),
+                                         (
+                                                 SPECTRUMGROUP, SPECTRUMGROUPPOSITIVECONTOURCOLOUR,
+                                                 cls._POSITIVECONTOURCOLOUR),
+                                         (
+                                                 SPECTRUMGROUP, SPECTRUMGROUPNEGATIVECONTOURCOLOUR,
+                                                 cls._NEGATIVECONTOURCOLOUR),
                                          (SPECTRUMGROUP, SPECTRUMGROUPSLICECOLOUR, cls._SLICECOLOUR),
                                          (SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESUNITS, cls._SERIESUNITS),
                                          (SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESTYPE, cls._SERIESTYPE),
@@ -635,13 +641,8 @@ def _newSpectrumGroup(self: Project, name: str, spectra=(), **kwds) -> SpectrumG
     if (result := SpectrumGroup._newInstanceFromApiData(apiObj=apiSpectrumGroup, project=self)) is None:
         raise RuntimeError('Unable to generate new SpectrumGroup item')
 
-    # result = self._data2Obj.get(apiSpectrumGroup)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new SpectrumGroup item')
-
     if spectra:
         result.spectra = spectra
-
     for param, value in kwds.items():
         if hasattr(result, param):
             setattr(result, param, value)
@@ -650,11 +651,6 @@ def _newSpectrumGroup(self: Project, name: str, spectra=(), **kwds) -> SpectrumG
                                 (result, param)
                                 )
     return result
-
-
-#EJB 2181206: moved to Project
-# Project.newSpectrumGroup = _newSpectrumGroup
-# del _newSpectrumGroup
 
 
 # reverse link Spectrum.spectrumGroups
@@ -667,7 +663,6 @@ def setter(self: Spectrum, value):
     self._wrappedData.spectrumGroups = [x._wrappedData for x in value]
 
 
-#
 Spectrum.spectrumGroups = property(getter, setter, None,
                                    "SpectrumGroups that contain Spectrum")
 del getter

@@ -5,8 +5,9 @@ Module documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-13 17:02:14 +0100 (Mon, May 13, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:47 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -180,6 +181,7 @@ class CalculationStep(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
@@ -190,7 +192,7 @@ def getter(self: StructureData) -> List[CalculationStep]:
 
 
 StructureData.outputCalculationSteps = property(getter, None, None,
-                                          "ccpn.CalculationSteps (from other StructureData) that used StructureData as input")
+                                                "ccpn.CalculationSteps (from other StructureData) that used StructureData as input")
 
 
 def getter(self: StructureData) -> List[CalculationStep]:
@@ -199,9 +201,9 @@ def getter(self: StructureData) -> List[CalculationStep]:
 
 
 StructureData.inputCalculationSteps = property(getter, None, None,
-                                         "ccpn.CalculationSteps (from this StructureData) that yielded StructureData as output"
-                                         "\nNB there can be more than one, because the StructureData may result from\n"
-                                         "multiple calculations that do not have intermediate StructureDatas stored")
+                                               "ccpn.CalculationSteps (from this StructureData) that yielded StructureData as output"
+                                               "\nNB there can be more than one, because the StructureData may result from\n"
+                                               "multiple calculations that do not have intermediate StructureDatas stored")
 del getter
 
 
@@ -212,7 +214,8 @@ del getter
 def _newCalculationStep(self: StructureData, programName: str = None, programVersion: str = None,
                         scriptName: str = None, script: str = None,
                         inputDataUuid: str = None, outputDataUuid: str = None,
-                        inputStructureData: StructureData = None, outputStructureData: StructureData = None) -> CalculationStep:
+                        inputStructureData: StructureData = None,
+                        outputStructureData: StructureData = None) -> CalculationStep:
     """Create new CalculationStep within StructureData.
 
     See the CalculationStep class for details.
@@ -252,9 +255,5 @@ def _newCalculationStep(self: StructureData, programName: str = None, programVer
 
     if (result := CalculationStep._newInstanceFromApiData(apiObj=obj, project=project)) is None:
         raise RuntimeError('Unable to generate new CalculationStep item')
-
-    # result = project._data2Obj.get(obj)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new CalculationStep item')
 
     return result

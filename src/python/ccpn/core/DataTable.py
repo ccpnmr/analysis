@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:47 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -129,7 +129,8 @@ class DataTable(AbstractWrapperObject):
                 raise RuntimeError(f'Data must be of type {TableFrame}, pd.DataFrame or None')
 
             value = TableFrame(value)
-            getLogger().debug(f'Data must be of type {TableFrame}. The value pd.DataFrame was converted to {TableFrame}.')
+            getLogger().debug(f'Data must be of type {TableFrame}.'
+                              f' The value pd.DataFrame was converted to {TableFrame}.')
 
         self._wrappedData.data = TableFrame() if value is None else value
 
@@ -161,7 +162,8 @@ class DataTable(AbstractWrapperObject):
 
         def _checkMetaTypes(value):
             if isinstance(value, dict):
-                return all(_checkMetaTypes(val) for val in value.keys()) and all(_checkMetaTypes(val) for val in value.values())
+                return (all(_checkMetaTypes(val) for val in value.keys()) and
+                        all(_checkMetaTypes(val) for val in value.values()))
             elif isinstance(value, list):
                 return all(_checkMetaTypes(val) for val in value)
             else:
@@ -263,15 +265,14 @@ class DataTable(AbstractWrapperObject):
             result._wrappedData.data = TableFrame()
 
         elif not isinstance(_data, TableFrame):
-
             if isinstance(_data, pd.DataFrame):
                 # make sure that data is the correct type
                 getLogger().debug(f'Restoring object - converting to {TableFrame}')
                 result._wrappedData.data = TableFrame(_data)
-
             else:
                 # make sure that data is the correct type
-                getLogger().debug(f'Failed restoring object {result.pid}: data not of type {TableFrame} - resetting to an empty table')
+                getLogger().debug(f'Failed restoring object {result.pid}: data not of type {TableFrame}'
+                                  f' - resetting to an empty table')
                 result._wrappedData.data = TableFrame()
 
         return result
@@ -307,31 +308,22 @@ def _newDataTable(self: Project, name: str = None, data: Optional[TableFrame] = 
     """
     if isinstance(data, TableFrame):
         pass
-
     elif data is None:
         # create new, empty TableFrame
         data = TableFrame()
-
     elif isinstance(data, pd.DataFrame):
         # convert type from panda's dataFrame
         data = TableFrame(data)
         getLogger().debug(f'The data of type pd.DataFrame was converted to {TableFrame}.')
-
     else:
-        raise ValueError(f'Unable to generate new DataTable: data not of type {TableFrame}, pd.DataFrame or None')
+        raise ValueError(f'Unable to generate new DataTable:'
+                         f' data not of type {TableFrame}, pd.DataFrame or None')
 
     name = DataTable._uniqueName(parent=self, name=name)
-
     apiParent = self._wrappedData
-
     apiDataTable = apiParent.newDataTable(name=name, details=comment)
-
     if (result := DataTable._newInstanceFromApiData(apiObj=apiDataTable, project=self)) is None:
         raise RuntimeError('Unable to generate new DataTable item')
-
-    # result = self._project._data2Obj.get(apiDataTable)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new DataTable item')
 
     # set the data and back-link
     result._wrappedData.data = data

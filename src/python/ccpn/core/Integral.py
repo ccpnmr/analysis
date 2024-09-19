@@ -5,8 +5,9 @@ Module documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-13 17:02:15 +0100 (Mon, May 13, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:47 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -521,40 +522,17 @@ def _newIntegral(self: IntegralList,
 
     apiParent = self._apiIntegralList
     apiIntegral = apiParent.newIntegral(**dd)
-
     if (result := Integral._newInstanceFromApiData(apiObj=apiIntegral)) is None:
         raise RuntimeError('Unable to generate new Integral item')
 
-    # result = self._project._data2Obj.get(apiIntegral)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new Integral item')
-
-    result.limits = limits  #needs to fire the first time for automatic calculation of the value
+    result.limits = limits  # needs to fire the first time for automatic calculation of the value
 
     return result
 
 
-# Integral._parentClass.newIntegral = _newIntegral
-# del _newIntegral
-
-# def _factoryFunction(project:Project, wrappedData:ApiIntegral) -> AbstractWrapperObject:
-#   """create Peak or Integral from API Peak"""
-#   if wrappedData.peakList.dataType == 'Peak':
-#     return Peak(project, wrappedData)
-#   elif wrappedData.peakList.dataType == 'Integral':
-#     return Integral(project, wrappedData)
-#   else:
-#     raise ValueError("API Peak object has illegal parent dataType: %s. Must be 'Peak' or 'Integral"
-#                      % wrappedData.dataType)
-#
-#
-# Integral._factoryFunction = staticmethod(_factoryFunction)
-# Peak._factoryFunction = staticmethod(_factoryFunction)
-
 # Additional Notifiers:
 # NB API level notifiers are defined in the Peak file for API Peaks
 # They will have the same effect for integrals
-
 Project._apiNotifiers.append(
         ('_notifyRelatedApiObject', {'pathToObject': 'peak.integral', 'action': 'change'},
          ApiPeakDim._metaclass.qualifiedName(), '')

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-22 15:20:30 +0100 (Wed, May 22, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1298,8 +1298,8 @@ class NmrResidue(AbstractWrapperObject):
             partialId = '%s.%s.' % (self._parent._id, sequenceCode.translate(Pid.remapSeparators))
             ll = self._project.getObjectsByPartialId(className=self.className, idStartsWith=partialId)
             if ll and ll != [self]:
-                raise ValueError(
-                    f'Cannot rename {self} to {self.nmrChain.id}.{sequenceCode}.{residueType or ""} - assignment already exists')
+                raise ValueError(f'Cannot rename {self} to {self.nmrChain.id}.{sequenceCode}.{residueType or ""}'
+                                 f' - assignment already exists')
 
         oldSequenceCode = apiResonanceGroup.sequenceCode
         oldResidueType = apiResonanceGroup.residueType
@@ -1437,85 +1437,6 @@ class NmrResidue(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-# GWV 20181122: Moved to Residue class
-# def getter(self:Residue) -> typing.Optional[NmrResidue]:
-#   try:
-#     return self._project.getNmrResidue(self._id)
-#   except:
-#     return None
-#
-# def setter(self:Residue, value:NmrResidue):
-#   oldValue = self.nmrResidue
-#   if oldValue is value:
-#     return
-#   elif oldValue is not None:
-#     oldValue.assignTo()
-#   #
-#   if value is not None:
-#     value.residue = self
-#
-# Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue is assigned")
-
-# GWV 20181122: Mover to Residue class
-# def getter(self:Residue) -> typing.Tuple[NmrResidue]:
-#   result = []
-#
-#   nmrChain = self.chain.nmrChain
-#   if nmrChain is not None:
-#     nmrResidue = self.nmrResidue
-#     if nmrResidue is not None:
-#       result = [nmrResidue]
-#
-#     for offset in set(x.relativeOffset for x in nmrChain.nmrResidues):
-#       if offset is not None:
-#         residue = self
-#         if offset > 0:
-#           for ii in range(offset):
-#             residue = residue.previousResidue
-#             if residue is None:
-#               break
-#         elif offset < 0:
-#           for ii in range(-offset):
-#             residue = residue.nextResidue
-#             if residue is None:
-#               break
-#         #
-#         if residue is not None:
-#           sequenceCode = '%s%+d' % (residue.sequenceCode, offset)
-#           ll = [x for x in nmrChain.nmrResidues if x.sequenceCode == sequenceCode]
-#           if ll:
-#             result.extend(ll)
-#
-#   #
-#   return tuple(sorted(result))
-# Residue.allNmrResidues = property(getter, None, None,
-#                                   "AllNmrResidues corresponding to Residue - E.g. (for MR:A.87)"
-#                                   " NmrResidues NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.")
-
-# def getter(self: NmrChain) -> typing.Tuple[NmrResidue]:
-#     if not self._wrappedData:
-#         return ()
-#
-#     result = list(self._project._data2Obj.get(x) for x in self._wrappedData.mainResonanceGroups)
-#     if not self.isConnected:
-#         result.sort()
-#     return tuple(result)
-#
-#
-# def setter(self: NmrChain, value):
-#     self._wrappedData.mainResonanceGroups = [x._wrappedData for x in value]
-#
-#
-# NmrChain.mainNmrResidues = property(getter, setter, None, """NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue
-#   (sequenceCode ending in '-1', '+1', etc.) For connected NmrChains in sequential order, otherwise sorted by assignment""")
-#
-# del getter
-# del setter
-
-
-#=========================================================================================
-
-
 @newObject(NmrResidue)
 def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, residueType: str = None,
                    comment: str = None) -> NmrResidue:
@@ -1580,13 +1501,8 @@ def _newNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None, 
     # Create ResonanceGroup
     dd['sequenceCode'] = sequenceCode
     apiResonanceGroup = nmrProject.newResonanceGroup(**dd)
-
     if (result := NmrResidue._newInstanceFromApiData(apiObj=apiResonanceGroup)) is None:
         raise RuntimeError('Unable to generate new NmrResidue item')
-
-    # result = self._project._data2Obj.get(apiResonanceGroup)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new NmrResidue item')
 
     if serial is not None:
         try:
@@ -1678,13 +1594,6 @@ def _fetchNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None
     return result
 
 
-# Connections to parents:
-
-#EJB 20181130: moved to nmrChain
-# NmrChain.newNmrResidue = _newNmrResidue
-# del _newNmrResidue
-# NmrChain.fetchNmrResidue = _fetchNmrResidue
-
 def _renameNmrResidue(self: Project, apiResonanceGroup: ApiResonanceGroup):
     """Reset pid for NmrResidue and all offset NmrResidues.
     """
@@ -1701,9 +1610,6 @@ def _renameNmrResidue(self: Project, apiResonanceGroup: ApiResonanceGroup):
         #     xx._finaliseAction('rename')
 
 
-# 20190501:ED haven't investigated this properly
-# but not tested fully - but moved the offsetNmrResidue._finaliseAction into nmrResidue._finaliseAction
-
 # Notifiers:
 #NBNB TBD We must make Resonance.ResonanceGroup 1..1 when we move beyond transition model
 # GWV 20230109: disabled notifiers for sequenceCode and residueType: changed only via rename
@@ -1713,14 +1619,6 @@ Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setDirectNmrCha
 Project._setupApiNotifier(_renameNmrResidue, ApiResonanceGroup, 'setAssignedResidue')
 del _renameNmrResidue
 
-
-# # Rename notifiers put in to ensure renaming of NmrAtoms:
-# className = ApiResonanceGroup._metaclass.qualifiedName()
-# Project._apiNotifiers.extend(
-#         (('_finaliseApiRename', {}, className, 'setResonances'),
-#          ('_finaliseApiRename', {}, className, 'addResonance'),
-#          )
-#         )
 
 def main():
     val = MoveToEnd.HEAD.value

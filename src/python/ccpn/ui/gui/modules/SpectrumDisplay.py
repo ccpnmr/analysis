@@ -5,8 +5,9 @@ This file contains the top-level SpectrumDisplay module code
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:52 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:49 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -69,8 +70,10 @@ class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):
         #  action name,        icon,                 tooltip,                                       active, callback
         ('addStrip', 'icons/plus', 'Duplicate the rightmost strip', True, GuiSpectrumDisplay.addStrip),
         ('removeStrip', 'icons/minus', 'Remove the current strip', True, GuiSpectrumDisplay.removeCurrentStrip),
-        ('increaseStripWidth', 'icons/range-expand', 'Increase the width of strips in display', True, GuiSpectrumDisplay.increaseStripSize),
-        ('decreaseStripWidth', 'icons/range-contract', 'Decrease the width of strips in display', True, GuiSpectrumDisplay.decreaseStripSize),
+        ('increaseStripWidth', 'icons/range-expand', 'Increase the width of strips in display', True,
+         GuiSpectrumDisplay.increaseStripSize),
+        ('decreaseStripWidth', 'icons/range-contract', 'Decrease the width of strips in display', True,
+         GuiSpectrumDisplay.decreaseStripSize),
         ('maximiseZoom', 'icons/zoom-full', 'Maximise Zoom (ZA)', True, GuiSpectrumDisplay._resetAllZooms),
 
         ('maximiseHeight', 'icons/zoom-best-fit-1d', 'Maximise Height', True, GuiSpectrumDisplay._resetYZooms),
@@ -113,16 +116,20 @@ class SpectrumDisplayNd(SpectrumDisplay, GuiSpectrumDisplay):
     _toolbarItems = [
         #  action name,         icon,                   tooltip,                                     active, callback
 
-        ('raiseBase', 'icons/contour-base-up', 'Raise Contour Base Level (Shift + Mouse Wheel)', True, GuiSpectrumDisplay._raiseContourBase),
-        ('lowerBase', 'icons/contour-base-down', 'Lower Contour Base Level (Shift + Mouse Wheel)', True, GuiSpectrumDisplay._lowerContourBase),
+        ('raiseBase', 'icons/contour-base-up', 'Raise Contour Base Level (Shift + Mouse Wheel)', True,
+         GuiSpectrumDisplay._raiseContourBase),
+        ('lowerBase', 'icons/contour-base-down', 'Lower Contour Base Level (Shift + Mouse Wheel)', True,
+         GuiSpectrumDisplay._lowerContourBase),
 
         # not needed now
         # ('increaseTraceScale', 'icons/tracescale-up', 'Increase scale of 1D traces in display (TU)', True, self.increaseTraceScale),
         # ('decreaseTraceScale', 'icons/tracescale-down', 'Decrease scale of 1D traces in display (TD)', True, self.decreaseTraceScale),
         ('addStrip', 'icons/plus', 'Duplicate the rightmost strip', True, GuiSpectrumDisplay.addStrip),
         ('removeStrip', 'icons/minus', 'Remove the current strip', True, GuiSpectrumDisplay.removeCurrentStrip),
-        ('increaseStripWidth', 'icons/range-expand', 'Increase the width of strips in display', True, GuiSpectrumDisplay.increaseStripSize),
-        ('decreaseStripWidth', 'icons/range-contract', 'Decrease the width of strips in display', True, GuiSpectrumDisplay.decreaseStripSize),
+        ('increaseStripWidth', 'icons/range-expand', 'Increase the width of strips in display', True,
+         GuiSpectrumDisplay.increaseStripSize),
+        ('decreaseStripWidth', 'icons/range-contract', 'Decrease the width of strips in display', True,
+         GuiSpectrumDisplay.decreaseStripSize),
         ('maximiseZoom', 'icons/zoom-full', 'Maximise Zoom (ZA)', True, GuiSpectrumDisplay._resetAllZooms),
         ('storeZoom', 'icons/zoom-store', 'Store Zoom (ZS)', True, GuiSpectrumDisplay._storeZoom),
         ('restoreZoom', 'icons/zoom-restore', 'Restore Zoom (ZR)', True, GuiSpectrumDisplay._restoreZoom),
@@ -171,19 +178,3 @@ class SpectrumDisplayNd(SpectrumDisplay, GuiSpectrumDisplay):
         Decreases number of contours by 1 for all nD spectra visible in the display.
         """
         self._removeContourLevel()
-
-# #=========================================================================================
-# # For Registering
-# #=========================================================================================
-#
-#
-#
-#
-# def _factoryFunction(project: Project, wrappedData):
-#     """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
-#     if wrappedData.is1d:
-#         return SpectrumDisplay1d(project, wrappedData)
-#     else:
-#         return SpectrumDisplayNd(project, wrappedData)
-#
-# # SpectrumDisplay._registerCoreClass()

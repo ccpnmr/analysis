@@ -4,8 +4,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Morgan Hayward, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Daniel Thompson",
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -357,6 +357,7 @@ class NmrChain(AbstractWrapperObject):
         :param keepAssignments: flag to keep or not-keep existing assignments
         """
         from ccpn.core.lib.AssignmentLib import _fetchNewPeakAssignments
+
         _fetchNewPeakAssignments(peakList=peakList, nmrChain=self, keepAssignments=keepAssignments)
 
     @renameObject(blockSidebar=True)
@@ -554,13 +555,8 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
     dd = {'code': shortName, 'isConnected': isConnected, 'label': label, 'details': comment}
 
     newApiNmrChain = nmrProject.newNmrChain(**dd)
-
     if (result := NmrChain._newInstanceFromApiData(apiObj=newApiNmrChain, project=self)) is None:
         raise RuntimeError('Unable to generate new NmrChain item')
-
-    # result = self._data2Obj.get(newApiNmrChain)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new NmrChain item')
 
     if serial is not None:
         try:
@@ -591,27 +587,3 @@ def _fetchNmrChain(self: Project, shortName: str = None) -> NmrChain:
                 result = self._data2Obj.get(apiNmrChain)
 
     return result
-
-# Clean-up
-
-# Connections to parents:
-
-#EJB 20181130: moved to project
-# Project.newNmrChain = _newNmrChain
-# del _newNmrChain
-# Project.fetchNmrChain = _fetchNmrChain
-# del _fetchNmrChain
-
-# # Notifiers:
-# className = ApiNmrChain._metaclass.qualifiedName()
-# Project._apiNotifiers.extend(
-#         (('_finaliseApiRename', {}, className, 'setImplCode'),
-#          )
-#         )
-
-#GWV 20181121: removed
-# Chain._setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
-#                           {'pathToObject':'nmrChain', 'action':'rename'})
-
-# NB Chain<->NmrChain link depends solely on the NmrChain name.
-# So no notifiers on the link - notify on the NmrChain rename instead.

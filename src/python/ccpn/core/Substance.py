@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:46:45 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:49 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -555,7 +555,8 @@ class Substance(AbstractWrapperObject):
         newSpecs = self.project.getObjectsByPids(spectra, objectTypes=(Spectrum, str))
 
         # remember the previous pids
-        oldSpecs = set(self.project.getByPids(self._getInternalParameter(self._REFERENCESPECTRA) or []))  # don't remove current pids
+        oldSpecs = set(self.project.getByPids(
+                self._getInternalParameter(self._REFERENCESPECTRA) or []))  # don't remove current pids
 
         # set the new pids
         self._setInternalParameter(self._REFERENCESPECTRA, [sp.pid for sp in newSpecs])
@@ -718,7 +719,8 @@ class Substance(AbstractWrapperObject):
         self._validateStringValue(attribName='labelling', value=labelling, allowNone=True)
 
         apiNmrProject = self.project._wrappedData
-        _molComponent = apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name, labeling=apiLabeling)
+        _molComponent = apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name,
+                                                                                             labeling=apiLabeling)
         if _molComponent is not None and _molComponent != self._wrappedData:
             raise ValueError(f"{name}.{labelling if labelling != DEFAULT_LABELLING else ''} already exists")
 
@@ -902,9 +904,12 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
                              % (name, oldSubstance.className))
         else:
             apiResult = apiComponentStore.newMolComponent(smiles=smiles, inChi=inChi, casNum=casNumber,
-                                                          empiricalFormula=empiricalFormula, molecularMass=molecularMass, atomCount=atomCount,
-                                                          bondCount=bondCount, ringCount=ringCount, hBondDonorCount=hBondDonorCount,
-                                                          hBondAcceptorCount=hBondAcceptorCount, polarSurfaceArea=polarSurfaceArea,
+                                                          empiricalFormula=empiricalFormula,
+                                                          molecularMass=molecularMass, atomCount=atomCount,
+                                                          bondCount=bondCount, ringCount=ringCount,
+                                                          hBondDonorCount=hBondDonorCount,
+                                                          hBondAcceptorCount=hBondAcceptorCount,
+                                                          polarSurfaceArea=polarSurfaceArea,
                                                           logPartitionCoefficient=logPartitionCoefficient, **params)
     else:
         raise ValueError("Substance type %s not recognised" % substanceType)
@@ -912,16 +917,7 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
     if (result := Substance._newInstanceFromApiData(apiObj=apiResult, project=self)) is None:
         raise RuntimeError('Unable to generate new Substance item')
 
-    # result = self._data2Obj[apiResult]
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new Substance item')
-
     return result
-
-
-#EJB 20181206: moved to Project
-# Project.newSubstance = _newSubstance
-# del _newSubstance
 
 
 @newObject(Substance)
@@ -942,16 +938,9 @@ def _fetchNefSubstance(self: Project, sequence: typing.Sequence[dict], name: str
         name = commonUtil.incrementName(name)
 
     apiMolecule = MoleculeModify.createMoleculeFromNef(apiNmrProject.root, name, sequence)
-
     mol = apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule)
     if (result := Substance._newInstanceFromApiData(apiObj=mol, project=self)) is None:
         raise RuntimeError('Unable to generate new Nef Substance item')
-
-    # result = self._data2Obj[
-    #     apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule)
-    # ]
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new Nef Substance item')
 
     return result
 
@@ -976,11 +965,6 @@ def _getNefSubstance(self: Project, sequence: typing.Sequence[dict], name: str =
                 return self._data2Obj[apiMolComponent]
             else:
                 raise RuntimeError('Error getting Nef Substance {} - {}'.format(name, apiMolComponent))
-
-
-#EJB 20181206: moved to Project
-# Project.fetchNefSubstance = _fetchNefSubstance
-# del _fetchNefSubstance
 
 
 @newObject(Substance)
@@ -1019,7 +1003,8 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
     self._validateStringValue(attribName='labelling', value=labelling, allowNone=True)
 
     apiNmrProject = self._wrappedData
-    if apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name, labeling=apiLabeling) is not None:
+    if apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name,
+                                                                            labeling=apiLabeling) is not None:
         # ensure that always has a name
         name = Substance._uniqueName(parent=self, name=name)
     if apiNmrProject.root.findFirstMolecule(name=name) is not None:
@@ -1036,13 +1021,8 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
     apiMolecule.details = comment
 
     mol = apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule, labeling=apiLabeling)
-    # TODO test
     if (result := Substance._newInstanceFromApiData(apiObj=mol, project=self)) is None:
         raise RuntimeError('Unable to generate new PolymerSubstance item')
-
-    # result = self._data2Obj[mol]
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new PolymerSubstance item')
 
     result.userCode = userCode
 
@@ -1073,7 +1053,8 @@ def _addUndoApiObject(project, apiObject):
         while len(objsToBeChecked) > 0:
             obj = objsToBeChecked.pop()
             if obj:
-                obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter, topObjectsToCheck)  # This builds the list/set
+                obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter,
+                                 topObjectsToCheck)  # This builds the list/set
 
         for topObjectToCheck in topObjectsToCheck:
             if (not (topObjectToCheck.__dict__.get('isModifiable'))):
@@ -1103,11 +1084,6 @@ def _addUndoApiObject(project, apiObject):
     undo.increaseBlocking()
 
 
-#EJB 20181206: moved to Project
-# Project.createPolymerSubstance = _createPolymerSubstance
-# del _createPolymerSubstance
-
-
 def _fetchSubstance(self: Project, name: str, labelling: str = None) -> Substance:
     """Get or create Substance with given name and labelling.
 
@@ -1132,11 +1108,6 @@ def _fetchSubstance(self: Project, name: str, labelling: str = None) -> Substanc
             result = self.newSubstance(name=name, labelling=labelling)
 
     return result
-
-
-#EJB 20181206: moved to Project
-# Project.fetchSubstance = _fetchSubstance
-# del _fetchSubstance
 
 
 def getter(self: SampleComponent) -> typing.Optional[Substance]:

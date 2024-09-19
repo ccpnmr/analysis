@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:37 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:49 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -131,7 +131,8 @@ class ViolationTable(AbstractWrapperObject):
                 raise RuntimeError(f'Data must be of type {ViolationFrame}, pd.DataFrame or None')
 
             value = ViolationFrame(value)
-            getLogger().debug(f'Data must be of type {ViolationFrame}. The value pd.DataFrame was converted to {ViolationFrame}.')
+            getLogger().debug(f'Data must be of type {ViolationFrame}.'
+                              f' The value pd.DataFrame was converted to {ViolationFrame}.')
 
         self._wrappedData.data = ViolationFrame() if value is None else value
 
@@ -165,7 +166,8 @@ class ViolationTable(AbstractWrapperObject):
 
         def _checkMetaTypes(value):
             if isinstance(value, dict):
-                return all(_checkMetaTypes(val) for val in value.keys()) and all(_checkMetaTypes(val) for val in value.values())
+                return (all(_checkMetaTypes(val) for val in value.keys()) and
+                        all(_checkMetaTypes(val) for val in value.values()))
             elif isinstance(value, list):
                 return all(_checkMetaTypes(val) for val in value)
             else:
@@ -290,7 +292,8 @@ class ViolationTable(AbstractWrapperObject):
 
             else:
                 # make sure that data is the correct type
-                getLogger().debug(f'Failed restoring object {result.pid}: data not of type {ViolationFrame} - resetting to an empty table')
+                getLogger().debug(f'Failed restoring object {result.pid}:'
+                                  f' data not of type {ViolationFrame} - resetting to an empty table')
                 result._wrappedData.data = ViolationFrame()
 
         return result
@@ -339,9 +342,11 @@ def _newViolationTable(self: StructureData, name: str = None, data: Optional[Vio
         getLogger().debug(f'The data of type pd.DataFrame was converted to {ViolationFrame}.')
 
     else:
-        raise ValueError(f'Unable to generate new ViolationTable: data not of type {ViolationFrame}, pd.DataFrame or None')
+        raise ValueError(f'Unable to generate new ViolationTable:'
+                         f' data not of type {ViolationFrame}, pd.DataFrame or None')
 
-    _restraintTableLink = self.project.getByPid(_restraintTableLink) if isinstance(_restraintTableLink, str) else _restraintTableLink
+    _restraintTableLink = (self.project.getByPid(_restraintTableLink)
+                           if isinstance(_restraintTableLink, str) else _restraintTableLink)
     if not isinstance(_restraintTableLink, (RestraintTable, type(None))):
         raise ValueError(f'Unable to generate new ViolationTable: restraintTable not of type {RestraintTable}')
 
@@ -349,16 +354,9 @@ def _newViolationTable(self: StructureData, name: str = None, data: Optional[Vio
     name = ViolationTable._uniqueName(parent=self, name=name)
 
     apiParent = self._wrappedData
-
     apiViolationTable = apiParent.newViolationTable(name=name, details=comment)
-    #TODO DT test
     if (result := ViolationTable._newInstanceFromApiData(apiObj=apiViolationTable, project=self._project)) is None:
         raise RuntimeError('Unable to generate new ViolationTable item')
-
-    # result = self._project._data2Obj.get(apiViolationTable)
-    #
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new ViolationTable item')
 
     # set the data and back-link
     result._wrappedData.data = data

@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-13 17:02:17 +0100 (Mon, May 13, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:49 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -696,7 +697,6 @@ def _newWindow(self: Project, title: str = None, position: tuple = (), size: tup
         raise ValueError(f"Character {Pid.altCharacter} not allowed in gui.core.Window.title")
 
     apiWindowStore = self._project._wrappedData.windowStore
-
     apiGuiTask = (apiWindowStore.root.findFirstGuiTask(nameSpace='user', name='View')
                   or apiWindowStore.root.newGuiTask(nameSpace='user', name='View'))
     newApiWindow = apiWindowStore.newWindow(title=title, guiTask=apiGuiTask)
@@ -704,18 +704,7 @@ def _newWindow(self: Project, title: str = None, position: tuple = (), size: tup
         newApiWindow.position = position
     if size:
         newApiWindow.size = size
-
     if (result := Window._newInstanceFromApiData(apiObj=newApiWindow, project=self)) is None:
         raise RuntimeError('Unable to generate new Window item')
 
-    # result = self._data2Obj.get(newApiWindow)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new Window item')
-
     return result
-
-#EJB 20181205: moved to Project
-# Project.newWindow = _newWindow
-# del _newWindow
-
-# Notifiers: None

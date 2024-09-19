@@ -4,8 +4,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-13 17:02:15 +0100 (Mon, May 13, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -575,7 +576,8 @@ class Peak(AbstractWrapperObject):
                             msg = f"""IsotopeCodes mismatch between NmrAtom {x.name} and Spectrum. 
                                   Consider changing NmrAtom isotopeCode from {x.isotopeCode} to {isotopeCode}, None, or {UnknownIsotopeCode}
                                   to avoid future warnings."""
-                            getLogger().warning(msg)  # don't raise errors. NmrAtoms are just labels and can be assigned to anything if user wants so.
+                            getLogger().warning(
+                                    msg)  # don't raise errors. NmrAtoms are just labels and can be assigned to anything if user wants so.
 
                 dimResonances.append(resonances)
 
@@ -595,7 +597,6 @@ class Peak(AbstractWrapperObject):
         """Set the peak  _snapFlag. positive or negative int
         """
         self._setInternalParameter(self._SNAPFLAG, value)
-
 
     @staticmethod
     def _recalculatePeakShifts(nmrResidues, shifts):
@@ -630,7 +631,8 @@ class Peak(AbstractWrapperObject):
             self._dimensionNmrAtoms = value
 
             # add those that are not already in the list - otherwise recalculate
-            newShifts.extend(chemShiftList.newChemicalShift(nmrAtom=nmrAtom) for nmrAtom in (_post - _pre - _thisNmrPids))
+            newShifts.extend(chemShiftList.newChemicalShift(nmrAtom=nmrAtom)
+                             for nmrAtom in (_post - _pre - _thisNmrPids))
 
             # update the chemicalShift value/valueError
             self._recalculatePeakShifts(nmrResidues, newShifts)
@@ -875,21 +877,24 @@ class Peak(AbstractWrapperObject):
                     getLogger().debug2(f'Impossible to set isotopeCode to {na}. {err}')
 
     @logCommand(get='self')
-    def assignDimensions(self, axisCodes: list, values:  list[str | NmrAtom | Sequence[str | NmrAtom]] | None = None):
+    def assignDimensions(self, axisCodes: list, values: list[str | NmrAtom | Sequence[str | NmrAtom]] | None = None):
         """Assign dimensions with axisCode to values (NmrAtom, or Pid or sequence of either, or None).
         """
         specAxisCodes = self.spectrum.axisCodes
         if len(axisCodes) != len(specAxisCodes) or len(values) != len(specAxisCodes):
-            raise TypeError(f'{self.__class__.__name__}.assignDimensions: axisCodes or values are not the correct length')
+            raise TypeError(f'{self.__class__.__name__}.assignDimensions:'
+                            f' axisCodes or values are not the correct length')
         if badAxisCodes := list(set(specAxisCodes) - set(axisCodes)):
-            raise ValueError(f'{self.__class__.__name__}.assignDimensions: axisCodes {badAxisCodes} not recognised') from None
+            raise ValueError(f'{self.__class__.__name__}.assignDimensions:'
+                             f' axisCodes {badAxisCodes} not recognised') from None
         if not isinstance(values, list):
             raise TypeError(f'{self.__class__.__name__}.assignDimensions: values is not a list')
 
         dimensionNmrAtoms = [None] * len(specAxisCodes)
         for axis, value in zip(axisCodes, values):
             if axis not in specAxisCodes:
-                raise ValueError(f'{self.__class__.__name__}.assignDimensions: axisCode {axis} not recognised')
+                raise ValueError(f'{self.__class__.__name__}.assignDimensions:'
+                                 f' axisCode {axis} not recognised')
 
             if value is None:
                 value = []
@@ -934,7 +939,8 @@ class Peak(AbstractWrapperObject):
         if axisCodes is None:
             dimensions = self.spectrum.dimensions
         else:
-            dimensions = self.spectrum.orderByAxisCodes(self.spectrum.dimensions, axisCodes=axisCodes, exactMatch=exactMatch)
+            dimensions = self.spectrum.orderByAxisCodes(self.spectrum.dimensions, axisCodes=axisCodes,
+                                                        exactMatch=exactMatch)
 
         try:
             newValues = _getParameterValues(self, parameterName,
@@ -944,7 +950,8 @@ class Peak(AbstractWrapperObject):
 
         return newValues
 
-    def setByAxisCodes(self, parameterName: str, values: Sequence, axisCodes: Sequence[str] = None, exactMatch: bool = False) -> list:
+    def setByAxisCodes(self, parameterName: str, values: Sequence, axisCodes: Sequence[str] = None,
+                       exactMatch: bool = False) -> list:
         """Set attributeName to values in order defined by axisCodes (default order if None)
         Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
 
@@ -963,7 +970,8 @@ class Peak(AbstractWrapperObject):
         if axisCodes is None:
             dimensions = self.spectrum.dimensions
         else:
-            dimensions = self.spectrum.orderByAxisCodes(self.spectrum.dimensions, axisCodes=axisCodes, exactMatch=exactMatch)
+            dimensions = self.spectrum.orderByAxisCodes(self.spectrum.dimensions, axisCodes=axisCodes,
+                                                        exactMatch=exactMatch)
 
         try:
             newValues = _setParameterValues(self, parameterName, values,
@@ -1016,7 +1024,8 @@ class Peak(AbstractWrapperObject):
             dimensions = self.spectrum.dimensions
 
         try:
-            newValues = _setParameterValues(self, parameterName, values, dimensions=dimensions, dimensionCount=self.spectrum.dimensionCount)
+            newValues = _setParameterValues(self, parameterName, values, dimensions=dimensions,
+                                            dimensionCount=self.spectrum.dimensionCount)
         except ValueError as es:
             raise ValueError(f'{self.__class__.__name__}.setByDimensions: {str(es)}') from es
 
@@ -1084,11 +1093,13 @@ class Peak(AbstractWrapperObject):
     def __str__(self):
         """Readable string representation;
         """
+        if self.isDeleted:
+            return f"<{self.pid}>"
         _digits = {'1H': 3, '15N': 2, '13C': 2, '19F': 3}
         # _digits.get(iCode,2)
         ppms = tuple(round(p, _digits.get(iCode, 2)) if p is not None else None
                      for p, iCode in zip(self.ppmPositions, self.spectrum.isotopeCodes))
-        return "<%s: @%r>" % (self.pid, ppms)
+        return f"<{self.pid}: @{ppms!r}>"
 
     #=========================================================================================
     # CCPN functions
@@ -1373,7 +1384,8 @@ def _newPeak(self: PeakList, *, height: float = None, volume: float = None,
              figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
              ppmPositions: Sequence[float] = (), position: Sequence[float] = None, positionError: Sequence[float] = (),
              pointPositions: Sequence[float] = (), boxWidths: Sequence[float] = (),
-             lineWidths: Sequence[float] = (), ppmLineWidths: Sequence[float] = (), pointLineWidths: Sequence[float] = (),
+             lineWidths: Sequence[float] = (), ppmLineWidths: Sequence[float] = (),
+             pointLineWidths: Sequence[float] = (),
              clusterId: int = None,
              ) -> Peak:
     """Create a new Peak within a peakList
@@ -1411,10 +1423,6 @@ def _newPeak(self: PeakList, *, height: float = None, volume: float = None,
                                   annotation=annotation, details=comment)
     if (result := Peak._newInstanceFromApiData(apiObj=apiPeak)) is None:
         raise RuntimeError('Unable to generate new Peak item')
-
-    # result = self._project._data2Obj.get(apiPeak)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new Peak item')
 
     apiPeakDims = apiPeak.sortedPeakDims()
     if ppmPositions:
@@ -1478,13 +1486,8 @@ def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, heigh
 
     apiPeakList = self._apiPeakList
     apiPeak = apiPeakList.newPeak()
-
     if (result := Peak._newInstanceFromApiData(apiObj=apiPeak)) is None:
         raise RuntimeError('Unable to generate new Peak item')
-
-    # result = self._project._data2Obj.get(apiPeak)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new Peak item')
 
     apiDataSource = self.spectrum._apiDataSource
     apiDataDims = apiDataSource.sortedDataDims()
@@ -1500,7 +1503,8 @@ def _newPickedPeak(self: PeakList, pointPositions: Sequence[float] = None, heigh
 
         if dataDimRef:
             peakDim.numAliasing = int(divmod(pointPositions[i], dataDim.numPointsOrig)[0])
-            peakDim.position = float(pointPositions[i] + 1 - peakDim.numAliasing * dataDim.numPointsOrig)  # API position starts at 1
+            # API position starts at 1
+            peakDim.position = float(pointPositions[i] + 1 - peakDim.numAliasing * dataDim.numPointsOrig)
 
         else:
             peakDim.position = float(pointPositions[i] + 1)
@@ -1532,9 +1536,3 @@ for clazz in Nmr.AbstractPeakDimContrib._metaclass.getNonAbstractSubtypes():
          className, 'delete'),
         )
             )
-
-# EJB 20181122: moved to SpectrumReference
-# Notify Peaks change when SpectrumReference changes
-# (That means DataDimRef referencing information)
-# SpectrumReference._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
-#                                      {'pathToObject': 'spectrum.peaks', 'action': 'change'})

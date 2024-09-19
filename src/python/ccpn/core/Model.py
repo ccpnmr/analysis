@@ -4,8 +4,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-13 17:02:15 +0100 (Mon, May 13, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:47 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -290,20 +291,8 @@ def _newModel(self: StructureEnsemble, label: str = None, comment: str = None) -
     newApiModel = structureEnsemble.newModel(name=label, details=comment)
     if (result := Model._newInstanceFromApiData(apiObj=newApiModel, project=self._project)) is None:
         raise RuntimeError('Unable to generate new Model item')
-    # result = self._project._data2Obj.get(newApiModel)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new Model item')
 
     return result
-
-
-#EJB 20181204: moved to StructureEnsemble
-# StructureEnsemble.newModel = _newModel
-# del _newModel
-
-#EJB 20181122: moved to _finaliseAction
-# Notifiers:
-# Model._setupCoreNotifier('delete', Model.clearData)
 
 
 class ChainedAssignmentWarningSuppressor:

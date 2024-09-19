@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:36 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -211,27 +211,14 @@ def _newNote(self: Project, name: str = None, text: str = None, comment: str = N
     """
 
     name = Note._uniqueName(parent=self, name=name)
-
     if text is not None:
         if not isinstance(text, str):
             raise TypeError("Note text must be a string")
 
     apiNote = self._wrappedData.newNote(text=text, name=name)
-
     if (result := Note._newInstanceFromApiData(apiObj=apiNote, project=self)) is None:
         raise RuntimeError('Unable to generate new Note item')
-    # result = self._data2Obj.get(apiNote)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new Note item')
 
     result.comment = comment
 
     return result
-
-#EJB 20181205: moved to Project
-# Project.newNote = _newNote
-# del _newNote
-
-# # Notifiers:
-# Project._apiNotifiers.append(('_finaliseApiRename', {},
-#                               ApiNote._metaclass.qualifiedName(), 'setName'))

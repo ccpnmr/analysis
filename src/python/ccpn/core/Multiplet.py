@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-22 15:20:30 +0100 (Wed, May 22, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:47 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -723,7 +723,7 @@ class Multiplet(AbstractWrapperObject):
                     self.addPeaks(pkAdd)
 
     @logCommand(get='self')
-    def mergeMultiplets(self, peaks : list[Peak], multiplets : list['Multiplet']):
+    def mergeMultiplets(self, peaks: list[Peak], multiplets: list['Multiplet']):
         """Merge any combination of multiplet and peak objects together.
 
         Note: if a peak is currently in another multiplet it will not merge unless
@@ -763,6 +763,7 @@ class Multiplet(AbstractWrapperObject):
 
         for pk in self.peaks:
             pk.assignDimensions(axisCodes, assignments)
+
 
 #=========================================================================================
 # Connections to parents
@@ -830,11 +831,9 @@ def _newAPIMultiplet(self: MultipletList,
     apiMultiplet = apiParent.newMultiplet(multipletType='multiplet', **dd)
     if (result := Multiplet._newInstanceFromApiData(apiObj=apiMultiplet)) is None:
         raise RuntimeError('Unable to generate new Multiplet item')
-    # result = self._project._data2Obj.get(apiMultiplet)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new Multiplet item')
 
     return result
+
 
 # changed after multiplet discussion feb 2 2024
 # def _assignNewMultipletPeaks(self, peaks):
@@ -901,13 +900,6 @@ def _newMultiplet(self: MultipletList,
         return result
 
 
-# EJB 20181127: removed
-# Multiplet._parentClass.newMultiplet = _newMultiplet
-# del _newMultiplet
-
-# EJB 20181128: removed, to be added to multiplet __init__?
-# Notify Multiplets when the contents of peaks have changed
-# i.e. PeakDim references
 Project._apiNotifiers.append(
         ('_notifyRelatedApiObject', {'pathToObject': 'peak.multiplets', 'action': 'change'},
          Nmr.PeakDim._metaclass.qualifiedName(), '')

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-04 14:28:07 +0100 (Thu, July 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -556,12 +556,8 @@ def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength:
                                             batchIdentifier=batchIdentifier,
                                             plateIdentifier=plateIdentifier, rowPosition=rowNumber,
                                             colPosition=columnNumber, details=comment)
-    #TODO DT Test
     if (result := Sample._newInstanceFromApiData(apiObj=newApiSample, project=self)) is None:
         raise RuntimeError('Unable to generate new Sample item')
-    # result = self._data2Obj.get(newApiSample)
-    # if result is None:
-    #     raise RuntimeError('Unable to generate new Sample item')
 
     result.amountUnits = amountUnits
     result.ionicStrengthUnits = ionicStrengthUnits
@@ -615,10 +611,6 @@ def _fetchSample(project, name: str = None):
                   project.newSample(name=name))
     return result
 
-
-#EJB 20181205: moved to Project
-# Project.newSample = _newSample
-# del _newSample
 
 # Notifiers - added to trigger crosslink changes
 className = Nmr.Experiment._metaclass.qualifiedName()

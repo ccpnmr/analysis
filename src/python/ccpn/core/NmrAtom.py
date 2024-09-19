@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-06-19 12:56:50 +0100 (Wed, June 19, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -441,7 +441,8 @@ class NmrAtom(AbstractWrapperObject):
         """Generate a unique name in the form @n (e.g. @_123) or @symbol_n (e.g. @H_34)
         :return the generated name
         """
-        if self.isotopeCode is not None and (symbol := isotopeCode2Nucleus(self.isotopeCode)) is not None and len(symbol) > 0:
+        if self.isotopeCode is not None and (symbol := isotopeCode2Nucleus(self.isotopeCode)) is not None and len(
+                symbol) > 0:
             _name = '@%s_%d' % (symbol[0:1], self._uniqueId)
         else:
             _name = '@_%d' % self._uniqueId
@@ -689,12 +690,8 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
     # Always create first with unknown isotopeCode
     dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': UnknownIsotopeCode, 'name': _name}
     obj = apiNmrProject.newResonance(**dd)
-
     if (result := NmrAtom._newInstanceFromApiData(apiObj=obj)) is None:
         raise RuntimeError('Unable to generate new NmrAtom item')
-
-    # if (result := self._project._data2Obj.get(obj)) is None:
-    #     raise RuntimeError('Unable to generate new NmrAtom item')
 
     # Check/set isotopeCode; it has to be set after the creation to avoid API errors.
     result._setIsotopeCode(isotopeCode)
@@ -702,7 +699,6 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
     if comment:
         # set the comment if defined
         result.comment = comment
-
     # Set additional optional attributes supplied as kwds arguments
     for key, value in kwds.items():
         setattr(result, key, value)
@@ -773,21 +769,7 @@ def _produceNmrAtom(self: Project, atomId: str = None, chainCode: str = None,
     return result
 
 
-#EJB 20181203: moved to NmrResidue
-# NmrResidue.newNmrAtom = _newNmrAtom
-# del _newNmrAtom
-# NmrResidue.fetchNmrAtom = _fetchNmrAtom
-
-#EJB 20181203: moved to nmrAtom
-# Project._produceNmrAtom = _produceNmrAtom
-
 # Notifiers:
-# className = Nmr.Resonance._metaclass.qualifiedName()
-# Project._apiNotifiers.extend(
-#         (('_finaliseApiRename', {}, className, 'setImplName'),
-#          ('_finaliseApiRename', {}, className, 'setResonanceGroup'),
-#          )
-#         )
 for clazz in Nmr.AbstractPeakDimContrib._metaclass.getNonAbstractSubtypes():
     className = clazz.qualifiedName()
     Project._apiNotifiers.extend(

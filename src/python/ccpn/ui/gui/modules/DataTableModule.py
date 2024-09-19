@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-27 13:00:49 +0100 (Tue, August 27, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-19 13:38:32 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -204,9 +204,8 @@ class DataTableModule(CcpnTableModule):
         """Set the active callbacks for the module
         """
         if self.activePulldownClass:
-            self._setCurrentPulldown = self.setCurrentNotifier(targetName=self.activePulldownClass._pluralLinkName,
-                                                               callback=self._selectCurrentPulldownClass)
-
+            self.setCurrentNotifier(targetName=self.activePulldownClass._pluralLinkName,
+                                    callback=self._selectCurrentPulldownClass)
             # set the active callback from the pulldown
             self._activeCheckbox = self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget']
 
@@ -271,9 +270,6 @@ class DataTableModule(CcpnTableModule):
             self._tableWidget._close()
         if self._metadata:
             self._metadata.close()
-        if self.activePulldownClass and self._setCurrentPulldown:
-            self._setCurrentPulldown.unRegisterNotifier()
-
         super()._closeModule()
 
     def _selectTable(self, table=None):

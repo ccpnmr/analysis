@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-17 17:32:15 +0100 (Wed, July 17, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-19 13:55:39 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -144,7 +144,7 @@ class PeakList(PMIListABC):
         for axisCode, points in zip(spectrum.axisCodes, regionToPick):
             ppm0 = spectrum.point2ppm(points[0], axisCode=axisCode)
             ppm1 = spectrum.point2ppm(points[1], axisCode=axisCode)
-            ppmDict[axisCode] = tuple(sorted( (ppm0,ppm1) ))
+            ppmDict[axisCode] = tuple(sorted((ppm0, ppm1)))
 
         return spectrum.pickPeaks(peakList=self,
                                   positiveThreshold=posThreshold,
@@ -661,9 +661,7 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
 
     apiDataSource = self._apiDataSource
     apiPeakList = apiDataSource.newPeakList(**dd)
-    result = self._project._data2Obj.get(apiPeakList)
-    # result = PeakList._newInstanceFromApiData(apiObj=apiPeakList, project=self.project)
-    if result is None:
+    if (result := PeakList._newInstanceFromApiData(apiObj=apiPeakList, project=self.project)) is None:
         raise RuntimeError('Unable to generate new PeakList item')
 
     # set non-api attributes

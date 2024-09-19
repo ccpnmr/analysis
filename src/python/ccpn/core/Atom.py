@@ -5,8 +5,9 @@ Module documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-05-13 17:02:14 +0100 (Mon, May 13, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-19 13:55:39 +0100 (Thu, September 19, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -92,7 +93,7 @@ class Atom(AbstractWrapperObject):
         return self._wrappedData.name
 
     @property
-    def boundAtoms(self) -> typing.Tuple['Atom']:
+    def boundAtoms(self) -> tuple['Atom', ...]:
         """Atoms that are covalently bound to this Atom"""
         getDataObj = self._project._data2Obj.get
         apiAtom = self._wrappedData
@@ -106,7 +107,7 @@ class Atom(AbstractWrapperObject):
         return tuple(sorted(x for x in boundAtoms if x is not None))
 
     @property
-    def bonds(self) -> typing.Tuple['Bond']:
+    def bonds(self) -> tuple['Bond', ...]:
         """Bonds that contain this Atom.
         """
         getDataObj = self._project._data2Obj.get
@@ -117,6 +118,7 @@ class Atom(AbstractWrapperObject):
     @property
     def realAtoms(self):
         """Recursively find all real atoms that combined  make up this atom. See componentAtoms"""
+
         def _getRealAtoms(atom):
             atoms = []
             for i in atom.componentAtoms:
@@ -125,6 +127,7 @@ class Atom(AbstractWrapperObject):
                 else:
                     atoms.append(i)
             return atoms
+
         return _getRealAtoms(self)
 
     def isRealAtom(self) -> bool:
@@ -285,18 +288,12 @@ def _newAtom(self: Residue, name: str, elementSymbol: str = None) -> 'Atom':
     lastAtom = self.getAtom(name)
     if lastAtom is not None:
         raise ValueError(f"Cannot create {lastAtom.longPid}, atom name {name} already in use")
-
     if elementSymbol is None:
         elementSymbol = name2ElementSymbol(name)
 
     apiAtom = self._wrappedData.newAtom(name=name, elementSymbol=elementSymbol)
-
-    result = self._project._data2Obj[apiAtom]
-    if result is None:
+    if (result := Atom._newInstanceFromApiData(apiObj=apiAtom)) is None:
         raise RuntimeError('Unable to generate new Atom item')
-    #
-    # if (result := Atom._newInstanceFromApiData(apiObj=apiAtom)) is None:
-    #     raise RuntimeError('Unable to generate new Atom item')
 
     apiAtom.expandNewAtom()
 

@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-18 17:16:45 +0100 (Thu, July 18, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-20 15:04:03 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -3582,7 +3582,9 @@ class CcpnNefReader(CcpnNefContent):
             for ii, apiResidue in enumerate(newChain._wrappedData.sortedResidues()):
                 # NB we have to loop over API residues to be sure we get the residues
                 # in creation order rather than sorted order
-                residue = project._data2Obj[apiResidue]
+                # residue = project._data2Obj[apiResidue]
+                if (residue := Residue._newInstanceFromApiData(apiResidue, project)) is None:
+                    raise RuntimeError('Unable to generate new Atom Item')
                 residue.rename(rows[ii].get('sequence_code'))
                 residue._resetIds()
 

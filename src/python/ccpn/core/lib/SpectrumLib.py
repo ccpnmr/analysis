@@ -4,8 +4,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:48 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-09-20 15:04:02 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,7 +54,7 @@ DIMENSION_SAMPLED = 'Sampled'
 DIMENSIONTYPES = [DIMENSION_TIME, DIMENSION_FREQUENCY, DIMENSION_SAMPLED]
 DIMENSIONFREQ = 'Freq'  # GWV: not sure why this is needed, used in the model??
 
-MAXDIM = 8  # Maximum dimensionality
+MAXDIM = 15  # Maximum dimensionality defined in nef-specification
 
 X_AXIS = 0
 Y_AXIS = 1
@@ -63,9 +64,18 @@ B_AXIS = 4
 C_AXIS = 5
 D_AXIS = 6
 E_AXIS = 7
-UNDEFINED_AXIS = 8
+F_AXIS = 8
+G_AXIS = 9
+H_AXIS = 10
+I_AXIS = 11
+J_AXIS = 12
+K_AXIS = 13
+L_AXIS = 14
+UNDEFINED_AXIS = 15
 axisNames = {X_AXIS        : "x-axis", Y_AXIS: "y-axis", Z_AXIS: "z-axis", A_AXIS: "a-axis",
              B_AXIS        : "b-axis", C_AXIS: "c-axis", D_AXIS: "d-axis", E_AXIS: "e-axis",
+             F_AXIS        : "f-axis", G_AXIS: "g-axis", H_AXIS: "h-axis", I_AXIS: "i-axis",
+             J_AXIS        : "j-axis", K_AXIS: "k-axis", L_AXIS: "l-axis",
              UNDEFINED_AXIS: "undefined-axis"
              }
 
@@ -78,10 +88,19 @@ B_DIM = 5
 C_DIM = 6
 D_DIM = 7
 E_DIM = 8
-UNDEFINED_DIM = 9
+F_DIM = 9
+G_DIM = 10
+H_DIM = 11
+I_DIM = 12
+J_DIM = 13
+K_DIM = 14
+L_DIM = 15
+UNDEFINED_DIM = 16
 dimensionNames = {INTENSITY_DIM: "intensity",
                   X_DIM        : "x-dimension", Y_DIM: "y-dimension", Z_DIM: "z-dimension", A_DIM: "a-dimension",
                   B_DIM        : "b-dimension", C_DIM: "c-dimension", D_DIM: "d-dimension", E_DIM: "e-dimension",
+                  F_DIM        : "f-dimension", G_DIM: "g-dimension", H_DIM: "h-dimension", I_DIM: "i-dimension",
+                  J_DIM        : "j-dimension", K_DIM: "k-dimension", L_DIM: "l-dimension",
                   UNDEFINED_DIM: "undefined-dimension"
                   }
 
@@ -93,7 +112,14 @@ B_DIM_INDEX = 4
 C_DIM_INDEX = 5
 D_DIM_INDEX = 6
 E_DIM_INDEX = 7
-UNDEFINED_DIM_INDEX = 8
+F_DIM_INDEX = 8
+G_DIM_INDEX = 9
+H_DIM_INDEX = 10
+I_DIM_INDEX = 11
+J_DIM_INDEX = 12
+K_DIM_INDEX = 13
+L_DIM_INDEX = 14
+UNDEFINED_DIM_INDEX = 15
 
 # # data types
 # DATA_TYPE_REAL    = 0  # real data points

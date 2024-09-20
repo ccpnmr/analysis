@@ -93,9 +93,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-30 16:39:18 +0100 (Tue, July 30, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-20 15:04:02 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1056,7 +1056,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
 
         if isotopeCode is not None:
-
             idx = dimension - 1
             nuc = Nucleus(isotopeCode)
             defaultValues = self.isotopeDefaultDataDict[isotopeCode]
@@ -1071,8 +1070,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 self.referencePoints[idx] = 1.0
                 self.referenceValues[idx] = high
 
-                _count = self.axisCodes.count(nuc.axisCode)
-                self.axisCodes[idx] = nuc.axisCode + (str(_count) if _count else '')
+                _count = 0
+                while (code := ''.join([nuc.axisCode, str(_count or '')])) in self.axisCodes:
+                    _count += 1
+                self.axisCodes[idx] = code
 
                 self.pointCounts[idx] = defaultValues['pointCount']
 

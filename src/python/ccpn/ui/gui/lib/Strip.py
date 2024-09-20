@@ -4,9 +4,10 @@ This file contains the Strip classes (1D and nD versions).
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-06-01 19:39:57 +0100 (Thu, June 01, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,22 +33,45 @@ from ccpn.ui._implementation.Strip import Strip as _CoreClassStrip
 from ccpn.ui.gui.lib.GuiStrip1d import GuiStrip1d as _GuiStrip1d
 from ccpn.ui.gui.lib.GuiStripNd import GuiStripNd as _GuiStripNd
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISASPECTRATIOS, AXISASPECTRATIOMODE
+from ccpn.ui.gui.guiSettings import _styleBlue
 
 from ccpn.core.Project import Project
 from ccpn.util.Logging import getLogger
 
 
+_DEBUG = False
+
+
 class Strip(_CoreClassStrip):
 
     @classmethod
-    def _newInstanceFromApiData(cls, project, apiObj):
-        """Return a new instance of cls, initialised with data from apiObj
+    def _newInstanceFromApiData(cls, apiObj, project=None):
+        """Return a new instance of cls, initialised with data from apiObj.
+        Checks for existence, and potential factory function.
         """
-        apiSpectrumDisplay = apiObj.spectrumDisplay
-        if apiSpectrumDisplay.is1d:
-            return Strip1d(project, apiObj)
+        from ccpn.framework.Application import getProject
+
+        # override cls-type - 1D/nD display
+        klass = Strip1d if apiObj.spectrumDisplay.is1d else StripNd
+        if project is None:
+            project = getProject()
+        if apiObj in project._data2Obj:
+            # This happens with Window, as it get initialised by the Window-Store and then once
+            # more as child of Project
+            newInstance = project._data2Obj[apiObj]
+            if _DEBUG:
+                getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
+                                             f'\n                     {apiObj}'
+                                             ))
+        elif (_factoryFunction := klass._factoryFunction) is not None:
+            newInstance = _factoryFunction(project, apiObj)
         else:
-            return StripNd(project, apiObj)
+            newInstance = klass(project, apiObj)
+
+        if newInstance is None:
+            raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
+
+        return newInstance
 
     def _postRestore(self):
         """Handle post-initialising children after all children have been restored
@@ -163,21 +187,3 @@ class StripNd(Strip, _GuiStripNd):
 
         else:
             getLogger().warning(f'Strip direction is not defined for spectrumDisplay: {str(self.spectrumDisplay.pid)}')
-
-# #=========================================================================================
-# # For Registering
-# #=========================================================================================
-#
-#
-#
-#
-# def _factoryFunction(project: Project, wrappedData):
-#     """create Strip, dispatching to subtype depending on wrappedData
-#     """
-#     apiSpectrumDisplay = wrappedData.spectrumDisplay
-#     if apiSpectrumDisplay.is1d:
-#         return Strip1d(project, wrappedData)
-#     else:
-#         return StripNd(project, wrappedData)
-#
-# # _CoreClassStrip._registerCoreClass(factoryFunction=_factoryFunction)

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:57:50 +0100 (Thu, September 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -30,23 +30,45 @@ __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
 from ccpn.ui._implementation.SpectrumView import SpectrumView as _CoreClassSpectrumView
 from ccpn.ui.gui.lib.GuiSpectrumView1d import GuiSpectrumView1d as _GuiSpectrumView1d
 from ccpn.ui.gui.lib.GuiSpectrumViewNd import GuiSpectrumViewNd as _GuiSpectrumViewNd
+from ccpn.ui.gui.guiSettings import _styleBlue
 
 from ccpn.core.Project import Project
 from ccpn.util.Logging import getLogger
 
 
+_DEBUG = False
+
+
 class SpectrumView(_CoreClassSpectrumView):
 
     @classmethod
-    def _newInstanceFromApiData(cls, project, apiObj):
-        """Return a new instance of cls, initialised with data from apiObj
+    def _newInstanceFromApiData(cls, apiObj, project=None):
+        """Return a new instance of cls, initialised with data from apiObj.
+        Checks for existence, and potential factory function.
         """
-        if 'intensity' in apiObj.strip.spectrumDisplay.axisCodes:
-            # 1D display
-            return SpectrumView1d(project, apiObj)
+        from ccpn.framework.Application import getProject
+
+        # override cls-type - 1D/nD display
+        klass = SpectrumView1d if ('intensity' in apiObj.strip.spectrumDisplay.axisCodes) else SpectrumViewNd
+        if project is None:
+            project = getProject()
+        if apiObj in project._data2Obj:
+            # This happens with Window, as it get initialised by the Window-Store and then once
+            # more as child of Project
+            newInstance = project._data2Obj[apiObj]
+            if _DEBUG:
+                getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
+                                             f'\n                     {apiObj}'
+                                             ))
+        elif (_factoryFunction := klass._factoryFunction) is not None:
+            newInstance = _factoryFunction(project, apiObj)
         else:
-            # ND display
-            return SpectrumViewNd(project, apiObj)
+            newInstance = klass(project, apiObj)
+
+        if newInstance is None:
+            raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
+
+        return newInstance
 
 
 class SpectrumView1d(SpectrumView, _GuiSpectrumView1d):
@@ -54,7 +76,6 @@ class SpectrumView1d(SpectrumView, _GuiSpectrumView1d):
     """
 
     def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
-
         # _CoreClassSpectrumView.__init__(self, project, wrappedData)
         SpectrumView.__init__(self, project, wrappedData)
 
@@ -70,7 +91,6 @@ class SpectrumViewNd(SpectrumView, _GuiSpectrumViewNd):
     """
 
     def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
-
         # _CoreClassSpectrumView.__init__(self, project, wrappedData)
         SpectrumView.__init__(self, project, wrappedData)
 

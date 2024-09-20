@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-28 18:22:04 +0100 (Wed, August 28, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -421,10 +421,10 @@ class Strip(AbstractWrapperObject):
     def _clone(self):
         """create new strip that duplicates this one, appending it at the end
         """
+        from ccpn.ui._implementation.Axis import Axis as _Axis
+
         apiStrip = self._wrappedData.clone()
-        result = self._project._data2Obj.get(apiStrip)
-        if result is None:
-            raise RuntimeError('Unable to generate new Strip item')
+        result = AbstractWrapperObject._restoreObject(project=self.project, apiObj=apiStrip)
 
         return result
 

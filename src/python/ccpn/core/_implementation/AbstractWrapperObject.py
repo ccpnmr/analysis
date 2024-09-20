@@ -3,7 +3,6 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
@@ -15,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-23 18:25:51 +0100 (Tue, July 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:10 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1041,9 +1040,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
             # # call any pre-initialisation updates
             # cls._updater.update(UPDATE_PRE_OBJECT_INITIALISATION, apiObj, cls)
-
-            obj = cls._newInstanceFromApiData(apiObj=apiObj, project=project)
-            if obj is None:
+            if (obj := cls._newInstanceFromApiData(apiObj=apiObj, project=project)) is None:
                 raise RuntimeError(f'_restoreObject: Error restoring object encoded by {apiObj}')
 
             # update _objectVersion from internal parameter store to model (if exists)
@@ -1087,22 +1084,23 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             # recursively create children
             apiObjs = childClass._getAllWrappedData(self)
             for apiObj in apiObjs:
-                obj = data2Obj.get(apiObj)
-                if obj is None:
-                    # obj does not exist; restore it from apiObj
+                # obj = data2Obj.get(apiObj)
+                # if obj is None:
+                #     # obj does not exist; restore it from apiObj
+                #
+                #     # GWV 13 Feb 24:
+                #     # Catching  errors on _restoreObject() here at such a low level is a bad idea
+                #     # as the project and its window is in an undefined state. Better raise a hard
+                #     # error
+                #
+                #     obj = childClass._restoreObject(project=project, apiObj=apiObj)
+                #
+                # # obj should exist now
+                # if obj is None:
+                #     raise RuntimeError(f'Error restoring api-child {self._apiObjectString(apiObj)} of {self}')
 
-                    # GWV 13 Feb 24:
-                    # Catching  errors on _restoreObject() here at such a low level is a bad idea
-                    # as the project and it's window is in an undefined state. Better raise a hard
-                    # error
-
-                    obj = childClass._restoreObject(project=project, apiObj=apiObj)
-
-                # obj should exist now
-                if obj is None:
-                    raise RuntimeError(f'Error restoring api-child {self._apiObjectString(apiObj)} of {self}')
-
-                result.append(obj)
+                if obj := childClass._restoreObject(project=project, apiObj=apiObj):
+                    result.append(obj)
 
         return result
 
@@ -1116,7 +1114,6 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         self._indentedDebug2(text=f'_postRestore:   Restored {self.className} {self}', enter=False)
 
     #  For restore 3.2 branch
-
     # def _restoreChildren(self, classes=['all']):
     #     """GWV: A method to restore the children of self
     #     classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
@@ -1143,7 +1140,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     #
     #             # recursively do the children of newInstance
     #             newInstance._restoreChildren(classes=classes)
-    #
+
     @classmethod
     def _newInstanceFromApiData(cls, apiObj, project=None):
         """Return a new instance of cls, initialised with data from apiObj.
@@ -1153,20 +1150,21 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         if project is None:
             project = getProject()
-
         if apiObj in project._data2Obj:
-            # This happens with Window, as it get initialised by the Windowstore and then once
+            # This happens with Window, as it get initialised by the Window-Store and then once
             # more as child of Project
             newInstance = project._data2Obj[apiObj]
-
+            if _DEBUG:
+                getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
+                                             f'\n                     {apiObj}'
+                                             ))
         elif (_factoryFunction := cls._factoryFunction) is not None:
             newInstance = _factoryFunction(project, apiObj)
-
         else:
             newInstance = cls(project, apiObj)
 
         if newInstance is None:
-            raise RuntimeError(f'Error creating new instance of class "{cls.className}"')
+            raise RuntimeError(f'Error creating new instance of class "{cls.__name__}"')
 
         return newInstance
 

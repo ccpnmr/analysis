@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-18 17:16:45 +0100 (Thu, July 18, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:10 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,6 +42,7 @@ from collections.abc import Iterable
 import numpy as np
 import pandas as pd
 import re
+import traceback
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
@@ -81,6 +82,9 @@ from ccpnmodel.ccpncore.memops.ApiError import ApiError
 from ccpnmodel.ccpncore.lib.spectrum import NmrExpPrototype
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
+
+
+_DEBUG = False
 
 
 class Project(AbstractWrapperObject):
@@ -2239,9 +2243,16 @@ class Project(AbstractWrapperObject):
         if (result := self._data2Obj.get(wrappedData)) is not None:
             raise RuntimeError(
                     f'Project._newApiObject: {result} already exists; Cannot create again and this should not happen!')
-        if cls._ignoreNewApiObjectCallback:
-            return
-        cls._newInstanceFromApiData(project=self, apiObj=wrappedData)
+        # if cls._ignoreNewApiObjectCallback:
+        #     return
+        # print(traceback.print_stack())  # useful for tracking the exact error
+
+        obj = cls._newInstanceFromApiData(project=self, apiObj=wrappedData)
+        if _DEBUG:
+            getLogger().debug(_styleRed(f'_newInstanceFromApiData {id(obj)} {obj}'
+                                        f'\n                                  {wrappedData}'
+                                        f'\n                                  {self}'
+                                        ))
 
     def _modifiedApiObject(self, wrappedData):
         """ call object-has-changed notifiers
@@ -2404,7 +2415,7 @@ class Project(AbstractWrapperObject):
         """
         self._indentedDebug2(f'Project._update(): '
                              f'calling _updateObject(UPDATE_POST_PROJECT_INITIALISATION) on self and all descendants',
-                enter=True, dots=True)
+                             enter=True, dots=True)
 
         self._updateObject(UPDATE_POST_PROJECT_INITIALISATION)
         objs = self._getAllDecendants()

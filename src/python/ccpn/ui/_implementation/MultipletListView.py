@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-03 17:29:33 +0100 (Wed, July 03, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -148,7 +148,22 @@ class MultipletListView(PMIListViewABC):
 #=========================================================================================
 
 
-# newMultipletListView functions: None
+def _newMultipletListView(spectrumView, multipletList: MultipletList) -> MultipletListView:
+    """Create a new MultipletListView object
+    :param spectrumView: the (parent) SpectrumView object
+    :param multipletList: the corresponding MultipletList object
+    :return MultipletListView instance
+    """
+    apiSpectrumView = spectrumView._wrappedData
+    project = multipletList.project
+
+    apiMultipletListView = apiSpectrumView.newStripMultipletListView(multipletListSerial=multipletList.serial,
+                                                                     multipletList=multipletList._wrappedData)
+    if (result := MultipletListView._newInstanceFromApiData(apiObj=apiMultipletListView, project=project)) is None:
+        raise RuntimeError('Failed to generate new MultipletListView instance')
+
+    return result
+
 
 # MultipletList.multipletListViews property
 def getter(multipletList: MultipletList) -> typing.Tuple[MultipletListView, ...]:
@@ -171,9 +186,16 @@ Project._apiNotifiers.append(
 
 def _multipletListAddMultipletListViews(project: Project, apiMultipletList: Nmr.MultipletList):
     """Add ApiMultipletListView when ApiMultipletList is created"""
-    for apiSpectrumView in apiMultipletList.dataSource.spectrumViews:
-        apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial,
-                                             multipletList=apiMultipletList)
+    from ccpn.core.lib.Notifiers import NotifierBase
+
+    if NotifierBase._apiNotificationBlanking == 0:
+        # create new apiObjects if not blocked
+        for apiSpectrumView in apiMultipletList.dataSource.spectrumViews:
+            apiMultipletListView = apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial,
+                                                                        multipletList=apiMultipletList)
+            if SpectrumView._newInstanceFromApiData(apiObj=apiMultipletListView.findFirstStripMultipletListView(),
+                                                    project=project) is None:
+                raise RuntimeError('Unable to generate new MultipletListView')
 
 
 Project._setupApiNotifier(_multipletListAddMultipletListViews, Nmr.MultipletList, 'postInit')
@@ -182,8 +204,11 @@ Project._setupApiNotifier(_multipletListAddMultipletListViews, Nmr.MultipletList
 def _spectrumViewAddMultipletListViews(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiMultipletListView when ApiSpectrumView is created"""
     for apiMultipletList in apiSpectrumView.dataSource.multipletLists:
-        apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial,
-                                             multipletList=apiMultipletList)
+        apiMultipletListView = apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial,
+                                                                    multipletList=apiMultipletList)
+        if SpectrumView._newInstanceFromApiData(apiObj=apiMultipletListView.findFirstStripMultipletListView(),
+                                                project=project) is None:
+            raise RuntimeError('Unable to generate new MultipletListView')
 
 
 Project._setupApiNotifier(_spectrumViewAddMultipletListViews, ApiSpectrumView, 'postInit')

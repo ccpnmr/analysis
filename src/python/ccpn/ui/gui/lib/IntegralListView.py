@@ -5,9 +5,10 @@ Get the regions between two peak Limits and fill the area under the curve.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:27 +0100 (Thu, May 11, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,33 +30,37 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 from ccpn.core.Project import Project
 from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
-from ccpn.ui._implementation.IntegralListView import IntegralListView as _CoreClassIntegralListView
+from ccpn.ui._implementation.IntegralListView import IntegralListView as _CoreClassListView
+from ccpn.ui._implementation.IntegralView import IntegralView as KlassView
 
 
 class GuiIntegralListView(GuiListViewABC):
     """integralList is the CCPN wrapper object
     """
 
-    def __init__(self):
+    def __init__(self, project: Project):
         super().__init__()
 
-        vIntegrals = {view.integral for view in self._wrappedData.integralListView.integralViews}
+        lView = self._wrappedData.integralListView
+        factoryFunc = lView.newIntegralView
+        vObjs = {view.integral for view in lView.integralViews}
         # create integralViews that don't already exist for all integrals in integralList
-        for obj in self.integralList.integrals:
-            apiIntegral = obj._wrappedData
-            if apiIntegral not in vIntegrals:
-                self._wrappedData.integralListView.newIntegralView(integral=apiIntegral, integralSerial=0)
+        for apiObj in lView.integralList.integrals:
+            if apiObj not in vObjs:
+                apiView = factoryFunc(integral=apiObj, integralSerial=0)
+                if KlassView._newInstanceFromApiData(apiObj=apiView, project=project) is None:
+                    raise RuntimeError(f'Unable to generate new {KlassView.__name__}')
 
 
-class IntegralListView(_CoreClassIntegralListView, GuiIntegralListView):
+class IntegralListView(_CoreClassListView, GuiIntegralListView):
     """Integral List View for 1D or nD IntegralList"""
 
     def __init__(self, project: Project, wrappedData: 'ApiStripIntegralListView'):
         """Local override init for Qt subclass"""
-        _CoreClassIntegralListView.__init__(self, project, wrappedData)
+        _CoreClassListView.__init__(self, project, wrappedData)
 
         # hack for now
         self.application = project.application
         self._init()
 
-        GuiIntegralListView.__init__(self)
+        GuiIntegralListView.__init__(self, project)

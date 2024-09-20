@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-03 17:29:33 +0100 (Wed, July 03, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -143,7 +143,7 @@ class PeakListView(PMIListViewABC):
 #========================================================================================
 
 
-def _newPeakListView(spectrumView, peakList:PeakList) -> PeakListView:
+def _newPeakListView(spectrumView, peakList: PeakList) -> PeakListView:
     """Create a new PeakListView object
     :param spectrumView: the (parent) SpectrumView object
     :param peakList: the corresponding PeakList object
@@ -152,11 +152,9 @@ def _newPeakListView(spectrumView, peakList:PeakList) -> PeakListView:
     apiSpectrumView = spectrumView._wrappedData
     project = peakList.project
 
-    apiPeakListView = apiSpectrumView.newStripPeakListView(peakListSerial=peakList.serial, peakList=peakList._wrappedData)
-    result = project._data2Obj.get(apiPeakListView)
-    # result = PeakListView._newInstanceFromApiData(apiObj=apiPeakListView, project=project)
-
-    if result is None:
+    apiPeakListView = apiSpectrumView.newStripPeakListView(peakListSerial=peakList.serial,
+                                                           peakList=peakList._wrappedData)
+    if (result := PeakListView._newInstanceFromApiData(apiObj=apiPeakListView, project=project)) is None:
         raise RuntimeError('Failed to generate new PeakListView instance')
 
     return result
@@ -181,19 +179,18 @@ Project._apiNotifiers.append(
         )
 
 
-#EJB 20181122: moved to PeakList _finaliseAction
-# Notify PeakListView change when PeakList changes
-# PeakList._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
-#                             {'pathToObject': 'peakListViews', 'action': 'change'})
-
-
 def _peakListAddPeakListViews(project: Project, apiPeakList: Nmr.PeakList):
     """Add ApiPeakListView when ApiPeakList is created"""
     from ccpn.core.lib.Notifiers import NotifierBase
+
     if NotifierBase._apiNotificationBlanking == 0:
         # create new apiObjects if not blocked
         for apiSpectrumView in apiPeakList.dataSource.spectrumViews:
-            apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
+            apiPeakListView = apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial,
+                                                              peakList=apiPeakList)
+            if PeakListView._newInstanceFromApiData(apiObj=apiPeakListView.findFirstStripPeakListView(),
+                                                    project=project) is None:
+                raise RuntimeError('Unable to generate new PeakListView')
 
 
 Project._setupApiNotifier(_peakListAddPeakListViews, Nmr.PeakList, 'postInit')
@@ -202,7 +199,11 @@ Project._setupApiNotifier(_peakListAddPeakListViews, Nmr.PeakList, 'postInit')
 def _spectrumViewAddPeakListViews(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiPeakListView when ApiSpectrumView is created"""
     for apiPeakList in apiSpectrumView.dataSource.peakLists:
-        apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
+        apiPeakListView = apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial,
+                                                          peakList=apiPeakList)
+        if PeakListView._newInstanceFromApiData(apiObj=apiPeakListView.findFirstStripPeakListView(),
+                                                project=project) is None:
+            raise RuntimeError('Unable to generate new PeakListView')
 
 
 Project._setupApiNotifier(_spectrumViewAddPeakListViews, ApiSpectrumView, 'postInit')

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:49:49 +0100 (Thu, September 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -31,24 +31,46 @@ from ccpn.core.Project import Project
 
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay as _CoreClassSpectrumDisplay
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.ui.gui.guiSettings import _styleBlue
 from ccpn.util.Logging import getLogger
 
 
 # NB:
 # GWV any coreClass 'name' property creates conflicts as pyqtgraph descendants need name()
 # GWV 26Jan2023: Remark still valid??
+_DEBUG = False
 
 
 class SpectrumDisplay(_CoreClassSpectrumDisplay):
 
     @classmethod
-    def _newInstanceFromApiData(cls, project, apiObj):
-        """Return a new instance of cls, initialised with data from apiObj
+    def _newInstanceFromApiData(cls, apiObj, project=None):
+        """Return a new instance of cls, initialised with data from apiObj.
+        Checks for existence, and potential factory function.
         """
-        if apiObj.is1d:
-            return SpectrumDisplay1d(project, apiObj)
+        from ccpn.framework.Application import getProject
+
+        # override cls-type - 1D/nD display
+        klass = SpectrumDisplay1d if apiObj.is1d else SpectrumDisplayNd
+        if project is None:
+            project = getProject()
+        if apiObj in project._data2Obj:
+            # This happens with Window, as it get initialised by the Window-Store and then once
+            # more as child of Project
+            newInstance = project._data2Obj[apiObj]
+            if _DEBUG:
+                getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
+                                             f'\n                     {apiObj}'
+                                             ))
+        elif (_factoryFunction := klass._factoryFunction) is not None:
+            newInstance = _factoryFunction(project, apiObj)
         else:
-            return SpectrumDisplayNd(project, apiObj)
+            newInstance = klass(project, apiObj)
+
+        if newInstance is None:
+            raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
+
+        return newInstance
 
 
 class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):

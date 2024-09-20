@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:49:47 +0100 (Thu, September 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:10 +0100 (Fri, September 20, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -523,7 +523,9 @@ def _createChainFromSubstance(self: Substance, shortName: str = None, role: str 
 
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
                                         details=comment)
-    if (result := Chain._newInstanceFromApiData(apiObj=newApiChain)) is None:
+    # if (result := Chain._newInstanceFromApiData(apiObj=newApiChain)) is None:
+    # need to restore the complete chain-tree structure
+    if (result := AbstractWrapperObject._restoreObject(project=self.project, apiObj=newApiChain)) is None:
         raise RuntimeError('Unable to generate new Chain item')
 
     for residue in result.residues:

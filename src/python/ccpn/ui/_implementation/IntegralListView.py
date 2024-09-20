@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-03 17:29:33 +0100 (Wed, July 03, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -139,7 +139,22 @@ class IntegralListView(PMIListViewABC):
 #=========================================================================================
 
 
-# newIntegralListView functions: None
+def _newIntegralListView(spectrumView, integralList: IntegralList) -> IntegralListView:
+    """Create a new IntegralListView object
+    :param spectrumView: the (parent) SpectrumView object
+    :param integralList: the corresponding IntegralList object
+    :return IntegralListView instance
+    """
+    apiSpectrumView = spectrumView._wrappedData
+    project = integralList.project
+
+    apiIntegralListView = apiSpectrumView.newStripIntegralListView(integralListSerial=integralList.serial,
+                                                                   integralList=integralList._wrappedData)
+    if (result := IntegralListView._newInstanceFromApiData(apiObj=apiIntegralListView, project=project)) is None:
+        raise RuntimeError('Failed to generate new IntegralListView instance')
+
+    return result
+
 
 # IntegralList.integralListViews property
 def getter(integralList: IntegralList) -> typing.Tuple[IntegralListView, ...]:
@@ -162,8 +177,16 @@ Project._apiNotifiers.append(
 
 def _integralListAddIntegralListViews(project: Project, apiIntegralList: Nmr.IntegralList):
     """Add ApiIntegralListView when ApiIntegralList is created"""
-    for apiSpectrumView in apiIntegralList.dataSource.spectrumViews:
-        apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial, integralList=apiIntegralList)
+    from ccpn.core.lib.Notifiers import NotifierBase
+
+    if NotifierBase._apiNotificationBlanking == 0:
+        # create new apiObjects if not blocked
+        for apiSpectrumView in apiIntegralList.dataSource.spectrumViews:
+            apiIntegralListView = apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial,
+                                                                      integralList=apiIntegralList)
+            if IntegralListView._newInstanceFromApiData(apiObj=apiIntegralListView.findFirstStripIntegralListView(),
+                                                        project=project) is None:
+                raise RuntimeError('Unable to generate new IntegralListView')
 
 
 Project._setupApiNotifier(_integralListAddIntegralListViews, Nmr.IntegralList, 'postInit')
@@ -172,7 +195,11 @@ Project._setupApiNotifier(_integralListAddIntegralListViews, Nmr.IntegralList, '
 def _spectrumViewAddIntegralListViews(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiIntegralListView when ApiSpectrumView is created"""
     for apiIntegralList in apiSpectrumView.dataSource.integralLists:
-        apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial, integralList=apiIntegralList)
+        apiIntegralListView = apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial,
+                                                                  integralList=apiIntegralList)
+        if IntegralListView._newInstanceFromApiData(apiObj=apiIntegralListView.findFirstStripIntegralListView(),
+                                                    project=project) is None:
+            raise RuntimeError('Unable to generate new IntegralListView')
 
 
 Project._setupApiNotifier(_spectrumViewAddIntegralListViews, ApiSpectrumView, 'postInit')

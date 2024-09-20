@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-26 17:27:52 +0100 (Fri, April 26, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -686,18 +687,9 @@ def _newSpectrumView(display, spectrum, displayOrder) -> SpectrumView:
     :param displayOrder: A tuple/list of spectrum dimensions (1-based) or 0 (For intensity) in display order
     :returns: SpectrumView instance
     """
-    from ccpn.ui._implementation.PeakListView import _newPeakListView
-
-    # # Set stripSerial
-    # if 'Free' in apiStrip.className:
-    #     # Independent strips
-    #     stripSerial = apiStrip.serial
-    # else:
-    #     stripSerial = 0
 
     if not isinstance(spectrum, Spectrum):
         raise ValueError('invalid spectrum; got %r' % spectrum)
-
     if not isinstance(displayOrder, (list, tuple)) or len(displayOrder) < 2:
         raise ValueError('invalid displayOrder; got %r' % displayOrder)
 
@@ -709,18 +701,9 @@ def _newSpectrumView(display, spectrum, displayOrder) -> SpectrumView:
     # 20191113:ED testing - doesn't work yet, _data2Obj not created in correct place
     # GWV: don't know why, but only querying via the FindFirstStripSpectrumView seems to allow to yield the V2 object
     apiSpectrumView = display.strips[0]._wrappedData.findFirstStripSpectrumView(spectrumView=obj)
-    newSpecView = display.project._data2Obj.get(apiSpectrumView)
-
-    if newSpecView is None:
+    if (newSpecView := SpectrumView._newInstanceFromApiData(apiObj=apiSpectrumView,
+                                                            project=spectrum.project)) is None:
         raise RuntimeError('Failed to generate new SpectrumView instance')
-
-    # # create all PeakListViews
-    # for _pkl in spectrum.peakLists:
-    #     _newPeakListView(newSpecView, peakList=_pkl)
-
-    # NOTE:ED - 2021oct25 - @GWV not sure why this is here as overrides the .getter logic
-    #   replaced with method
-    # newSpecView.copyContourAttributesFromSpectrum()
 
     return newSpecView
 
@@ -734,14 +717,3 @@ Project._apiNotifiers.append(
         ('_notifyRelatedApiObject', {'pathToObject': 'stripSpectrumViews', 'action': 'change'},
          ApiSpectrumView._metaclass.qualifiedName(), '')
         )
-
-#EJB 20181122: moved to Spectrum
-# Notify SpectrumView change when Spectrum changes
-# Bloody hell: as far as GWV understands the effect of this: a 'change' to a Spectrum object triggers
-# a _finaliseAction('change') on each of the spectrum.spectrumViews objects, which then calls all
-# ('SpectrumView','change') notifiers
-# Spectrum._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
-#                             {'pathToObject': 'spectrumViews', 'action': 'change'})
-
-# Links to SpectrumView and Spectrum are fixed after creation - any link notifiers should be put in
-# create/destroy instead

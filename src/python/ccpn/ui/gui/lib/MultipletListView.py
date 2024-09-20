@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-11 19:16:27 +0100 (Thu, May 11, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,36 +27,39 @@ __date__ = "$Date: 2018-12-20 15:44:34 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
 from ccpn.core.Project import Project
-from ccpn.ui._implementation.MultipletListView import MultipletListView as _CoreClassMultipletListView
+from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
+from ccpn.ui._implementation.MultipletListView import MultipletListView as _CoreClassListView
+from ccpn.ui._implementation.MultipletView import MultipletView as KlassView
 
 
 class GuiMultipletListView(GuiListViewABC):
     """multipletList is the CCPN wrapper object
     """
 
-    def __init__(self):
+    def __init__(self, project: Project):
         super().__init__()
 
-        vMultiplets = {view.multiplet for view in self._wrappedData.multipletListView.multipletViews}
+        lView = self._wrappedData.multipletListView
+        factoryFunc = lView.newMultipletView
+        vObjs = {view.multiplet for view in lView.multipletViews}
         # create multipletViews that don't already exist for all multiplets in multipletList
-        for obj in self.multipletList.multiplets:
-            apiMultiplet = obj._wrappedData
-            if apiMultiplet not in vMultiplets:
-                self._wrappedData.multipletListView.newMultipletView(multiplet=apiMultiplet, multipletSerial=0)
+        for apiObj in lView.multipletList.multiplets:
+            if apiObj not in vObjs:
+                apiView = factoryFunc(multiplet=apiObj, multipletSerial=0)
+                if KlassView._newInstanceFromApiData(apiObj=apiView, project=project) is None:
+                    raise RuntimeError(f'Unable to generate new {KlassView.__name__}')
 
 
-class MultipletListView(_CoreClassMultipletListView, GuiMultipletListView):
-    """Multiplet List View for 1D or nD MultipletList
-    """
+class MultipletListView(_CoreClassListView, GuiMultipletListView):
+    """Multiplet List View for 1D or nD MultipletList"""
 
     def __init__(self, project: Project, wrappedData: 'ApiStripMultipletListView'):
         """Local override init for Qt subclass"""
-        _CoreClassMultipletListView.__init__(self, project, wrappedData)
+        _CoreClassListView.__init__(self, project, wrappedData)
 
         # hack for now
         self.application = project.application
         self._init()
 
-        GuiMultipletListView.__init__(self)
+        GuiMultipletListView.__init__(self, project)

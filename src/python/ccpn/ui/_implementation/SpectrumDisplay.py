@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-21 11:56:53 +0100 (Fri, June 21, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -758,6 +758,7 @@ class SpectrumDisplay(AbstractWrapperObject):
         """Make copy of strip in self, at position newIndex - or rightmost.
         """
         from ccpn.ui._implementation.Strip import _copyStrip
+
         return _copyStrip(self, strip=strip, newIndex=newIndex)
 
 
@@ -835,12 +836,8 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
     # Create Boundstrip/Nostrip display and first strip
     apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
-
     if (display := SpectrumDisplay._newInstanceFromApiData(apiObj=apiSpectrumDisplay, project=project)) is None:
         raise RuntimeError('Unable to generate new SpectrumDisplay')
-
-    # if (display := project._data2Obj.get(apiSpectrumDisplay)) is None:
-    #     raise RuntimeError('Unable to generate new SpectrumDisplay')
 
     # may need to set other values here, guarantees before strip generation;
     # however, do this without any callbacks, as various objects have set CHANGE, CREATE notifiers
@@ -855,22 +852,38 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
         display.isGrouped = isGrouped
 
     # Create first strip; looks like we need this before other things, otherwise the api goes crazy
+    from ccpn.ui._implementation.Strip import Strip as _Strip
+    from ccpn.ui._implementation.Axis import Axis as _Axis
+
     apiStrip = apiSpectrumDisplay.newBoundStrip()
-    if (strip := project._data2Obj.get(apiStrip)) is None:
-        raise RuntimeError(f'Unable to generate new Strip for {display}')
+    # if (strip := project._data2Obj.get(apiStrip)) is None:
+    #     raise RuntimeError(f'Unable to generate new Strip for {display}')
+    if (strip := _Strip._newInstanceFromApiData(apiObj=apiStrip, project=project)) is None:
+        raise RuntimeError('Unable to generate new Strip')
 
     # Create axes
     if is1D:
         if flip1D:
             # SpectrumDisplay X; i.e. Intensity
-            apiAxis = apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1, unit=AXISUNIT_NUMBER)
+            apiAxis = apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1,
+                                                          unit=AXISUNIT_NUMBER)
+            if _Axis._newInstanceFromApiData(apiObj=apiAxis.findFirstStripAxis(strip=apiStrip),
+                                             project=project) is None:
+                raise RuntimeError('Unable to generate new Intensity-Axis')
             _unit = apiAxis.unit
 
             # SpectrumDisplay Y
             if spectrum.dimensionTypes[0] == specLib.DIMENSION_FREQUENCY:
-                apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[1], stripSerial=1, unit=AXISUNIT_PPM)
+                apiAxis = apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[1], stripSerial=1, unit=AXISUNIT_PPM)
+                if (_Axis._newInstanceFromApiData(apiObj=apiAxis.findFirstStripAxis(strip=apiStrip),
+                                                  project=project) is
+                        None):
+                    raise RuntimeError('Unable to generate new Frequency-Axis')
             elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
-                apiSpectrumDisplay.newFidAxis(code='Time', stripSerial=1, unit=AXISUNIT_POINT)
+                apiAxis = apiSpectrumDisplay.newFidAxis(code='Time', stripSerial=1, unit=AXISUNIT_POINT)
+                if _Axis._newInstanceFromApiData(apiObj=apiAxis.findFirstStripAxis(strip=apiStrip),
+                                                 project=project) is None:
+                    raise RuntimeError('Unable to generate new Time-Axis')
 
             # we need these to do the checks
             # display._isotopeCodes = tuple(spectrum.isotopeCodes)
@@ -878,12 +891,22 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
         else:
             # SpectrumDisplay X
             if spectrum.dimensionTypes[0] == specLib.DIMENSION_FREQUENCY:
-                apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[0], stripSerial=1, unit=AXISUNIT_PPM)
+                apiAxis = apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[0], stripSerial=1, unit=AXISUNIT_PPM)
+                if _Axis._newInstanceFromApiData(apiObj=apiAxis.findFirstStripAxis(strip=apiStrip),
+                                                 project=project) is None:
+                    raise RuntimeError('Unable to generate new Frequency-Axis')
             elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
-                apiSpectrumDisplay.newFidAxis(code='Time', stripSerial=1, unit=AXISUNIT_POINT)
+                apiAxis = apiSpectrumDisplay.newFidAxis(code='Time', stripSerial=1, unit=AXISUNIT_POINT)
+                if _Axis._newInstanceFromApiData(apiObj=apiAxis.findFirstStripAxis(strip=apiStrip),
+                                                 project=project) is None:
+                    raise RuntimeError('Unable to generate new Time-Axis')
 
             # SpectrumDisplay Y; i.e. Intensity
-            apiAxis = apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1, unit=AXISUNIT_NUMBER)
+            apiAxis = apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1,
+                                                          unit=AXISUNIT_NUMBER)
+            if _Axis._newInstanceFromApiData(apiObj=apiAxis.findFirstStripAxis(strip=apiStrip),
+                                             project=project) is None:
+                raise RuntimeError('Unable to generate new Intensity-Axis')
             _unit = apiAxis.unit
 
             # we need these to do the checks
@@ -913,16 +936,25 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             dimType = spectrum.dimensionTypes[dimIndex]
             if dimType == specLib.DIMENSION_FREQUENCY:
                 apiAxis = apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_PPM)
+                if _Axis._newInstanceFromApiData(apiObj=apiAxis.findFirstStripAxis(strip=apiStrip),
+                                                 project=project) is None:
+                    raise RuntimeError('Unable to generate new Frequency Axis')
                 _unit = apiAxis.unit
 
             elif dimType == specLib.DIMENSION_TIME:
                 # Cannot do newFidAxis; all falls apart
                 # apiSpectrumDisplay.newFidAxis(code=axisCode, stripSerial=1, unit=AXISUNIT_POINT)
                 apiAxis = apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_POINT)
+                if _Axis._newInstanceFromApiData(apiObj=apiAxis.findFirstStripAxis(strip=apiStrip),
+                                                 project=project) is None:
+                    raise RuntimeError('Unable to generate new Frequency Axis')
                 _unit = apiAxis.unit
 
             elif dimType == specLib.DIMENSION_SAMPLED:
                 apiAxis = apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_POINT)
+                if _Axis._newInstanceFromApiData(apiObj=apiAxis.findFirstStripAxis(strip=apiStrip),
+                                                 project=project) is None:
+                    raise RuntimeError('Unable to generate new Frequency Axis')
                 _unit = apiAxis.unit
 
             else:
@@ -949,19 +981,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     return display
 
 
-# GWV 20210807: moved to _implementation.Window
-# # Window.spectrumDisplays property
-# def getter(window: Window):
-#     ll = [x for x in window._wrappedData.sortedModules() if isinstance(x, ApiBoundDisplay)]
-#     return tuple(window._project._data2Obj[x] for x in ll if x in window._project._data2Obj)
-#
-#
-# Window.spectrumDisplays = property(getter, None, None,
-#                                    "SpectrumDisplays shown in Window")
-# del getter
-
 # Notifiers:
-
 # crosslinks window, nmrResidue
 Project._apiNotifiers.append(
         ('_modifiedLink', {'classNames': ('Window', 'SpectrumDisplay')},

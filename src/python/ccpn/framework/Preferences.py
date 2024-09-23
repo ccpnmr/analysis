@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-09-18 12:03:12 +0100 (Wed, September 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-23 10:33:43 +0100 (Mon, September 23, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -89,6 +89,7 @@ class Preferences(AttrDict):
         # needs to be after user prefs are loaded as this is always true
         self._applicationVersion = str(application.applicationVersion)
         self._overrideDefaults(self)
+        self._updateOldPrefs(self)
 
     def _readPreferencesFile(self, path):
         """Read the preference from the json file path,
@@ -252,3 +253,11 @@ class Preferences(AttrDict):
             # set from the default for the OS-specific
             if not pr.get(prefFont):
                 pr[prefFont] = pr.get(frmFont, '')
+
+    @staticmethod
+    def _updateOldPrefs(prefs):
+        """update any changed preferences to ensure correct type
+        """
+        # update project path to use new format
+        if prefs.general.useProjectPath is True:
+            prefs.general.useProjectPath = 'Alongside'

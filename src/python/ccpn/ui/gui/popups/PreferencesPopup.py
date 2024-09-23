@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-17 13:15:08 +0100 (Fri, May 17, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-09-23 12:46:57 +0100 (Mon, September 23, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -178,7 +179,7 @@ def _makeLine(parent, grid, text=None, **kwds):
     return result
 
 
-def _makeCheckBox(parent, row, text, callback, toolTip=None, **kwds):
+def _makeCheckBox(parent, row, text, callback, toolTip=None, visible=True, **kwds):
     """Convenience routine to make a row with a label and a checkbox
     :return CheckBox instance
     """
@@ -188,6 +189,10 @@ def _makeCheckBox(parent, row, text, callback, toolTip=None, **kwds):
     if toolTip is not None:
         _label.setToolTip(toolTip)
         _checkBox.setToolTip(toolTip)
+    if not visible:
+        # temporarily hide options
+        _label.setVisible(False)
+        _checkBox.setVisible(False)
     return _checkBox
 
 
@@ -547,7 +552,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
                'If this value is changed, older backups may need to be manually deleted.'
         self.backupSaveEnabledBox = _makeCheckBox(parent, row=row, text="Backup on Save",
                                                   callback=partial(self._queueToggleGeneralOptions,
-                                                                   'backupSaveEnabled'))
+                                                                   'backupSaveEnabled'),
+                                                  visible=False)
         row += 1
         self.backupSaveCountLabel = _makeLabel(parent, text="Number of backups on user-save", grid=(row, 0))
         self.backupSaveCountData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=1, decimals=0, step=1)

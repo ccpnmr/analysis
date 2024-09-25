@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-13 14:53:30 +0100 (Fri, September 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-25 13:11:20 +0100 (Wed, September 25, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -69,7 +69,8 @@ class Path(_Path_):
 
     @property
     def filepath(self) -> Path:
-        """The folder without the filename"""
+        """The folder without the filename
+        """
         return self if self.is_dir() else self.parent
 
     @property
@@ -299,11 +300,15 @@ class Path(_Path_):
         """
         return Path(os.path.normpath(self.asString()))  # python <= 3.4; strings only
 
-    def open(self, *args, **kwds):
-        """Subclassing to catch any long file name errors that allegedly can occur on Windows
+    def open(self, mode='r', buffering=-1, encoding=None, errors=None, newline=None):
         """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        # Subclassed to catch any potential long file name errors
         try:
-            fp = super().open(*args, **kwds)
+            fp = super().open(mode=mode, buffering=buffering, encoding=encoding,
+                              errors=errors, newline=newline)
         except FileNotFoundError:
             if len(self.asString()) > 256:
                 raise FileNotFoundError('Error opening file "%s"; potentially path length (%d) is too large. Consider moving the file'
@@ -323,7 +328,7 @@ class Path(_Path_):
 
         Use in a with statement; ie.:
 
-        with myFile.saveWriteToFile as fp:
+        with myFile.saveWriteToFile(mode='w', validator=myValidatorFunc) as fp:
             sys.write(fp, 'text')
 
         :param mode: usual string defining write (w) or append (a) access, text or binary (b)
@@ -334,6 +339,8 @@ class Path(_Path_):
                           signature: validator(path:Path) -> bool
 
         :raise RunTimeError upon catching any error during open, write, close, ..
+
+        Loosely based on internet discussions using os.rename() as an atomic operation (on most platform's)
         """
 
         _tempFile = aPath(self + self._tempSuffix).uniqueVersion()
@@ -384,12 +391,12 @@ class Path(_Path_):
                 raise RuntimeError(f'While writing to {self} an error occured: {errorString}')
 
             else:
-                # We have successfully written (and optionally validated) the file to a temporary file.
-                # We already have checked if we can overwrite the file, so now just remove
-                # it and rename the temporary file
+                # We have successfully written (and optionally validated) the data as a temporary file.
+                # We already have checked if we can overwrite the file, so now just remove any existing
+                # "self" and rename the temporary file
                 if self.exists():
                     self.remove()
-                # use the os.rename call to cut out any intermediary
+                # use the os.rename call to make it an atomic operation
                 os.rename(_tempFile.asString(), aPath(self).asString())
 
     def globList(self, pattern='*') -> list:
@@ -405,7 +412,9 @@ class Path(_Path_):
         _rmdirs(str(self))
 
     def fetchParent(self):
-        """Create, if needed, all directories upward of self
+        """Create, if needed, all directories upward of self;
+        different from mkdir as it does not attempt to create root and does not overwrite
+        or throws errors for existing directories.
         """
         _dirs = []
         _p = self.parent
@@ -417,7 +426,7 @@ class Path(_Path_):
         _p.fetchDir(*_dirs)
 
     def fetchDir(self, *dirNames) -> Path:
-        """Return and (if needed) create all dirNames relative to self
+        """Return and (if needed) create the downward tree all dirNames staring from self
         :return: Path instance of self / dirName[0] / dirName[1] ...
         """
         if not self.is_dir():

@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-13 14:53:30 +0100 (Fri, September 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-25 13:11:20 +0100 (Wed, September 25, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -143,8 +143,7 @@ class ModuleLayout(_ApplicationProperties):
         if not isinstance(path, (str, Path)):
             raise TypeError(f'ModuleLayout.loadFromJson(): expected str or Path instance, got {type(path)}')
 
-        _path = aPath(path)
-        _path.assureSuffix(JSON_SUFFIX)
+        _path = aPath(path).assureSuffix(JSON_SUFFIX)
         _path.fetchParent()
         self.updateDict()
         self.updateData()

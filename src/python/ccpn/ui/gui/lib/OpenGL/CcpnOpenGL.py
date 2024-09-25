@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:05:24 +0100 (Wed, July 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-25 18:53:58 +0100 (Wed, September 25, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -3108,10 +3108,11 @@ class CcpnGLWidget(QOpenGLWidget):
         """
         if self._blankDisplay:
             return
-
         if self.strip.isDeleted:
             return
-
+        if self.is1D and self.axisCodes[0] == 'intensity':
+            # temporarily discard flipped 1d-displays
+            return
         # tt = time.perf_counter()
 
         # NOTE:ED - testing, remove later

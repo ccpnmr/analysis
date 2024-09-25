@@ -254,6 +254,7 @@ MEMOPS_PACKAGE = f'{MEMOPS}.{IMPLEMENTATION}'
 XML_SUFFIX = '.xml'
 BACKUP_SUFFIX = '.ccpnV3backup'
 AUTOBACKUP_SUFFIX = '.ccpnV3autobackup'
+TEMPBACKUP_SUFFIX = '.ccpnV3tempbackup'
 KEY_SEPARATOR = '+'
 
 XML_LOADER_ATTR = 'xmlLoader'  # attribute name for MemopsRoot
@@ -421,8 +422,8 @@ class TopObject(XmlLoaderABC):
             _apiTopObjects = forceGetattr(self.root.memopsRoot, 'topObjects')
             self.apiTopObject = _apiTopObjects.get(self.guid)
             if not self.apiTopObject:
-                getLogger().debug2(
-                    f'{consoleStyle.fg.darkyellow}Undefined apiTopObject {self.guid}{consoleStyle.reset}')
+                getLogger().debug2(f'{consoleStyle.fg.darkyellow}Undefined apiTopObject '
+                                   f'{self.guid}{consoleStyle.reset}')
 
         _stack = self.root.loadingStack
         _stack.append(self)
@@ -492,8 +493,8 @@ class TopObject(XmlLoaderABC):
         """Save the apiTopObject to the xml file defined by self.path
         """
         if self.apiTopObject is None:
-            getLogger().warning(
-                f'{consoleStyle.fg.red}Cannot save {self._path}: undefined apiTopObject{consoleStyle.reset}')
+            getLogger().warning(f'{consoleStyle.fg.red}Cannot save {self._path}: '
+                                f'undefined apiTopObject{consoleStyle.reset}')
             return
 
         if self.apiTopObject.isDeleted:
@@ -520,8 +521,8 @@ class TopObject(XmlLoaderABC):
         """Save the apiTopObject to the xml file defined by self.path / CCPN_BACKUPS_DIRECTORY
         """
         if self.apiTopObject is None:
-            getLogger().warning(
-                f'{consoleStyle.fg.red}Cannot save {self._path}: undefined apiTopObject{consoleStyle.reset}')
+            getLogger().warning(f'{consoleStyle.fg.red}Cannot save {self._path}: '
+                                f'undefined apiTopObject{consoleStyle.reset}')
             return
         if self.apiTopObject.isDeleted:
             # ignore deleted objects
@@ -1267,8 +1268,8 @@ class XmlLoader(XmlLoaderABC):
             if not self.isV2:
                 raise RuntimeError(f'XmlLoader.loadProject: {es}') from es
 
-            self.logger.debug(
-                f'XmlLoader.loadProject: loading "{_projectXml}" failed on first try; retrying patial load')
+            self.logger.debug(f'XmlLoader.loadProject: loading "{_projectXml}" '
+                              f'failed on first try; retrying patial load')
             self._loadMemopsFromXml(_projectXml, partialLoad=True)
 
         if self.memopsRoot is None:

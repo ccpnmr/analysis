@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-23 12:46:57 +0100 (Mon, September 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-25 18:43:30 +0100 (Wed, September 25, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -27,12 +27,12 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-import os
+# import os
 from collections import OrderedDict
 import pandas as pd
-from PyQt5 import QtWidgets, QtCore, QtGui, Qt
+from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
-from copy import deepcopy, copy
+from copy import deepcopy
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD, LORENTZIANMETHOD
 from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
@@ -52,22 +52,23 @@ from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.HLine import HLine, LabeledHLine
 from ccpn.ui.gui.widgets.table.Table import Table
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR, \
-    getFontHeight, getSystemFonts, getFont, getSystemFont, TABLEFONT, updateSystemFonts
+from ccpn.ui.gui.widgets.Font import (DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR, getFontHeight,
+                                      getSystemFonts, getFont, getSystemFont, TABLEFONT, updateSystemFonts)
 from ccpn.ui.gui.widgets.CompoundWidgets import ButtonCompoundWidget
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-from ccpn.ui.gui.widgets.FileDialog import SpectrumFileDialog, ProjectFileDialog, AuxiliaryFileDialog, \
-    LayoutsFileDialog, MacrosFileDialog, PluginsFileDialog, PipelineFileDialog, ExecutablesFileDialog, \
-    ProjectSaveFileDialog
+from ccpn.ui.gui.widgets.FileDialog import (SpectrumFileDialog, ProjectFileDialog, AuxiliaryFileDialog,
+                                            LayoutsFileDialog, MacrosFileDialog, PluginsFileDialog, PipelineFileDialog,
+                                            ExecutablesFileDialog, ProjectSaveFileDialog)
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
 # from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
-from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
+from ccpn.ui.gui.guiSettings import (COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST,
+                                     ZPlaneNavigationModes)
 from ccpn.ui.gui.lib.GuiPath import PathEdit, VALIDFILE
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLFONT_DEFAULTSIZE, _OLDGLFONT_SIZES
 from ccpn.util.Logging import getLogger
-from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, colourNameNoSpace, _setColourPulldown
+from ccpn.util.Colour import (spectrumColours, addNewColour, fillColourPulldown, colourNameNoSpace, _setColourPulldown)
 from ccpn.util.UserPreferences import UserPreferences
 # from ccpn.util.Common import camelCaseToString
 from ccpn.util.Path import aPath
@@ -107,7 +108,6 @@ PROFILING_SORTINGS = OrderedDict([  # (arg to go on script, tipText)
     ('nfl', 'name/file/line'),
     ('stdname', 'standard name'),
     ])
-
 
 DefaultProfileLines = .2  # % of tot lines to be printed when profiling
 DefaultProfileMaxNoLines = 10  # Max number of lines to be printed when profiling
@@ -283,7 +283,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         revertState = False
         allChanges = True if self._changes else False
 
-        return changeState(self, allChanges, applyState, revertState, self._okButton, self._applyButton, self._revertButton, self._currentNumApplies)
+        return changeState(self, allChanges, applyState, revertState, self._okButton, self._applyButton,
+                           self._revertButton, self._currentNumApplies)
 
     def getActiveTabList(self):
         """Return the list of active tabs
@@ -461,7 +462,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
             if specDisplay.strips and updateSpectrumDisplays:
 
                 if not specDisplay.is1D:
-                    specDisplay.zPlaneNavigationMode = ZPlaneNavigationModes(self.application.preferences.general.zPlaneNavigationMode).dataValue
+                    specDisplay.zPlaneNavigationMode = ZPlaneNavigationModes(
+                            self.application.preferences.general.zPlaneNavigationMode).dataValue
                     specDisplay.attachZPlaneWidgets()
                 specDisplay._stripDirectionChangedInSettings(self.application.preferences.general.stripArrangement)
                 # specDisplay.setVisibleAxes()
@@ -509,11 +511,13 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.autoSaveLayoutOnQuitBox = _makeCheckBox(parent, row=row, text="Auto-save on 'Quit'",
-                                                     callback=partial(self._queueToggleGeneralOptions, 'autoSaveLayoutOnQuit'))
+                                                     callback=partial(self._queueToggleGeneralOptions,
+                                                                      'autoSaveLayoutOnQuit'))
 
         row += 1
         self.restoreLayoutOnOpeningBox = _makeCheckBox(parent, row=row, text="Restore on 'Open'",
-                                                       callback=partial(self._queueToggleGeneralOptions, 'restoreLayoutOnOpening'))
+                                                       callback=partial(self._queueToggleGeneralOptions,
+                                                                        'restoreLayoutOnOpening'))
 
         #====== Auto Backups ======
         row += 1
@@ -521,7 +525,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.autoBackupEnabledBox = _makeCheckBox(parent, row=row, text="Auto backup",
-                                                  callback=partial(self._queueToggleGeneralOptions, 'autoBackupEnabled'))
+                                                  callback=partial(self._queueToggleGeneralOptions,
+                                                                   'autoBackupEnabled'))
 
         row += 1
         self.autoBackupFrequencyLabel = _makeLabel(parent, text="Backup frequency (mins)", grid=(row, 0))
@@ -561,6 +566,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.backupSaveCountData.setToolTip(tTip)
         self.backupSaveCountData.setMinimumWidth(LineEditsMinimumWidth)
         self.backupSaveCountData.valueChanged.connect(self._queueSetBackupSaveCount)
+
+        row += 1
+        self._backupButton = _makeButton(parent, text='', row=row,
+                                         buttonText='Clean-up backups',
+                                         toolTip='Manually clean up auto- and user-backups in this project',
+                                         callback=self._queueShowBackupsDialog)
 
         #====== Paths ======
         row += 1
@@ -716,7 +727,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useOnlineDocumentation.setEnabled(False)
 
         row += 1
-        self.closeSpectrumDisplayOnLastSpectrum = _makeCheckBox(parent, row=row, text="Close spectrum display on last spectrum",
+        self.closeSpectrumDisplayOnLastSpectrum = _makeCheckBox(parent, row=row,
+                                                                text="Close spectrum display on last spectrum",
                                                                 callback=self._queueSetCloseSpectrumDisplayOnLastSpectrum,
                                                                 toolTip="Close spectrum displays if the last spectrum has been removed or deleted")
 
@@ -801,7 +813,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         btn = ButtonCompoundWidget(parent, grid=(row, 1), gridSpan=(1, 2),
-                                   text=' update printing-fonts ', buttonAlignment='right', icon=Icon('icons/redo'), enabled=True,
+                                   text=' update printing-fonts ', buttonAlignment='right', icon=Icon('icons/redo'),
+                                   enabled=True,
                                    minimumWidths=(25, 25, 25), callback=self._updateAvailableFonts)
         btn.setToolTip('Update the current printing-fonts if there are new fonts available')
 
@@ -815,14 +828,15 @@ class PreferencesPopup(CcpnDialogMainWidget):
         _makeLine(parent, grid=(row, 0), text="Macro Saving")
         row += 1
         self.macroAutoSaveBox = _makeCheckBox(parent, text="Autosave Macros", row=row,
-                                         callback=partial(self._queueToggleGeneralOptions, 'macroAutosave'))
+                                              callback=partial(self._queueToggleGeneralOptions, 'macroAutosave'))
 
         #==== Default Profiler Settings ====#
         row += 1
         _makeLine(parent, grid=(row, 0), text="Default Profiler Settings")
         row += 1
         self.safeProfileFileCheckBox = _makeCheckBox(parent, text="Save Profiler to disk", row=row,
-                                                     callback=partial(self._queueToggleGeneralOptions, 'macroSaveProfile'))
+                                                     callback=partial(self._queueToggleGeneralOptions,
+                                                                      'macroSaveProfile'))
         row += 1
         self.sortProfileFilePulldownLabel = _makeLabel(parent, text="Profiler output sorting", grid=(row, 0))
         self.sortProfileFilePulldown = PulldownList(parent, grid=(row, 1), hAlign='l')
@@ -854,11 +868,22 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _changeShowLines(self, value):
         self.preferences.general.macroShowLines = value
 
-    @queueStateChange(_verifyPopupApply)
+    def _queueShowBackupsDialog(self):
+        self._setShowBackupsDialog()
+
+        # return a 'null' function so that the revert/okay buttons appear correctly
+        return lambda: True
+
+    def _setShowBackupsDialog(self):
+        from ccpn.ui.gui.popups.CleanupBackups import CleanupBackups
+
+        popup = CleanupBackups(parent=self, mainWindow=self.mainWindow)
+        popup.exec_()
+
     def _queueShowAllDialogs(self):
         self._setShowAllDialogs()
 
-        # return a 'null' function so that the revert/ok buttons appear correctly
+        # return a 'null' function so that the revert/OK buttons appear correctly
         return lambda: True
 
     def _setShowAllDialogs(self):
@@ -871,7 +896,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _queueShowAllTips(self):
         self._setShowAllTips()
 
-        # return a 'null' function so that the revert/ok buttons appear correctly
+        # return a 'null' function so that the revert/OK buttons appear correctly
         return lambda: True
 
     def _setShowAllTips(self):
@@ -959,7 +984,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.glFontSizeData.setCurrentIndex(self.glFontSizeData.findText(str(prefApp.spectrumDisplayFontSize)))
 
         self.glAxisFontSizeData.addItems([str(val) for val in _OLDGLFONT_SIZES])
-        self.glAxisFontSizeData.setCurrentIndex(self.glAxisFontSizeData.findText(str(prefApp.spectrumDisplayAxisFontSize)))
+        self.glAxisFontSizeData.setCurrentIndex(
+                self.glAxisFontSizeData.findText(str(prefApp.spectrumDisplayAxisFontSize)))
 
         self.showAllDialogs.setEnabled(True)
         self.showTipsAtStartUp.setChecked(prefGen.showTipOfTheDay)
@@ -984,7 +1010,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showLinesPulldown.addItems(ShowMaxLines.keys())
         self.showLinesPulldown.setCurrentIndex(self.showLinesPulldown.findText(prefGen.macroShowLines))
 
-
     def _populate(self):
         """Populate the widgets in the tabs
         """
@@ -1007,15 +1032,15 @@ class PreferencesPopup(CcpnDialogMainWidget):
             fontList = fontString.split(',')
             if len(fontList) == 10:
                 name, size, _, _, _, _, _, _, _, _ = fontList
-                type = None
+                tp = None
             elif len(fontList) == 11:
-                name, size, _, _, _, _, _, _, _, _, type = fontList
+                name, size, _, _, _, _, _, _, _, _, tp = fontList
             else:
-                name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
+                name, size, tp = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
         except Exception:
-            name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
+            name, size, tp = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
 
-        fontName = f'{name}, {size}pt, {type}' if type else f'{name}, {size}pt'
+        fontName = f'{name}, {size}pt, {tp}' if tp else f'{name}, {size}pt'
         widget._fontString = fontString
         widget.setText(fontName)
 
@@ -1030,7 +1055,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _updateFontTable(table):
         """Update the fonts in the table
         """
-        db = sorted((fnt, '!@£$%&*(),.; The Quick brown fox jumped over the lazy dog, 0123456789') for fnt in getSystemFonts())
+        db = sorted((fnt, '!@£$%&*(),.; The Quick brown fox jumped over the lazy dog, 0123456789') for fnt in
+                    getSystemFonts())
         table.updateDf(pd.DataFrame(db, columns=['name', 'font']))
 
         # set the font-type for the second column to match the font-name
@@ -1074,7 +1100,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.proxyPortData.setText(str(self.preferences.proxySettings.proxyPort))
         self.useProxyPasswordBox.setChecked(self.preferences.proxySettings.useProxyPassword)
         self.proxyUsernameData.setText(str(self.preferences.proxySettings.proxyUsername))
-        self.proxyPasswordData.setText(self._userPreferences.decodeValue(str(self.preferences.proxySettings.proxyPassword)))
+        self.proxyPasswordData.setText(
+                self._userPreferences.decodeValue(str(self.preferences.proxySettings.proxyPassword)))
 
         # set the enabled state of some settings boxes
         self._enableProxyButtons()
@@ -1182,7 +1209,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.volumeIntegralLimitData.set(self.preferences.general.volumeIntegralLimit)
 
         multipletAveraging = self.preferences.general.multipletAveraging
-        self.multipletAveraging.setIndex(MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
+        self.multipletAveraging.setIndex(
+                MULTIPLETAVERAGINGTYPES.index(
+                        multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
 
         self.useSearchBoxModeBox.setChecked(self.preferences.general.searchBoxMode)
         self.useSearchBoxDoFitBox.setChecked(self.preferences.general.searchBoxDoFit)
@@ -1323,16 +1352,18 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                      callback=self._queueSetZPlaneNavigationMode,
                                                      direction='h',
                                                      grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                                     tipTexts=('Plane navigation tools are located at the bottom of the spectrumDisplay,\nand will operate on the selected strip in that spectrumDisplay',
-                                                               'Plane navigation tools are located at the bottom of each strip',
-                                                               'Plane navigation tools are displayed in the upper-left corner of each strip'),
+                                                     tipTexts=(
+                                                         'Plane navigation tools are located at the bottom of the spectrumDisplay,\nand will operate on the selected strip in that spectrumDisplay',
+                                                         'Plane navigation tools are located at the bottom of each strip',
+                                                         'Plane navigation tools are displayed in the upper-left corner of each strip'),
                                                      )
         self.zPlaneNavigationModeLabel.setToolTip('Select where the Plane navigation tools are located')
 
         row += 1
         self.useApplyToSpectrumDisplaysLabel = _makeLabel(parent, text="Apply to open spectrum displays", grid=(row, 0))
         self.useApplyToSpectrumDisplaysBox = CheckBox(parent, grid=(row, 1))
-        self.useApplyToSpectrumDisplaysBox.toggled.connect(partial(self._queueApplyToSpectrumDisplays, 'applyToSpectrumDisplays'))
+        self.useApplyToSpectrumDisplaysBox.toggled.connect(partial(self._queueApplyToSpectrumDisplays,
+                                                                   'applyToSpectrumDisplays'))
 
         #====== Aspect ratios ======
         row += 1
@@ -1367,7 +1398,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.spectrumScalingLabel = _makeLabel(parent, text="Single step scaling factor",
                                                tipText='Set the single step for rescaling a current spectrum using the shortcuts.',
                                                grid=(row, 0))
-        self.spectrumScalingData = ScientificDoubleSpinBox(parent, step=0.01, min=None, max=None, grid=(row, 1), hAlign='l')
+        self.spectrumScalingData = ScientificDoubleSpinBox(parent, step=0.01, min=None, max=None, grid=(row, 1),
+                                                           hAlign='l')
         self.spectrumScalingData.setMinimumWidth(LineEditsMinimumWidth)
         self.spectrumScalingData.valueChanged.connect(self._queueSetSpectrumScaling)
 
@@ -1541,7 +1573,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.peakPicker1dData.currentIndexChanged.connect(self._queueChangePeakPicker1dIndex)
 
         row += 1
-        self.dropFactorLabel = _makeLabel(parent, text="1D Peak picking drop (%)", tipText='Increase to filter out more', grid=(row, 0))
+        self.dropFactorLabel = _makeLabel(parent, text="1D Peak picking drop (%)",
+                                          tipText='Increase to filter out more', grid=(row, 0))
         self.peakFactor1D = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=-100, max=100)
         self.peakFactor1D.setMinimumWidth(LineEditsMinimumWidth)
         self.peakFactor1D.valueChanged.connect(self._queueSetDropFactor1D)
@@ -1578,12 +1611,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         self.multipletSymbolsEnabledLabel = _makeLabel(parent, text="Show multiplet symbols", grid=(row, 0))
         self.multipletSymbolsEnabledData = CheckBox(parent, grid=(row, 1))
-        self.multipletSymbolsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'multipletSymbolsEnabled'))
+        self.multipletSymbolsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions,
+                                                                 'multipletSymbolsEnabled'))
 
         row += 1
         self.multipletLabelsEnabledLabel = _makeLabel(parent, text="Show multiplet labels", grid=(row, 0))
         self.multipletLabelsEnabledData = CheckBox(parent, grid=(row, 1))
-        self.multipletLabelsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'multipletLabelsEnabled'))
+        self.multipletLabelsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions,
+                                                                'multipletLabelsEnabled'))
 
         row += 1
         self.aliasEnabledLabel = _makeLabel(parent, text="Show aliased peaks", grid=(row, 0))
@@ -1608,12 +1643,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         self.peakArrowsEnabledLabel = _makeLabel(parent, text="Show peak arrows", grid=(row, 0))
         self.peakArrowsEnabledData = CheckBox(parent, grid=(row, 1))
-        self.peakArrowsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'peakArrowsEnabled'))
+        self.peakArrowsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions,
+                                                           'peakArrowsEnabled'))
 
         row += 1
         self.multipletArrowsEnabledLabel = _makeLabel(parent, text="Show multiplet arrows", grid=(row, 0))
         self.multipletArrowsEnabledData = CheckBox(parent, grid=(row, 1))
-        self.multipletArrowsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'multipletArrowsEnabled'))
+        self.multipletArrowsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions,
+                                                                'multipletArrowsEnabled'))
 
         #====== Peak Fitting ======
         row += 1
@@ -1674,7 +1711,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.annotationsLabel = _makeLabel(parent, text="Label", grid=(row, 0))
-        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Peak Pid', 'ClusterId', 'Annotation'],
+        self.annotationsData = RadioButtons(parent,
+                                            texts=['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Peak Pid', 'ClusterId',
+                                                   'Annotation'],
                                             callback=self._queueSetAnnotations,
                                             direction='h',
                                             grid=(row, 1), hAlign='l', gridSpan=(1, 2),
@@ -1709,7 +1748,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         _texts = ['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Multiplet Pid', 'ClusterId', 'Annotation']
-        _names = ['annMDS_Short', 'annMDS_Full', 'annMDS_Pid', 'annMDS_Minimal', 'annMDS_Id', 'annMDS_ClusterId', 'annMDS_Annotation']
+        _names = ['annMDS_Short', 'annMDS_Full', 'annMDS_Pid', 'annMDS_Minimal', 'annMDS_Id', 'annMDS_ClusterId',
+                  'annMDS_Annotation']
 
         self.multipletAnnotationLabel = Label(parent, text="Label", hAlign='r', grid=(row, 0))
         self.multipletAnnotationData = RadioButtons(parent, texts=_texts,
@@ -1862,7 +1902,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         except Exception as es:
             raise RuntimeError(f'{external} does not contain the correct widgets')
 
-    def _testExternalProgram(self, program):
+    @staticmethod
+    def _testExternalProgram(program):
         import subprocess
 
         try:
@@ -1944,7 +1985,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _getAuxiliaryFilesPath(self):
         currentDataPath = aPath(self.auxiliaryFilesData.text() or '~')
         currentDataPath = currentDataPath if currentDataPath.exists() else aPath('~')
-        dialog = AuxiliaryFileDialog(parent=self, acceptMode='select', directory=currentDataPath, _useDirectoryOnly=True)
+        dialog = AuxiliaryFileDialog(parent=self, acceptMode='select', directory=currentDataPath,
+                                     _useDirectoryOnly=True)
         dialog._show()
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
@@ -2512,7 +2554,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Set the default peak picker for 1d spectra
         """
         self.preferences.general.peakPicker1d = value
-        spectra =  [sp for sp in  self.project.spectra if sp.dimensionCount  == 1]
+        spectra = [sp for sp in self.project.spectra if sp.dimensionCount == 1]
         self._updatePeakPickerOnSpectra(value, spectra)
 
     @queueStateChange(_verifyPopupApply)
@@ -2525,7 +2567,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Set the default peak picker for Nd spectra
         """
         self.preferences.general.peakPickerNd = value
-        spectra =  [sp for sp in  self.project.spectra if sp.dimensionCount  > 1]
+        spectra = [sp for sp in self.project.spectra if sp.dimensionCount > 1]
         self._updatePeakPickerOnSpectra(value, spectra)
 
     def _updatePeakPickerOnSpectra(self, value, spectra):
@@ -2533,13 +2575,13 @@ class PreferencesPopup(CcpnDialogMainWidget):
         from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPickerTypes
 
         PeakPicker = getPeakPickerTypes().get(value)
-        if PeakPicker is None: # Don't use a fetch or fallback to default. User should select one.
+        if PeakPicker is None:  # Don't use a fetch or fallback to default. User should select one.
             raise RuntimeError(f'Cannot find a PeakPicker called {value}.')
         getLogger().info(f'Setting the {value} PeakPicker to Spectra')
         with undoBlock():
             for sp in spectra:
                 if sp.peakPicker and sp.peakPicker.peakPickerType == value:
-                    continue # is the same. no need to reset.
+                    continue  # is the same. no need to reset.
                 sp.peakPicker = None
                 thePeakPicker = PeakPicker(spectrum=sp)
                 sp.peakPicker = thePeakPicker

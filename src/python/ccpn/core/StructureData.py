@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:49:49 +0100 (Thu, September 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-20 19:28:49 +0100 (Fri, September 20, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -350,6 +350,18 @@ class StructureData(AbstractWrapperObject):
     def _getAllWrappedData(cls, parent: Project) -> list:
         """get wrappedData for all NmrConstraintStores linked to NmrProject"""
         return parent._wrappedData.sortedNmrConstraintStores()
+
+    def _finaliseAction(self, action: str, **actionKwds):
+        """Spawn _finaliseAction notifiers for restraint/violationTables.
+        """
+        if not super()._finaliseAction(action, **actionKwds):
+            return
+
+        if action in {'create', 'delete'}:
+            for rt in self.restraintTables:
+                rt._finaliseAction(action, **actionKwds)
+            for vt in self.violationTables:
+                vt._finaliseAction(action, **actionKwds)
 
     @classmethod
     def _restoreObject(cls, project, apiObj):

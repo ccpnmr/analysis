@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-09-23 10:33:43 +0100 (Mon, September 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-26 12:14:57 +0100 (Thu, September 26, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -258,6 +258,10 @@ class Preferences(AttrDict):
     def _updateOldPrefs(prefs):
         """update any changed preferences to ensure correct type
         """
-        # update project path to use new format
+        # 3.2.7
         if prefs.general.useProjectPath is True:
+            # previously checkbox now Key
             prefs.general.useProjectPath = 'Alongside'
+        elif prefs.general.useProjectPath is False:
+            # shouldn't reach this, as cur/prev default
+            prefs.general.useProjectPath = 'User-defined'

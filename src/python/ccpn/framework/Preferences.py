@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-09-26 12:14:57 +0100 (Thu, September 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-26 15:12:49 +0100 (Thu, September 26, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -28,14 +28,17 @@ __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
 #=========================================================================================
 
 import json
+from itertools import chain
 
 from ccpn.ui.gui.guiSettings import FONTLIST
 from ccpn.util.AttrDict import AttrDict
+from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import singleton
 from ccpn.util.Path import aPath
 from ccpn.util.Common import uniquify, isMacOS, isLinux
 
 from ccpn.framework.PathsAndUrls import (userPreferencesPath,
+                                         userPreferencesPathInvalid,
                                          userPreferencesDirectory,
                                          defaultPreferencesPath)
 from ccpn.framework.Application import getApplication
@@ -121,6 +124,7 @@ class Preferences(AttrDict):
         if _prefs := self._readPreferencesFile(userPreferencesPath):
             _prefs["_lastPath"] = self._lastPath  # forces correct path
             self._recursiveUpdate(theDict=self, updateDict=_prefs)
+            self._validatePrefs(_prefs)
         # just some patches to the data
         self.recentMacros = uniquify(self.recentMacros)
         return _prefs
@@ -265,3 +269,39 @@ class Preferences(AttrDict):
         elif prefs.general.useProjectPath is False:
             # shouldn't reach this, as cur/prev default
             prefs.general.useProjectPath = 'User-defined'
+
+    def _validatePrefs(self, prefs):
+        """Validated preferences are of the correct type
+         compared to the default
+
+         :param prefs: preferences dict to be checked
+         """
+        defPref = self._getDefaultPreferences()
+        invalidPrefs = False
+        try:
+            # should probably make this recursive to be more thorough
+            for subDictKey in list(chain(prefs)):
+                subDict = prefs[subDictKey]
+                if isinstance(subDict, (AttrDict, dict)):
+                    for key, value in subDict.items():
+                        if not isinstance(value, type(defPref[subDictKey][key])):
+                            # This is the only default 'null' value
+                            if key is "traceColour":
+                                continue
+                            invalidPrefs = True
+                            self[subDictKey][key] = defPref[subDictKey][key]
+                            getLogger().warning(f'Preference {key} incorrect type {type(value)}, \
+                                                  expected: {type(defPref[subDictKey][key])}')
+        except KeyError as e:
+            # Catch any bigger inconsistencies in the dictionaries
+            getLogger().error(f'Preferences validation error: {repr(e)}')
+
+        if invalidPrefs:
+            if not (invDir := userPreferencesPathInvalid).exists():
+                invDir.mkdir(parents=True, exist_ok=True)
+
+            invFile = invDir / f'v3settings-{prefs._applicationVersion}.json'
+            with invFile.open(mode='w') as fp:
+                json.dump(prefs, fp, indent=4)
+
+            getLogger().warning(f'Invalid Settings file backed-up ({invFile.asString()})')

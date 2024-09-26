@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-09-05 15:46:55 +0100 (Thu, September 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-24 15:57:23 +0100 (Tue, September 24, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -288,7 +288,7 @@ class GuiBase(object):
         ms.append(('Molecules', [
             ("Load ChemComp from Xml...", self._loadDataCallback),
             (),
-            ("Chain from FASTA...", self._loadDataCallback),
+            ("Chain from FASTA...", self._loadFastaCallback),
             (),
             ("New Chain...", self.showCreateChainPopup),
             ("Inspect...", self.inspectMolecule, [('enabled', False)]),
@@ -418,21 +418,27 @@ class GuiBase(object):
         """
         self.ui.loadProject()
 
+    def _loadFastaCallback(self):
+        """menu callback; passes correct dataLoader to _loadDataIgnoreExtension
+        """
+        from ccpn.framework.lib.DataLoaders.FastaDataLoader import FastaDataLoader
+        self._loadDataIgnoreExtension(FastaDataLoader)
+
     def _importNefCallback(self):
-        """menu callback; use ui.loadData to do the lifting
+        """menu callback; passes correct dataLoader to _loadDataIgnoreExtension
         """
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
-
-        # self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
         self._loadDataIgnoreExtension(NefDataLoader)
 
+        # self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
+
     def _loadNMRStarFileCallback(self):
-        """menu callback; use ui.loadData to do the lifting
+        """menu callback; passes correct dataLoader to _loadDataIgnoreExtension
         """
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
+        self._loadDataIgnoreExtension(StarDataLoader)
 
         # self.ui.loadData(formatFilter=(StarDataLoader.dataFormat,))
-        self._loadDataIgnoreExtension(StarDataLoader)
 
     def _loadDataIgnoreExtension(self, dataLoader=None) -> list:
         """Load the data defined by dataLoader, provides file dialog.

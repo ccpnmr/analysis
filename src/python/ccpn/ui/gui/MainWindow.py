@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-09-18 17:06:57 +0100 (Wed, September 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-27 14:17:01 +0100 (Fri, September 27, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -479,6 +479,10 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             genPrefs.userWorkingPath = project.projectPath.parent.asString()
         elif genPrefs.useProjectPath == 'Inside':
             genPrefs.userWorkingPath = project.projectPath.asString()
+
+        # if temporary file set working path to user defined
+        if 'temp' in project.projectPath.asString().lower():
+            genPrefs.userWorkingPath = genPrefs.userSetWorkingPath
 
         from copy import deepcopy
 

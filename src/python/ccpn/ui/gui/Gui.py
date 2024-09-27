@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-06 11:32:58 +0100 (Fri, September 06, 2024) $"
-__version__ = "$Revision: 3.2.6 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-09-27 14:17:01 +0100 (Fri, September 27, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -956,6 +956,12 @@ class Gui(Ui):
         self.mainWindow._updateWindowTitle()
         self.application._getRecentProjectFiles()  # this will update the preferences-list
         self.mainWindow._fillRecentProjectsMenu()  # Update the menu
+
+        # sets working path to current path if required
+        if (genPrefs := self.application.preferences.general).useProjectPath == 'Alongside':
+            genPrefs.userWorkingPath = self.project.projectPath.parent.asString()
+        elif genPrefs.useProjectPath == 'Inside':
+            genPrefs.userWorkingPath = self.project.projectPath.asString()
 
         successMessage = f'Project successfully saved to "{self.project.path}"'
         # MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)

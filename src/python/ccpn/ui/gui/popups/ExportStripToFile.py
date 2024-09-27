@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:23:04 +0100 (Fri, August 23, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-09-26 15:11:41 +0100 (Thu, September 26, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -2001,7 +2001,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             return partial(self._setFontSize, _value)
 
     def _setFontSize(self, value):
-        self.printSettings.fontSize = value
+        self.printSettings.fontSize = int(value)
 
     @queueStateChange(_verifyPopupApply)
     def _queueFontNameCallback(self, _value):

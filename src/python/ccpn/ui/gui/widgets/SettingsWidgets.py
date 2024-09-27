@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-25 09:58:47 +0100 (Wed, September 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-09-27 11:32:29 +0100 (Fri, September 27, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -1813,10 +1813,10 @@ class ObjectSelectionWidget(ListCompoundWidget):
                                             callback=self._objDeletedCallback,
                                             setterObject=self)
 
-            self._notifierCreate = Notifier(theObject=self.project,
-                                            triggers=[Notifier.CREATE],
+            self._notifierCreate = Notifier(theObject=self.project, trigger=Notifier.CREATE,
                                             targetName=self.KLASS.className,
-                                            callback=self._objCreatedCallback)
+                                            callback=self._objCreatedCallback,
+                                            setterObject=self)
 
         else:
             self._notifierRename = self._notifierDelete = None
@@ -1833,6 +1833,9 @@ class ObjectSelectionWidget(ListCompoundWidget):
         if self._notifierDelete:
             self._notifierDelete.unRegisterNotifier()
             self._notifierDelete = None
+        if self._notifierCreate:
+            self._notifierCreate.unRegisterNotifier()
+            self._notifierCreate = None
 
     def select(self, item, blockSignals=False):
         """Convenience: Set item in Pulldown; works with text or item"""

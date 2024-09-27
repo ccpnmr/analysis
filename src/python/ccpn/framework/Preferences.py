@@ -289,14 +289,16 @@ class Preferences(AttrDict):
                             if key == "traceColour":
                                 continue
                             invalidPrefs = True
+                            # set value to default if of wrong type.
                             self[subDictKey][key] = defPref[subDictKey][key]
-                            getLogger().warning(f'Preference {key} incorrect type {type(value)}, \
-                                                  expected: {type(defPref[subDictKey][key])}')
+                            getLogger().warning(f'Preference {key} should be type: {type(defPref[subDictKey][key])} \
+                                                setting to default.')
         except KeyError as e:
             # Catch any bigger inconsistencies in the dictionaries
             getLogger().error(f'Preferences validation error: {repr(e)}')
 
         if invalidPrefs:
+            # saves a copy of the bad preferences for the user.
             if not (invDir := userPreferencesPathInvalid).exists():
                 invDir.mkdir(parents=True, exist_ok=True)
 

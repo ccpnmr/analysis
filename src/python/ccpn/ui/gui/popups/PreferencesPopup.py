@@ -2648,7 +2648,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _setNumSideBands(self, value):
         """Set the value for number of sideband gridlines to display
         """
-        self.preferences.general.numSideBands = value
+        self.preferences.general.numSideBands = int(value)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetMatchAxisCode(self):

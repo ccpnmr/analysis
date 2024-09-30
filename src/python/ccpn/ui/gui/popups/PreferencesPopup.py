@@ -613,6 +613,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         self.userWorkingPathRadio = RadioButtons(parent,
                                                  texts=OPTIONS_DICT.values(),
+                                                 tipTexts=['An editable path defined by the user',
+                                                           'A non-editable path: the projects parent folder',
+                                                           'A non-editable path: the project folder'],
                                                  direction='h',
                                                  grid=(row, 1),
                                                  callback=self._queueRadioWorkingPath)

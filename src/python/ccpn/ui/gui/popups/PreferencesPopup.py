@@ -1693,9 +1693,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.aliasShadeLabel = _makeLabel(parent, text="Label opacity", grid=(row, 0))
         _sliderBox = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l')
         # self.aliasShadeData = Slider(parent, grid=(row, 1), hAlign='l')
-        Label(_sliderBox, text="0%", grid=(0, 0), hAlign='l')
+        # Label(_sliderBox, text="0%", grid=(0, 0), hAlign='l')
         self.aliasShadeData = Slider(_sliderBox, grid=(0, 1), hAlign='l')
-        Label(_sliderBox, text="100%", grid=(0, 2), hAlign='l')
+        self.shadeLabel = Label(_sliderBox, text="100%", grid=(0, 2), hAlign='l')
         self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)
         self.aliasShadeData.valueChanged.connect(self._queueSetAliasShade)
 
@@ -2471,6 +2471,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
     @queueStateChange(_verifyPopupApply)
     def _queueSetAliasShade(self, _value):
         value = int(self.aliasShadeData.get())
+        self.shadeLabel.setText(f'{value}%')
         if value != self.preferences.general.aliasShade:
             return partial(self._setAliasShade, value)
 

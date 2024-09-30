@@ -2064,8 +2064,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         if option is None:
             option = OPTIONS_DICT[self.userWorkingPathRadio.getIndex()]
 
-        # make text the previously user defined if in temporary file
-        if 'temp' in self.project.projectPath.asString().lower():
+        # make text the user defined if in temporary file
+        if self.project.isTemporary:
             option = "User-defined"
 
         match option:

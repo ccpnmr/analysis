@@ -2243,7 +2243,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         option = OPTIONS_DICT[self.userWorkingPathRadio.getIndex()]
         self._enableUserWorkingPath()
         if option != self.preferences.general.useProjectPath:
-            self._changeRadioWorkingPath(option)
+            return partial(self._changeRadioWorkingPath, option)
 
     def _changeRadioWorkingPath(self, option):
         self.preferences.general.useProjectPath = option

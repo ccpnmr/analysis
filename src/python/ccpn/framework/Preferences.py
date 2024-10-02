@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-09-26 15:12:49 +0100 (Thu, September 26, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-10-02 09:30:46 +0100 (Wed, October 02, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -286,7 +286,7 @@ class Preferences(AttrDict):
                     for key, value in subDict.items():
                         if not isinstance(value, type(defPref[subDictKey][key])):
                             # This is the only default 'null' value
-                            if key is "traceColour":
+                            if key == "traceColour":
                                 continue
                             invalidPrefs = True
                             self[subDictKey][key] = defPref[subDictKey][key]

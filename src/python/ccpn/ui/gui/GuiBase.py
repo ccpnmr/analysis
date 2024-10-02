@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-09-24 15:57:23 +0100 (Tue, September 24, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-10-02 09:59:39 +0100 (Wed, October 02, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -160,9 +160,11 @@ class GuiBase(object):
         self._menuSpec = ms = []
 
         ms.append(('File', [
-            ("New", self._newProjectCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("New", self._newProjectCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the caret on your
+            # keyboard.
             (),
-            ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the caret on your
+            # keyboard.
             ("Open Recent", ()),
 
             ("Load Data...", self._loadDataCallback, [('shortcut', 'ld')]),
@@ -188,6 +190,8 @@ class GuiBase(object):
             ("Summary", self._showProjectSummaryPopup),
             ("Archive", self._archiveProjectCallback, [('enabled', False)]),
             ("Restore From Archive...", self._restoreFromArchiveCallback, [('enabled', False)]),
+            ("View Backups...", self._viewBackupsCallback, [('shortcut', 'vb'), ('enabled', True)]),
+            ("Manual Backup", self._manualBackupCallback, [('shortcut', 'mb'), ('enabled', True)]),
             (),
             ("Preferences...", self._showApplicationPreferences, [('shortcut', '⌃,')]),
             (),
@@ -272,7 +276,7 @@ class GuiBase(object):
             ("Peak Collections...", self.showPeakCollectionsPopup, [('shortcut', 'sc')]),
             # (),
             ("Estimate Peak Volumes...", self.showEstimateVolumesPopup, [('shortcut', 'ev')]),
-            ("Estimate Current Peak Volumes", self.showEstimateCurrentVolumesPopup, [('shortcut', 'ec')]),
+            ("Estimate Current Peak Volumes...", self.showEstimateCurrentVolumesPopup, [('shortcut', 'ec')]),
             ("Reorder PeakList Axes...", self.showReorderPeakListAxesPopup, [('shortcut', 'rl')]),
             (),
             ("Make Strip Plot...", self.makeStripPlotPopup, [('shortcut', 'sp')]),
@@ -297,7 +301,7 @@ class GuiBase(object):
             (),
             ("Reference Chemical Shifts", self.showReferenceChemicalShifts, [('shortcut', 'rc')]),
             (),
-            ("Edit Molecular Bonds", self.showMolecularBondsPopup, ),
+            ("Edit Molecular Bonds...", self.showMolecularBondsPopup, ),
             ]
                    ))
 
@@ -528,6 +532,19 @@ class GuiBase(object):
             MessageDialog.showInfo('Restore from Archive',
                                    'Project restored as %s' % newProject.path)
 
+    def _viewBackupsCallback(self):
+        from ccpn.ui.gui.popups.CleanupBackups import CleanupBackups
+
+        popup = CleanupBackups(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+        popup.exec_()
+
+    @staticmethod
+    def _manualBackupCallback():
+        from ccpn.framework.Application import getApplication
+
+        if app := getApplication():
+            app._forceBackup()
+
     def _saveLayoutCallback(self):
         Layout.updateSavedLayout(self.ui.mainWindow)
         getLogger().info('Layout saved')
@@ -535,7 +552,6 @@ class GuiBase(object):
     def _saveLayoutAsCallback(self):
         path = _getSaveLayoutPath(self.mainWindow)
         try:
-            print(path)
             Layout.saveLayoutToJson(self.mainWindow, jsonFilePath=path)
             getLogger().info('Layout saved to %s' % path)
         except Exception as es:

@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-02 09:30:46 +0100 (Wed, October 02, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-10-02 11:17:23 +0100 (Wed, October 02, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -289,10 +289,14 @@ class Preferences(AttrDict):
                             if key == "traceColour":
                                 continue
                             invalidPrefs = True
-                            # set value to default if of wrong type.
-                            self[subDictKey][key] = defPref[subDictKey][key]
-                            getLogger().warning(f'Preference {key} should be type: {type(defPref[subDictKey][key])} \
-                                                setting to default.')
+                            try:
+                                self[subDictKey][key] = type(defPref[subDictKey][key])(value)
+                                getLogger().warning(f'Preference {key} type corrected to {type(defPref[subDictKey][key])}')
+                            except TypeError:
+                                # set value to default if of wrong type.
+                                self[subDictKey][key] = defPref[subDictKey][key]
+                                getLogger().warning(f'Preference {key} should be type: {type(defPref[subDictKey][key])} \
+                                                    setting to default.')
         except KeyError as e:
             # Catch any bigger inconsistencies in the dictionaries
             getLogger().error(f'Preferences validation error: {repr(e)}')

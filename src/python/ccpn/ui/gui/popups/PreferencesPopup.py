@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-02 10:04:24 +0100 (Wed, October 02, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-10-03 10:40:59 +0100 (Thu, October 03, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -2021,7 +2021,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         of the radio buttons
         """
         option = OPTIONS_DICT[self.userWorkingPathRadio.getIndex()]
-        path = self.workingPathDataStore.path
+        path = self.workingPathDataStore.path.filepath
 
         if option == "User-defined":  # saves user set result in preferences dict
             self.preferences.general.userSetWorkingPath = path.asString()
@@ -2077,14 +2077,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
                 # else get from prefs as its radio button change.
                 if path:
                     self.workingPathDataStore = DataStore.newFromPath(
-                            path=aPath(self.userWorkingPathData.text()))
+                            path=aPath(self.userWorkingPathData.text()).filepath)
                 else:
                     self.workingPathDataStore = DataStore.newFromPath(
                             path=aPath(self.preferences.general.userSetWorkingPath))
             case "Alongside":
-                self.workingPathDataStore = DataStore.newFromPath(path=Path(self.project.path).parent)
+                self.workingPathDataStore = DataStore.newFromPath(path=Path(self.project.path.filepath).parent)
             case "Inside":
-                self.workingPathDataStore = DataStore.newFromPath(path=Path(self.project.path))
+                self.workingPathDataStore = DataStore.newFromPath(path=Path(self.project.path.filepath))
             case _:  # All other cases raise error.
                 raise RuntimeError(f'Invalid choice returned; This should not happen')
 

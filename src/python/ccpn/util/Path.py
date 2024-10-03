@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-25 13:11:20 +0100 (Wed, September 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-03 18:04:11 +0200 (Thu, October 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -69,7 +69,7 @@ class Path(_Path_):
 
     @property
     def filepath(self) -> Path:
-        """The folder without the filename
+        """:return: The folder of self without possible filename as a Path instance
         """
         return self if self.is_dir() else self.parent
 

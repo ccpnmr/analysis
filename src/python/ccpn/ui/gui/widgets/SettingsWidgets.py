@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-25 09:58:47 +0100 (Wed, September 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-02 09:30:47 +0100 (Wed, October 02, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -1853,7 +1853,7 @@ class ObjectSelectionWidget(ListCompoundWidget):
         if self._selectObjectInListCallback:
             self._selectObjectInListCallback()
 
-    def _objectWidgetChanged(self):
+    def _objectWidgetChanged(self, data=None):
         """Handle adding/removing items from object selection
         """
         if self._objectWidgetChangedCallback:

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-25 18:43:30 +0100 (Wed, September 25, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-02 10:04:24 +0100 (Wed, October 02, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -144,7 +144,7 @@ def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, 
 
     if (pref.general.autoBackupEnabled, pref.general.autoBackupFrequency) != lastBackup:
         # update the autoBackup with the new settings
-        self.application._updateAutoBackup()
+        self.application._updateAutoBackup(resetInterval=True)
 
     # update the current userWorkingPath in the active file dialogs
     if userWorkingPath:
@@ -595,7 +595,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self._backupButton = _makeButton(parent, text='', row=row,
-                                         buttonText='Clean-up backups',
+                                         buttonText='View backups',
                                          toolTip='Manually clean up auto- and user-backups in this project',
                                          callback=self._queueShowBackupsDialog)
 
@@ -2344,7 +2344,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _setAutoBackupFrequency(self, value):
         # raise NotImplementedError('AutoBackup is not available in the current release')
-        self.preferences.general.autoBackupFrequency = value
+        self.preferences.general.autoBackupFrequency = int(value)
 
     def _enableAutoBackupFrequency(self):
         # raise NotImplementedError('AutoBackup is not available in the current release')
@@ -2360,7 +2360,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return partial(self._setAutoBackupCount, value)
 
     def _setAutoBackupCount(self, value):
-        self.preferences.general.autoBackupCount = value
+        self.preferences.general.autoBackupCount = int(value)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetBackupSaveCount(self, _value):
@@ -2371,7 +2371,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return partial(self._setBackupSaveCount, value)
 
     def _setBackupSaveCount(self, value):
-        self.preferences.general.backupSaveCount = value
+        self.preferences.general.backupSaveCount = int(value)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetRegionPadding(self, _value):

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-22 14:42:25 +0100 (Wed, May 22, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-03 18:18:58 +0100 (Thu, October 03, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -762,7 +762,7 @@ class Multiplet(AbstractWrapperObject):
                             assign.append(ll[dim])
 
         for pk in self.peaks:
-            pk.assignDimensions(axisCodes, assignments)
+            pk.assignDimensions(axisCodes=axisCodes, values=assignments)
 
 #=========================================================================================
 # Connections to parents

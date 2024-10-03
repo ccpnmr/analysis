@@ -96,7 +96,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-07 12:17:46 +0100 (Wed, August 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-03 18:05:20 +0200 (Thu, October 03, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -407,13 +407,15 @@ class CEnum(Enum):
     # Json serialisation will store the value (and automatically revert to enum-value)
     # upon restore.
     """
-    def __init__(self, mapping, *args, **kwargs):
+    def __init__(self, mapping, alternatives: dict = None, *args, **kwargs):
         """
         :param mapping: A list, mapping-dict or DataEnum instance that defines the
                         mapping: i.e.
                         list, tuple: will yield a (index, item) dict
                         dict: should be (value, enum-value) dict
                         DataEnum: will yield a (value, name) dict
+        :param alternatives: an optional dict of (alternative, actual) key, value pairs.
+                             Used for correction of previous/different/'wrong' values
         :param args: optional arguments
         :param kwargs: optional keyword arguments
         """
@@ -426,6 +428,8 @@ class CEnum(Enum):
         else:
             raise ValueError(f'CEnum.__init__(): invalid mapping {mapping}')
 
+        self._alternatives = alternatives
+
         Enum.__init__(self, list(self._mapping.values()), *args, **kwargs)
 
     def validate(self, obj, value):
@@ -433,6 +437,10 @@ class CEnum(Enum):
         """
         if value is None and self.allow_none:
             return value
+
+        if self._alternatives is not None:
+            # see if this is an 'alternative' value and
+            value = self._alternatives.get(value, value)
 
         # Special provision for Enum types derived from DataEnum's
         if isinstance(value, DataEnum) or issubclass(value.__class__, DataEnum):
@@ -580,7 +588,7 @@ class _TypedList(list):
         """
         Validate an item
         :param item: the index, i.e. item, in the list
-        :param value: value for the item to be validated used self._itemTrait (if
+        :param value: value for the item to be validated using self._itemTrait (if
                       self._itemTrait is not None and not Any)
         :return: validated (and optionally converted) value
         :raises: ValueError, TypeError
@@ -590,10 +598,10 @@ class _TypedList(list):
 
         try:
             value = self._itemTrait.validate(self._obj, value)
-        except (TraitError, ValueError):
-            raise ValueError(f'{self._fullName}[{item}]: invalid value {repr(value)}, expected {self._itemTrait.info()}; got value "{value}"')
-        except TypeError:
-            raise ValueError(f'{self._fullName}[{item}]: invalid type, expected {self._itemTrait.info()}; got {_classType(value)} with value "{value}"')
+        except (TraitError, ValueError) as es:
+            raise ValueError(f'{self._fullName}[{item}]: invalid value {value!r}, expected {self._itemTrait.info()}')
+        except TypeError as es:
+            raise ValueError(f'{self._fullName}[{item}]: invalid type {_classType(value)} with value {value!r}, expected {self._itemTrait.info()}')
 
         return value
 

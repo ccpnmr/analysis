@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-10-03 10:40:59 +0100 (Thu, October 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-04 14:02:20 +0100 (Fri, October 04, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -2082,9 +2082,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
                     self.workingPathDataStore = DataStore.newFromPath(
                             path=aPath(self.preferences.general.userSetWorkingPath))
             case "Alongside":
-                self.workingPathDataStore = DataStore.newFromPath(path=Path(self.project.path.filepath).parent)
+                self.workingPathDataStore = DataStore.newFromPath(path=Path(self.project.path).filepath.parent)
             case "Inside":
-                self.workingPathDataStore = DataStore.newFromPath(path=Path(self.project.path.filepath))
+                self.workingPathDataStore = DataStore.newFromPath(path=Path(self.project.path).filepath)
             case _:  # All other cases raise error.
                 raise RuntimeError(f'Invalid choice returned; This should not happen')
 

@@ -96,7 +96,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-03 18:05:20 +0200 (Thu, October 03, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-07 19:44:44 +0100 (Mon, October 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -110,6 +110,7 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 import sys
 import pathlib
 import inspect
+import numpy as np
 
 from collections import OrderedDict
 from traitlets import \
@@ -547,6 +548,57 @@ class CList(List):
 
         else:
             raise ValueError(f'{self._fullName(obj)}: expected list or iterable, got {theList}')
+
+
+class CArray(TraitType, _CcpNmrTrait):
+    """An numpy ndarray with casting from any suitable iterable object as defined by
+    numpy.array
+    """
+
+    klass = np.ndarray
+    info_text = 'A numpy ndarray'
+
+    def __init__(self, *args, **kwargs):
+        TraitType.__init__(self, *args, **kwargs)
+        _CcpNmrTrait.__init__(self)
+
+    def validate(self, obj, value) -> np.ndarray:
+        """
+        Validate value; tries casting to numpy.array
+        :param obj: object containing trait
+        :param value: new value for the trait to be validated or None
+        :return: validated (and optionally converted) value
+        :raises: ValueError
+        """
+        if value is None and self.allow_none:
+            return None
+
+        if isinstance(value, np.ndarray):
+            return value
+
+        try:
+            value = np.array(value)
+        except Exception as es:
+            raise ValueError(f'{self._fullName(obj)}: casting into numpy array failed; {es}')
+
+        return value
+
+    class jsonHandler(CcpNmrJsonClassHandlerABC):
+        # encode / decode the ndarray as a list (of lists)
+        def encode(self, value):
+            _klass = self.trait.klass
+            if not isinstance(value, _klass):
+                raise TypeError(f'encode value: expected  {_classType(_klass)} instance; got {_classType(value)}')
+            _value = value.tolist()
+            return _value
+
+        def decode(self, value):
+            # decode value; i.e. a list of lists defining a numpy ndarray
+            _klass = self.trait.klass
+            if not _klass._isEncodedObject(value):
+                raise RuntimeError(f'decode value: error decoding and initialising {_classType(_klass)} instance')
+            _value = np.array(value)
+            return _value
 
 
 class _TypedList(list):

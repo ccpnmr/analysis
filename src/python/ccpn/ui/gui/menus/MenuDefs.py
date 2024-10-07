@@ -85,7 +85,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-18 14:14:00 +0100 (Wed, September 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-07 12:12:50 +0100 (Mon, October 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -292,11 +292,18 @@ class MenusDefs(Menu, _ApplicationProperties):
     Menu(SPECTRUM_MENU,
 
         Action('Load Spectra...', self._loadSpectraCallback, shortcut='ls'),
-        # Action("Spectrum Groups...", self._spectrumGroupsCallback, shortcut ='ss'), # multiple edit temporarly disabled
-        # Separator(),
         Action("Validate Paths...", self._validatePathsCallback, shortcut='vp', checkEnabled=_projectHasSpectra),
+        Action("Copy Spectra into Project...", self._copyToProjectCallback, checkEnabled=_projectHasSpectra),
+        Action("Convert...", self._convertSpectrumCallback, checkEnabled=_projectHasSpectra),
+        Action("Make Projection...", self._makeProjectionCallback, shortcut='pj', checkEnabled=_projectHasSpectra),
+
+        Separator(),
+        Action("New Spectrum Group...", self._newSpectrumGroupCallback, checkEnabled=_projectHasSpectra),
+        Action("Edit Spectrum Group...", self._editSpectrumGroupCallback, shortcut ='ss', checkEnabled=_projectHasSpectrumGroups),
+        Action("Pseudo-Spectrum to SpectrumGroup...", self._pseudoSpectrumCallback, checkEnabled=_projectHasPseudoSpectra),
+
+        Separator(),
         Action("Set Experiment Types...", self._experimentTypesCallback, shortcut='et', checkEnabled=_projectHasSpectra),
-        Action("Copy into Project...", self._copyToProjectCallback, checkEnabled=_projectHasSpectra),
 
         Separator(),
         Menu("Pick Peaks",
@@ -310,11 +317,6 @@ class MenusDefs(Menu, _ApplicationProperties):
         Action("Estimate Peak Volumes...", self._estimateVolumesCallback, shortcut='ev', checkEnabled=_projectHasPeaks),
         Action("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, shortcut='ec', checkEnabled=_projectHasPeaks),
         Action("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, shortcut='rl', checkEnabled=_projectHasSpectra),
-
-        Separator(),
-        Action("Pseudo-Spectrum to SpectrumGroup...", self._pseudoSpectrumCallback, checkEnabled=_projectHasSpectra),
-        Action("Make Projection...", self._makeProjectionCallback, shortcut='pj', checkEnabled=_projectHasSpectra),
-        Action("Convert...", self._convertSpectrumCallback, checkEnabled=_projectHasSpectra),
 
         Separator(),
         Action("Make Strip Plot...", self._makeStripPlotCallback, shortcut='sp', checkEnabled=_projectHasSpectra),
@@ -757,23 +759,23 @@ class MenusDefs(Menu, _ApplicationProperties):
         """
         self.mainWindow._showEstimateCurrentVolumesPopup()
 
-    def _spectrumGroupsCallback(self):
-        if not self.project.spectra:
-            getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
-            MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
+    def _editSpectrumGroupCallback(self):
+        from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
-        else:
-            from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+        _mainWindow = self.mainWindow
+        _popup = SpectrumGroupEditor(parent=_mainWindow, mainWindow=_mainWindow,
+                                     editMode=True,
+                                     obj=self.project.spectrumGroups[0])
+        _popup.exec_()
 
-            if not self.project.spectrumGroups:
-                #GST This seems to have problems MessageDialog wraps it which looks bad...
-                # MessageDialog.showWarning('Project has no Spectrum Groups.',
-                #                           'Create them using:\nSidebar → SpectrumGroups → <New SpectrumGroup>\n ')
-                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=False).exec_()
+    def _newSpectrumGroupCallback(self):
+        from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
-            else:
-                SpectrumGroupEditor(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, editMode=True,
-                                    obj=self.project.spectrumGroups[0]).exec_()
+        _mainWindow = self.mainWindow
+        _popup = SpectrumGroupEditor(parent=_mainWindow, mainWindow=_mainWindow,
+                                     editMode=False,
+                                     )
+        _popup.exec_()
 
     def _pseudoSpectrumCallback(self):
         if not self.project.spectra:
@@ -1486,6 +1488,23 @@ def _projectHasSpectra(node) -> bool:
     """
     project = getProject()
     return bool(project and project.spectra)
+
+
+def _projectHasPseudoSpectra(node) -> bool:
+    """callback to test if project has pseudo nD spectra
+    """
+    project = getProject()
+    if not project:
+        return False
+    _validSpectra = [sp for sp in project.spectra if sp._getPseudoDimension() != 0]
+    return bool(_validSpectra)
+
+
+def _projectHasSpectrumGroups(node) -> bool:
+    """callback to test if project has spectrumGroups
+    """
+    project = getProject()
+    return bool(project and project.spectrumGroups)
 
 
 def _projectHasChains(node) -> bool:

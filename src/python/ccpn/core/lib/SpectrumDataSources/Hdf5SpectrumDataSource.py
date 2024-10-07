@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-04 09:09:35 +0200 (Fri, October 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-07 11:21:23 +0100 (Mon, October 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -72,6 +72,15 @@ HDF5_DATATYPE_SPECTRUM_MATRIX = 'DataType_SpectrumData_Matrix'
 _hdf5DataTypes = {
     HDF5_DATATYPE_SPECTRUM_MATRIX : 'spectrumData',
 }
+
+#--------------------------------------------------------------------------------------------------
+# lzf compression seems not to yield any improvement, but rather a increase in file size;
+# gzip compression about 30% reductions, albeit at a great cost-penalty
+HDF5_COMPRESSION_GZIP = 'gzip'
+HDF5_COMPRESSION_LZF = 'lzf'
+HDF5_COMPRESSION_SZIP = 'szip'
+HDF5_COMPRESSION_MODES = (HDF5_COMPRESSION_GZIP, HDF5_COMPRESSION_LZF)  # 'szip' not in conda distribution
+
 #--------------------------------------------------------------------------------------------------
 
 
@@ -118,10 +127,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     defaultOpenWriteMode = 'w'  # creates, truncates if exists
     defaultAppendMode = 'a'
 
-    # lzf compression seems not to yield any improvement, but rather a increase in file size;
-    # gzip compression about 30% reductions, albeit at a great cost-penalty
-    compressionModes = ('lzf', 'gzip')  # 'szip' not in conda distribution
-    defaultCompressionMode = None  # hdf5 compression modes
+    _compressionMode = CEnum(mapping=HDF5_COMPRESSION_MODES, allow_none=True, default_value=None)
 
     _NONE = bytes(NONE_STR, 'utf8')
 
@@ -153,24 +159,47 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         dataset = self.spectrumData
         return dataset.attrs
 
-    def _createSpectrumDataMatrix(self):
+    def _createSpectrumDataMatrix(self, sparse=False, compressionMode=None):
         """Create the HDF5 spectrum data matrix at the location storage HDF5_DATATYPE_SPECTRUM_MATRIX
+        :param sparse: flag to
+        :param compressionMode: compression mode; defaults to None
         """
         dataSetKwds = {}
-        dataSetKwds.setdefault('fletcher32', True)
         dataSetKwds.setdefault('fillvalue', 0.0)
-        if self.defaultCompressionMode is not None and self.defaultCompressionMode in self.compressionModes:
-            dataSetKwds.setdefault('compression', self.defaultCompressionMode)
+
+        if compressionMode is not None:
+            self._compressionMode = compressionMode
+
+        if self._compressionMode is not None:
+            dataSetKwds.setdefault('compression', self._compressionMode)
             dataSetKwds.setdefault('fletcher32', False)
+        else:
+            dataSetKwds.setdefault('fletcher32', True)
+
+
+        if sparse:
+            _chunkSizes = {
+                1 : [64],
+                2 : [32]*2,
+                3 : [8]*3,
+                4 : [8]*4,
+                5 : [4]*5,
+                6 : [4]*6,
+                7 : [4]*7,
+                8 : [4]*8,
+            }
+            _chunks = tuple(_chunkSizes.get(self.dimensionCount, [4]*self.dimensionCount))
+            dataSetKwds.setdefault('chunks', _chunks)
+        else:
+            dataSetKwds.setdefault('chunks', True)
 
         # get the spectrum data key and store it in the metadata
         _key = _hdf5DataTypes[HDF5_DATATYPE_SPECTRUM_MATRIX]
         self._hdf5Metadata[HDF5_DATATYPE_SPECTRUM_MATRIX] = _key
 
         self.fp.create_dataset(_key,
-                               self.pointCounts[::-1],  # data are organised numpy style z, y, x
+                               shape=self.pointCounts[::-1],  # data are organised numpy style z, y, x
                                dtype=self._dtype,
-                               chunks=True,
                                track_times=False,  # to assure same hash after opening/storing
                                **dataSetKwds)
         self.blockSizes = tuple(self.spectrumData.chunks[::-1])
@@ -245,42 +274,53 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         """
         return self._hdf5Metadata.get(HDF5_CURRENT_DATA_TYPE, None)
 
-    def openFile(self, mode, check=True, **kwds):
+    def openFile(self, mode='r', overwrite:bool = False, check:bool = True, sparse:bool = False, compressionMode = None, **kwds):
         """open self.path, set self.fp,
-        Raise Runtime error on opening errors
 
         :param mode: open file mode;
-                    from hdf5 documentation:
-                        r	    Readonly, file must exist (default)
-                        r+	    Read/write, file must exist
-                        w	    Create file, truncate if exists
-                        w- or x	Create file, fail if exists
-                        a	    Read/write if exists, create otherwise
-        :param check: check for old parameter definitions
+            from hdf5 documentation:
+                r	    Readonly, file must exist (default)
+                r+	    Read/write, file must exist
+                w	    Create file, truncate if exists
+                x	    Create file, fail if exists
+                a	    Read/write if exists, create otherwise
+        :param overwrite: overwrite flag (default: False).
+                          NB mode=='w' and overwrite==False amounts to mode=='x'
+                             mode=='x' sets overwrite==False
+        :param check: check for old parameter definitions (default: True)
+        :param sparse: overwrite hdf5 default chunking for sparse matrices (default: False)
+        :param compressionMode: set the hdf5 compression; one of HDF5_COMPRESSION_MODES or None; (default: None)
+        :param **kwds: optional keyword arguments passed to open-method for this class.
+
         :return self.fp
+
+        :raises RuntimeError on opening errors
+
         """
 
         if mode is None:
             raise ValueError('%s.openFile: Undefined open mode' % self.__class__.__name__)
+
+        if mode[0:1] == 'x':
+            overwrite = False
+
         newFile = mode.startswith('w')
 
         if self.hasOpenFile():
             self.closeFile()
 
-        overwrite = kwds.pop('overwrite', False)
-        self._checkFilePath(newFile, mode, overwrite=overwrite)
+        self.disableCache()  # Hdf has its own caching
+        # Adjust hdf chunk caching parameters
+        kwds.setdefault('rdcc_nbytes', self.maxCacheSize)
+        kwds.setdefault('rdcc_nslots', 9973)  # large 'enough' prime number
+        kwds.setdefault('rdcc_w0', 0.25)  # most-often will read
 
         try:
-            self.disableCache()  # Hdf has its own caching
-            # Adjust hdf chunk caching parameters
-            kwds.setdefault('rdcc_nbytes', self.maxCacheSize)
-            kwds.setdefault('rdcc_nslots', 9973)  # large 'enough' prime number
-            kwds.setdefault('rdcc_w0', 0.25)  # most-often will read
-
+            self._checkFilePath(newFile, mode=mode, overwrite=overwrite)
             self.fp = self.openMethod(str(self.path), mode, **kwds)
             self.mode = mode
 
-        except Exception as es:
+        except (FileExistsError, FileNotFoundError) as es:
             self.closeFile()
             text = '%s.openFile(mode=%r): %s' % (self.__class__.__name__, mode, str(es))
             getLogger().warning(text)
@@ -298,7 +338,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             self._hdf5Metadata.initCurrentValues(HDF5_DATATYPE_SPECTRUM_MATRIX)
 
             # create the spectrum dataset
-            self._createSpectrumDataMatrix()
+            self._createSpectrumDataMatrix(sparse=sparse, compressionMode=compressionMode)
             self.writeParameters()
             self._hdf5Metadata.saveToHdf5(self.fp)
 

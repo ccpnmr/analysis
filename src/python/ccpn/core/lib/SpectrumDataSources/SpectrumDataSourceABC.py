@@ -94,7 +94,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-04 09:09:35 +0200 (Fri, October 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-07 11:21:23 +0100 (Mon, October 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1531,12 +1531,14 @@ class SpectrumDataSourceABC(CcpNmrJson):
         else:
             return instance
 
-    def _checkFilePath(self, newFile, mode, overwrite=False):
-        """Helper function to do checks on path"""
+    def _checkFilePath(self, newFile, mode, overwrite):
+        """Helper function to do checks on path
+        :raises FileNotFoundError or FileExistsError
+        """
 
         _path = self.path
         if _path is None:
-            raise RuntimeError('openFile: no path defined for %s' % self)
+            raise FileNotFoundError('openFile: no path defined for %s' % self)
 
         if not newFile and not _path.exists():
             raise FileNotFoundError('path "%s" does not exist' % _path)
@@ -1558,25 +1560,41 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         return [self.path]
 
-    def openFile(self, mode, **kwds):
-        """open self.path, set self.fp,
-        Raise RunTimeError on opening errors
+    def openFile(self, mode, overwrite: bool = False, **kwds):
+        """Check and open self.path, set self.fp
+        :param mode: sequence of read/write flag(s) for opening:
+            from the python docs:
+                'r'  : open for reading (default)
+                'w'  : open for writing, truncating the file first
+                'x'  : open for exclusive creation, failing if the file already exists
+                'a'  : open for writing, appending to the end of file if it exists
+                'b'  : binary mode
+                '+'  : open for updating (reading and writing)
+        :param overwrite: overwrite flag (default: False).
+                          NB mode=='w' and overwrite==False amounts to mode=='x'
+                             mode=='x' sets overwrite==False
+        :raises RunTimeError on opening errors
         :return self.fp
         """
+
         if mode is None:
             raise ValueError('%s.openFile: Undefined open mode' % self.__class__.__name__)
+
+        if mode[0:1] == 'x':
+            overwrite = False
+
         newFile = not mode.startswith('r')
 
         if self.hasOpenFile():
             self.closeFile()
 
         try:
-            self._checkFilePath(newFile, mode)
+            self._checkFilePath(newFile, mode, overwrite=overwrite)
             _p = self.path.asString()
             self.fp = self.openMethod(_p, mode, **kwds)
             self.mode = mode
 
-        except Exception as es:
+        except (FileExistsError, FileNotFoundError) as es:
             self.closeFile()
             text = '%s.openFile: %s' % (self.__class__.__name__, str(es))
             getLogger().error(text)
@@ -1622,23 +1640,35 @@ class SpectrumDataSourceABC(CcpNmrJson):
             self.closeFile()
 
     @contextmanager
-    def openNewFile(self, path=None, mode=None, overwrite=False):
+    def openNewFile(self, path=None, mode:str = None, overwrite:bool = False, **kwds):
         """Open new file, write parameters, and close at the end
         Yields self; i.e. one can do:
 
         with SpectrumDataSource(spectrum=sp).openNewFile(path) as ds:
             ds.writeSliceData(data)
+
+        :param path: path of the new file (str or Path instance) (default: path on dataSource object)
+        :param mode: flag defining open mode, i.e. not 'r' (default: defaultOpenWriteMode of class)
+        :param overwrite: flag to allow overwriting of existing file (default: False)
+        :param **kwds: optional keyword arguments passed to openFile().
+        :raises FileExistsError, ValueError, or errors raised by closeFile(), openFile()
         """
         if path is not None:
             self.setPath(path, checkSuffix=True)
 
+        if self.path.exists() and not overwrite:
+            raise FileExistsError(f'{self.__class__.__name__}.openNewFile(): overwrite=False and path {self.path!r} exists')
+
         if mode is None:
             mode = self.defaultOpenWriteMode
+
+        if mode == 'r':
+            raise ValueError(f'{self.__class__.__name__}.openNewFile(): invalid {mode = }')
 
         try:
             self.closeFile()  # Will close if open disgarding everything, do nothing otherwise
             getLogger().debug('%s.openNewFile: calling openFile' % self.__class__.__name__)
-            self.openFile(mode=mode, overwrite=overwrite)
+            self.openFile(mode=mode, overwrite=overwrite, **kwds)
             yield self
 
         except Exception as es:

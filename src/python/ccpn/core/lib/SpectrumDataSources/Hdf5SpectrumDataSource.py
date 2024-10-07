@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-07 19:44:11 +0100 (Mon, October 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-07 21:18:58 +0100 (Mon, October 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -152,7 +152,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         :param checkValid:flag to do validity check (default=False)
 
         """
-        self._hdf5Metadata = Hdf5Metadata()
+        self._hdf5Metadata = Hdf5Metadata(dataSource=self)
         super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount, checkValid=checkValid)
 
     @property
@@ -218,63 +218,63 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
                                )
         self.blockSizes = tuple(self.spectrumData.chunks[::-1])
 
-    def _checkHdf5Metadata(self):
-        """Check the hdf5 metadata for versioning, updates etc
-        """
-        if not self.hasOpenFile():
-            getLogger().debug('File not open: hdf5 metadata check and update skipped')
-            return
-
-        try:
-            _params = self.spectrumParameters
-        except Exception:
-            getLogger().debug('Error finding parameters: check and update skipped')
-            return
-
-        if NDF5_VERSION_KEY in self._hdf5Metadata:
-            # we are up-to-date to the current hdf5 version
-            pass
-
-        elif 'version' in _params:
-            _mode = self.mode
-            if self.mode == self.defaultOpenReadMode:
-                self.closeFile()
-                self.openFile(mode=self.defaultOpenReadWriteMode, check=False)
-                _params = self.spectrumParameters
-
-            del _params['version']
-
-            # we are now up-to-date to the current hdf5 version
-            self._hdf5Metadata.initCurrentValues(NDF5_DATATYPE_SPECTRUM_MATRIX)
-            self._hdf5Metadata.saveToHdf5(self.fp)
-            self.closeFile()
-            self.openFile(mode=_mode)
-
-        elif NDF5_VERSION_KEY not in self._hdf5Metadata and 'version' not in _params:
-            # Earlier (Luca) hdf5 files, in which spectralWidth (sometimes)
-            # denoted the width in Hz
-
-            # for this, we need the file to open read/write
-            _mode = self.mode
-            if self.mode == self.defaultOpenReadMode:
-                self.closeFile()
-                self.openFile(mode=self.defaultOpenReadWriteMode, check=False)
-                _params = self.spectrumParameters
-
-            if 'spectralWidths' in _params:
-                sw = _params['spectralWidths']
-                _params['spectralWidthsHz'] = sw
-                del (_params['spectralWidths'])
-
-            # we are now up-to-date to the current hdf5 version
-            self._hdf5Metadata.initCurrentValues(NDF5_DATATYPE_SPECTRUM_MATRIX)
-            self._hdf5Metadata.saveToHdf5(self.fp)
-            self.closeFile()
-            self.openFile(mode=_mode)
-
-        else:
-            # This should not happen
-            getLogger().warning('Undetermined hdf5 version; skipping checks/upgrades')
+    # def _checkHdf5Metadata(self):
+    #     """Check the hdf5 metadata for versioning, updates etc
+    #     """
+    #     if not self.hasOpenFile():
+    #         getLogger().debug('File not open: hdf5 metadata check and update skipped')
+    #         return
+    #
+    #     try:
+    #         _params = self.spectrumParameters
+    #     except Exception:
+    #         getLogger().debug('Error finding parameters: check and update skipped')
+    #         return
+    #
+    #     if NDF5_VERSION_KEY in self._hdf5Metadata:
+    #         # we are up-to-date to the current hdf5 version
+    #         pass
+    #
+    #     elif 'version' in _params:
+    #         _mode = self.mode
+    #         if self.mode == self.defaultOpenReadMode:
+    #             self.closeFile()
+    #             self.openFile(mode=self.defaultOpenReadWriteMode, check=False)
+    #             _params = self.spectrumParameters
+    #
+    #         del _params['version']
+    #
+    #         # we are now up-to-date to the current hdf5 version
+    #         self._hdf5Metadata.initCurrentValues(NDF5_DATATYPE_SPECTRUM_MATRIX)
+    #         self._hdf5Metadata.saveToHdf5(self.fp)
+    #         self.closeFile()
+    #         self.openFile(mode=_mode)
+    #
+    #     elif NDF5_VERSION_KEY not in self._hdf5Metadata and 'version' not in _params:
+    #         # Earlier (Luca) hdf5 files, in which spectralWidth (sometimes)
+    #         # denoted the width in Hz
+    #
+    #         # for this, we need the file to open read/write
+    #         _mode = self.mode
+    #         if self.mode == self.defaultOpenReadMode:
+    #             self.closeFile()
+    #             self.openFile(mode=self.defaultOpenReadWriteMode, check=False)
+    #             _params = self.spectrumParameters
+    #
+    #         if 'spectralWidths' in _params:
+    #             sw = _params['spectralWidths']
+    #             _params['spectralWidthsHz'] = sw
+    #             del (_params['spectralWidths'])
+    #
+    #         # we are now up-to-date to the current hdf5 version
+    #         self._hdf5Metadata.initCurrentValues(NDF5_DATATYPE_SPECTRUM_MATRIX)
+    #         self._hdf5Metadata.saveToHdf5(self.fp)
+    #         self.closeFile()
+    #         self.openFile(mode=_mode)
+    #
+    #     else:
+    #         # This should not happen
+    #         getLogger().warning('Undetermined hdf5 version; skipping checks/upgrades')
 
     @property
     def _hdf5version(self) -> VersionString:
@@ -288,7 +288,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         """
         return self._hdf5Metadata.get(NDF5_SPECTRUM_DATATYPE, None)
 
-    def openFile(self, mode='r', overwrite:bool = False, check:bool = True, sparse:bool = False, compressionMode = None, **kwds):
+    def openFile(self, mode='r', overwrite:bool = False, sparse:bool = False, compressionMode = None, **kwds):
         """open self.path, set self.fp,
 
         :param mode: open file mode;
@@ -301,7 +301,6 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         :param overwrite: overwrite flag (default: False).
                           NB mode=='w' and overwrite==False amounts to mode=='x'
                              mode=='x' sets overwrite==False
-        :param check: check for old parameter definitions (default: True)
         :param sparse: overwrite hdf5 default chunking for sparse matrices (default: False)
         :param compressionMode: set the hdf5 compression; one of HDF5_COMPRESSION_MODES or None; (default: None)
         :param **kwds: optional keyword arguments passed to open-method for this class.
@@ -318,7 +317,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         if mode[0:1] == 'x':
             overwrite = False
 
-        newFile = mode.startswith('w')
+        newFile = not mode.startswith('r')
 
         if self.hasOpenFile():
             self.closeFile()
@@ -343,8 +342,6 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         if not newFile:
             # old file
             self._hdf5Metadata.restoreFromHdf5(self.fp)
-            if check:
-                self._checkHdf5Metadata()
             self.readParameters()
 
         else:
@@ -427,7 +424,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             self.blockSizes = tuple(dataset.chunks[::-1])
 
         except Exception as es:
-            logger.error('%s.readParameters: %s' % (self.__class__.__name__, es))
+            logger.error('%s.readParameters(): %s' % (self.__class__.__name__, es))
             raise es
 
         return super().readParameters()
@@ -765,15 +762,17 @@ Hdf5SpectrumDataSource._registerFormat()
 class Hdf5Metadata(dict):
     """A class to store/manage the Hdf5 metadata
     """
-    # def __init__(self):
-    #     super().__init__()
+    def __init__(self, dataSource:Hdf5SpectrumDataSource):
+        super().__init__()
+        self.dataSource = dataSource
+        self.blockUpdate = 0   # blocking for when updating
 
     def initCurrentValues(self, currentDataType=None):
         """Initialise with optionally setting current dataTypes
         """
         self.clear()
-
         self[NDF5_VERSION_KEY] = str(NDF5_VERSION)
+
         if currentDataType:
             if currentDataType in _ndf5DataTypes:
                 self[NDF5_SPECTRUM_DATATYPE] = _ndf5DataTypes[currentDataType]
@@ -783,12 +782,50 @@ class Hdf5Metadata(dict):
     def _updateMetadata(self):
         """Update the self to the latest version
         """
+        if self.blockUpdate > 0:
+            return
+
+        self.blockUpdate += 1
+        _version = None
+
         # Metadata Version 1.0.1 definitions
         HDF5_DATATYPE_KEY = 'HDF5_DataType'
         HDF5_DATASET_KEY = 'HDF5_DatasetName'
         HDF5_VERSION_KEY = 'HDF5_Version'
 
-        if HDF5_VERSION_KEY in self:
+        if not HDF5_VERSION_KEY in self and not NDF5_VERSION_KEY in self:
+            # pre 1.0.1 version
+            _params = self.dataSource.parameters
+            if 'version' in _params:
+                _version = VersionString('1.0.0')
+                _mode = self.dataSource.mode
+                # if the file was opened for reading only, we need to close it and open it ReadWrite mode
+                # and read the parameters again
+                if _mode == Hdf5SpectrumDataSource.defaultOpenReadMode:
+                    self.dataSource.closeFile()
+                    self.dataSource.openFile(mode=Hdf5SpectrumDataSource.defaultOpenReadWriteMode)
+                    _params = self.dataSource.spectrumParameters
+
+                del _params['version']
+
+                # we can now set the 1.1.0 ndf5 version
+                self.clear()
+                self[NDF5_VERSION_KEY] = '1.1.0'
+                self[NDF5_SPECTRUM_DATATYPE] = NDF5_DATATYPE_SPECTRUM_MATRIX
+                self[NDF5_DATATYPE_SPECTRUM_MATRIX] = _ndf5DataTypes[NDF5_DATATYPE_SPECTRUM_MATRIX]
+
+                self.saveToHdf5(self.dataSource.fp)
+
+                # self.closeFile()
+                # self.openFile(mode=_mode)
+
+                # We are now upto version 1.1.0
+                _version = VersionString('1.1.0')
+
+            else:
+                raise RuntimeError('Hdf5Metadata._updateMetadata(): non-versioned instance')
+
+        elif HDF5_VERSION_KEY in self:
             # 1.0.1 -> 1.1.0
             _version = VersionString(self[HDF5_VERSION_KEY])
 
@@ -807,7 +844,7 @@ class Hdf5Metadata(dict):
                 RuntimeError(f'Hdf5Metadata._updateMetadata(): unknown version {_version}')
 
         elif NDF5_VERSION_KEY in self:
-            # we are already at 1.1.0 and higher
+            # we are already at 1.1.0 or higher
             _version = VersionString(self[NDF5_VERSION_KEY])
 
         else:
@@ -819,6 +856,8 @@ class Hdf5Metadata(dict):
 
         if _version != NDF5_VERSION:
             raise RuntimeError(f'Hdf5Metadata._updateMetadata(): updating failed; stuck at version {_version}')
+
+        self.blockUpdate -= 1
 
     def restoreFromHdf5(self, fp):
         """Update self from the Hdf5 file

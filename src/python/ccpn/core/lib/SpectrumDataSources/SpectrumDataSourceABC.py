@@ -94,7 +94,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-07 19:44:11 +0100 (Mon, October 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-07 21:18:59 +0100 (Mon, October 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -1524,6 +1524,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         except RuntimeError as es:
             txt = f'{_iniTxt}: Reading parameters failed with error: "{es}"'
             return self._returnFalse(txt)
+
         # Check if reading parameters yielded any errors
         if not self.isValid:
             return self._returnFalse(self.errorString)
@@ -1617,7 +1618,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 '+'  : open for updating (reading and writing)
         :param overwrite: overwrite flag (default: False).
                           NB mode=='w' and overwrite==False amounts to mode=='x'
-                             mode=='x' sets overwrite==False
+                             --> mode=='x' sets overwrite==False
         :raises RunTimeError on opening errors
         :return self.fp
         """

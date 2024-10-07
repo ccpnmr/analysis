@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-07 09:30:45 +0100 (Wed, August 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-07 14:50:16 +0100 (Mon, October 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -814,6 +814,15 @@ class Spectrum(AbstractWrapperObject):
         self._wrappedData.experiment.name = str(value)
 
     @property
+    def pulseProgram(self):
+        """:return the pulse program if defined by the dataSource or None otherwise
+        """
+        if self.dataSource is not None:
+            return self.dataSource.pulseProgram
+        else:
+            return None
+
+    @property
     def filePath(self) -> Optional[str]:
         """Definition of the NMR (binary) dataSource file; can contain redirections (e.g. $DATA)
         Use Spectrum.path attribute for an absolute, decoded path
@@ -881,7 +890,6 @@ class Spectrum(AbstractWrapperObject):
         """Return True if the spectrum is already defined as Alongside
         """
         from ccpn.core.lib.DataStore import AlongsideRedirection
-
         return self._dataStore.redirectionIdentifier == AlongsideRedirection.identifier
 
     @property
@@ -889,7 +897,6 @@ class Spectrum(AbstractWrapperObject):
         """Return True if the spectrum is already defined as Inside
         """
         from ccpn.core.lib.DataStore import InsideRedirection
-
         return self._dataStore.redirectionIdentifier == InsideRedirection.identifier
 
     def _makeNewRelativePath(self, newPath) -> Path:

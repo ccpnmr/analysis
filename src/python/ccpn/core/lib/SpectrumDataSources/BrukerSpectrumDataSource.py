@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-25 10:11:17 +0100 (Thu, July 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-07 14:50:16 +0100 (Mon, October 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -37,8 +37,9 @@ from itertools import permutations, combinations_with_replacement
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flatten
-from ccpn.util.traits.CcpNmrTraits import CPath
+from ccpn.util.traits.CcpNmrTraits import CPath, CString
 from ccpn.util.isotopes import DEFAULT_ISOTOPE_DICT
+
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 from ccpn.framework.constants import NO_SUFFIX
@@ -208,12 +209,12 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 
     #=========================================================================================
 
-    _brukerRoot = CPath(default_value=None, allow_none=True).tag(info=
-                                                                 'an attribute to store the path to the Bruker root directory; used during parsing'
-                                                                 )
-    _pdataDir = CPath(default_value=None, allow_none=True).tag(info=
-                                                               'an attribute to store the path to the Bruker pdata directory; used during parsing'
-                                                               )
+    _brukerRoot = CPath(default_value=None).tag(
+                        info='The path to the Bruker root directory; used during parsing'
+                       )
+    _pdataDir = CPath(default_value=None).tag(
+                      info='The path to the Bruker pdata directory; used during parsing'
+                      )
 
     #=========================================================================================
 
@@ -553,6 +554,11 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             if self.temperature == 0.0:
                 self.temperature = None
                 getLogger().warning(f'Acqus defined temperature was 0.0; changed to undefined (None) instead')
+
+            _ppPath = self._brukerRoot / 'pulseprogram'
+            if _ppPath.exists():
+                with _ppPath.open() as fp:
+                    self.pulseProgram = fp.read()
 
             # Dimensional parameters
             for dimIndx in range(self.dimensionCount):

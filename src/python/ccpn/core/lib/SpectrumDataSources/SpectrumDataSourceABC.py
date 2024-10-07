@@ -94,7 +94,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-07 11:21:23 +0100 (Mon, October 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-07 14:50:16 +0100 (Mon, October 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -322,10 +322,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                     spectrumAttribute='comment',
                                     hasSetterInSpectrumClass=True
                                     )
-    pulseProgram = CString(         default_value=None).tag(isDimensional=False,
+    pulseProgram = CString(         default_value=None).tag(
                                     doCopy=True,
-                                    spectrumAttribute=None,
-                                    hasSetterInSpectrumClass=False
+                                    spectrumAttribute='pulseProgram',
+                                    hasSetterInSpectrumClass=False,
+                                    doPrint=False
                                     )
     temperature = CFloat(           default_value=None, min=0.0).tag(isDimensional=False,
                                     doCopy=True,
@@ -2400,7 +2401,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
 
     def printParameters(self, path=sys.stdout):
-        """Print all to path"""
+        """Print all to path
+        """
         path.write(str(self) + '\n')
         path.write('%-24s: %s\n' % ('path', self.path))
         for param, value in self.getNonDimensionalParameters().items():

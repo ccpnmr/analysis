@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-02 09:30:47 +0100 (Wed, October 02, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-10-09 14:26:12 +0100 (Wed, October 09, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -1047,8 +1047,9 @@ class _commonSettings():
     #
     #             spectraWidgets[spectrum.pid] = f
 
-    def _fillAllSpectrumFrame(self, displays):
+    def _fillAllSpectrumFrame(self, displays, data=None):
         """Populate all spectrumFrames into a moreLessFrame
+        :param data : Required for SpectrumView notifiers.
         """
         def _codeDictUpdate(displayKey : str = None, checkBox : CheckBox = None):
             """update axisCode dict when check boxes are changed.
@@ -1111,6 +1112,14 @@ class _commonSettings():
             if self.application:
                 spectraWidgets = {}  # spectrum.pid, frame dict to show/hide
                 for row, spectrum in enumerate(validSpectrumViews.keys()):
+
+                    # ignore if view is deleted
+                    if data is not None and data.get(Notifier.TRIGGER) == 'delete':
+                        notifObj = data.get(Notifier.OBJECT)
+                        # check if both correct spectrum display and spectrum.
+                        if notifObj.strip.spectrumDisplay is display and notifObj.spectrum is spectrum:
+                            continue
+
                     f_row += 1
                     f = _SpectrumRow(parent=_frame,
                                      application=self.application,
@@ -1134,7 +1143,7 @@ class _commonSettings():
         if data is not None and data.get(Notifier.TRIGGER) == 'delete':
             obj = data.get(Notifier.OBJECT)
             gids = [gg for gg in gids if gg and gg != obj]
-        self._fillAllSpectrumFrame(gids)
+        self._fillAllSpectrumFrame(gids, data)
 
         # if gid == '> All <':
         #     gids = [self.application.getByGid(gid) for gid in self.spectrumDisplayPulldown.getTexts() if gid not in ['> All <', '> Select <']]
@@ -2023,6 +2032,38 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
     .. Note:: Method for callback requires a data argument.
     """
     KLASS = SpectrumDisplay
+
+    def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',
+                 vPolicy='minimal', fixedWidths=(None, None, None), orientation='left',
+                 labelText=None, tipText=None,
+                 texts=None, callback=None, objectWidgetChangedCallback=None,
+                 defaultListItem=None, displayText=None,
+                 standardListItems=None,
+                 **kwds):
+        """Subclassed to initialize SpectrumView notifiers."""
+        super().__init__(parent=parent, mainWindow=mainWindow, vAlign=vAlign, stretch=stretch, hAlign=hAlign,
+                 vPolicy=vPolicy, fixedWidths=fixedWidths, orientation=orientation,
+                 labelText=labelText, tipText=tipText,
+                 texts=texts, callback=callback, objectWidgetChangedCallback=objectWidgetChangedCallback,
+                 defaultListItem=defaultListItem, displayText=displayText,
+                 standardListItems=standardListItems,
+                 **kwds)
+
+        if self.project:
+            self._specViewNotifierRename = Notifier(theObject=self.project,
+                                            triggers=[Notifier.RENAME],
+                                            targetName=SpectrumView.className,
+                                            callback=self._objRenamedCallback)
+
+            self._specViewNotifierDelete = Notifier(theObject=self.project,
+                                            triggers=[Notifier.DELETE],
+                                            targetName=SpectrumView.className,
+                                            callback=self._objDeletedCallback)
+
+            self._specViewNotifierCreate = Notifier(theObject=self.project,
+                                            triggers=[Notifier.CREATE],
+                                            targetName=SpectrumView.className,
+                                            callback=self._objCreatedCallback)
 
     def getDisplays(self):
         """

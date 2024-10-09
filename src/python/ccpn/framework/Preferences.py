@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-02 09:30:46 +0100 (Wed, October 02, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-09 19:49:20 +0100 (Wed, October 09, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -238,6 +238,7 @@ class Preferences(AttrDict):
         """
         # NOTE:ED - there is a bug in pyqt5.12.3 that causes a crash when using QWebEngineView
         prefs.general.useNativeWebbrowser = True
+        prefs.general.backupSaveEnabled = True
         if (pr := prefs.get(APPEARANCE)) is None:
             # appearance is not in very early settings
             return

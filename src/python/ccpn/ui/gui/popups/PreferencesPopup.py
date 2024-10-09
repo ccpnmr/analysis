@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-02 10:04:24 +0100 (Wed, October 02, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-09 19:49:20 +0100 (Wed, October 09, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -186,7 +186,7 @@ def _makeLine(parent, grid, text=None, **kwds):
     return result
 
 
-def _makeCheckBox(parent, row, text, callback, toolTip=None, visible=True, **kwds):
+def _makeCheckBox(parent, row, text, callback, toolTip=None, visible=True, enabled=True, **kwds):
     """Convenience routine to make a row with a label and a checkbox
     :return CheckBox instance
     """
@@ -200,6 +200,10 @@ def _makeCheckBox(parent, row, text, callback, toolTip=None, visible=True, **kwd
         # temporarily hide options
         _label.setVisible(False)
         _checkBox.setVisible(False)
+    if not enabled:
+        # temporarily disable
+        _label.setEnabled(False)
+        _checkBox.setEnabled(False)
     return _checkBox
 
 
@@ -550,13 +554,18 @@ class PreferencesPopup(CcpnDialogMainWidget):
         _makeLine(parent, grid=(row, 0), text="Auto Backups")
 
         row += 1
+        tTip = 'Automatically make backups at regular intervals.'
         self.autoBackupEnabledBox = _makeCheckBox(parent, row=row, text="Auto backup",
                                                   callback=partial(self._queueToggleGeneralOptions,
-                                                                   'autoBackupEnabled'))
+                                                                   'autoBackupEnabled'),
+                                                  toolTip=tTip)
 
         row += 1
+        tTip = 'The time interval, in minutes, for making backups.'
         self.autoBackupFrequencyLabel = _makeLabel(parent, text="Backup frequency (mins)", grid=(row, 0))
         self.autoBackupFrequencyData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=1, decimals=0, step=10)
+        self.autoBackupFrequencyLabel.setToolTip(tTip)
+        self.autoBackupFrequencyData.setToolTip(tTip)
         self.autoBackupFrequencyData.setMinimumWidth(LineEditsMinimumWidth)
         self.autoBackupFrequencyData.valueChanged.connect(self._queueSetAutoBackupFrequency)
 
@@ -570,22 +579,18 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.autoBackupCountData.setMinimumWidth(LineEditsMinimumWidth)
         self.autoBackupCountData.valueChanged.connect(self._queueSetAutoBackupCount)
 
-        # options can be disabled here
-        # self.autoBackupEnabledBox.setChecked(False)
-        # self.autoBackupEnabledBox.setEnabled(False)
-        # self.autoBackupFrequencyData.setEnabled(False)
-        # self.autoBackupCountData.setEnabled(False)
-
+        row += 1
+        tTip = 'Make a backup every time a project is saved by the user.'
+        self.backupSaveEnabledBox = _makeCheckBox(parent, row=row, text="Backup on 'Save'",
+                                                  callback=partial(self._queueToggleGeneralOptions,
+                                                                   'backupSaveEnabled'),
+                                                  toolTip=tTip,
+                                                  visible=True, enabled=False)
         row += 1
         tTip = 'The number of user-backups to keep.\n' \
                'A backup is written to the backup folder every time a project is saved by the user.\n' \
                'If the number of backups exceeds this value, the oldest backup is removed.\n' \
                'If this value is changed, older backups may need to be manually deleted.'
-        self.backupSaveEnabledBox = _makeCheckBox(parent, row=row, text="Backup on Save",
-                                                  callback=partial(self._queueToggleGeneralOptions,
-                                                                   'backupSaveEnabled'),
-                                                  visible=False)
-        row += 1
         self.backupSaveCountLabel = _makeLabel(parent, text="Number of backups on user-save", grid=(row, 0))
         self.backupSaveCountData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=1, decimals=0, step=1)
         self.backupSaveCountLabel.setToolTip(tTip)
@@ -2677,7 +2682,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """
         self.preferences.general.peakPicker1d = value
         spectra = [sp for sp in self.project.spectra if sp.dimensionCount == 1]
-        self._updatePeakPickerOnSpectra(value, spectra)
+        self._updatePeakPickerOnSpectra(spectra, value)
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangePeakPickerNdIndex(self, _value):
@@ -2690,9 +2695,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """
         self.preferences.general.peakPickerNd = value
         spectra = [sp for sp in self.project.spectra if sp.dimensionCount > 1]
-        self._updatePeakPickerOnSpectra(value, spectra)
+        self._updatePeakPickerOnSpectra(spectra, value)
 
-    def _updatePeakPickerOnSpectra(self, value, spectra):
+    @staticmethod
+    def _updatePeakPickerOnSpectra(spectra, value):
         from ccpn.core.lib.ContextManagers import undoBlock
         from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPickerTypes
 

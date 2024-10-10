@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-02 09:59:39 +0100 (Wed, October 02, 2024) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-10-10 14:11:36 +0100 (Thu, October 10, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -484,7 +484,7 @@ class GuiBase(object):
 
             elif isinstance(dataLoader, StarDataLoader):
                 (_, createNewProject, ignore) = self._queryChoices(dataLoader)
-                if createNewProject and not ignore:
+                if not ignore:
                     title = 'New project from NmrStar' if createNewProject else \
                         'Import from NmrStar'
                     dataLoader.getDataBlock()  # this will read and parse the file

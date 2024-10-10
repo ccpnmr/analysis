@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-10 15:45:27 +0100 (Thu, October 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-10 18:23:54 +0100 (Thu, October 10, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -249,7 +249,16 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                         QMenuBar::item:disabled {
                             color: palette(dark);
                         }
+                        QProgressBar {
+                            color: palette(text);
+                            text-align: center;
+                        }
                         """
+        # there is also some weird stuff with the qprogressbar text-colour:
+        #   the left-edge of the text-label is its local 0%, the right-edge its local 100%,
+        #   and the text-label is coloured highlighttedtext|text based on the progress %
+        #   it doesn't follow the edge of the progress-chunk :|
+        #   ... but I think the stylesheet sometimes overwrites this
         # set stylesheet
         base = pal.base().color().lightness()  # use as a guide for light/dark theme
         colours = getColours()

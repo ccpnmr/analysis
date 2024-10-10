@@ -27,8 +27,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-07 21:18:58 +0100 (Mon, October 07, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-10 20:47:58 +0100 (Thu, October 10, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,41 +53,76 @@ from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionD
 #--------------------------------------------------------------------------------------------------
 # hdf5 metadata keys, as stored in the 'top' object and copied into the Hdf5Metadata object
 # NB:
-# this is different from the metadata of the SpectrumDataSouceABC, i.e. CcpNmrJson object
+# this is different from the metadata of the SpectrumDataSourceABC, i.e. CcpNmrJson object
 # from which the Hdf5DataSource class is derived.
 # It is also different from the Traits metadata (as defined by the tag() method)
 #
 NDF5_VERSION_KEY = 'ndf5_version'
 NDF5_VERSION = VersionString('1.1.0')  # Current HDF5 implementation version
 
-#--------------------------------------------------------------------------------------------------
-# ndf5 dataTypes
-#--------------------------------------------------------------------------------------------------
-# the datatype used for retrieving the spectrum data
-NDF5_SPECTRUM_DATATYPE = 'spectrum_dataType'
+NDF5_UID_KEY = 'uid'
+NDF5_USER_KEY = 'user'
+NDF5_DATE_KEY = 'date'
+NDF5_SPECTROMETER_KEY = 'spectrometer'
 
-# dataType definitions
-NDF5_DATATYPE_SPECTRUM_MATRIX = 'dataType_spectrum_dataMatrix'
-NDF5_DATATYPE_NUSLIST =         'dataType_nuslist'
-NDF5_DATATYPE_PULSEPROGRAM =    'dataType_pulseprogram'
+# the key in the metadata dict defining the dict of all data types contained in the file
+NDF5_DATATYPES_KEY = 'dataTypes'
+# the key in the metadata dict defining datatype used for retrieving the spectrum data
+NDF5_SPECTRUM_DATATYPE_KEY = 'spectrum_dataType'
 
-# Dict of NDF5 data types and their HDF-file storage key;
-_ndf5DataTypes = {
-    NDF5_DATATYPE_SPECTRUM_MATRIX : 'spectrumData',
-    NDF5_DATATYPE_NUSLIST : 'nuslist',
-    NDF5_DATATYPE_PULSEPROGRAM : 'pulseprogram',
+_defaultNdf5MetadataDict = {
+
+    NDF5_VERSION_KEY : str(NDF5_VERSION),
+    NDF5_UID_KEY : None,
+    NDF5_USER_KEY : None,
+    NDF5_DATE_KEY : None,
+    NDF5_SPECTROMETER_KEY : None,
+
+    # data types
+    NDF5_DATATYPES_KEY : {},
+    NDF5_SPECTRUM_DATATYPE_KEY : None,
+
 }
 
 #--------------------------------------------------------------------------------------------------
+# ndf5 dataTypes
+#--------------------------------------------------------------------------------------------------
+
+NDF5_SPECTRUM = 'spectrum'
+NDF5_NUS = 'nus'
+
+# spectrum: a complete (i.e. all dimensions), np.ndarray-like data matrix
+NDF5_DATATYPE_SPECTRUM_NDARRAY = f'dataType_{NDF5_SPECTRUM}_ndarray'
+
+# pulseprogram:
+NDF5_DATATYPE_PULSEPROGRAM =     f'dataType_pulseprogram'
+
+# NUS:
+NDF5_DATATYPE_NUSLIST =          f'dataType_{NDF5_NUS}_nuslist'
+NDF5_DATATYPE_NUSDATA =          f'dataType_{NDF5_NUS}_nusdata'
+
+# Dict of ndf5 data types and their (default) ndf5-file storage key;
+_ndf5DataTypes = {
+    NDF5_DATATYPE_PULSEPROGRAM : 'pulseprogram',
+    NDF5_DATATYPE_SPECTRUM_NDARRAY : 'spectrumData', # historical; keep for now
+    NDF5_DATATYPE_NUSLIST : 'nus/nuslist',
+    NDF5_DATATYPE_NUSDATA : 'nus/nusdata',
+}
+
+
+#--------------------------------------------------------------------------------------------------
+# Compression modes
+#
 # GWV 2020 for full files:
 #   lzf compression seems not to yield any improvement, but rather a increase in file size;
-#   gzip compression about 30% reductions, albeit at a speed-penalty
+#   gzip compression some (max 30%) reductions, albeit at a speed-penalty
 # GWV 7/10/2024 update:
 #   gzip works well on file writing sparse data and the sparse=True option
+
 NDF5_COMPRESSION_GZIP = 'gzip'
 NDF5_COMPRESSION_LZF = 'lzf'
-NDF5_COMPRESSION_SZIP = 'szip'
 # 'szip' not in conda distribution
+# NDF5_COMPRESSION_SZIP = 'szip'
 NDF5_COMPRESSION_MODES = (NDF5_COMPRESSION_GZIP, NDF5_COMPRESSION_LZF)
 
 #--------------------------------------------------------------------------------------------------
@@ -136,7 +171,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     defaultOpenWriteMode = 'w'  # creates, truncates if exists
     defaultAppendMode = 'a'
 
-    _compressionMode = CEnum(mapping=NDF5_COMPRESSION_MODES, default_value=None)
+    compressionMode = CEnum(mapping=NDF5_COMPRESSION_MODES, default_value=None)
 
     _NONE = bytes(NONE_STR, 'utf8')
 
@@ -159,8 +194,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     def spectrumData(self):
         if not self.hasOpenFile():
             raise RuntimeError(f'File {self.path!r} is not open')
-        _key = self._hdf5Metadata[NDF5_DATATYPE_SPECTRUM_MATRIX]
-        data = self.fp[_key]
+        _dataKey = self._hdf5Metadata.spectrumDataKey
+        data = self.fp[_dataKey]
         return data
 
     @property
@@ -169,18 +204,16 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         return dataset.attrs
 
     def _createSpectrumDataMatrix(self, sparse=False, compressionMode=None):
-        """Create the NDF5 spectrum data matrix at the location storage NDF5_DATATYPE_SPECTRUM_MATRIX
+        """Create the NDF5 spectrum data matrix at the location storage NDF5_DATATYPE_SPECTRUM_NDARRAY
         :param sparse: flag to set chunking to smaller (i.e. more sparse) blocks
         :param compressionMode: compression mode; defaults to None
         """
         dataSetKwds = {}
         dataSetKwds.setdefault('fillvalue', 0.0)
 
-        if compressionMode is not None:
-            self._compressionMode = compressionMode
-
-        if self._compressionMode is not None:
-            dataSetKwds.setdefault('compression', self._compressionMode)
+        self.compressionMode = compressionMode
+        if self.compressionMode is not None:
+            dataSetKwds.setdefault('compression', self.compressionMode)
             dataSetKwds.setdefault('fletcher32', False)
         else:
             dataSetKwds.setdefault('fletcher32', True)
@@ -203,78 +236,16 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             dataSetKwds.setdefault('chunks', True)
 
         # we are storing the data as a spectrum data matrix
-        self._hdf5Metadata[NDF5_SPECTRUM_DATATYPE] = NDF5_DATATYPE_SPECTRUM_MATRIX
+        # method returns the key under which we store spectrum data matrix in the file;
+        _dataKey = self._hdf5Metadata.addDataType(NDF5_DATATYPE_SPECTRUM_NDARRAY)
 
-        # get the key under which we store spectrum data matrix in the file;
-        # also add it to the metadata
-        _key = _ndf5DataTypes[NDF5_DATATYPE_SPECTRUM_MATRIX]
-        self._hdf5Metadata[NDF5_DATATYPE_SPECTRUM_MATRIX] = _key
-
-        self.fp.create_dataset(_key,
+        self.fp.create_dataset(_dataKey,
                                shape=self.pointCounts[::-1],  # data are organised numpy style z, y, x
                                dtype=self._dtype,
                                track_times=False,  # to assure same hash after opening/storing
                                **dataSetKwds
                                )
         self.blockSizes = tuple(self.spectrumData.chunks[::-1])
-
-    # def _checkHdf5Metadata(self):
-    #     """Check the hdf5 metadata for versioning, updates etc
-    #     """
-    #     if not self.hasOpenFile():
-    #         getLogger().debug('File not open: hdf5 metadata check and update skipped')
-    #         return
-    #
-    #     try:
-    #         _params = self.spectrumParameters
-    #     except Exception:
-    #         getLogger().debug('Error finding parameters: check and update skipped')
-    #         return
-    #
-    #     if NDF5_VERSION_KEY in self._hdf5Metadata:
-    #         # we are up-to-date to the current hdf5 version
-    #         pass
-    #
-    #     elif 'version' in _params:
-    #         _mode = self.mode
-    #         if self.mode == self.defaultOpenReadMode:
-    #             self.closeFile()
-    #             self.openFile(mode=self.defaultOpenReadWriteMode, check=False)
-    #             _params = self.spectrumParameters
-    #
-    #         del _params['version']
-    #
-    #         # we are now up-to-date to the current hdf5 version
-    #         self._hdf5Metadata.initCurrentValues(NDF5_DATATYPE_SPECTRUM_MATRIX)
-    #         self._hdf5Metadata.saveToHdf5(self.fp)
-    #         self.closeFile()
-    #         self.openFile(mode=_mode)
-    #
-    #     elif NDF5_VERSION_KEY not in self._hdf5Metadata and 'version' not in _params:
-    #         # Earlier (Luca) hdf5 files, in which spectralWidth (sometimes)
-    #         # denoted the width in Hz
-    #
-    #         # for this, we need the file to open read/write
-    #         _mode = self.mode
-    #         if self.mode == self.defaultOpenReadMode:
-    #             self.closeFile()
-    #             self.openFile(mode=self.defaultOpenReadWriteMode, check=False)
-    #             _params = self.spectrumParameters
-    #
-    #         if 'spectralWidths' in _params:
-    #             sw = _params['spectralWidths']
-    #             _params['spectralWidthsHz'] = sw
-    #             del (_params['spectralWidths'])
-    #
-    #         # we are now up-to-date to the current hdf5 version
-    #         self._hdf5Metadata.initCurrentValues(NDF5_DATATYPE_SPECTRUM_MATRIX)
-    #         self._hdf5Metadata.saveToHdf5(self.fp)
-    #         self.closeFile()
-    #         self.openFile(mode=_mode)
-    #
-    #     else:
-    #         # This should not happen
-    #         getLogger().warning('Undetermined hdf5 version; skipping checks/upgrades')
 
     @property
     def _hdf5version(self) -> VersionString:
@@ -286,7 +257,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     def _hdf5CurrentDataType(self) -> str:
         """:return the hdf5 current dataType string or None if undefined
         """
-        return self._hdf5Metadata.get(NDF5_SPECTRUM_DATATYPE, None)
+        return self._hdf5Metadata.get(NDF5_SPECTRUM_DATATYPE_KEY, None)
 
     def openFile(self, mode='r', overwrite:bool = False, sparse:bool = False, compressionMode = None, **kwds):
         """open self.path, set self.fp,
@@ -341,17 +312,19 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         if not newFile:
             # old file
-            self._hdf5Metadata.restoreFromHdf5(self.fp)
+            self._hdf5Metadata.restoreFromNdf5()
             self.readParameters()
 
         else:
-            # New file; set the hdf5 metadata to contain spectral data
-            self._hdf5Metadata.initCurrentValues(NDF5_DATATYPE_SPECTRUM_MATRIX)
+            # New file;
+            self._hdf5Metadata.initDefaultValues()
 
-            # create the spectrum dataset
+            # create the spectrum ndarray
             self._createSpectrumDataMatrix(sparse=sparse, compressionMode=compressionMode)
+            # set the spectrumDataType
+            self._hdf5Metadata.spectrumDataType = NDF5_DATATYPE_SPECTRUM_NDARRAY
+            self._hdf5Metadata.saveToNdf5()
             self.writeParameters()
-            self._hdf5Metadata.saveToHdf5(self.fp)
 
         # getLogger().debug2('openFile: %s; %s blocks with size %s; chunks=%s' %
         #                   (self, self._totalBlocks, self._totalBlockSize, tuple(self.blockSizes)))
@@ -646,7 +619,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         return pointValue
 
-    def setPointData(self, value, position: Sequence = None) -> float:
+    def setPointData(self, value, position: Sequence = None):
         """Set point value defined by position (1-based)
         """
         if self.isBuffered:
@@ -759,25 +732,215 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 Hdf5SpectrumDataSource._registerFormat()
 
 
+import numpy as np
+from ccpn.util.Common import isIterable
+
+_NONE = bytes(NONE_STR, 'utf8')
+# define some tags to denote a dict, xml-style
+DICT = '<__DICT__>'
+DICT_END = '</__DICT__>'
+
+def _encode(value):
+    """Encode value for None; process and recurse into any tuple or list or dicts
+    """
+    if value is None:
+        result = NONE_STR
+
+    elif isinstance(value, dict):
+        # hdf5 attributes do not do dict's;
+        # tried numpy object_: no avail; i.e. result = np.array(value.items())
+        # tried arrays of tuples; no avail
+        # now: Encoded as a list of DICT, n-times key, val, DICT_END
+        result = [DICT]
+        for key, val in value.items():
+            result.append(key)
+            result.append(_encode(val))
+        result.append(DICT_END)
+
+    elif isinstance(value, (tuple, list)):
+        result = [_encode(val) for val in value]
+
+    else:
+        result = value
+
+    return result
+
+
+def _decode(value):
+    """Decode value for None; process and recurse into any tuple, list or dicts
+    """
+
+    # the special case dict need to be first in the checks
+    if isinstance(value, (np.ndarray,)) and len(value)>= 2 \
+            and value[0] == DICT and value[-1] == DICT_END:
+        # Encoded as a list of list of DICT, n-times key, val, DICT_END
+        result = {}
+        ii = 1
+        while ii < len(value) and value[ii] != DICT_END:
+            key = value[ii]
+            val = _decode(value[ii+1])
+            result[key] = val
+            ii += 2
+
+    elif isinstance(value, (np.ndarray,)):
+        result = [_decode(val) for val in value]
+
+    elif value == NONE_STR:
+        result = None
+
+    else:
+        result = value
+
+    return result
+
+
+# Metadata Version 1.0.1 definitions
+HDF5_DATATYPE_KEY = 'HDF5_DataType'
+HDF5_DATASET_KEY = 'HDF5_DatasetName'
+HDF5_VERSION_KEY = 'HDF5_Version'
+
 class Hdf5Metadata(dict):
-    """A class to store/manage the Hdf5 metadata
+    """A class to store/manage the ndf5 metadata
     """
     def __init__(self, dataSource:Hdf5SpectrumDataSource):
         super().__init__()
         self.dataSource = dataSource
         self.blockUpdate = 0   # blocking for when updating
 
-    def initCurrentValues(self, currentDataType=None):
-        """Initialise with optionally setting current dataTypes
+    @property
+    def version(self) -> VersionString:
+        """:return current version from self[NDF5_VERSION_KEY] as VersionString instance
         """
-        self.clear()
-        self[NDF5_VERSION_KEY] = str(NDF5_VERSION)
+        return VersionString(self[NDF5_VERSION_KEY])
 
-        if currentDataType:
-            if currentDataType in _ndf5DataTypes:
-                self[NDF5_SPECTRUM_DATATYPE] = _ndf5DataTypes[currentDataType]
-            else:
-                raise ValueError(f'HdfMetadata.initCurrentValues(): invalid dataType {currentDataType!r}')
+    @property
+    def uid(self) -> str:
+        """:return current uid from self[NDF5_UID_KEY]
+        """
+        return self[NDF5_UID_KEY]
+
+    @property
+    def dataTypes(self) -> dict:
+        """:return the dict with available (dataType, ndf5-dataKey) as contained in self[NDF5_DATATYPES_KEY]
+        """
+        return self[NDF5_DATATYPES_KEY]
+
+    @property
+    def spectrumDataType(self) -> str:
+        """:return The spectrum dataType, as contained in NDF5_SPECTRUM_DATATYPE_KEY
+        """
+        return self[NDF5_SPECTRUM_DATATYPE_KEY]
+
+    @spectrumDataType.setter
+    def spectrumDataType(self, value: str):
+        """Set spectrumDataType to value
+        """
+        if value not in _ndf5DataTypes:
+            raise ValueError(f'HdfMetadata.spectrumDataType: invalid dataType {value!r}')
+        self[NDF5_SPECTRUM_DATATYPE_KEY] = value
+
+    @property
+    def spectrumDataKey(self) -> str:
+        """:return The spectrum dataKey used for retrieving the spectrum data in the ndf5 file.
+                   Retrieved from self.spectrumDataType and the self.dataTypes dict
+        """
+        return self.dataTypes[self.spectrumDataType]
+
+    def initDefaultValues(self, spectrumDataType=None):
+        """Initialise self with default values, optionally setting the spectrum dataType
+        """
+        import uuid
+
+        self.clear()
+        self.update(_defaultNdf5MetadataDict)
+        self[NDF5_UID_KEY] = str(uuid.uuid4())
+
+        if spectrumDataType:
+            self.addDataType(spectrumDataType)
+            self.spectrumDataType = spectrumDataType
+
+    def addDataType(self, dataType, dataKey=None) -> str:
+        """Add dataType to the dict of available data
+        Use dataKey or set to default value as defined in the _ndf5DataTypes dict
+        :return the dataKey
+        """
+        if dataType not in _ndf5DataTypes:
+            raise ValueError(f'HdfMetadata.addDataType: invalid dataType {dataType!r}')
+        if dataKey is None:
+            dataKey = _ndf5DataTypes[dataType]
+        self.dataTypes[dataType] = dataKey
+        return dataKey
+
+    def _reopenFile(self):
+        """Reopen the file as r+
+        :return the file pointer to the H5py file
+        """
+        self.dataSource.fp.close()
+        _mode = Hdf5SpectrumDataSource.defaultOpenReadWriteMode
+        _path = str(self.dataSource.path)
+        _fp = Hdf5SpectrumDataSource.openMethod(_path, mode=_mode)
+        self.dataSource.fp = _fp
+        return _fp
+
+    def _updateVersion100(self):
+        """Update pre 1.0.1 version to 1.1.0
+        """
+        # pre 1.0.1 version;
+        _oldDataKey = 'spectrumData' # This is historic from the first implementation
+
+        _params = self.dataSource.fp[_oldDataKey].attrs
+        if not 'version' in _params:
+            raise RuntimeError('Hdf5Metadata._updateVersion100(): non-versioned metadata instance')
+
+        _version = VersionString('1.0.0')  # it was a float in this implementation
+        del _params['version']
+
+        # we can now set the 1.1.0 ndf5 version
+        self.initDefaultValues()
+        self[NDF5_VERSION_KEY] = '1.1.0'
+        self[NDF5_DATE_KEY] = self.dataSource.date
+        self[NDF5_USER_KEY] = self.dataSource.user
+
+        self.addDataType(NDF5_DATATYPE_SPECTRUM_NDARRAY, _oldDataKey)
+        self.spectrumDataType = NDF5_DATATYPE_SPECTRUM_NDARRAY
+
+        # We are now upto version 1.1.0, as defined above
+        _version = self.version
+        return _version
+
+    def _updateVersion101(self):
+        """Update 1.0.1 version to 1.1.0
+        """
+        # 1.0.1 -> 1.1.0
+        _version = VersionString(self[HDF5_VERSION_KEY])
+        if not _version == '1.0.1':
+            RuntimeError(f'Hdf5Metadata._updateVeersion101(): unknown version {_version}')
+
+        # remap
+        _oldDataKey = self[HDF5_DATASET_KEY]
+
+        self.initDefaultValues()
+        self[NDF5_VERSION_KEY] = '1.1.0'
+        self[NDF5_DATE_KEY] = self.dataSource.date
+        self[NDF5_USER_KEY] = self.dataSource.user
+
+        # # This works, but don't for now
+        # # reopen the file as we are going to write the update info
+        # _fp = self._reopenFile()
+        # # the spectrum data; move to new location
+        # _fp.create_group(NDF5_SPECTRUM)
+        # _newDataKey = self.addDataType(NDF5_DATATYPE_SPECTRUM_NDARRAY)
+        # _fp.move(_oldDataKey, _newDataKey)
+        # self.spectrumDataType = NDF5_DATATYPE_SPECTRUM_NDARRAY
+        # self.saveToNdf5()
+
+        # instead, just leave it were it is for backward compatibility
+        self.addDataType(NDF5_DATATYPE_SPECTRUM_NDARRAY, _oldDataKey)
+        self.spectrumDataType = NDF5_DATATYPE_SPECTRUM_NDARRAY
+
+        # We are now upto version 1.1.0, as defined above
+        _version = self.version
+        return _version
 
     def _updateMetadata(self):
         """Update the self to the latest version
@@ -788,64 +951,20 @@ class Hdf5Metadata(dict):
         self.blockUpdate += 1
         _version = None
 
-        # Metadata Version 1.0.1 definitions
-        HDF5_DATATYPE_KEY = 'HDF5_DataType'
-        HDF5_DATASET_KEY = 'HDF5_DatasetName'
-        HDF5_VERSION_KEY = 'HDF5_Version'
+        if not self.dataSource.hasOpenFile():
+            raise RuntimeError(f'HdfMetadata._updateMetadata(): File is closed')
 
-        if not HDF5_VERSION_KEY in self and not NDF5_VERSION_KEY in self:
-            # pre 1.0.1 version
-            _params = self.dataSource.parameters
-            if 'version' in _params:
-                _version = VersionString('1.0.0')
-                _mode = self.dataSource.mode
-                # if the file was opened for reading only, we need to close it and open it ReadWrite mode
-                # and read the parameters again
-                if _mode == Hdf5SpectrumDataSource.defaultOpenReadMode:
-                    self.dataSource.closeFile()
-                    self.dataSource.openFile(mode=Hdf5SpectrumDataSource.defaultOpenReadWriteMode)
-                    _params = self.dataSource.spectrumParameters
-
-                del _params['version']
-
-                # we can now set the 1.1.0 ndf5 version
-                self.clear()
-                self[NDF5_VERSION_KEY] = '1.1.0'
-                self[NDF5_SPECTRUM_DATATYPE] = NDF5_DATATYPE_SPECTRUM_MATRIX
-                self[NDF5_DATATYPE_SPECTRUM_MATRIX] = _ndf5DataTypes[NDF5_DATATYPE_SPECTRUM_MATRIX]
-
-                self.saveToHdf5(self.dataSource.fp)
-
-                # self.closeFile()
-                # self.openFile(mode=_mode)
-
-                # We are now upto version 1.1.0
-                _version = VersionString('1.1.0')
-
-            else:
-                raise RuntimeError('Hdf5Metadata._updateMetadata(): non-versioned instance')
-
-        elif HDF5_VERSION_KEY in self:
-            # 1.0.1 -> 1.1.0
-            _version = VersionString(self[HDF5_VERSION_KEY])
-
-            if _version == '1.0.1':
-                # remap
-                _dataKey = self[HDF5_DATASET_KEY]
-                self.clear()
-                self[NDF5_VERSION_KEY] = '1.1.0'
-                self[NDF5_SPECTRUM_DATATYPE] = NDF5_DATATYPE_SPECTRUM_MATRIX
-                self[NDF5_DATATYPE_SPECTRUM_MATRIX] = _dataKey
-
-                # We are now upto 1.1.0 version
-                _version = VersionString('1.1.0')
-
-            else:
-                RuntimeError(f'Hdf5Metadata._updateMetadata(): unknown version {_version}')
-
-        elif NDF5_VERSION_KEY in self:
+        if NDF5_VERSION_KEY in self:
             # we are already at 1.1.0 or higher
-            _version = VersionString(self[NDF5_VERSION_KEY])
+            _version = self.version
+
+        elif not HDF5_VERSION_KEY in self and not NDF5_VERSION_KEY in self:
+            # # pre 1.0.1 version;
+            _version = self._updateVersion100()
+
+        elif HDF5_VERSION_KEY in self and not NDF5_VERSION_KEY in self:
+            # 1.0.1 -> 1.1.0
+            _version = self._updateVersion101()
 
         else:
             raise RuntimeError('Hdf5Metadata._updateMetadata(): non-versioned instance')
@@ -859,30 +978,43 @@ class Hdf5Metadata(dict):
 
         self.blockUpdate -= 1
 
-    def restoreFromHdf5(self, fp):
-        """Update self from the Hdf5 file
+    def restoreFromNdf5(self):
+        """Update self from the ndf5 file toplevel attributes
         """
-        if fp is None:
-            raise ValueError('Undefined Hdf5 file')
+        if not self.dataSource.hasOpenFile():
+            raise RuntimeError(f'HdfMetadata.restoreFromNdf5(): File is closed')
 
-        _metadata = fp.attrs
-        # the _metadata object is unfortunately not a real dict
-        for key in list(_metadata):
-            self[key] = _metadata[key]
+        _metadata = self.dataSource.fp.attrs
+        self.clear()
+
+        # the _metadata object is unfortunately not a real dict;
+        # Decode it from the earlier encoding
+        for key, value in _metadata.items():
+            self[key] = _decode(value)
         self._updateMetadata()
 
-    def saveToHdf5(self, fp):
-        """Update the Hdf5 file with self
+    def saveToNdf5(self):
+        """Update the ndf5 file toplevel attributes with self
         """
-        if fp is None:
-            raise ValueError('Undefined Hdf5 file')
+        if not self.dataSource.hasOpenFile():
+            raise RuntimeError(f'HdfMetadata.saveToNdf5(): File is closed')
 
         # the _metadata object is unfortunately not a real dict
-        _metadata = fp.attrs
+        _metadata = self.dataSource.fp.attrs
 
         # fist delete current values in the hdf5 file
         for key in list(_metadata):
             del _metadata[key]
-        # now copy the values from self
-        for key, value in self.items():
-           _metadata[key] = value
+
+        _items = list(self.items())
+        # # for backward compatibility, add the old 1.0.1 definition;
+        # _items.append( (HDF5_DATASET_KEY, self.spectrumDataKey) )
+
+        for key, value in _items:
+            # now copy the values from self
+            try:
+               _metadata[key] = _encode(value)
+            except Exception as es:
+                _txt = f'HdfMetadata.saveToNdf5(): error saving {key = } {value = }; {es}'
+                getLogger().error(_txt)
+                raise RuntimeError(_txt)

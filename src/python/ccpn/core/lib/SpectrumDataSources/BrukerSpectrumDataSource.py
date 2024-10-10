@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-07 19:44:10 +0100 (Mon, October 07, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-10 20:47:58 +0100 (Thu, October 10, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -546,8 +546,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             _comments = self.acqus[0].get('_comments', [])
             if isinstance(_comments, list) and len(_comments) > 0:
                 _tmp = _comments[0].split()
-                self.date = _tmp[1:-1]
-                self.user = _tmp[-1]
+                self.date = ' '.join(_tmp[1:-1])
+                self.user = str(_tmp[-1])
 
             self.isBigEndian = self.procs[0].get('BYTORDP') == 1
 

@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-07 14:50:16 +0100 (Mon, October 07, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-10 20:47:58 +0100 (Thu, October 10, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2881,10 +2881,11 @@ class Spectrum(AbstractWrapperObject):
         return newSpectrum
 
     @logCommand(get='self')
-    def convertToHdf5(self, path=None):
+    def convertToHdf5(self, path=None, compressionMode=None):
         """Convert the binary data of self to an Hdf5 type file
         :param path: optional path, auto-generated from self.path when None
-        :return The newly created Hdf5DataStore instance
+        :param compressionMode: optional compressionMode
+        :return The newly created Hdf5DataSource instance
         """
         from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource as _Hdf5
 
@@ -2902,16 +2903,15 @@ class Spectrum(AbstractWrapperObject):
 
         _ds = self.dataSource
         if _ds.isNmrPipeSpectrum:
-            # Special case because of NmrPipe buffering
-            # _ds.closeHdf5Buffer()
-            # _ds.setBuffering(True, bufferIsTemporary=False, bufferPath=newDataStore.aPath())
-            # newDataSource = _ds.initialiseHdf5Buffer()
-            newDataSource = _ds.openHdf5Buffer(bufferIsTemporary=False, bufferPath=newDataStore.aPath())
+            # Special case because of NmrPipe buffering; this avoids first reading and writing the buffer
+            # file and then writing it again
+            newDataSource = _ds.openHdf5Buffer(bufferIsTemporary=False, bufferPath=newDataStore.aPath(),
+                                               compressionMode=compressionMode)
             _ds.fillHdf5Buffer()
 
         else:
             # Duplicate the data in an Hdf5 file
-            newDataSource = _ds.duplicateDataToHdf5(newDataStore.aPath())
+            newDataSource = _ds.duplicateDataToHdf5(newDataStore.aPath(), compressionMode=compressionMode)
 
         # Activate the new binary file
         self._openFileHelper(newDataStore=newDataStore, newDataSource=newDataSource)

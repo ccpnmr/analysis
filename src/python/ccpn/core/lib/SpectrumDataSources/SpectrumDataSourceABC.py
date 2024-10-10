@@ -94,8 +94,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-07 21:18:59 +0100 (Mon, October 07, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-10 20:47:58 +0100 (Thu, October 10, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -129,7 +129,7 @@ from ccpn.util.decorators import singleton
 
 from ccpn.util.isotopes import findNucleiFromSpectrometerFrequencies, Nucleus
 from ccpn.util.traits.CcpNmrTraits import CFloat, Int, CInt, CBool, Bool, List, TList, CList, \
-    CString, CPath, Any, CEnum, Enum, observe, All, CArray
+    CString, CPath, Any, CEnum, Enum, observe, All, CArray, Unicode
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
 from ccpn.framework.constants import CCPNMR_PREFIX, NO_SUFFIX, ANY_SUFFIX
@@ -327,7 +327,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     pulseProgram = CString(         default_value=None).tag(
 
                                     doCopy=True,
-                                    spectrumAttribute='pulseProgram',
+                                    spectrumAttribute=None,
                                     hasSetterInSpectrumClass=False,
                                     doPrint=False
                                     )
@@ -631,9 +631,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                                 'Flag to indicate if the buffer is temporary',
                                                 saveToJson = False
                                                 )
-
+    _bufferCompressionMode = Unicode(default_value=None).tag(info =
+                                                'Buffer file compression mode',
+                                                saveToJson = False
+                                                )
     _bufferPath = CPath(default_value=None).tag(info =
-                                                'an attribute to store the path of the buffer file',
+                                                'Path of the buffer file',
                                                 saveToJson = False
                                                 )
     # Can't use DataSourceTrait defined below because of the circular nature of the definitions
@@ -2306,11 +2309,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         return self.isBuffered and self._bufferFilled
 
-    def setBuffering(self, isBuffered:bool, bufferIsTemporary:bool=True, bufferPath=None):
+    def setBuffering(self, isBuffered:bool, bufferIsTemporary:bool=True, bufferPath=None, compressionMode=None):
         """Define the SpectrumDataSource buffering status
         :param isBuffered (True, False): set the buffering status
         :param bufferIsTemporary (True, False): define buffer as temporary (i.e. disgarded on close)
         :param bufferPath: optional path to store the buffer file
+        :param compressionMode: optional compressionMode
         """
         from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
 
@@ -2320,6 +2324,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self._isBuffered = isBuffered
         self._bufferFilled = False
         self._bufferIsTemporary = bufferIsTemporary
+        self._bufferCompressionMode = compressionMode
 
         self._bufferPath = None
         if isBuffered:
@@ -2365,7 +2370,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         hdf5buffer = Hdf5SpectrumDataSource(path=self._bufferPath, checkValid=False)
         hdf5buffer.copyParametersFrom(self)
         # do not use openNewFile as it has to remain open to allow for filling the buffer
-        hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode)
+        hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode, compressionMode=self._bufferCompressionMode)
         # backward and forward linkages
         hdf5buffer.parent = self
         self.hdf5buffer = hdf5buffer
@@ -2396,18 +2401,19 @@ class SpectrumDataSourceABC(CcpNmrJson):
             self.fp = None
             self.mode = None
 
-    def openHdf5Buffer(self, bufferIsTemporary:bool=True, bufferPath=None):
+    def openHdf5Buffer(self, bufferIsTemporary:bool=True, bufferPath=None, compressionMode=None):
         """Open and activate the SpectrumDataSource buffering.
         Coveniance: closes any open buffer, sets new buffering and initialises
 
         :param bufferIsTemporary flag (True, False): define buffer as temporary (i.e. disgarded on close)
         :param bufferPath: optional path to store the buffer file
+        :param compressionMode: optional compressionMode
         :return the Hdf5SpectrumDataSource buffer instance
         """
         if self.isBuffered:
             self.closeHdf5Buffer()
         self.setBuffering(isBuffered=True, bufferIsTemporary=bufferIsTemporary,
-                          bufferPath=bufferPath
+                          bufferPath=bufferPath, compressionMode=compressionMode
                           )
         _bufferDs = self.initialiseHdf5Buffer()
         return _bufferDs
@@ -2427,7 +2433,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self._isBuffered = False
         self._bufferFilled = False
 
-    def duplicateDataToHdf5(self, path=None):
+    def duplicateDataToHdf5(self, path=None, compressionMode=None):
         """Make a duplicate from self to a Hdf5 file;
         return an Hdf5SpectrumDataSource instance
         """
@@ -2437,7 +2443,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             path = self.path.withSuffix(Hdf5SpectrumDataSource.suffixes[0]).uniqueVersion()
 
         hdf5 = Hdf5SpectrumDataSource().copyParametersFrom(self)
-        with hdf5.openNewFile(path=path):
+        with hdf5.openNewFile(path=path, compressionMode=compressionMode):
             self.copyDataTo(hdf5)
         return hdf5
 
@@ -2523,6 +2529,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
                     pathName = self.path.name
 
             return f'<{self.__class__.__name__}: {self._fileInfoString3}, ({fpStatus},{pathName!r})>'
+
+    __repr__ = __str__
 #end class
 
 

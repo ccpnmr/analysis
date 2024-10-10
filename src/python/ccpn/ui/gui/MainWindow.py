@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-09-18 17:06:57 +0100 (Wed, September 18, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-10-10 15:45:27 +0100 (Thu, October 10, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1808,7 +1808,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                     getLogger().warning('Current strip is not 1D')
 
     @logCommand('mainWindow.')
-    def refitCurrentPeaks(self, singularMode=True):
+    def refitCurrentPeaks(self, singularMode=False):
         from ccpn.core.lib import AssignmentLib
 
         peaks = self.application.current.peaks

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-10-09 14:26:12 +0100 (Wed, October 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-10 10:40:31 +0100 (Thu, October 10, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -1116,8 +1116,8 @@ class _commonSettings():
                     # ignore if view is deleted
                     if data is not None and data.get(Notifier.TRIGGER) == 'delete':
                         notifObj = data.get(Notifier.OBJECT)
-                        # check if both correct spectrum display and spectrum.
-                        if notifObj.strip.spectrumDisplay is display and notifObj.spectrum is spectrum:
+                        # check if it is a SpectrumView and both correct spectrum display and spectrum.
+                        if isinstance(notifObj, SpectrumView) and notifObj.strip.spectrumDisplay is display and notifObj.spectrum is spectrum:
                             continue
 
                     f_row += 1

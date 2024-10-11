@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-11 11:33:36 +0100 (Fri, October 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-11 14:39:14 +0100 (Fri, October 11, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 
+from ccpn.framework.Application import ANALYSIS_ASSIGN
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY
 
 
@@ -349,17 +350,21 @@ def _getAvailableModules(mainWindow, layout, neededModules):
 
     if General in layout:
         if ApplicationName in layout.general:
+            modules = _getApplicationSpecificModules(mainWindow, ANALYSIS_ASSIGN)
+            modules.append(gM)
+            modules.append(ea)
 
             applicationName = layout.general.get(ApplicationName)  # getattr(layout.general, ApplicationName)
-            modules = []
             if applicationName != mainWindow.application.applicationName:
                 getLogger().debug('The layout was saved in a different application. Some of the modules might not be loaded.'
                                   'If this happens,  start a new project with %s' % applicationName)
             else:
-                modules = _getApplicationSpecificModules(mainWindow, applicationName)
-            modules.append(gM)
-            modules.append(ea)
-            paths = [item.__path__ for item in modules]
+                modules.extend(_getApplicationSpecificModules(mainWindow, applicationName))
+            mods = []
+            for mod in modules:
+                if mod not in mods:
+                    mods.append(mod)
+            paths = [item.__path__ for item in mods]
 
             ccpnModules = [ccpnModule for path in paths for ccpnModule in _ccpnModulesImporter(path, neededModules)]
             return ccpnModules

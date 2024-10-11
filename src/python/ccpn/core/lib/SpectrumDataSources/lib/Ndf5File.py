@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-11 10:06:56 +0100 (Fri, October 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-11 10:37:01 +0100 (Fri, October 11, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -289,6 +289,7 @@ class Ndf5File(object):
 
         if self.newFile:
             self._initMetadata()
+            self._saveMetadata()
         else:
             self._restoreMetadata()
 
@@ -367,7 +368,7 @@ class Ndf5File(object):
         # 1.0.1 -> 1.1.0
         _version = VersionString(self.metadata[HDF5_VERSION_KEY])
         if not _version == '1.0.1':
-            RuntimeError(f'Ndf5File._updateVeersion101(): unknown version {_version}')
+            RuntimeError(f'Ndf5File._updateVersion101(): unknown version {_version}')
 
         # remap
         _oldDataKey = self.metadata[HDF5_DATASET_KEY]
@@ -512,3 +513,6 @@ class Ndf5File(object):
                                track_times=False,  # to assure same hash after opening/storing
                                **dataSetKwds
                                )
+
+        # need to update the metadata as we have added info
+        self._saveMetadata()

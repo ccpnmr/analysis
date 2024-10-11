@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-10-10 14:11:36 +0100 (Thu, October 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-11 18:10:08 +0100 (Fri, October 11, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -469,7 +469,7 @@ class GuiBase(object):
             if not _path.exists():
                 txt = f'"{path}" does not exist'
                 getLogger().warning(txt)
-                MessageDialog.showError('Load Data', txt, parent=self)
+                MessageDialog.showError('Load Data', txt, parent=self.mainWindow)
                 continue
             # loads data using the provided dataLoader
             dataLoaders.append(dataLoader(path))

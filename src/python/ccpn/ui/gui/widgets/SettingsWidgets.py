@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-10-10 10:40:31 +0100 (Thu, October 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-11 17:57:29 +0100 (Fri, October 11, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -1145,12 +1145,6 @@ class _commonSettings():
             gids = [gg for gg in gids if gg and gg != obj]
         self._fillAllSpectrumFrame(gids, data)
 
-        # if gid == '> All <':
-        #     gids = [self.application.getByGid(gid) for gid in self.spectrumDisplayPulldown.getTexts() if gid not in ['> All <', '> Select <']]
-        #     self._fillAllSpectrumFrame(gids)
-        # else:
-        #     self._fillSpectrumFrame([self.application.getByGid(gid)])
-
 
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 LINKTOACTIVESTATE = True
@@ -1463,13 +1457,37 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         #                                       SpectrumView.className,
         #                                       self._spectrumViewChanged,
         #                                       onceOnly=True)
-        ...
+        try:
+            if self.project:
+                self._notifierRename = Notifier(theObject=self.project,
+                                                triggers=[Notifier.RENAME],
+                                                targetName=SpectrumView.className,
+                                                callback=self._spectrumDisplaySelectionPulldownCallback)
+
+                self._notifierDelete = Notifier(theObject=self.project,
+                                                triggers=[Notifier.DELETE],
+                                                targetName=SpectrumView.className,
+                                                callback=self._spectrumDisplaySelectionPulldownCallback)
+
+                self._notifierCreate = Notifier(theObject=self.project,
+                                                triggers=[Notifier.CREATE],
+                                                targetName=SpectrumView.className,
+                                                callback=self._spectrumDisplaySelectionPulldownCallback)
+        except Exception:
+            # if anything goes wrong unregister still works
+            self._notifierRename = None
+            self._notifierDelete = None
+            self._notifierCreate = None
 
     def _unRegisterNotifiers(self):
         """Unregister notifiers
         """
-        # if self._spectrumViewNotifier:
-        #     self._spectrumViewNotifier.unRegister()
+        if self._notifierRename:
+            self._notifierRename.unRegister()
+        if self._notifierDelete:
+            self._notifierDelete.unRegister()
+        if self._notifierCreate:
+            self._notifierCreate.unRegister()
         if self.includeNmrChainPullSelection:
             self.ncWidget.unRegister()
         if self.includeSpectrumTable:
@@ -2032,38 +2050,6 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
     .. Note:: Method for callback requires a data argument.
     """
     KLASS = SpectrumDisplay
-
-    def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',
-                 vPolicy='minimal', fixedWidths=(None, None, None), orientation='left',
-                 labelText=None, tipText=None,
-                 texts=None, callback=None, objectWidgetChangedCallback=None,
-                 defaultListItem=None, displayText=None,
-                 standardListItems=None,
-                 **kwds):
-        """Subclassed to initialize SpectrumView notifiers."""
-        super().__init__(parent=parent, mainWindow=mainWindow, vAlign=vAlign, stretch=stretch, hAlign=hAlign,
-                 vPolicy=vPolicy, fixedWidths=fixedWidths, orientation=orientation,
-                 labelText=labelText, tipText=tipText,
-                 texts=texts, callback=callback, objectWidgetChangedCallback=objectWidgetChangedCallback,
-                 defaultListItem=defaultListItem, displayText=displayText,
-                 standardListItems=standardListItems,
-                 **kwds)
-
-        if self.project:
-            self._specViewNotifierRename = Notifier(theObject=self.project,
-                                            triggers=[Notifier.RENAME],
-                                            targetName=SpectrumView.className,
-                                            callback=self._objRenamedCallback)
-
-            self._specViewNotifierDelete = Notifier(theObject=self.project,
-                                            triggers=[Notifier.DELETE],
-                                            targetName=SpectrumView.className,
-                                            callback=self._objDeletedCallback)
-
-            self._specViewNotifierCreate = Notifier(theObject=self.project,
-                                            triggers=[Notifier.CREATE],
-                                            targetName=SpectrumView.className,
-                                            callback=self._objCreatedCallback)
 
     def getDisplays(self):
         """

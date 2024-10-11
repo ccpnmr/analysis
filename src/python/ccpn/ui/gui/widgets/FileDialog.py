@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-07-18 14:03:48 +0100 (Thu, July 18, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__dateModified__ = "$dateModified: 2024-10-03 10:41:26 +0100 (Thu, October 03, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -160,6 +160,10 @@ class FileDialogABC(QtWidgets.QFileDialog):
             # set the current working path if this is the first time the dialog has been opened
             if self._clsID not in self._initialPaths:
                 self._initialPaths[self._clsID] = _path
+                self._lastPreferencePaths[self._clsID] = _path
+
+            # added in rare case that clsID exists for _initalPaths but not _lastPreferencePaths.
+            if self._clsID not in self._lastPreferencePaths:
                 self._lastPreferencePaths[self._clsID] = _path
 
             directory = self._initialPaths[self._clsID]

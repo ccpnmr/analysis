@@ -489,6 +489,10 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         elif genPrefs.useProjectPath == 'Inside':
             genPrefs.userWorkingPath = project.projectPath.asString()
 
+        # if temporary file set working path to user defined
+        if project.isTemporary:
+            genPrefs.userWorkingPath = genPrefs.userSetWorkingPath
+
         from copy import deepcopy
 
         self._spectrumModuleLayouts = self.moduleLayouts = None

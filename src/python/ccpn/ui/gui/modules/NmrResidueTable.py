@@ -22,9 +22,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-20 16:42:22 +0100 (Thu, June 20, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-10-10 10:56:18 +0100 (Thu, October 10, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -560,6 +560,9 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
                         nmrResidue = _adjacent.mainNmrResidue
 
             for specDisplay in displays:
+                axisMask = self.axisMaskFromAxisCode(specDisplay.axes,
+                        self.nmrResidueTableSettings.axisCodeOptionsDict.get(f'{specDisplay}'))
+
                 if self.current.strip in specDisplay.strips:
 
                     # just navigate to this strip
@@ -567,7 +570,9 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
                                               nmrResidue.nmrAtoms,
                                               widths=newWidths,
                                               markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked(),
-                                              setNmrResidueLabel=True)
+                                              setNmrResidueLabel=True,
+                                              axisMask=axisMask
+                                              )
 
                 else:
                     #navigate to the specDisplay (and remove excess strips)
@@ -577,7 +582,8 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
                                                       widths=newWidths,  #['full'] * len(display.strips[0].axisCodes),
                                                       showSequentialResidues=(len(specDisplay.axisCodes) > 2) and
                                                                              self.nmrResidueTableSettings.sequentialStripsWidget.checkBox.isChecked(),
-                                                      markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked()
+                                                      markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked(),
+                                                      axisMask=axisMask
                                                       )
 
                 # open the other headers to match
@@ -586,6 +592,10 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
                         strip.header.reset()
                         strip.header.headerVisible = True
 
+    @staticmethod
+    def axisMaskFromAxisCode(axes , axisCode) -> list:
+        """Create a mask for axes based on which are ticked in settings"""
+        return [True if num in axisCode else None for num, axis in enumerate(axes)]
 
 #=========================================================================================
 # _NewCSMNmrResidueTable

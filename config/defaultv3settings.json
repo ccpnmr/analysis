@@ -317,19 +317,6 @@
     "modules": {
         "profileByReference" : {
             "databasePath" : ""
-        },
-        "backBoneAssignment": {
-            "markPositions": true,
-            "autoClearMarks": true,
-            "linkToCurrentNmrChain": true,
-            "focusYAxis": true,
-            "numberOfMinusMatchesWidget": 3,
-            "numberOfPlusMatchesWidget": 3,
-            "showStripInMatch": false,
-            "showSequentialStrips": true,
-            "matchCA": true,
-            "matchCB": true,
-            "matchC": false
         }
     }
 }

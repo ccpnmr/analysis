@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-10 15:45:26 +0100 (Thu, October 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-11 11:32:03 +0100 (Fri, October 11, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -320,6 +320,7 @@ class PeakPickerNd(PeakPickerABC):
                         result += tuple(localResult)
                     except Exception as es:
                         # catch all errors as a single report - make sure results stay aligned
+                        # by padding with Nones
                         _errorMsgs.append(f'failed to fit peaks: {peakArray}\n{es}')
                         result += tuple([None] * len(slc))
                     else:
@@ -660,7 +661,7 @@ class PeakPickerNd(PeakPickerABC):
             # result indexing SHOULD correspond to original peaks, with Nones as bad refits
             if not (res := result[pkNum]):
                 continue
-            height, center, linewidth = res[pkNum]
+            height, center, linewidth = res
             # overwrite the peak pointPositions
             _shape = data.shape[::-1]
             newPos = list(peak.pointPositions)

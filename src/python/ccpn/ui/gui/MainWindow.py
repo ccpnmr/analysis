@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-10 18:23:54 +0100 (Thu, October 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-11 18:50:23 +0100 (Fri, October 11, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -753,7 +753,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             for sp in badSpectra:  # these can be >1000 lines message. Added in a scrollable area.
                 text += f'{str(sp)}\n'
             title = 'Detected invalid Spectrum file paths'
-            MessageDialog.showWarning(title=title, message=text, scrollableMessage=True,
+            MessageDialog.showWarning(title=title, message=text,
                                       dontShowEnabled=True, defaultResponse=None,
                                       popupId=f'{self.__class__.__name__}BadSpectra')
 

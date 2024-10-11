@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-10 20:47:58 +0100 (Thu, October 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-11 15:28:15 +0100 (Fri, October 11, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -2881,8 +2881,8 @@ class Spectrum(AbstractWrapperObject):
         return newSpectrum
 
     @logCommand(get='self')
-    def convertToHdf5(self, path=None, compressionMode=None):
-        """Convert the binary data of self to an Hdf5 type file
+    def convertToNdf5(self, path=None, compressionMode=None):
+        """Convert the binary data of self to an ndf5 type file
         :param path: optional path, auto-generated from self.path when None
         :param compressionMode: optional compressionMode
         :return The newly created Hdf5DataSource instance

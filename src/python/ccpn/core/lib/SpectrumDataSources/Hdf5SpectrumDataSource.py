@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-11 10:37:01 +0100 (Fri, October 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-11 15:28:15 +0100 (Fri, October 11, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -73,8 +73,6 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     defaultAppendMode = 'a'
 
     compressionMode = CEnum(mapping=NDF5_COMPRESSION_MODES, default_value=None)
-
-    _NONE = bytes(NONE_STR, 'utf8')
 
     #=========================================================================================
 
@@ -143,9 +141,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         try:
             self._checkFilePath(newFile, mode=mode, overwrite=overwrite)
-            self._ndf5File.open(path=self.path, mode=mode,
-                                maxCacheSize=self.maxCacheSize
-                                )
+            self._ndf5File.open(path=self.path, mode=mode, cacheSize=self.maxCacheSize)
             self.mode = mode
 
         except (FileExistsError, FileNotFoundError) as es:
@@ -160,12 +156,12 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         else:
             # New file;
             # create the spectrum ndarray
-            self._ndf5File._createSpectrumData(dimensionCount=self.dimensionCount,
-                                               pointCounts=self.pointCounts,
-                                               dtype=self.dtype,
-                                               sparse=sparse,
-                                               compressionMode=compressionMode
-                                              )
+            self._ndf5File.createSpectrumData(dimensionCount=self.dimensionCount,
+                                              pointCounts=self.pointCounts,
+                                              dtype=self.dtype,
+                                              sparse=sparse,
+                                              compressionMode=compressionMode
+                                             )
             self.writeParameters()
 
         # getLogger().debug2('openFile: %s; %s blocks with size %s; chunks=%s' %
@@ -174,135 +170,66 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         return self._ndf5File.fp
 
     def readParameters(self):
-        """Read the parameter values from the hdf5 data structure
+        """Read the parameter values from the ndf5 data structure
         :return self
+        :raises RuntimeError
         """
-        def _convertValue(trait, value):
-            """Convert a value,  checking for bytes and CString type
-            return: optionally converted value
-            """
-            if value == self._NONE or value == NONE_STR:
-                newValue = None
-            elif isinstance(trait, (CString,)):
-                newValue = trait.fromBytes(value)
-            elif isinstance(trait, (CEnum,)) and isinstance(value, bytes):
-                newValue = value.decode('utf8')
-            else:
-                newValue = value
-            return newValue
-
-        def _decode(parName, value):
-            """Decode CString, CEnum traits from bytes, accounting for None values as well
-            """
-            if self.isDimensionalParameter(parName):
-                # dimensional parameter: optionally decode the items in the list
-                if not isIterable(value):
-                    raise RuntimeError('Decoding Hdf5 parameters, expected iterable but got "%s"' % value)
-                itemTrait = self.getItemTrait(parName)
-                newValue = []
-                for val in value:
-                    _convertedVal = _convertValue(itemTrait, val)
-                    newValue.append(_convertedVal)
-
-            else:
-                # non-dimensional parameter: optionally decode
-                trait = self.getTrait(parName)
-                newValue = _convertValue(trait, value)
-
-            return newValue
-
-        logger = getLogger()
-
         self.setDefaultParameters()
-
         try:
             if not self.hasOpenFile():
                 self.openFile(mode=self.defaultOpenReadMode)
 
-            dataset = self._ndf5File.getSpectrumData()
-            params = dataset.attrs
-            #pDict = [(k, _decode(k, params[k])) for k in params.keys()]
+            params = self._ndf5File.getSpectrumParameters()
+            # loop over all parameters that are defined for the Spectrum class and present in the ndf5 parameters
+            for parName, value in [(p, params[p]) for p in self.keys(spectrumAttribute=lambda i: i is not None)
+                                    if p in params
+                                   ]:
 
-            # loop over all parameters that are defined for the Spectrum class and present in the hdf5 parameters
-            for parName, values in [(p, params[p]) for p in self.keys(spectrumAttribute=lambda i: i is not None) if p in params]:
-                if values is not None:
-                    # if parName == 'dimensionTypes':
-                    #     pass  # debug
-                    values = _decode(parName, values)
-                    self.setTraitValue(parName, values)
+                self.setTraitValue(parName, value, force=True)
 
             # Get some dataset related parameters
             dataset = self._ndf5File.getSpectrumData()
-            self.dimensionCount = len(dataset.shape)
             self.isBigEndian = self._bigEndian
-            # Get the number of points and blockSizes from the dataset
-            self.pointCounts = tuple(dataset.shape[::-1])
+            # get dimensionCount; some older parameter sets did not have this!
+            self.dimensionCount = len(dataset.shape)
+            # Get the blockSizes from the dataset
             self.blockSizes = tuple(dataset.chunks[::-1])
+            # some parameters are stored in the metadata
+            self.date = self._ndf5File.date
+            self.user = self._ndf5File.user
 
         except Exception as es:
-            logger.error('%s.readParameters(): %s' % (self.__class__.__name__, es))
-            raise es
+            _txt = f'readParameters(): {es}'
+            getLogger().error(_txt)
+            raise RuntimeError(_txt)
 
         return super().readParameters()
 
     def writeParameters(self):
-        """write the parameter values into the hdf5 data structure
+        """write the parameter values into the ndf5 data structure
         :return self
+        :raises RuntimeError
         """
-        logger = getLogger()
+        if self.mode == 'r':
+            # self._ndf5File._reopen() # throws some error: "resource unavailable"
+            raise RuntimeError(f'writeParameters(): Cannot write to read-only file')
 
-        def _encode(parName, value):
-            """Encode CString traits as bytes, accounting for None values as well
-            """
-            if self.getMetadata(parName, 'isDimensional'):
-                # dimensional parameter: optionally encode the items in the list
-                if not isIterable(value):
-                    raise RuntimeError('Encoding Hdf5 parameters, expected iterable but got "%s"' % value)
-                itemTrait = self.getItemTrait(parName)
-                newValue = []
-                for val in value:
-                    if val is None:
-                        newValue.append(self._NONE)
-                    elif itemTrait is not None and isinstance(itemTrait, CString):
-                        newValue.append(itemTrait.asBytes(val))
-                    else:
-                        newValue.append(val)
-            else:
-                # non-dimensional parameter: optionally encode
-                trait = self.getTrait(parName)
-                if value is None:
-                    newValue = self._NONE
-                elif isinstance(trait, CString):
-                    newValue = trait.asBytes(value)
-                else:
-                    newValue = value
-
-            return newValue
+        if not self.hasOpenFile():
+            raise RuntimeError(f'writeParameters(): File {self} is not open')
 
         try:
-            if self.hasOpenFile() and self.mode == 'r':
-                # File was opened read-only; close it so it can be re-opened 'r+'
-                self.closeFile()
-                self.openFile(mode=self.defaultOpenReadWriteMode, check=False)
-
-            if not self.hasOpenFile():
-                raise RuntimeError('File %s is not open' % self)
-
-        except Exception as es:
-            logger.error('%s.writeParameters: %s' % (self.__class__.__name__, es))
-            raise es
-
-        try:
-            dataset = self._ndf5File.getSpectrumData()
-            params = dataset.attrs
-            # values are stored in the hdf5 under the same attribute name as in the Spectrum class
-            for parName, values in self.items(spectrumAttribute=lambda i: i is not None):
-                values = _encode(parName, values)
-                params[parName] = values
+            # parameters are stored in the ndf5 under the same attribute name as in the Spectrum class
+            _params = dict(item for item in self.items(spectrumAttribute=lambda i: i is not None))
+            self._ndf5File.setSpectrumParameters(_params, clear=True)
+            # some parameters go into the metadata
+            self._ndf5File.date = self.date
+            self._ndf5File.user = self.user
+            self._ndf5File._saveMetadata()
 
         except Exception as es:
-            logger.error('%s.writeParameters: %s' % (self.__class__.__name__, es))
-            raise es
+            _txt = f'writeParameters(): {es}'
+            getLogger().error(_txt)
+            raise RuntimeError(_txt)
 
         return self
 

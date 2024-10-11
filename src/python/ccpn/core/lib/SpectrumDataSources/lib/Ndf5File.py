@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-11 10:37:01 +0100 (Fri, October 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-11 15:28:15 +0100 (Fri, October 11, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -111,8 +111,6 @@ _ndf5DataTypes = {
     NDF5_DATATYPE_NUSDATA : 'nus/nusdata',
 }
 
-#--------------------------------------------------------------------------------------------------
-
 
 #--------------------------------------------------------------------------------------------------
 # Compression modes
@@ -129,96 +127,68 @@ NDF5_COMPRESSION_LZF = 'lzf'
 # NDF5_COMPRESSION_SZIP = 'szip'
 NDF5_COMPRESSION_MODES = (NDF5_COMPRESSION_GZIP, NDF5_COMPRESSION_LZF)
 
+
 #--------------------------------------------------------------------------------------------------
-# Encoding of metadata
+# a class to set property getter, setter from the metadata dict
 
-NONE_STR = '__NONE__'
+class _Property(property):
+    # GWV: Only by having no doc strings I seem to be able to dynamically set these!
 
-# define some tags to denote a dict, xml-style
-DICT = '<__DICT__>'
-DICT_END = '</__DICT__>'
+    # """A property class for the getting and setting of attributes from the metadata dict
+    # """
+    def __init__(self, attributeName, key, hasSetter, cast=None, doc=None):
+        # GWV: Only by having no doc strings I seem to be able to dynamically set these!
 
-def _encode(value):
-    """Encode value for None; process and recurse into any tuple or list or dicts
-    """
-    if value is None:
-        result = NONE_STR
+        # """
+        # :param attributeName: the name of the attribute
+        # :param key: the corresponding key in metadata dict
+        # :param hasSetter: flag to include setter
+        # :param cast: optional casting function
+        # :param doc: optional documentation; if None, taken from 'info' tag for traits
+        # """
 
-    elif isinstance(value, dict):
-        # hdf5 attributes do not do dict's;
-        # tried numpy object_: no avail; i.e. result = np.array(value.items())
-        # tried arrays of tuples; no avail
-        # now: Encoded as a list of DICT, n-times key, val, DICT_END
-        result = [DICT]
-        for key, val in value.items():
-            result.append(key)
-            result.append(_encode(val))
-        result.append(DICT_END)
+        super(_Property, self).__init__(fget=self._getter, fset=self._setter, doc=doc)
+        self.attributeName = attributeName
+        self.key = key
+        self.hasSetter = hasSetter
+        self.cast = cast
+        self.__doc__ = self.doc = doc
 
-    elif isinstance(value, (tuple, list)):
-        result = [_encode(val) for val in value]
+    def _getter(self, instance):
+        if not self.key in instance.metadata:
+            raise AttributeError(f'Cannot get {instance.__class.__.__name__}.{self.attributeName}: invalid key "{self.key}"')
+        result = instance.metadata[self.key]
+        if self.cast:
+            result = self.cast(result)
+        return result
 
-    else:
-        result = value
+    def _setter(self, instance, value):
+        if not self.hasSetter:
+            raise AttributeError(f'Cannot set {instance.__class.__.__name__}.{self.attributeName}')
+        if not self.key in instance.metadata:
+            raise AttributeError(f'Cannot set {instance.__class.__.__name__}.{self.attributeName}: invalid key "{self.key}"')
+        instance.metadata[self.key] = value
 
-    return result
-
-
-def _decode(value):
-    """Decode value for None; process and recurse into any tuple, list or dicts
-    """
-
-    # the special case dict need to be first in the checks
-    if isinstance(value, (np.ndarray,)) and len(value)>= 2 \
-            and value[0] == DICT and value[-1] == DICT_END:
-        # Encoded as a list of list of DICT, n-times key, val, DICT_END
-        result = {}
-        ii = 1
-        while ii < len(value) and value[ii] != DICT_END:
-            key = value[ii]
-            val = _decode(value[ii+1])
-            result[key] = val
-            ii += 2
-
-    elif isinstance(value, (np.ndarray,)):
-        result = [_decode(val) for val in value]
-
-    elif value == NONE_STR:
-        result = None
-
-    else:
-        result = value
-
-    return result
+#--------------------------------------------------------------------------------------------------
 
 
 class Ndf5File(object):
     """A class that implements the ndf5 standard
     """
 
-    @property
-    def version(self) -> VersionString:
-        """:return current version from self.metadata[NDF5_VERSION_KEY] as VersionString instance
-        """
-        return VersionString(self.metadata[NDF5_VERSION_KEY])
+    version =      _Property('version', NDF5_VERSION_KEY, hasSetter=False, cast=VersionString,
+                             doc='The current ndf5 version as a VersionString instance')
+    uid =          _Property('uid', NDF5_UID_KEY, hasSetter=False,
+                             doc='The UID of the file')
+    user =         _Property('user', NDF5_USER_KEY, hasSetter=True,
+                             doc='The user associated with the file')
+    date =         _Property('date', NDF5_DATE_KEY, hasSetter=True,
+                             doc='The date associated with the file')
+    spectrometer = _Property('spectrometer', NDF5_SPECTROMETER_KEY, hasSetter=True,
+                             doc='The spectrometer associated with the file')
 
-    @property
-    def uid(self) -> str:
-        """:return current uid from self.metadata[NDF5_UID_KEY]
-        """
-        return self.metadata[NDF5_UID_KEY]
-
-    @property
-    def user(self) -> str:
-        """:return user from self.metadata[NDF5_USER_KEY]
-        """
-        return self.metadata[NDF5_USER_KEY]
-
-    @property
-    def dataTypes(self) -> dict:
-        """:return the dict with available (dataType, ndf5-dataKey) as contained in self.metadata[NDF5_DATATYPES_KEY]
-        """
-        return self.metadata[NDF5_DATATYPES_KEY]
+    dataTypes =    _Property('dataTypes', NDF5_DATATYPES_KEY, hasSetter=False,
+                             doc='The dict with available (dataType, ndf5-dataKey) pairs present in the file')
 
     @property
     def spectrumDataType(self) -> str:
@@ -256,6 +226,46 @@ class Ndf5File(object):
             raise KeyError((f'Ndf5File.getSpectrumData(): no data for dataKey "{_dataKey}"'))
         return _data
 
+    def getSpectrumParameters(self) -> dict:
+        """:return A dict of (parameterName, parameterValue) pairs as contained in the attributes of the
+                   spectrumData.
+        :raises RuntimeError on error
+        """
+        if self.fp is None:
+            raise RuntimeError(f'Ndf5File.getSpectrumParameters(): File is closed')
+        try:
+            dataset = self.getSpectrumData()
+        except KeyError as es:
+            raise RuntimeError(f'Ndf5File.getSpectrumParameters(): unable to get spectrum dataset')
+
+        _params = dataset.attrs
+        result = {}
+        for parName, value in _params.items():
+            result[parName] = _decode(value)
+
+        return result
+
+    def setSpectrumParameters(self, parameterDict, clear=True):
+        """Set the attributes of the spectrumData from the parameterDict of (parameterName, parameterValue) pairs.
+        Optionally clear the attributes first
+        :raises RuntimeError on error
+        """
+        if self.fp is None:
+            raise RuntimeError(f'Ndf5File.setSpectrumParameters(): File is closed')
+        try:
+            dataset = self.getSpectrumData()
+        except KeyError as es:
+            raise RuntimeError(f'Ndf5File.setSpectrumParameters(): unable to get spectrum dataset')
+
+        _params = dataset.attrs
+
+        if clear:
+            for parName, value in _params.items():
+                del _params[parName]
+
+        for parName, value in parameterDict.items():
+            _params[parName] = _encode(value)
+
     def __init__(self, dataSource):
         """Initialise the object; maintain the backling to the dataSource object
         """
@@ -264,11 +274,13 @@ class Ndf5File(object):
         self.metadata = {}  # The dict with metadata
         self.blockUpdate = 0   # blocking for when updating
 
-        self.fp = None  # The h5py.File object
+        self.path = None
         self.mode = None
+        self.cacheSize = None
         self.newFile = None
+        self.fp = None  # The h5py.File object
 
-    def open(self, path, mode, maxCacheSize, **kwds):
+    def open(self, path, mode, cacheSize, **kwds):
         """Open path using mode; set sensible values for rdcc_nbytes, rdcc_nslots, and rdcc_w0
         :param path of the file (str or Path)
         :param mode: open file mode;
@@ -278,14 +290,19 @@ class Ndf5File(object):
                 w	    Create file, truncate if exists
                 x	    Create file, fail if exists
                 a	    Read/write if exists, create otherwise
+        :param cacheSize: size of ndf5 cache in bytes; sets rdcc_nbytes
         :return self
         """
-        self.newFile = not mode.startswith('r')
 
-        kwds.setdefault('rdcc_nbytes', maxCacheSize)
+        kwds.setdefault('rdcc_nbytes', cacheSize)
         kwds.setdefault('rdcc_nslots', 9973)  # large 'enough' prime number
         kwds.setdefault('rdcc_w0', 0.25)  # most-often will read
         self.fp = h5py.File(str(path), mode=mode, **kwds)
+
+        self.path = path
+        self.mode = mode
+        self.cacheSize = cacheSize
+        self.newFile = not mode.startswith('r')
 
         if self.newFile:
             self._initMetadata()
@@ -294,6 +311,15 @@ class Ndf5File(object):
             self._restoreMetadata()
 
         return self
+
+    def _reopen(self):
+        """Reopen the file as r+
+        """
+        # local import to avoid cycles
+        from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
+        self.close()
+        _mode = Hdf5SpectrumDataSource.defaultAppendMode
+        self.open(self.path, mode=_mode, cacheSize=self.cacheSize)
 
     def close(self):
         """Close the file
@@ -326,17 +352,6 @@ class Ndf5File(object):
             dataKey = _ndf5DataTypes[dataType]
         self.dataTypes[dataType] = dataKey
         return dataKey
-
-    # def _reopenFile(self):
-    #     """Reopen the file as r+
-    #     :return the file pointer to the H5py file
-    #     """
-    #     self.dataSource.fp.close()
-    #     _mode = Hdf5SpectrumDataSource.defaultOpenReadWriteMode
-    #     _path = str(self.dataSource.path)
-    #     _fp = Hdf5SpectrumDataSource.openMethod(_path, mode=_mode)
-    #     self.dataSource.fp = _fp
-    #     return _fp
 
     def _updateVersion100(self):
         """Update pre 1.0.1 version to 1.1.0
@@ -467,7 +482,7 @@ class Ndf5File(object):
                 getLogger().error(_txt)
                 raise RuntimeError(_txt)
 
-    def _createSpectrumData(self, dimensionCount, pointCounts, dtype, sparse=False, compressionMode=None):
+    def createSpectrumData(self, dimensionCount, pointCounts, dtype, sparse=False, compressionMode=None):
         """Create the ndf5 spectrum data ndarray at the location storage spectrumDataKey
         :param dimensionCount: number of dimensions.
         :param pointCounts: list/tuple of total points for each dimension.
@@ -502,8 +517,8 @@ class Ndf5File(object):
         else:
             dataSetKwds.setdefault('chunks', True)
 
-        # we are storing the data as a spectrum data ndarray
-        # method returns the key under which we store spectrum data ndarray in the file;
+        # we are storing a spectrum data ndarray
+        # addDataType method returns the dataKey under which we store the ndarray in the file;
         _dataKey = self.addDataType(NDF5_DATATYPE_SPECTRUM_NDARRAY)
         self.spectrumDataType = NDF5_DATATYPE_SPECTRUM_NDARRAY
 
@@ -516,3 +531,70 @@ class Ndf5File(object):
 
         # need to update the metadata as we have added info
         self._saveMetadata()
+
+#--------------------------------------------------------------------------------------------------
+# Encoding of metadata and parameters
+
+_NONE_STR = '__NONE__'
+
+# define some tags to denote a dict, xml-style
+_DICT = '<__DICT__>'
+_DICT_END = '</__DICT__>'
+
+def _encode(value):
+    """Encode value for None; process and recurse into any tuple or list or dicts
+    """
+    if value is None:
+        result = _NONE_STR
+
+    elif isinstance(value, dict):
+        # hdf5 attributes do not do dict's;
+        # tried numpy object_: no avail; i.e. result = np.array(value.items())
+        # tried arrays of tuples; no avail
+        # now: Encoded as a list of _DICT, n-times key, val, _DICT_END
+        result = [_DICT]
+        for key, val in value.items():
+            result.append(key)
+            result.append(_encode(val))
+        result.append(_DICT_END)
+
+    elif isinstance(value, (tuple, list)):
+        result = [_encode(val) for val in value]
+
+    else:
+        result = value
+
+    return result
+
+
+def _decode(value):
+    """Decode value for None; process and recurse into any tuple, list or dicts
+    """
+
+    # the special case dict need to be first in the checks
+    if isinstance(value, (np.ndarray,)) and len(value)>= 2 \
+            and value[0] == _DICT and value[-1] == _DICT_END:
+        # Encoded as a list of list of _DICT, n-times key, val, _ICT_END
+        result = {}
+        ii = 1
+        while ii < len(value) and value[ii] != _DICT_END:
+            key = value[ii]
+            val = _decode(value[ii+1])
+            result[key] = val
+            ii += 2
+
+    elif isinstance(value, (np.ndarray,)):
+        result = [_decode(val) for val in value]
+
+    elif isinstance(value, np.bytes_):
+        #  string values were previously (1.0.1) encoded as bytes
+        result = _decode(value.decode('utf8'))  # calling decode again to change any _NONE_STR instances
+
+    elif value == _NONE_STR:
+        result = None
+
+    else:
+        result = value
+
+    return result
+

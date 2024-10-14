@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-11 15:28:15 +0100 (Fri, October 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-14 16:34:41 +0200 (Mon, October 14, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -190,22 +190,24 @@ class Ndf5File(object):
     dataTypes =    _Property('dataTypes', NDF5_DATATYPES_KEY, hasSetter=False,
                              doc='The dict with available (dataType, ndf5-dataKey) pairs present in the file')
 
-    @property
-    def spectrumDataType(self) -> str:
-        """:return The spectrum dataType, as contained in NDF5_SPECTRUM_DATATYPE_KEY
-        """
-        return self.metadata[NDF5_SPECTRUM_DATATYPE_KEY]
+    spectrumDataType = _Property('spectrumDataType', NDF5_SPECTRUM_DATATYPE_KEY, hasSetter=True,
+                             doc=' The spectrum dataType')
 
-    @spectrumDataType.setter
-    def spectrumDataType(self, value: str):
-        """Set spectrumDataType to value
-        """
-        if value not in _ndf5DataTypes:
-            raise ValueError(f'Ndf5File.spectrumDataType: invalid dataType "{value}"')
-        self.metadata[NDF5_SPECTRUM_DATATYPE_KEY] = value
+    # @property
+    # def spectrumDataType(self) -> str:
+    #     """:return The spectrum dataType, as contained in NDF5_SPECTRUM_DATATYPE_KEY
+    #     """
+    #     return self.metadata[NDF5_SPECTRUM_DATATYPE_KEY]
+    #
+    # @spectrumDataType.setter
+    # def spectrumDataType(self, value: str):
+    #     """Set spectrumDataType to value
+    #     """
+    #     if value not in _ndf5DataTypes:
+    #         raise ValueError(f'Ndf5File.spectrumDataType: invalid dataType "{value}"')
+    #     self.metadata[NDF5_SPECTRUM_DATATYPE_KEY] = value
 
-    @property
-    def spectrumDataKey(self):
+    def getSpectrumDataKey(self):
         """:return The spectrum dataKey used for retrieving the spectrum data in the ndf5 file.
                    Retrieved from self.spectrumDataType and the self.dataTypes dict.
                    Return None if there is no dataKey defined.
@@ -220,7 +222,7 @@ class Ndf5File(object):
         """
         if self.fp is None:
             raise RuntimeError(f'Ndf5File.getSpectrumData(): File is closed')
-        if (_dataKey := self.spectrumDataKey) is None:
+        if (_dataKey := self.getSpectrumDataKey()) is None:
             raise KeyError((f'Ndf5File.getSpectrumData(): invalid dataKey "{_dataKey}"'))
         if (_data := self.fp.get(_dataKey, None)) is None:
             raise KeyError((f'Ndf5File.getSpectrumData(): no data for dataKey "{_dataKey}"'))
@@ -246,8 +248,9 @@ class Ndf5File(object):
         return result
 
     def setSpectrumParameters(self, parameterDict, clear=True):
-        """Set the attributes of the spectrumData from the parameterDict of (parameterName, parameterValue) pairs.
-        Optionally clear the attributes first
+        """Set the attributes of the spectrumData from the parameterDict.
+        :param parameterDict: Dict of (parameterName, parameterValue) pairs
+        :param clear: Flag to optionally clear the attributes first
         :raises RuntimeError on error
         """
         if self.fp is None:
@@ -493,6 +496,8 @@ class Ndf5File(object):
         dataSetKwds = {}
         dataSetKwds.setdefault('fillvalue', 0.0)
 
+        if compressionMode is not None and compressionMode not in NDF5_COMPRESSION_MODES:
+            raise ValueError(f'Ndf5File.createSpectrumdata(): invalid {compressionMode = }; should be None or one of {NDF5_COMPRESSION_MODES}')
         self.compressionMode = compressionMode
         if self.compressionMode is not None:
             dataSetKwds.setdefault('compression', self.compressionMode)
@@ -515,6 +520,7 @@ class Ndf5File(object):
             _chunks = tuple(_chunkSizes.get(dimensionCount, [4]*dimensionCount))
             dataSetKwds.setdefault('chunks', _chunks)
         else:
+            # Setting chucks to True amounts to h5py sorting the optimal settings
             dataSetKwds.setdefault('chunks', True)
 
         # we are storing a spectrum data ndarray
@@ -533,7 +539,7 @@ class Ndf5File(object):
         self._saveMetadata()
 
 #--------------------------------------------------------------------------------------------------
-# Encoding of metadata and parameters
+# Encoding of metadata and parameters; the h5py attributes can't handle None's nor dicts
 
 _NONE_STR = '__NONE__'
 

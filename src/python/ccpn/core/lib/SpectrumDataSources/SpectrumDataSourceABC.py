@@ -94,7 +94,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-10 20:47:58 +0100 (Thu, October 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-14 16:34:41 +0200 (Mon, October 14, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -299,7 +299,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     _bigEndian = (sys.byteorder == 'big')
 
-    # isDimensional: bool: defines a spectral parameter, either as dimensional or not
+    # isDimensional: bool: defines a spectrum parameter, either as dimensional or not
     # doCopy: bool: copy parameter to/from spectra and between dataSource instances
     # spectrumAttribute: name of corresponding attribute in Spectrum class
     # hasSetterInSpectrumClass: bool: corresponding attribute in Spectrum class can be set

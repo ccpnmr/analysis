@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-11 15:28:15 +0100 (Fri, October 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-14 16:34:40 +0200 (Mon, October 14, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionD
 
 from ccpn.core.lib.SpectrumDataSources.lib.Ndf5File import Ndf5File, NDF5_COMPRESSION_MODES
 
-NONE_STR = '__NONE__'
+# NONE_STR = '__NONE__'
 
 class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     """

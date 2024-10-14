@@ -310,6 +310,9 @@
         },
         "MainWindowBadSpectra": {
             "dontShowPopup": false
+        },
+        "_TestInfo": {
+            "dontShowPopup": false
         }
     },
     "tables"           : {

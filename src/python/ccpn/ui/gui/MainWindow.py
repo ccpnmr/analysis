@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-11 18:50:23 +0100 (Fri, October 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-14 19:13:39 +0100 (Mon, October 14, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -749,17 +749,20 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     def _checkForBadSpectra(self, project):
         """Report bad spectra in a popup
         """
+        from ccpn.ui.gui.popups.Dialog import showWarning
+
         badSpectra = [str(spectrum.pid) for spectrum in project.spectra if not spectrum.hasValidPath()]
 
         if badSpectra:
-            text = 'Use menu "Spectrum --> Validate paths..." Or "VP" shortcut to correct\n\n'
-            text += 'Please inspect file path(s) for:\n'
+            msg = 'Use menu "Spectrum --> Validate paths..." Or "VP" shortcut to correct\n\n'
+            details = 'Please inspect file path(s) for:\n'
             for sp in badSpectra:  # these can be >1000 lines message. Added in a scrollable area.
-                text += f'{str(sp)}\n'
-            title = 'Detected invalid Spectrum file paths'
-            MessageDialog.showWarning(title=title, message=text,
-                                      dontShowEnabled=True, defaultResponse=None,
-                                      popupId=f'{self.__class__.__name__}BadSpectra')
+                details += f'{str(sp)}\n'
+            basicText = 'Detected invalid Spectrum file paths'
+            title = 'Invalid Spectra'
+            showWarning(title, basicText, msg, detailedText=details, parent=self,
+                        dontShowEnabled=True, defaultResponse=None,
+                        popupId=f'{self.__class__.__name__}BadSpectra')
 
     def _showNefPopup(self, dataLoader):
         """Helper function; it allows the user to select the elements

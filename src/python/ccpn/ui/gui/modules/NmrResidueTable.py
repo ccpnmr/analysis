@@ -22,8 +22,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-10-10 10:56:18 +0100 (Thu, October 10, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-10-14 11:49:19 +0100 (Mon, October 14, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -560,11 +560,15 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
                         nmrResidue = _adjacent.mainNmrResidue
 
             for specDisplay in displays:
-                axisMask = self.axisMaskFromAxisCode(specDisplay.axes,
-                        self.nmrResidueTableSettings.axisCodeOptionsDict.get(f'{specDisplay}'))
+                if ((optDict := self.nmrResidueTableSettings.axisCodeOptionsDict) and
+                        (options := optDict.get(f'{specDisplay}')) and
+                        specDisplay.axes):
+                    # use a mask if specified in displays-to-pick
+                    axisMask = self.axisMaskFromAxisCode(specDisplay.axes, options)
+                else:
+                    axisMask = None
 
                 if self.current.strip in specDisplay.strips:
-
                     # just navigate to this strip
                     navigateToNmrAtomsInStrip(self.current.strip,
                                               nmrResidue.nmrAtoms,
@@ -593,9 +597,10 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
                         strip.header.headerVisible = True
 
     @staticmethod
-    def axisMaskFromAxisCode(axes , axisCode) -> list:
+    def axisMaskFromAxisCode(axes, axisCode) -> list:
         """Create a mask for axes based on which are ticked in settings"""
         return [True if num in axisCode else None for num, axis in enumerate(axes)]
+
 
 #=========================================================================================
 # _NewCSMNmrResidueTable

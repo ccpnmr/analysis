@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-10-11 17:57:29 +0100 (Fri, October 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-14 14:34:02 +0100 (Mon, October 14, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -801,6 +801,8 @@ class _commonSettings():
     Not to be used as a stand-alone class
     """
 
+    prevNotifierObj = None
+
     # separated from settings widgets below, but only one seems to use it now
 
     def _getSpectraFromDisplays(self, displays, data=None):
@@ -1142,7 +1144,15 @@ class _commonSettings():
         # check if display is deleted, removes from list if it has been. Data passed by notifier
         if data is not None and data.get(Notifier.TRIGGER) == 'delete':
             obj = data.get(Notifier.OBJECT)
+
+            if isinstance(obj, SpectrumView):
+                # object is a SpectrumView, check if last object deleted is this views display
+                if obj.strip.spectrumDisplay is self.prevNotifierObj:
+                    return
+
             gids = [gg for gg in gids if gg and gg != obj]
+            self.prevNotifierObj = obj
+
         self._fillAllSpectrumFrame(gids, data)
 
 

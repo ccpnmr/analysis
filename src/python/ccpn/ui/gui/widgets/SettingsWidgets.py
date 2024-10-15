@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-10-14 14:34:02 +0100 (Mon, October 14, 2024) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-10-15 11:11:29 +0100 (Tue, October 15, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -1378,7 +1378,9 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                     objectWidgetChangedCallback=self._spectrumDisplaySelectionPulldownCallback,
                     labelText='Pick Peaks in\n'
                               'Display')
-
+        else:
+            # just to be sure
+            self.spectrumDisplayPulldown = None
             # self.spectrumDisplayPulldown.setTexts(['> All <'] + list(self.spectrumDisplayPulldown.getTexts()))
 
         # add a spacer in the bottom-right corner to stop everything moving
@@ -1468,7 +1470,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         #                                       self._spectrumViewChanged,
         #                                       onceOnly=True)
         try:
-            if self.project:
+            if self.project and self.includeSpectrumTable:
                 self._notifierRename = Notifier(theObject=self.project,
                                                 triggers=[Notifier.RENAME],
                                                 targetName=SpectrumView.className,

@@ -94,7 +94,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-14 16:34:41 +0200 (Mon, October 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-15 16:02:44 +0100 (Tue, October 15, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -299,23 +299,21 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     _bigEndian = (sys.byteorder == 'big')
 
-    # isDimensional: bool: defines a spectrum parameter, either as dimensional or not
-    # doCopy: bool: copy parameter to/from spectra and between dataSource instances
-    # spectrumAttribute: name of corresponding attribute in Spectrum class
-    # hasSetterInSpectrumClass: bool: corresponding attribute in Spectrum class can be set
-    date = CString(                 default_value=None).tag(
+    # Define a spectrum-related parameter, either as dimensional or not
+    # isDimensional: bool:
 
-                                    isDimensional=False,
+    # copy parameter to/from spectra and between dataSource instances
+    #   doCopy: bool:
+
+    # import/export to Spectrum instance:
+    #   spectrumAttribute: name of corresponding attribute in Spectrum class
+    #   hasSetterInSpectrumClass: bool: corresponding attribute in Spectrum class can be set
+
+    date = CString(                 default_value=None).tag(
                                     doCopy=True,
-                                    spectrumAttribute=None,
-                                    hasSetterInSpectrumClass=False
                                     )
     user = CString(                 default_value=None).tag(
-
-                                    isDimensional=False,
                                     doCopy=True,
-                                    spectrumAttribute=None,
-                                    hasSetterInSpectrumClass=False
                                     )
     comment = CString(              default_value=None).tag(
 
@@ -327,15 +325,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
     pulseProgram = CString(         default_value=None).tag(
 
                                     doCopy=True,
-                                    spectrumAttribute=None,
-                                    hasSetterInSpectrumClass=False,
+                                    # spectrumAttribute=None,
+                                    # hasSetterInSpectrumClass=False,
                                     doPrint=False
                                     )
     nuslist = CArray(               default_value=None).tag(
 
                                     doCopy=True,
-                                    spectrumAttribute=None,
-                                    hasSetterInSpectrumClass=False,
+                                    # spectrumAttribute=None,
+                                    # hasSetterInSpectrumClass=False,
                                     doPrint=False
                                     )
     temperature = CFloat(           default_value=None, min=0.0).tag(
@@ -356,30 +354,30 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
                                     isDimensional=False,
                                     doCopy=True,
-                                    spectrumAttribute=None,
-                                    hasSetterInSpectrumClass=False
+                                    # spectrumAttribute=None,
+                                    # hasSetterInSpectrumClass=False
                                     )
     # internal data scale (e.g. as used by Bruker)
     dataScale = CFloat(             default_value=1.0).tag(
 
                                     isDimensional=False,
                                     doCopy=True,
-                                    spectrumAttribute=None,
-                                    hasSetterInSpectrumClass=False
+                                    # spectrumAttribute=None,
+                                    # hasSetterInSpectrumClass=False
                                     )
     sampledValues = List(           default_value=[None for dim in range(0, MAXDIM)]).tag(
 
                                     isDimensional=True,
                                     doCopy=True,
-                                    spectrumAttribute=None,
-                                    hasSetterInSpectrumClass=False
+                                    # spectrumAttribute=None,
+                                    # hasSetterInSpectrumClass=False
                                     )
     sampledSigmas = List(           default_value=[None for dim in range(0, MAXDIM)]).tag(
 
                                     isDimensional=True,
                                     doCopy=True,
-                                    spectrumAttribute=None,
-                                    hasSetterInSpectrumClass=False
+                                    # spectrumAttribute=None,
+                                    # hasSetterInSpectrumClass=False
                                     )
     dimensionCount = CInt(          default_value=0, min=0, max=MAXDIM).tag(
 
@@ -397,8 +395,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                     info='A (optional) mapping index into the dimensional data',
                                     isDimensional=True,
                                     doCopy=True,
-                                    spectrumAttribute=None,
-                                    hasSetterInSpectrumClass=False
+                                    # spectrumAttribute=None,
+                                    # hasSetterInSpectrumClass=False
                                     )
     pointCounts = TList(            itemTrait=CInt(allow_none=False, min=0),
                                     default_value=[0] * MAXDIM, maxlen=MAXDIM).tag(
@@ -415,8 +413,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                     info='Sub-matrix number of points along each dimension',
                                     isDimensional=True,
                                     doCopy=False,
-                                    spectrumAttribute=None,
-                                    hasSetterInSpectrumClass=False
+                                    # spectrumAttribute=None,
+                                    # hasSetterInSpectrumClass=False
                                     )
     dimensionTypes = TList(         itemTrait=CEnum(specLib.DIMENSIONTYPES, allow_none=True),
                                     default_value=[specLib.DIMENSION_FREQUENCY] * MAXDIM, maxlen=MAXDIM).tag(
@@ -433,8 +431,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                     info=f'Data type identifier, i.e. {specLib.DATA_TYPES}, along each dimension',
                                     isDimensional=True,
                                     doCopy=True,
-                                    spectrumAttribute=None,
-                                    hasSetterInSpectrumClass=False
+                                    # spectrumAttribute=None,
+                                    # hasSetterInSpectrumClass=False
                                     )
     isComplex = TList(              itemTrait=CBool(),
                                     default_value=[False] * MAXDIM, maxlen=MAXDIM).tag(
@@ -457,7 +455,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #             raise IndexError(f'dataTypes: Invalid index ({idx}; cannot change isComplex')
     #         self.isComplex[idx] = specLib.isComplexDataType(newValue)
 
-    _tmp = [False] * MAXDIM; _tmp[0] = True
+    _tmp = [True] + [False]*(MAXDIM-1)
     isAcquisition = TList(          itemTrait=CBool(),
                                     default_value=_tmp, maxlen=MAXDIM).tag(
 
@@ -488,8 +486,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                     info='per dimension: labels, as e.g. present in Felix or NmrPipe',
                                     isDimensional=True,
                                     doCopy=True,
-                                    spectrumAttribute=None,
-                                    hasSetterInSpectrumClass=False,
+                                    # spectrumAttribute=None,
+                                    # hasSetterInSpectrumClass=False,
                                     )
     # Add lower case 'shift' as an alternative
     _shift = specLib.MEASUREMENT_TYPE_SHIFT
@@ -902,33 +900,38 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self.setTraitValue(parameterName, newValues)
 
     def _copyParametersFromSpectrum(self, spectrum):
-        """Copy parameters values from a Spectrum instance
+        """Copy parameters values from a Spectrum instance.
+        Uses those traits that have their 'spectrumAttribute' tag set
         """
-        for param in self.parameterKeys():
-            doCopy = self.getMetadata(param, 'doCopy')
-            spectrumAttribute = self.getMetadata(param, 'spectrumAttribute')
-            if spectrumAttribute is not None and doCopy:
-                values = getattr(spectrum, spectrumAttribute)
-                self.setTraitValue(param, values)
+        for parName in self.keys(spectrumAttribute=lambda i: bool(i)):
+            try:
+                values = getattr(spectrum, parName)
+            except AttributeError as es:
+                _errMsg = f'Getting {parName!r} of {spectrum} failed'
+                getLogger().error(_errMsg)
+                raise AttributeError(_errMsg)
+            self.setTraitValue(parName, values)
 
     def _copyParametersToSpectrum(self, spectrum):
         """Copy parameter values to a Spectrum instance
+        Uses those traits that have their 'spectrumAttribute' tag set
+        and 'hasSetterInSpectrumClass' True
         """
-        for param in self.parameterKeys():
-            doCopy = self.getMetadata(param, 'doCopy')
-            spectrumAttribute = self.getMetadata(param, 'spectrumAttribute')
-            hasSetter = self.getMetadata(param, 'hasSetterInSpectrumClass')
-            if spectrumAttribute is not None and doCopy and hasSetter:
-                try:
-                    values = self.getTraitValue(param)
-                    setattr(spectrum, spectrumAttribute, values)
-                except AttributeError as es:
-                    _errMsg = f'Setting {spectrumAttribute!r} of {spectrum} failed'
-                    getLogger().error(_errMsg)
-                    raise AttributeError(_errMsg)
+        for parName in self.keys(spectrumAttribute=lambda i: bool(i), hasSetterInSpectrumClass=True):
+            values = self.getTraitValue(parName)
+            try:
+                setattr(spectrum, parName, values)
+            except AttributeError as es:
+                _errMsg = f'Setting {parName!r} of {spectrum} failed'
+                getLogger().error(_errMsg)
+                raise AttributeError(_errMsg)
 
     def importFromSpectrum(self, spectrum, includePath=True):
-        """copy parameters & path (optionally) from spectrum, set spectrum attribute and return self
+        """Import parameters & path (optionally) from spectrum to self,
+        and return self
+        :param spectrum: A Spectrum instance
+        :param includePath: flag to also import path as defined by spectrum
+        :return self
         """
         # local import to avoid cycles
         from ccpn.core.Spectrum import Spectrum
@@ -948,7 +951,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return self
 
     def exportToSpectrum(self, spectrum, includePath=True):
-        """copy parameters & path (optionally) to spectrum, set spectrum attribute, and return self
+        """Export parameters & path (optionally) from self to spectrum,
+        set spectrum attribute, and return self
+        :param spectrum: A Spectrum instance
+        :param includePath: flag to also export path as defined by spectrum
+        :return self
         """
         # local import to avoid cycles
         from ccpn.core.Spectrum import Spectrum
@@ -967,7 +974,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return self
 
     def importFromDataSource(self, dataSource):
-        """copy parameters & path from dataSource, return self
+        """Copy parameters & path from dataSource, return self
         """
         if dataSource is None:
             raise ValueError('Undefined dataSource; cannot import parameters')
@@ -1163,7 +1170,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
 
     def _initBlockCache(self):
-        """Intialise the cache"""
+        """Initialise the cache"""
         cache = Cache(maxItems=0, name=_BLOCK_CACHE)
         setattr(self, _BLOCK_CACHE, cache)
 

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-15 11:11:29 +0100 (Tue, October 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-15 12:09:49 +0100 (Tue, October 15, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -1469,8 +1469,9 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         #                                       SpectrumView.className,
         #                                       self._spectrumViewChanged,
         #                                       onceOnly=True)
-        try:
-            if self.project and self.includeSpectrumTable:
+        if self.project and self.includeSpectrumTable:
+            # suppress is a bit of a hack :| but settings needs revisiting
+            with contextlib.suppress(Exception):
                 self._notifierRename = Notifier(theObject=self.project,
                                                 triggers=[Notifier.RENAME],
                                                 targetName=SpectrumView.className,
@@ -1485,11 +1486,11 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                                                 triggers=[Notifier.CREATE],
                                                 targetName=SpectrumView.className,
                                                 callback=self._spectrumDisplaySelectionPulldownCallback)
-        except Exception:
-            # if anything goes wrong unregister still works
-            self._notifierRename = None
-            self._notifierDelete = None
-            self._notifierCreate = None
+                return
+        # if anything goes wrong unregister still works
+        self._notifierRename = None
+        self._notifierDelete = None
+        self._notifierCreate = None
 
     def _unRegisterNotifiers(self):
         """Unregister notifiers

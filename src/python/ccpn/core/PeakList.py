@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:55:39 +0100 (Thu, September 19, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-10 15:45:26 +0100 (Thu, October 10, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -336,8 +336,10 @@ class PeakList(PMIListABC):
 
             _spectrum = self.spectrum
             if _peakPicker := _spectrum.peakPicker:
-                _peakPicker.dropFactor = minDropFactor
-                _peakPicker.setLineWidths = True
+                _peakPicker.setParameters(dropFactor=minDropFactor,
+                                          setLineWidths=True,
+                                          singularMode=False
+                                          )
                 return _spectrum.pickPeaks(
                         self,
                         _spectrum.positiveContourBase if doPos else None,
@@ -379,7 +381,7 @@ class PeakList(PMIListABC):
                                      estimateLineWidths=estimateLineWidths)
         return peaks
 
-    def fitExistingPeaks(self, peaks: Sequence['Peak'], fitMethod: str = GAUSSIANMETHOD, singularMode: bool = True,
+    def fitExistingPeaks(self, peaks: Sequence['Peak'], fitMethod: str = GAUSSIANMETHOD, singularMode: bool = False,
                          halfBoxSearchWidth: int = 4, halfBoxFitWidth: int = 4):
         """Refit the current selected peaks.
         Must be called with peaks that belong to this peakList

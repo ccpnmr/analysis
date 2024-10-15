@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:23:05 +0100 (Fri, August 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-11 11:33:02 +0100 (Fri, October 11, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -49,6 +49,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox, VariableScientificSpinBox, fexp
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -62,8 +63,10 @@ from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.MagnetisationTransferTable import MagnetisationTransferTable
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
 from ccpn.ui.gui.popups.ValidateSpectraPopup import SpectrumPathRow
+from ccpn.ui.gui.popups.PreferencesPopup import PEAKFITTINGDEFAULTS
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply, _verifyPopupApply
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 from ccpn.ui.gui.lib.DynamicSizeAdjust import dynamicSizeAdjust
@@ -627,7 +630,7 @@ class _SpectrumPathRow(SpectrumPathRow):
 class GeneralTab(Widget):
     def __init__(self, parent=None, container=None, mainWindow=None, spectrum=None, item=None, colourOnly=False):
 
-        super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING)  # ejb
+        super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING)
         self.setWindowTitle("Spectrum Properties")
         self.setMinimumHeight(600)
         self.setMinimumWidth(400)
@@ -644,14 +647,13 @@ class GeneralTab(Widget):
         self.atomCodes = ()
 
         self.experimentTypes = self.project._experimentTypeMap
+        self._setWidgets(spectrum)
 
-        row = -1
-
-        row += 1
+    def _setWidgets(self, spectrum):
+        row = 0
         Label(self, text="Pid", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'pid'),
               bold=True, **_alignLabel)
         self.spectrumPidLabel = Label(self, grid=(row, 1), **_align1)
-
         row += 1
         Label(self, text="Name", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'name'), **_alignLabel)
         self.nameData = LineEdit(self, textAlignment='left', grid=(row, 1), backgroundText='> Enter name <', **_align2)
@@ -738,6 +740,54 @@ class GeneralTab(Widget):
                                                       **_align2
                                                       )
 
+        #====== Peak Picking ======
+        if spectrum.dimensionCount == 1:
+            row += 1
+            Label(self, text="Default 1d peak picker", vAlign='t', hAlign='l', grid=(row, 0))
+            self.peakPicker1dData = PulldownList(self, vAlign='t', grid=(row, 1), headerText='< default >')
+            self.peakPicker1dData.currentIndexChanged.connect(partial(self._queueChangePeakPicker1dIndex, spectrum))
+            row += 1
+            self.peakFittingMethodLabel = Label(self, text="Peak interpolation method", grid=(row, 0))
+            self.peakFittingMethod = RadioButtons(self, texts=PEAKFITTINGDEFAULTS,
+                                                  callback=self._queueSetPeakFittingMethod,
+                                                  direction='h',
+                                                  grid=(row, 1), hAlign='l', #gridSpan=(1, 2),
+                                                  tipTexts=None,
+                                                  )
+            self.peakFittingMethodLabel.setEnabled(False)
+            self.peakFittingMethodLabel.setVisible(False)
+            self.peakFittingMethod.setEnabled(False)
+            self.peakFittingMethod.setVisible(False)
+            # row += 1
+            # self.dropFactorLabel = Label(self, text="1D Peak picking drop (%)",
+            #                                   tipText='Increase to filter out more', grid=(row, 0))
+            # self.peakFactor1D = DoubleSpinbox(self, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=-100,
+            #                                   max=100)
+            # # self.peakFactor1D.valueChanged.connect(self._queueSetDropFactor1D)
+        else:
+            row += 1
+            Label(self, text="Default nD peak picker", vAlign='t', hAlign='l', grid=(row, 0))
+            self.peakPickerNdData = PulldownList(self, vAlign='t', grid=(row, 1), headerText='< default >')
+            self.peakPickerNdData.currentIndexChanged.connect(partial(self._queueChangePeakPickerNdIndex, spectrum))
+            row += 1
+            self.peakFittingMethodLabel = Label(self, text="Peak interpolation method", grid=(row, 0))
+            self.peakFittingMethod = RadioButtons(self, texts=PEAKFITTINGDEFAULTS,
+                                                  callback=self._queueSetPeakFittingMethod,
+                                                  direction='h',
+                                                  grid=(row, 1), hAlign='l', #gridSpan=(1, 2),
+                                                  tipTexts=None,
+                                                  )
+            self.peakFittingMethodLabel.setEnabled(False)
+            self.peakFittingMethodLabel.setVisible(False)
+            self.peakFittingMethod.setEnabled(False)
+            self.peakFittingMethod.setVisible(False)
+            # row += 1
+            # self.dropFactorLabel = Label(self, text="nD Peak picking drop (%)",
+            #                                   tipText='Increase to filter out more', grid=(row, 0))
+            # self.peakFactorNd = DoubleSpinbox(self, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=-100,
+            #                                   max=100)
+            # # self.peakFactorNd.valueChanged.connect(self._queueSetDropFactor1D)
+
         row += 1
         Label(self, text="Sample", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'sample'), **_alignLabel)
         self.samplesPulldownList = PulldownList(self, grid=(row, 1), **_align2)
@@ -802,6 +852,23 @@ class GeneralTab(Widget):
             #
             #     if (idx := self.spectrumType.findText(key)) > 0:
             #         self.spectrumType.setCurrentIndex(idx)
+
+            # add the peakPicker list
+            from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPickerTypes
+
+            _peakPickers = getPeakPickerTypes()
+            if self.spectrum.dimensionCount == 1:
+                self.peakPicker1dData.setData(texts=sorted([name for name, pp in _peakPickers.items()]))
+                if pp := self.spectrum.peakPicker:
+                    self.peakPicker1dData.set(pp.peakPickerType)
+            else:
+                self.peakPickerNdData.setData(texts=sorted([name for name, pp in _peakPickers.items()
+                                                            if not pp.onlyFor1D]))
+                if pp := self.spectrum.peakPicker:
+                    self.peakPickerNdData.set(pp.peakPickerType)
+            # this is still a global value here :|
+            self.peakFittingMethod.setIndex(PEAKFITTINGDEFAULTS.index(
+                    self.application.preferences.general.peakFittingMethod))
 
             value = self.spectrum.spinningRate
             self.spinningRateData.setValue(value if value is not None else 0)
@@ -935,6 +1002,56 @@ class GeneralTab(Widget):
     @staticmethod
     def _setSpectrumType(spectrum, expType):
         spectrum.experimentType = expType or None
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueChangePeakPicker1dIndex(self, spectrum, _value):
+        value = self.peakPicker1dData.get() or None
+        if value != spectrum.peakPicker:
+            return partial(self._updatePeakPickerOnSpectra, [spectrum], value)
+
+    # def _setPeakPicker1d(self, spectrum, value):
+    #     """Set the default peak picker for 1d spectra
+    #     """
+    #     self._updatePeakPickerOnSpectra([spectrum], value)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueChangePeakPickerNdIndex(self, spectrum, _value):
+        value = self.peakPickerNdData.get() or None
+        if value != spectrum.peakPicker:
+            return partial(self._updatePeakPickerOnSpectra, [spectrum], value)
+
+    # def _setPeakPickerNd(self, spectrum, value):
+    #     """Set the default peak picker for Nd spectra
+    #     """
+    #     self._updatePeakPickerOnSpectra([spectrum], value)
+
+    @staticmethod
+    def _updatePeakPickerOnSpectra(spectra, value):
+        from ccpn.core.lib.ContextManagers import undoBlock
+        from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPickerTypes
+
+        PeakPicker = getPeakPickerTypes().get(value)
+        if PeakPicker is None:  # Don't use a fetch or fallback to default. User should select one.
+            raise RuntimeError(f'Cannot find a PeakPicker called {value}.')
+        # getLogger().info(f'Setting the {value} PeakPicker to Spectra')
+        with undoBlock():
+            for sp in spectra:
+                if sp.peakPicker and sp.peakPicker.peakPickerType == value:
+                    continue  # is the same. no need to reset.
+                sp.peakPicker = None
+                thePeakPicker = PeakPicker(spectrum=sp)
+                sp.peakPicker = thePeakPicker
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetPeakFittingMethod(self):
+        value = PEAKFITTINGDEFAULTS[self.peakFittingMethod.getIndex()]
+        if value != self.application.preferences.general.peakFittingMethod:
+            return partial(self._setPeakFittingMethod, value)
+
+    def _setPeakFittingMethod(self, value):
+        """Set the matching of the axis codes across different strips
+        """
+        self.application.preferences.general.peakFittingMethod = value
 
     # spectrum sliceColour button and pulldown
     def _queueSetSpectrumColour(self, spectrum):

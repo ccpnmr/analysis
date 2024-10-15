@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-20 15:04:02 +0100 (Fri, September 20, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-10 15:45:26 +0100 (Thu, October 10, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -2326,19 +2326,17 @@ def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negat
     fitMethod = preferences.general.peakFittingMethod
     peakPicker.setParameters(dropFactor=minDropFactor,
                              fitMethod=fitMethod,
-                             setLineWidths=True
+                             setLineWidths=True,
+                             singularMode=False
                              )
-
     peaks = []
     with undoBlockWithoutSideBar():
-
         try:
             peaks = peakPicker.pickPeaks(sliceTuples=_sliceTuples,
                                          peakList=peakList,
                                          positiveThreshold=positiveThreshold,
                                          negativeThreshold=negativeThreshold
                                          )
-
         except Exception as err:
             # need to trap error that Nd spectra may not be defined in all dimensions of axisDict
             logger.debug('_pickPeaks %s, trapped error: %s' % (spectrum, str(err)))

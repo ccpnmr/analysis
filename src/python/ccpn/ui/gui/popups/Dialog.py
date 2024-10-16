@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-14 19:13:39 +0100 (Mon, October 14, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-16 14:44:19 +0100 (Wed, October 16, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -1123,7 +1123,7 @@ class DetailedTextDialog(CcpnDialogMainWidget):
         widg.layout().setSpacing(8)
 
         iconLabel = Label(widg, grid=(0, 0), gridSpan=(3, 1), vAlign='t')
-        iconLabel.setFixedSize(self.DEFAULTICONSIZE, self.DEFAULTICONSIZE)
+        iconLabel.setFixedSize(self.DEFAULTICONSIZE + 3, self.DEFAULTICONSIZE + 3)
         if self._pixmap:
             iconLabel.setPixmap(self._pixmap)
 

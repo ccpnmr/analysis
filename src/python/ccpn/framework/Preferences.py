@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-09 19:49:20 +0100 (Wed, October 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-16 10:05:19 +0100 (Wed, October 16, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -264,10 +264,10 @@ class Preferences(AttrDict):
         """update any changed preferences to ensure correct type
         """
         # 3.2.7
-        if prefs.general.useProjectPath is True:
+        if prefs.general.useProjectPath in [True, 'True']:
             # previously checkbox now Key
             prefs.general.useProjectPath = 'Alongside'
-        elif prefs.general.useProjectPath is False:
+        elif prefs.general.useProjectPath in [False, 'False']:
             # shouldn't reach this, as cur/prev default
             prefs.general.useProjectPath = 'User-defined'
 

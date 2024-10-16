@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-09-03 15:47:08 +0100 (Tue, September 03, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-10-16 18:41:25 +0100 (Wed, October 16, 2024) $"
+__version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -162,6 +162,7 @@ class _TableModel(QtCore.QAbstractTableModel):
     _chrHeight = 12
     _chrPixelPadding = 6
     _chrPadding = 3
+    _cellBorder = QtCore.QSizeF(16.0, 0.0)
 
     showEditIcon = False
     defaultFlags = ENABLED | SELECTABLE  # add CHECKABLE to enable check-boxes
@@ -203,8 +204,8 @@ class _TableModel(QtCore.QAbstractTableModel):
         self._view = view
         if view:
             fontMetric = QtGui.QFontMetricsF(view.font())
-            bbox = fontMetric.boundingRect
-
+            self._bbox = bbox = fontMetric.boundingRect
+            self._hAdvance = fontMetric.horizontalAdvance  # just returns the width, 25% faster?
             # get an estimate for an average character width/height - must be floats for estimate-column-widths
             test = 'WMB' # Selection of wider letters to prevent collapsing column
             self._chrWidth = bbox(test).width() / len(test)
@@ -488,6 +489,11 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         if not index.isValid():
             return None
+        if role == SIZE_ROLE:
+            # sorting filter not really important, just need to grab a few rows
+            # return QtCore.QSizeF(16.0 + self._hAdvance(str(self._df.iat[index.row(), index.column()])),
+            #                      self._chrHeight)
+            return self._bbox(str(self._df.iat[index.row(), index.column()])).size() + self._cellBorder
 
         try:
             # get the source cell
@@ -583,13 +589,11 @@ class _TableModel(QtCore.QAbstractTableModel):
             # elif role == ICON_ROLE:
             #     # return the pixmap - this works, transfer to _MultiHeader
             #     return self._editableIcon
-
             # elif role == ALIGNMENT_ROLE:
             #     pass
-
-            elif role == SIZE_ROLE:
-                # this is required to disable the bbox calculation for the default QT functionality
-                return QtCore.QSize(16, 24)
+            # elif role == SIZE_ROLE:
+            #     # this is required to disable the bbox calculation for the default QT functionality
+            #     return QtCore.QSize(16, 24)
 
         except Exception as es:
             getLogger().debug(f'{consoleStyle.fg.yellow}--> TABLE ERROR - {es}{consoleStyle.reset}')
@@ -657,41 +661,42 @@ class _TableModel(QtCore.QAbstractTableModel):
 
         # NOTE:ED - if SIZE_ROLE is defined in both data and headerData, the larger of the two is used for the row/column/cell size
         #           assuming that both always return a QSize, otherwise QT defaults to calculating the bbox for the cell
-        elif role == SIZE_ROLE:
-            # process the heights/widths of the headers
-            if orientation == QtCore.Qt.Horizontal:
-                try:
-                    # get the cell height from the number of lines in the header data
-                    txt = str(self.headerData(col, orientation, role=DISPLAY_ROLE))
-                    height = len(txt.split('\n')) * int(self._chrHeight)
-
-                    # get the estimated width of the column, also for the last visible column
-                    if (self._view._columnDefs and self._view._columnDefs._columns):
-                        colObj = self._view._columnDefs._columns[col]
-                        width = colObj.columnWidth
-                        if width is not None:
-                            return QtCore.QSize(width, height)
-
-                    width = self._estimateColumnWidth(col) + \
-                            (self._editableIcon.width() if (self._isColumnEditable(col) and self.showEditIcon) else 0)
-
-                    # return the size
-                    return QtCore.QSize(width, height)
-
-                except Exception:
-                    # return the default QSize
-                    return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
-
-            # vertical-header
-            # get the cell height from the number of lines in the header data
-            txts = str(self.headerData(col, orientation, role=DISPLAY_ROLE)).split('\n')
-            height = int(len(txts) * self._chrHeight)
-
-            maxLen = max(len(txt) for txt in txts) + 1
-            width = int(min(self._MAXCHARS, maxLen) * self._chrWidth) + 2
-
-            # return the default QSize for vertical header
-            return QtCore.QSize(width, height)
+        # elif role == SIZE_ROLE:
+        #     print('==> HELP')
+        #     # process the heights/widths of the headers
+        #     if orientation == QtCore.Qt.Horizontal:
+        #         try:
+        #             # get the cell height from the number of lines in the header data
+        #             txt = str(self.headerData(col, orientation, role=DISPLAY_ROLE))
+        #             height = len(txt.split('\n')) * int(self._chrHeight)
+        #
+        #             # get the estimated width of the column, also for the last visible column
+        #             if (self._view._columnDefs and self._view._columnDefs._columns):
+        #                 colObj = self._view._columnDefs._columns[col]
+        #                 width = colObj.columnWidth
+        #                 if width is not None:
+        #                     return QtCore.QSize(width, height)
+        #
+        #             width = self._estimateColumnWidth(col) + \
+        #                     (self._editableIcon.width() if (self._isColumnEditable(col) and self.showEditIcon) else 0)
+        #
+        #             # return the size
+        #             return QtCore.QSize(width, height)
+        #
+        #         except Exception:
+        #             # return the default QSize
+        #             return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
+        #
+        #     # vertical-header
+        #     # get the cell height from the number of lines in the header data
+        #     txts = str(self.headerData(col, orientation, role=DISPLAY_ROLE)).split('\n')
+        #     height = int(len(txts) * self._chrHeight)
+        #
+        #     maxLen = max(len(txt) for txt in txts) + 1
+        #     width = int(min(self._MAXCHARS, maxLen) * self._chrWidth) + 2
+        #
+        #     # return the default QSize for vertical header
+        #     return QtCore.QSize(width, height)
 
         elif role == ICON_ROLE and self._isColumnEditable(col) and self.showEditIcon:
             # return the pixmap

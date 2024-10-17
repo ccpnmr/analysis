@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-16 18:41:25 +0100 (Wed, October 16, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-17 17:53:13 +0100 (Thu, October 17, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -51,25 +51,24 @@ from ccpn.util.Logging import getLogger
 def _getDisplayRole(self, row, col):
     # need to discard columns that include check-boxes
     val = self._df.iat[row, col]
-
-    # float/np.float - round to 3 decimal places. This should be settable, ideally even by the user,
-    if isinstance(val, (float, np.floating)):
-        try:
-            maxDecimalToShow = 3
-            if abs(val) > 1e6:  # make it scientific annotation if a huge/tiny number
-                value = f'{val:.{maxDecimalToShow}e}'
-            elif numZeros(val) >= maxDecimalToShow:
+    try:
+        # try and get the function from the column-definitions
+        fmt = self._view._columnDefs._columns[col].format
+        return fmt % val
+    except Exception:
+        # fallback - float/np.float - round to 3 decimal places. This should be settable, ideally even by the user,
+        if isinstance(val, (float, np.floating)):
+            if abs(val) > 1e6 or numZeros(val) >= 3:
+                # make it scientific annotation if a huge/tiny number
                 #e.g.:  if is 0.0001 will show as 1e-4 instead of 0.000
-                value = f'{val:.{maxDecimalToShow}e}'
+                val = f'{val:.3e}'
             else:
                 # just rounds to the third decimal
-                value = f'{val:.{maxDecimalToShow}f}'
-        except Exception:
-            value = str(val)
-    else:
-        value = str(val)
-
-    return value
+                val = f'{val:.3f}'
+        elif isinstance(val, bool) and self._enableCheckBoxes:
+            # an empty cell with a checkbox - allow other text?
+            return None
+    return str(val)
 
 
 def _getValueRole(self, row, col):
@@ -101,22 +100,20 @@ def _getBorderRole(self, row, col):
 
 def _getToolTipRole(self, row, col):
     if self._view._toolTipsEnabled:
-        data = self._df.iat[row, col]
-
-        return str(data)
+        return str(self._df.iat[row, col])
 
 
 def _getEditRole(self, row, col):
     data = self._df.iat[row, col]
-
     # float/np.float - return float
     if isinstance(data, (float, np.floating)):
         return float(data)
-
+    elif isinstance(data, bool):
+        # need to check before int - int also includes bool :|
+        return data
     # int/np.integer - return int
     elif isinstance(data, (int, np.integer)):
         return int(data)
-
     return data
 
 
@@ -133,7 +130,9 @@ def _getFontRole(self, row, col):
 
 def _getCheckRole(self, row, col):
     # need flags to include CHECKABLE and return QtCore.Qt.checked/unchecked/PartiallyChecked here
-    return CHECKED
+    if isinstance((val := self._df.iat[row, col]), bool):
+        # bool to checkbox state
+        return CHECKED if val else UNCHECKED
 
 
 def _getIconRole(self, row, col):
@@ -162,7 +161,8 @@ class _TableModel(QtCore.QAbstractTableModel):
     _chrHeight = 12
     _chrPixelPadding = 6
     _chrPadding = 3
-    _cellBorder = QtCore.QSizeF(16.0, 0.0)
+    _cellRightBorder = 32.0
+    _cellBorder = QtCore.QSizeF(_cellRightBorder, 0.0)
 
     showEditIcon = False
     defaultFlags = ENABLED | SELECTABLE  # add CHECKABLE to enable check-boxes
@@ -184,7 +184,7 @@ class _TableModel(QtCore.QAbstractTableModel):
                      EDIT_ROLE      : _getEditRole,
                      INDEX_ROLE     : _getIndexRole,
                      FONT_ROLE      : _getFontRole,
-                     # CHECK_ROLE     : _getCheckRole,
+                     CHECK_ROLE     : _getCheckRole,
                      # ICON_ROLE      : _getIconRole,
                      # ALIGNMENT_ROLE : _getAlignmentRole,
                      }
@@ -207,7 +207,7 @@ class _TableModel(QtCore.QAbstractTableModel):
             self._bbox = bbox = fontMetric.boundingRect
             self._hAdvance = fontMetric.horizontalAdvance  # just returns the width, 25% faster?
             # get an estimate for an average character width/height - must be floats for estimate-column-widths
-            test = 'WMB' # Selection of wider letters to prevent collapsing column
+            test = 'WMB'  # Selection of wider letters to prevent collapsing column
             self._chrWidth = bbox(test).width() / len(test)
             self._chrHeight = bbox('A').height() + self._chrPixelPadding
 
@@ -465,140 +465,119 @@ class _TableModel(QtCore.QAbstractTableModel):
         """
         return 1 if type(self._df) == pd.Series else self._df.shape[1]
 
+    def data(self, index, role=DISPLAY_ROLE):
+        """Return the data/roles for the model.
+        """
+        # usual roles {0, 1, 3, 4, 6, 7, 8, 9, 10, 13}
+        if not index.isValid():
+            return
+        row = index.row()
+        if role == SIZE_ROLE:
+            # sorting filter not really important, just need to grab a few rows
+            return QtCore.QSizeF(self._cellRightBorder +
+                                 self._hAdvance(str(self._df.iat[row, index.column()])),
+                                 self._chrHeight)
+        if func := self.getAttribRole.get(role):
+            # get the source cell
+            fRow = (self._filterIndex[row]
+                    if self._filterIndex is not None and 0 <= row < len(self._filterIndex) else row)
+            return func(self, self._sortIndex[fRow], index.column())
+
     # def data(self, index, role=DISPLAY_ROLE):
     #     """Return the data/roles for the model.
     #     """
     #     if not index.isValid():
+    #         return
+    #     row = index.row()
+    #     if role == SIZE_ROLE:
+    #         # sorting filter not really important, just need to grab a few rows
+    #         return QtCore.QSizeF(self._cellRightBorder +
+    #                              self._hAdvance(str(self._df.iat[row, index.column()])),
+    #                              self._chrHeight)
+    #
+    #     # try:
+    #     # get the source cell
+    #     fRow = self._filterIndex[row] if self._filterIndex is not None and 0 <= row < len(
+    #             self._filterIndex) else row
+    #     row, col = self._sortIndex[fRow], index.column()
+    #
+    #     if role == DISPLAY_ROLE:
+    #         # need to discard columns that include check-boxes
+    #         val = self._df.iat[row, col]
+    #         try:
+    #             # try and get the function from the column-definitions
+    #             fmt = self._view._columnDefs._columns[col].format
+    #             return fmt % val
+    #         except Exception:
+    #             # fallback - float/np.float - round to 3 decimal places. This should be settable, ideally even by the user,
+    #             if isinstance(val, (float, np.floating)):
+    #                 if abs(val) > 1e6 or numZeros(val) >= 3:
+    #                     # make it scientific annotation if a huge/tiny number
+    #                     #e.g.:  if is 0.0001 will show as 1e-4 instead of 0.000
+    #                     val = f'{val:.3e}'
+    #                 else:
+    #                     # just rounds to the third decimal
+    #                     val = f'{val:.3f}'
+    #             elif isinstance(val, bool) and self._enableCheckBoxes:
+    #                 # an empty cell with a checkbox - allow other text?
+    #                 return None
+    #         return str(val)
+    #
+    #     elif role == VALUE_ROLE:
+    #         val = self._df.iat[row, col]
+    #         try:
+    #             # convert np.types to python types
+    #             return val.item()  # type np.generic
+    #         except Exception:
+    #             return val
+    #
+    #     elif role == BACKGROUND_ROLE:
+    #         if (indexGui := self._guiState[row, col]):
+    #             # get the colour from the dict
+    #             return indexGui.get(role)
+    #
+    #     elif role == FOREGROUND_ROLE:
+    #         if (indexGui := self._guiState[row, col]):
+    #             # get the colour from the dict
+    #             return indexGui.get(role)
+    #
+    #     elif role == BORDER_ROLE:
+    #         if (indexGui := self._guiState[row, col]):
+    #             # get the colour from the dict
+    #             return bool(indexGui.get(role))
+    #
+    #     elif role == TOOLTIP_ROLE:
+    #         if self._view._toolTipsEnabled:
+    #             data = self._df.iat[row, col]
+    #             return str(data)
+    #
+    #     elif role == EDIT_ROLE:
+    #         data = self._df.iat[row, col]
+    #         # float/np.float - return float
+    #         if isinstance(data, (float, np.floating)):
+    #             return float(data)
+    #         elif isinstance(data, bool):
+    #             # need to check before int - int also includes bool :|
+    #             return data
+    #         # int/np.integer - return int
+    #         elif isinstance(data, (int, np.integer)):
+    #             return int(data)
+    #         return data
+    #
+    #     elif role == INDEX_ROLE:
+    #         # return a dict of item-data?
+    #         return (row, col)
+    #
+    #     elif role == FONT_ROLE:
+    #         if (indexGui := self._guiState[row, col]):
+    #             # get the font from the dict
+    #             return indexGui.get(role)
+    #
+    #     elif role == CHECK_ROLE and self._enableCheckBoxes:
+    #         if isinstance((val := self._df.iat[row, col]), bool):
+    #             # bool to checkbox state
+    #             return CHECKED if val else UNCHECKED
     #         return None
-    #
-    #     try:
-    #         if (func := self.getAttribRole.get(role)):
-    #             # get the source cell
-    #             fRow = self._filterIndex[index.row()] if self._filterIndex is not None and 0 <= index.row() < len(self._filterIndex) else index.row()
-    #             row, col = self._sortIndex[fRow], index.column()
-    #
-    #             return func(self, row, col)
-    #
-    #     except Exception as es:
-    #         getLogger().debug(f'{consoleStyle.fg.yellow}--> TABLE ERROR - {es}{consoleStyle.reset}')
-    #
-    #     return None
-
-    def data(self, index, role=DISPLAY_ROLE):
-        """Return the data/roles for the model.
-        """
-        if not index.isValid():
-            return None
-        if role == SIZE_ROLE:
-            # sorting filter not really important, just need to grab a few rows
-            # return QtCore.QSizeF(16.0 + self._hAdvance(str(self._df.iat[index.row(), index.column()])),
-            #                      self._chrHeight)
-            return self._bbox(str(self._df.iat[index.row(), index.column()])).size() + self._cellBorder
-
-        try:
-            # get the source cell
-            fRow = self._filterIndex[index.row()] if self._filterIndex is not None and 0 <= index.row() < len(
-                    self._filterIndex) else index.row()
-            row, col = self._sortIndex[fRow], index.column()
-
-            if role == DISPLAY_ROLE:
-                # need to discard columns that include check-boxes
-                val = self._df.iat[row, col]
-                try:
-                    # try and get the function from the column-definitions
-                    fmt = self._view._columnDefs._columns[col].format
-                    return fmt % val
-                except Exception:
-                    # fallback - float/np.float - round to 3 decimal places. This should be settable, ideally even by the user,
-                    if isinstance(val, (float, np.floating)):
-                        try:
-                            maxDecimalToShow = 3
-                            if abs(val) > 1e6:  # make it scientific annotation if a huge/tiny number
-                                value = f'{val:.{maxDecimalToShow}e}'
-                            elif numZeros(val) >= maxDecimalToShow:
-                                #e.g.:  if is 0.0001 will show as 1e-4 instead of 0.000
-                                value = f'{val:.{maxDecimalToShow}e}'
-                            else:
-                                # just rounds to the third decimal
-                                value = f'{val:.{maxDecimalToShow}f}'
-                        except Exception:
-                            value = str(val)
-                    elif isinstance(val, bool) and self._enableCheckBoxes:
-                        # an empty cell with a checkbox - allow other text?
-                        return None
-                    else:
-                        value = str(val)
-                return value
-
-            elif role == VALUE_ROLE:
-                val = self._df.iat[row, col]
-                try:
-                    # convert np.types to python types
-                    return val.item()  # type np.generic
-                except Exception:
-                    return val
-
-            elif role == BACKGROUND_ROLE:
-                if (indexGui := self._guiState[row, col]):
-                    # get the colour from the dict
-                    return indexGui.get(role)
-
-            elif role == FOREGROUND_ROLE:
-                if (indexGui := self._guiState[row, col]):
-                    # get the colour from the dict
-                    return indexGui.get(role)
-
-            elif role == BORDER_ROLE:
-                if (indexGui := self._guiState[row, col]):
-                    # get the colour from the dict
-                    return bool(indexGui.get(role))
-
-            elif role == TOOLTIP_ROLE:
-                if self._view._toolTipsEnabled:
-                    data = self._df.iat[row, col]
-                    return str(data)
-
-            elif role == EDIT_ROLE:
-                data = self._df.iat[row, col]
-                # float/np.float - return float
-                if isinstance(data, (float, np.floating)):
-                    return float(data)
-                elif isinstance(data, bool):
-                    # need to check before int - int also includes bool :|
-                    return data
-                # int/np.integer - return int
-                elif isinstance(data, (int, np.integer)):
-                    return int(data)
-                return data
-
-            elif role == INDEX_ROLE:
-                # return a dict of item-data?
-                return (row, col)
-
-            elif role == FONT_ROLE:
-                if (indexGui := self._guiState[row, col]):
-                    # get the font from the dict
-                    return indexGui.get(role)
-
-            elif role == CHECK_ROLE and self._enableCheckBoxes:
-                if isinstance((val := self._df.iat[row, col]), bool):
-                    # bool to checkbox state
-                    return CHECKED if val else UNCHECKED
-                return None
-
-            # elif role == ICON_ROLE:
-            #     # return the pixmap - this works, transfer to _MultiHeader
-            #     return self._editableIcon
-            # elif role == ALIGNMENT_ROLE:
-            #     pass
-            # elif role == SIZE_ROLE:
-            #     # this is required to disable the bbox calculation for the default QT functionality
-            #     return QtCore.QSize(16, 24)
-
-        except Exception as es:
-            getLogger().debug(f'{consoleStyle.fg.yellow}--> TABLE ERROR - {es}{consoleStyle.reset}')
-
-        return None
 
     def setData(self, index, value, role=EDIT_ROLE) -> bool:
         """Set data in the DataFrame. Required if table is editable.
@@ -659,6 +638,10 @@ class _TableModel(QtCore.QAbstractTableModel):
             except Exception:
                 return None
 
+        elif role == ICON_ROLE and self._isColumnEditable(col) and self.showEditIcon:
+            # return the pixmap
+            return self._editableIcon
+
         # NOTE:ED - if SIZE_ROLE is defined in both data and headerData, the larger of the two is used for the row/column/cell size
         #           assuming that both always return a QSize, otherwise QT defaults to calculating the bbox for the cell
         # elif role == SIZE_ROLE:
@@ -698,12 +681,6 @@ class _TableModel(QtCore.QAbstractTableModel):
         #     # return the default QSize for vertical header
         #     return QtCore.QSize(width, height)
 
-        elif role == ICON_ROLE and self._isColumnEditable(col) and self.showEditIcon:
-            # return the pixmap
-            return self._editableIcon
-
-        return None
-
     def _estimateColumnWidth(self, col):
         """Estimate the width for the column from the header and fixed number of rows
         """
@@ -733,7 +710,7 @@ class _TableModel(QtCore.QAbstractTableModel):
 
             return int(min(self._MAXCHARS, maxLen) * self._chrWidth)
 
-        except Exception as es:
+        except Exception:
             # iterate over a few rows to get an estimate
             for row in range(min(self.rowCount(), self._CHECKROWS)):
                 data = self._df.iat[row, col]

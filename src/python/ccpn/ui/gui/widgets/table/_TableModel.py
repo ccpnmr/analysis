@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-17 18:25:17 +0100 (Thu, October 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-18 14:24:18 +0100 (Fri, October 18, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,9 @@ def _getDisplayRole(self, row, col):
     except Exception:
         # fallback - float/np.float - round to 3 decimal places. This should be settable, ideally even by the user,
         if isinstance(val, float | np.floating):
-            if abs(val) > 1e6 or numZeros(val) >= 3:
+            if not (val - val == 0.0):
+                return None
+            elif abs(val) > 1e6 or numZeros(val) >= 3:
                 # make it scientific annotation if a huge/tiny number
                 #e.g.:  if is 0.0001 will show as 1e-4 instead of 0.000
                 val = f'{val:.3e}'

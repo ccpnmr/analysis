@@ -319,7 +319,7 @@
     },
     "modules": {
         "profileByReference" : {
-            "databasePath" : ""
+            "databasePaths" : []
         }
     }
 }

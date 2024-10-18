@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-11 15:28:15 +0100 (Fri, October 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-18 10:03:52 +0100 (Fri, October 18, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -2438,12 +2438,14 @@ class Spectrum(AbstractWrapperObject):
             self._setInternalParameter(self._NOISESD, None)  #ensure we don't go out of sync with the NoiseLevel.
 
         result = self._getInternalParameter(self._NOISESD)
-        if result is None and self.noiseLevel:
-            # We have the noiseLevel, we can back-calculate the noise sd
-            from ccpn.core.lib.SpectrumLib import _estimateNoiseSDforSpectrumNoiseLevel
-
-            result = _estimateNoiseSDforSpectrumNoiseLevel(self)
-            self._setInternalParameter(self._NOISESD, result)  #ensure we don't go out of sync with the NoiseLevel.
+        # GWV 17/10/2024: diabled; this is a bad idea as its triggers a read of the full spectrum;
+        # just imagine this is a 20GB 4D!
+        # if result is None and self.noiseLevel:
+        #     # We have the noiseLevel, we can back-calculate the noise sd
+        #     from ccpn.core.lib.SpectrumLib import _estimateNoiseSDforSpectrumNoiseLevel
+        #
+        #     result = _estimateNoiseSDforSpectrumNoiseLevel(self)
+        #     self._setInternalParameter(self._NOISESD, result)  #ensure we don't go out of sync with the NoiseLevel.
         return result
 
     @_noiseSD.setter

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 08:48:50 +0100 (Thu, September 12, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-18 10:03:52 +0100 (Fri, October 18, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -842,8 +842,7 @@ class Peak(AbstractWrapperObject):
             self.assignedNmrAtoms = assignedNmrAtoms
 
     @logCommand(get='self')
-    def assignDimension(self, axisCode: str, value: Union[Union[str, 'NmrAtom'],
-    Sequence[Union[str, 'NmrAtom']]] = None):
+    def assignDimension(self, axisCode: str, value: Union[Union[str, 'NmrAtom'], Sequence[Union[str, 'NmrAtom']]] = None):
         """Assign dimension with axisCode to value (NmrAtom, or Pid or sequence of either, or None)."""
 
         axisCodes = self.spectrum.axisCodes

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-18 10:03:52 +0100 (Fri, October 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-20 17:14:07 +0100 (Sun, October 20, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -847,7 +847,7 @@ class Peak(AbstractWrapperObject):
 
         axisCodes = self.spectrum.axisCodes
         try:
-            axis = axisCodes.index(axisCode)
+            dimIndex = axisCodes.index(axisCode)
         except ValueError:
             raise ValueError(f"axisCode {axisCode} not recognised") from None
 
@@ -861,8 +861,9 @@ class Peak(AbstractWrapperObject):
             value = [value]
         dimensionNmrAtoms = list(self.dimensionNmrAtoms)
 
-        dimensionNmrAtoms[axis] = value
+        dimensionNmrAtoms[dimIndex] = value
         self.dimensionNmrAtoms = dimensionNmrAtoms
+
         # isotopeCode. if not defined, assign to the nmrAtoms from the spectrum isotopeCodes
         for na in value:
             if na.isotopeCode in [UnknownIsotopeCode, self._UNKNOWN_VALUE_STRING, None]:

@@ -31,8 +31,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-21 11:56:53 +0100 (Fri, June 21, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-21 19:52:34 +0100 (Mon, October 21, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -49,6 +49,7 @@ from collections import OrderedDict
 from typing import Callable, Any, Optional
 from itertools import permutations
 import weakref
+from contextlib import contextmanager
 
 from ccpn.core.lib.WeakRefList import _WeakRefList
 
@@ -455,12 +456,13 @@ class Notifier(NotifierABC):
                 raise ValueError(
                     f'Notifier ({trigger!r},{targetName!r}) can not be set on {theObject}')
 
+        # Registering in current implementation
         if trigger == Notifier.OBSERVE:
             # OBSERVE special case, as the current underpinning implementation does not allow this directly
             # Hence, we track all changes to the object class, filtering those that apply
 
             if targetName == self.ANY or not hasattr(theObject, targetName):
-                raise RuntimeWarning(
+                raise ValueError(
                     f'Notifier.__init__(): invalid targetName {targetName!r} for {theObject}')
 
             self._attributeName = targetName
@@ -1011,18 +1013,28 @@ class NotifierBase(object):
 
         return foundNotifiers
 
-    def deleteNotifier(self, notifier: NotifierABC):
+    def deleteNotifier(self, notifier: NotifierABC | int):
         """Remove notifier associated self, unregister it and delete it
 
         :param notifier: a Notifier instance previously set by
-                         setNotifier, setGuiNotifier or setCurrentNotifier.
+                         setNotifier, setGuiNotifier or setCurrentNotifier
+                         or
+                         the notifier-id (an int)
         """
-        if not self._hasNotifier(notifier):
+        if isinstance(notifier, int):
+            _id = notifier
+        elif isinstance(notifier, NotifierABC):
+            _id = notifier.id
+        else:
+            raise TypeError(f'deleteNotifier(): {notifier} is not a valid type')
+
+        _idDict = dict((ntf.id, ntf) for ntf in self._objectNotifiersDict.allNotifiers)
+        if (_notifier := _idDict.get(_id, None)) is None:
             raise ValueError(f'deleteNotifier(): {notifier} is not a (valid) notifier of {self}')
 
-        self._objectNotifiersDict.deleteNotifier(notifier)
-        notifier.unRegisterNotifier()
-        del(notifier)
+        self._objectNotifiersDict.deleteNotifier(_notifier)
+        _notifier.unRegisterNotifier()
+        del(_notifier)
 
     def deleteAllNotifiers(self):
         """Unregister and delete all the notifiers associated with self
@@ -1153,6 +1165,23 @@ class NotifierBase(object):
         for notifier in objNotifiers.allNotifiers:
             notifier.setBlanking(flag)
 
+    @contextmanager
+    def blankNotifications(self):
+        """Convenience to method
+        """
+        self._increaseNotificationBlanking()
+        try:
+            # transfer control to the calling function
+            yield
+
+        except AttributeError as es:
+            raise es
+
+        finally:
+            # clean up after blocking notifications
+            self._decreaseNotificationBlanking()
+
+
     #-----------------------------------------------------------------------------------------
     # api 'change' notification blanking level -
     # To be used with the apiNotificationBlanking context manager; e.g.
@@ -1178,6 +1207,52 @@ class NotifierBase(object):
         if NotifierBase._apiNotificationBlanking == 0:
             raise RuntimeError("_decreaseApiNotificationBlanking(): cannot set _apiNotificationBlanking < 0")
         NotifierBase._apiNotificationBlanking -= 1
+
+#end class -----------------------------------------------------------------------------------------
+
+
+class NotifierSignal(property):
+    """A class that defines a property that functions as a signal for other objects,
+    as these can set OBSERVE notifiers for its value changing.
+
+    e.g. in type MyClass:
+
+        mySignal = NotifierSignal('mySignal')  # Unfortunately have to pass the name
+
+        def func1(self):
+            .....
+            self.mySignal = True
+
+    elsewhere with myObject of type MyClass:
+        otherObject.setNotifier(myObject, [OBSERVE], 'mySignal', callback=someFunc)
+
+    calling myObject.func1(), will trigger the callback someFunc()
+    """
+
+    def __init__(self, name: str):
+        super().__init__(self._getter, self._setter, doc=f'NotifierSignal {name}')
+
+        self.name: str = name
+        self.counter: int = 0
+
+    def _getter(self, instance):
+        return self.counter
+
+    def _setter(self, instance, value):
+        if bool(value):
+            self.counter += 1
+            _callbackDict = {NotifierABC.ATTRIBUTE_NAME:self.name,
+                             NotifierABC.PREVIOUSVALUE:self.counter-1,
+                             NotifierABC.VALUE:self.counter
+                             }
+            instance._fireRegisteredNotifiers(trigger=Notifier.OBSERVE, targetName=self.name,
+                                              callbackDict=_callbackDict)
+
+    # def __get__(self, *args, **kwds):
+    #     return super().__get__(*args, **kwds)
+    #
+    # def __set__(self, *args, **kwds):
+    #     super().__set__(*args, **kwds)
 
 #end class -----------------------------------------------------------------------------------------
 

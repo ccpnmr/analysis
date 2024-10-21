@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-18 10:03:52 +0100 (Fri, October 18, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-21 19:52:34 +0100 (Mon, October 21, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -90,6 +90,7 @@ from ccpn.core.lib.ContextManagers import \
     undoStackBlocking, renameObject, undoBlock, \
     ccpNmrV3CoreSetter, inactivity, undoBlockWithoutSideBar, notificationEchoBlocking
 
+from ccpn.core.lib.Notifiers import NotifierSignal
 from ccpn.core.lib.DataStore import DataStore
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC, getDataFormats
 from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
@@ -170,6 +171,11 @@ class Spectrum(AbstractWrapperObject):
     _SERIESITEMS = '_seriesItems'
     _DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
     _NEGATIVENOISELEVEL = 'negativeNoiseLevel'
+
+    # A property for which the graphics machinery sets an OBSERVE notifier
+    # Code potentially affecting graphics can do: mySpectrum._updateContours = True,
+    # which will advance the _updateContours counter by one, triggering any callbacks
+    _updateContours = NotifierSignal('_updateContours')
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure
@@ -963,13 +969,15 @@ class Spectrum(AbstractWrapperObject):
                     redo=partial(self._openFileHelper, newDataStore, newDataSource)
                     )
 
-    def _openFile(self, path: str, dataFormat: str, checkParameters: bool = True, dataSource=None) -> bool:
+    def _openFile(self, path: str, dataFormat: str, checkParameters: bool = True,
+                  dataSource=None, update=False) -> bool:
         """Open the spectrum as defined by path and dataFormat, creating a dataSource object.
 
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
         :param dataFormat: a dataFormat defined by one of the SpectrumDataSource types
         :param checkParameters: flag to check a set of (limited) parameters
         :param dataSource: a SpectrumDataSource instance, overriding _getDataSource call
+        :param update: set the updateContour flag (potentially triggering contour updates)
         :return True if opened succesfully
 
         CCPNMRINTERNAL: also used in nef loader; ValidateSpectraPopup
@@ -1011,7 +1019,9 @@ class Spectrum(AbstractWrapperObject):
             # NOTE:ED - this is a bit of a hack :|
             _ = self.intensities
 
-        self._finaliseAction('change', _openFile=True)
+        if update:
+            self._updateContours = True
+
         return True
 
     @logCommand(get='self')
@@ -1026,9 +1036,10 @@ class Spectrum(AbstractWrapperObject):
         path = path or self.filePath
 
         self._closeFile()
-        self._openFile(path=path, dataFormat=self.dataFormat, checkParameters=False)
-        if self.dataSource is not None:
-            self.dataSource.exportToSpectrum(self, includePath=False)
+        if self._openFile(path=path, dataFormat=self.dataFormat, checkParameters=False, update=False):
+            if self.dataSource is not None:
+                self.dataSource.exportToSpectrum(self, includePath=False)
+            self.updateContours = True
 
     @property
     def path(self) -> Path:

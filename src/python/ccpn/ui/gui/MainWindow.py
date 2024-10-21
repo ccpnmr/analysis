@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-13 15:14:33 +0100 (Fri, September 13, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-21 11:25:10 +0100 (Mon, October 21, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1692,7 +1692,7 @@ class GuiMainWindow(Shortcuts, QtWidgets.QMainWindow):
     # Code moved from previously lib.GuiWindow
     #-----------------------------------------------------------------------------------------
 
-    @logCommand('mainWindow.')
+    # @logCommand('mainWindow.')
     def _deassignPeaks(self):
         """Deassign all from selected peaks
         """

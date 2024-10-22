@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-04 11:47:18 +0100 (Fri, October 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-22 17:58:54 +0100 (Tue, October 22, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -47,7 +47,7 @@ from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
 
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui import Layout
-from ccpn.ui.gui.guiSettings import LIGHT, DARK
+# from ccpn.ui.gui.guiSettings import LIGHT, DARK
 
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
@@ -429,6 +429,11 @@ class Gui(Ui, _Gui_V3_V4):
 
         self._qtApp = self._initQtApp()
 
+        # referenced by _changeThemeInstant()
+        self._themeStyle = None
+        self._themeColour = None
+        self._themeSDStyle = None
+
         # override the dark/light theme
         self._changeThemeInstant()
 
@@ -622,6 +627,49 @@ class Gui(Ui, _Gui_V3_V4):
             for mark in project.marks:
                 mark.colour = autoCorrectHexColour(mark.colour,
                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+
+    def _changeThemeInstant(self, theme: str=None, colour: str=None, themeSD: str=None):
+        """Set the light/dark palette in single step.
+        0 - dark, 1 - light, 2 - default = follow OS/application
+        """
+        prefsApp = self.application.preferences.appearance
+        prefsGen = self.application.preferences.general
+
+        _th, _col, _thSD = getTheme()  # should have been set on creation
+        if theme is None: theme = _th.dataValue
+        if themeSD is None: themeSD = _thSD.dataValue
+        if colour is None: colour = _col
+
+        if not isinstance(theme, Theme) and theme not in Theme.dataValues():
+            raise ValueError(f'{self.__class__.__name__}._changeThemeInstant: theme not in {Theme.dataValues()}')
+        if not isinstance(themeSD, Theme) and themeSD not in Theme.dataValues():
+            raise ValueError(f'{self.__class__.__name__}._changeThemeInstant: themeSD not in {Theme.dataValues()}')
+        if not isinstance(colour, str):
+            raise TypeError(f'{self.__class__.__name__}._changeThemeInstant: colour not of type str')
+        try:
+            # test the colour
+            QtGui.QColor(colour)
+        except Exception:
+            raise ValueError(f'{self.__class__.__name__}._changeThemeInstant: colour {colour!r} not valid')
+
+        getLogger().debug(f'{consoleStyle.fg.darkblue}==> start palette-change event.{consoleStyle.reset}')
+        # set highlight to the required highlighting colour
+        # set the theme in preferences
+        th = Theme.getByDataValue(theme)
+        thSD = Theme.getByDataValue(themeSD)
+        prefsApp.themeStyle = th.dataValue  # application theme
+        prefsApp.themeColour = colour
+        prefsGen.colourScheme = thSD.dataValue  # spectrumDisplay theme
+
+        if pal := setColourScheme(th, colour, thSD):
+            self._qtApp.setPalette(pal)
+            # QtCore.QTimer.singleShot(0, partial(self.qtApp.setPalette, pal))
+            QtCore.QTimer.singleShot(0, partial(self._qtApp.sigPaletteChanged.emit, pal,
+                                              prefsApp.themeStyle,
+                                              prefsApp.themeColour,
+                                              prefsGen.colourScheme)
+                                     )
+        getLogger().debug(f'{consoleStyle.fg.darkblue}==> end palette-change event.{consoleStyle.reset}')
 
     # GWV 12/2/24; replaced by other implementation
     # def _updateCheckableMenuItems(self):

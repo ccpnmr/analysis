@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-21 11:25:10 +0100 (Mon, October 21, 2024) $"
-__version__ = "$Revision: 3.2.5.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-10-22 17:58:54 +0100 (Tue, October 22, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -330,7 +330,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                                                                    ).name()
         colours['_fontSize'] = self.font().pointSize()
         colours['_BORDER_WIDTH'] = 2  # need to grab from the table-instance :|
-        self.ui.qtApp.setStyleSheet(styleSheet % colours)
+        self.ui._qtApp.setStyleSheet(styleSheet % colours)
 
         # store the colours in the baseclass, is this the best place?
         Base._highlight = highlight
@@ -339,7 +339,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         Base._transparent = pal.highlight().color()  # grab again to stop overwrite
         Base._transparent.setAlpha(40)
         # pass through the palette-changed to other widgets
-        self.ui.qtApp._sigPaletteChanged.emit(pal, theme, themeColour, themeSD)
+        self.ui._qtApp._sigPaletteChanged.emit(pal, theme, themeColour, themeSD)
         getLogger().debug(f'{consoleStyle.fg.darkblue}qtApp changePalette event{consoleStyle.reset}')
 
     def _initReadOnlyIcon(self):

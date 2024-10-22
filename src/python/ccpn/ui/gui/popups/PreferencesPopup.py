@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-09 19:49:20 +0100 (Wed, October 09, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__dateModified__ = "$dateModified: 2024-10-22 17:58:54 +0100 (Tue, October 22, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -372,8 +372,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
                             prefs.appearance.themeColour,
                             Theme.getByDataValue(prefs.general.colourScheme),
                             force=True):
-                self.application.ui.qtApp.setPalette(pal)
-                QtCore.QTimer.singleShot(0, partial(self.application.ui.qtApp.sigPaletteChanged.emit, pal,
+                self.application.ui._qtApp.setPalette(pal)
+                QtCore.QTimer.singleShot(0, partial(self.application.ui._qtApp.sigPaletteChanged.emit, pal,
                                                     prefs.appearance.themeStyle,
                                                     prefs.appearance.themeColour,
                                                     prefs.general.colourScheme)

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:21:55 +0100 (Fri, August 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-22 17:58:54 +0100 (Tue, October 22, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -187,7 +187,7 @@ from pyqtgraph.dockarea import Dock, DockArea
 
 class TestQt:
     def __init__(self, w=100, h=100):
-        self.qtApp = QtWidgets.QApplication([])
+        self._qtApp = QtWidgets.QApplication([])
 
         self.qtMainWindow = QtWidgets.QMainWindow()
         pgDockArea = DockArea()

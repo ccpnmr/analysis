@@ -15,7 +15,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
 from ccpn.util.decorators import logCommand
 
-from ccpn.ui.gui.guiSettings import LIGHT, DARK
+from ccpn.ui.gui.guiSettings import Theme
 
 
 
@@ -66,9 +66,9 @@ class _Gui_V3_V4(object):
         """
         _app = self.application
         if _app.args.darkColourScheme:
-            colourScheme = DARK
+            colourScheme = Theme.DARK
         elif _app.args.lightColourScheme:
-            colourScheme = LIGHT
+            colourScheme = Theme.LIGHT
         else:
             colourScheme = _app.preferences.general.colourScheme
 
@@ -218,18 +218,125 @@ class _Gui_V3_V4(object):
 # _MyAppProxyStyle
 #=========================================================================================
 
+# class _MyAppProxyStyle(QtWidgets.QProxyStyle):
+#     """Class to handle resizing icons in menus
+#     """
+#
+#     def drawControl(self, element, option, painter, widget=None):
+#         if (element in {QtWidgets.QStyle.CE_MenuItem} and isinstance(option, QtWidgets.QStyleOptionMenuItem) and
+#                 (_actionGeometries := getattr(widget, '_actionGeometries', None)) and
+#                 (action := _actionGeometries.get(str(option.rect))) and
+#                 (colour := getattr(action, '_foregroundColour', None))):
+#             # Customise the foreground colour for the menu-item from the QAction
+#             option.palette.setColor(option.palette.Text, colour)
+#         return super().drawControl(element, option, painter, widget)
+#
+#     def standardIcon(self, standardIcon, option=None, widget=None) -> QtGui.QIcon:
+#         # change the close-button of the line-edit to a cleaner icon, set by setClearButtonEnabled
+#         if standardIcon == QtWidgets.QStyle.SP_LineEditClearButton:
+#             return Icon('icons/close-lineedit')
+#         return super().standardIcon(standardIcon, option, widget)
+
+
 class _MyAppProxyStyle(QtWidgets.QProxyStyle):
     """Class to handle resizing icons in menus
     """
 
+    # def drawPrimitive(self, element: QtWidgets.QStyle.PrimitiveElement,
+    #                   option: QtWidgets.QStyleOption,
+    #                   painter: QtGui.QPainter,
+    #                   widget: typing.Optional[QtWidgets.QWidget] = ...) -> None:
+    #     focus = False
+    #     if element in {QtWidgets.QStyle.PE_FrameLineEdit,
+    #                    QtWidgets.QStyle.PE_FrameFocusRect,
+    #                    QtWidgets.QStyle.PE_PanelButtonCommand,
+    #                    }:
+    #         focus = option.state & QtWidgets.QStyle.State_HasFocus
+    #         option.state &= ~(QtWidgets.QStyle.State_HasFocus | QtWidgets.QStyle.State_Selected)
+    #         # Customise the highlight color for a soft background
+    #         if Base._highlightMid is not None:
+    #             option.palette.setColor(option.palette.Highlight, Base._highlightMid)
+    #     if element == QtWidgets.QStyle.PE_FrameFocusRect and isinstance(widget, QtWidgets.QPushButton):
+    #         # replace the QPushButton focus with just a border
+    #         if (efb := getattr(widget, '_enableFocusBorder', None)) is None or efb is True:
+    #             self._drawBorder(element, painter, widget, col=Base._highlightVivid)
+    #         return
+    #     super().drawPrimitive(element, option, painter, widget)
+    #     if focus and element in {QtWidgets.QStyle.PE_FrameLineEdit,
+    #                              }:
+    #         # draw new focus-border
+    #         self._drawBorder(element, painter, widget, col=Base._highlightVivid)
+
     def drawControl(self, element, option, painter, widget=None):
-        if (element in {QtWidgets.QStyle.CE_MenuItem} and isinstance(option, QtWidgets.QStyleOptionMenuItem) and
+        # if element in {QtWidgets.QStyle.CE_TabBarTab,
+        #                }:
+        #     # Customise the highlight color for the tab-widget
+        #     if Base._highlightVivid is not None:
+        #         option.palette.setColor(option.palette.Highlight, Base._highlightVivid)
+        if (element in {QtWidgets.QStyle.CE_MenuItem,} and
+              isinstance(option, QtWidgets.QStyleOptionMenuItem) and
                 (_actionGeometries := getattr(widget, '_actionGeometries', None)) and
                 (action := _actionGeometries.get(str(option.rect))) and
                 (colour := getattr(action, '_foregroundColour', None))):
             # Customise the foreground colour for the menu-item from the QAction
+            # - menu-items don't have a stylesheet or palette
             option.palette.setColor(option.palette.Text, colour)
-        return super().drawControl(element, option, painter, widget)
+        super().drawControl(element, option, painter, widget)
+        # if element in {QtWidgets.QStyle.CE_ItemViewItem, } and (option.state & QtWidgets.QStyle.State_HasFocus):
+        #     # draw border inside the listWidget/listView/TreeView
+        #     #   - draws border inside pulldowns though, shame :(
+        #     self._drawBorder(element, painter, widget, col=Base._highlightVivid)
+
+    def drawComplexControl(self, control: QtWidgets.QStyle.ComplexControl,
+                           option: QtWidgets.QStyleOptionComplex,
+                           painter: QtGui.QPainter,
+                           widget: QtWidgets.QWidget | None = ...) -> None:
+        focus = None
+        if control in {QtWidgets.QStyle.CC_ComboBox,
+                       QtWidgets.QStyle.CC_SpinBox,
+                       }:
+            focus = option.state & QtWidgets.QStyle.State_HasFocus
+            option.state &= ~QtWidgets.QStyle.State_HasFocus
+            if control in {QtWidgets.QStyle.CC_ComboBox,}:
+                # hack to set the drop-arrow colour
+                # using window-text allows setting the text colour on non-editable combobox
+                option.palette.setColor(option.palette.ButtonText,
+                                        option.palette.color(QtGui.QPalette.Active,
+                                                             QtGui.QPalette.ColorRole(QtGui.QPalette.WindowText)))
+        # elif control in {QtWidgets.QStyle.CC_Slider,} and Base._highlightVivid is not None:
+        #     option.palette.setColor(option.palette.Highlight, Base._highlightVivid)
+        super().drawComplexControl(control, option, painter, widget)
+        if focus:
+            # draw new focus-border
+            self._drawBorder(control, painter, widget,
+                             col=option.palette.highlight().color())
+
+    @staticmethod
+    def _drawBorder(control, p, widget, col=None):
+        p.save()
+        try:
+            wind = widget.rect()
+            if control == QtWidgets.QStyle.CC_SpinBox:
+                # not sure why the border is off slightly
+                wind = wind.adjusted(0, 1, 0, -1)  # x1, y1 - x2, y2
+            elif control == QtWidgets.QStyle.CE_ItemViewItem:
+                # border is off because the border-width is outside the widget :|
+                wind = wind.adjusted(-1, -1, -1, -1)
+            # paint the new border
+            p.translate(0.5, 0.5)  # move to pixel-centre
+            p.setRenderHint(QtGui.QPainter.Antialiasing, True)
+            col = col or QtGui.QColor('red')
+            col.setAlpha(40)  # feint must be done first so that QSlider draws correctly
+            p.setPen(col)
+            p.drawRoundedRect(wind.adjusted(1, 1, -2, -2), 1.7, 1.7)
+            col.setAlpha(255)
+            p.setPen(col)
+            p.drawRoundedRect(wind.adjusted(0, 0, -1, -1), 2, 2)
+        except Exception:
+            ...
+        finally:
+            p.translate(-0.5, -0.5)
+            p.restore()
 
     def standardIcon(self, standardIcon, option=None, widget=None) -> QtGui.QIcon:
         # change the close-button of the line-edit to a cleaner icon, set by setClearButtonEnabled

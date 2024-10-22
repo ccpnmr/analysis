@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-21 19:52:34 +0100 (Mon, October 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-22 15:44:21 +0100 (Tue, October 22, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -695,7 +695,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         # Contours
         targets = """
-        _updateContours
+        _rebuildContours
         positiveContourBase positiveContourFactor positiveContourCount
         negativeContourBase negativeContourFactor negativeContourCount
         """.split()
@@ -859,7 +859,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
     def _spectrumChangedCallback(self, data):
         """Handle notifier for changes to spectrum
-        This can also be used after creation of new spectrumView
         """
         # NOTE:ED - this needs a better system to determine which notifiers affect the screen
         trigger = data[Notifier.TRIGGER]

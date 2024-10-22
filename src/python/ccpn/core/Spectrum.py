@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-21 19:52:34 +0100 (Mon, October 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-22 15:44:21 +0100 (Tue, October 22, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -173,9 +173,9 @@ class Spectrum(AbstractWrapperObject):
     _NEGATIVENOISELEVEL = 'negativeNoiseLevel'
 
     # A property for which the graphics machinery sets an OBSERVE notifier
-    # Code potentially affecting graphics can do: mySpectrum._updateContours = True,
-    # which will advance the _updateContours counter by one, triggering any callbacks
-    _updateContours = NotifierSignal('_updateContours')
+    # Code potentially affecting graphics can do: mySpectrum._rebuildContours = True,
+    # which will advance the _rebuildContours counter by one, triggering any callbacks
+    _rebuildContours = NotifierSignal('_rebuildContours')
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure
@@ -970,7 +970,7 @@ class Spectrum(AbstractWrapperObject):
                     )
 
     def _openFile(self, path: str, dataFormat: str, checkParameters: bool = True,
-                  dataSource=None, update=False) -> bool:
+                  dataSource=None, update=True) -> bool:
         """Open the spectrum as defined by path and dataFormat, creating a dataSource object.
 
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
@@ -1020,7 +1020,7 @@ class Spectrum(AbstractWrapperObject):
             _ = self.intensities
 
         if update:
-            self._updateContours = True
+            self._rebuildContours = True
 
         return True
 
@@ -1033,13 +1033,12 @@ class Spectrum(AbstractWrapperObject):
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
                      defaults to self.filePath.
         """
-        path = path or self.filePath
-
+        _path = path or self.filePath
         self._closeFile()
         if self._openFile(path=path, dataFormat=self.dataFormat, checkParameters=False, update=False):
             if self.dataSource is not None:
                 self.dataSource.exportToSpectrum(self, includePath=False)
-            self.updateContours = True
+            self._rebuildContours = True
 
     @property
     def path(self) -> Path:

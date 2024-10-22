@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-21 19:52:34 +0100 (Mon, October 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-22 15:44:21 +0100 (Tue, October 22, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -1239,6 +1239,8 @@ class NotifierSignal(property):
         return self.counter
 
     def _setter(self, instance, value):
+        """Any bool(value) == True will increment the counter and fire the notifiers
+        """
         if bool(value):
             self.counter += 1
             _callbackDict = {NotifierABC.ATTRIBUTE_NAME:self.name,

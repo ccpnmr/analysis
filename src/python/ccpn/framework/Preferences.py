@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-16 10:05:19 +0100 (Wed, October 16, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__dateModified__ = "$dateModified: 2024-10-22 18:24:16 +0100 (Tue, October 22, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,6 +42,7 @@ from ccpn.framework.PathsAndUrls import (userPreferencesPath,
                                          userPreferencesDirectory,
                                          defaultPreferencesPath)
 from ccpn.framework.Application import getApplication
+from ccpn.framework.Version import applicationVersion
 
 
 ARIA_PATH = 'externalPrograms.aria'
@@ -66,10 +67,12 @@ APPEARANCE = 'appearance'
 
 
 def getPreferences():
-    """Return the Preferences instance"""
+    """Return the Preferences instance
+    """
     if (app := getApplication()) is None:
         raise RuntimeError('getPreferences: application has not registered itself!')
     return app.preferences
+
 
 
 @singleton
@@ -78,7 +81,10 @@ class Preferences(AttrDict):
     implemented as a AttrDict-of-AttrDict-of-AttrDict
     """
 
-    def __init__(self, application, userPreferences=True):
+    def __init__(self, userPreferences:bool = True):
+        """Intitialise the Prefereence object.
+        :param userPreferences: flag to load user preferences
+        """
         super().__init__()
 
         # self._applicationVersion = str(application.applicationVersion) # removed to fix order of operations
@@ -94,7 +100,7 @@ class Preferences(AttrDict):
             self._getUserPreferences()
 
         # needs to be after user prefs are loaded as this is always true
-        self._applicationVersion = str(application.applicationVersion)
+        self._applicationVersion = str(applicationVersion)
         self._overrideDefaults(self)
         self._updateOldPrefs(self)
 

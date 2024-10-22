@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:48 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-11 13:07:55 +0100 (Wed, September 11, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -103,6 +104,9 @@ class Arguments:
     debug3_backup_thread = False
     skipUserPreferences = False
     projectPath = None
+    darkColourScheme = None
+    lightColourScheme = None
+
     _skipUpdates = False
 
     def __init__(self, projectPath=None, **kwds):
@@ -161,3 +165,54 @@ def defineProgramArguments():
     parser.add_argument('projectPath', nargs='?', help='Project path')
 
     return parser
+
+
+
+class _ApplicationProperties(object):
+    """Convenience class to have easy application derived properties
+    """
+    def __init__(self):
+        self._application = getApplication()
+
+    @property
+    def application(self):
+        """:return the Application instance
+        """
+        if self._application is None:
+            raise RuntimeError(f'Unable to retrieve application from {self}')
+        return self._application
+
+    @property
+    def project(self):
+        """:return the Project instance
+        """
+        if self._application is None:
+            raise RuntimeError(f'Unable to retrieve application from {self}')
+        return self._application.project
+
+    @property
+    def current(self):
+        """:return the Current instance
+        """
+        if self._application is None:
+            raise RuntimeError(f'Unable to retrieve application from {self}')
+        return self._application.current
+
+    @property
+    def mainWindow(self):
+        """:return the MainWindow instance or None
+        """
+        if self._application is None:
+            raise RuntimeError(f'Unable to retrieve application from {self}')
+        if self._application.hasGui:
+            return self.application.mainWindow
+        else:
+            return None
+
+    @property
+    def ui(self):
+        """:return the Ui instance
+        """
+        if self._application is None:
+            raise RuntimeError(f'Unable to retrieve application from {self}')
+        return self._application.ui

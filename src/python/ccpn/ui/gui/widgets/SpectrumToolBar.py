@@ -49,7 +49,7 @@ from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
-from ccpn.ui.gui.lib.GuiStripContextMenus import _SCMitem, ItemTypes, ITEM, _addMenuItems
+from ccpn.ui.gui.menus.StripContextMenus import _SCMitem, ItemTypes, ITEM, _addMenuItems
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.util import Colour
 
@@ -502,7 +502,6 @@ class SpectrumToolBar(ToolBar):
     def _setupAction(self, spectrumView):
         """Create and set up a new action attached to the spectrum
         """
-        import traceback
 
         spectrum = spectrumView.spectrum
         spectrumName = spectrum.name

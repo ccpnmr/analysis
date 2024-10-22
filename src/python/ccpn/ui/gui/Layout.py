@@ -33,20 +33,27 @@ import glob
 import json
 import sys
 from collections import OrderedDict as od
+from copy import deepcopy
+
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Logging import getLogger
-from ccpn.util.Path import aPath
-from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.util.Path import aPath, Path
+from ccpn.util.decorators import singleton
+# from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 
 from ccpn.framework.Application import ANALYSIS_ASSIGN
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY
+from ccpn.framework.Application import getApplication, _ApplicationProperties
 
 
 StateDirName = CCPN_STATE_DIRECTORY
-DefaultLayoutFileName = 'Layout.json'
+JSON_SUFFIX = '.json'
+defaultProjectFileName = 'Layout.json'
+
 Warning = "warning"
 WarningMessage = "Warning. Any changes in this file will be overwritten when saving a new layout."
+
 General = "general"
 ApplicationName = "applicationName"  # type: str
 ApplicationVersion = "applicationVersion"
@@ -59,7 +66,7 @@ LayoutState = "layoutState"
 TitleText = 'LayoutFile'
 Title = "Title"
 
-DefaultLayoutFile = {
+defaultLayoutDict = {
     Title           : TitleText,
     Warning         : WarningMessage,
     General         : {
@@ -71,75 +78,150 @@ DefaultLayoutFile = {
     GuiModules      : [],
     FileNames       : [],
     LayoutState     : {}
-    }
+}
 
 METADATA = '_metadata'
 MODULES = 'modules'
 
 
-def _createLayoutFile(application):
-    try:
-        if application.project.isReadOnly:
-            # project is read-only, don't create new file
-            return
-
-        path = aPath(application.statePath) / DefaultLayoutFileName
-
-        if General in DefaultLayoutFile:
-            if ApplicationName in DefaultLayoutFile[General]:
-                DefaultLayoutFile[General][ApplicationName] = application.applicationName
-            if ApplicationVersion in DefaultLayoutFile[General]:
-                DefaultLayoutFile[General][ApplicationVersion] = application.applicationVersion
-            if LayoutVersionName in DefaultLayoutFile[General]:
-                DefaultLayoutFile[General][LayoutVersionName] = LayoutVersion
-
-        with open(path, "w") as file:
-            json.dump(DefaultLayoutFile, file, sort_keys=False, indent=4, separators=(',', ': '))
-
-    except (PermissionError, FileNotFoundError):
-        getLogger().debug('Folder may be read-only')
-
-    except Exception as es:
-        getLogger().debug(f'Impossible to create a layout File {es}')
-
-
-def getLayoutFile(application):
-    """Return the path to the layout-file, file may not exist
+@singleton
+class ModuleLayout(_ApplicationProperties):
+    """Class holding module layout information
     """
-    path = aPath(application.statePath) / DefaultLayoutFileName
-    return path.asString()
+    def __init__(self):
+        super().__init__()
+        self.layout: dict = self.setDefaultLayout()
+
+    def setDefaultLayout(self) -> dict:
+        """Set the layout to the default
+        :return the default layout
+        """
+        self.layout = deepcopy(defaultLayoutDict)
+        self.updateDict()
+        return self.layout
+
+    def updateDict(self):
+        """Update the the dict with title, warning and general info
+        """
+        self.layout[Title] = TitleText
+        self.layout[Warning] = WarningMessage
+        self.layout.setdefault(General, {})
+        self.layout[General][ApplicationName] = self.application.applicationName
+        self.layout[General][ApplicationVersion] = self.application.applicationVersion
+        self.layout[General][LayoutVersionName] = LayoutVersion
+
+    def updateData(self):
+        """Update the dict with the actual data
+        """
+        self.layout[SpectrumDisplays] = _getSpectrumDisplaysState(self.mainWindow)
+        self.layout[LayoutState] = self.mainWindow.moduleArea.saveState()
+        self.layout[FileNames] = _updateFileNames(self.mainWindow)
+        self.layout[GuiModules]  = _updateGuiModules(self.mainWindow)
+
+    def loadFromJson(self, path: (str, Path)) -> dict:
+        """Load the layout from json file path
+        :param path: the path where to save
+        :return the layout dict
+        """
+        if not isinstance(path, (str, Path)):
+            raise TypeError(f'ModuleLayout.loadFromJson(): expected str or Path instance, got {type(path)}')
+
+        _path = aPath(path)
+        if _path.suffix != JSON_SUFFIX:
+            raise FileNotFoundError(f'ModuleLayout.loadFromJson(): expected json file, got {_path}')
+        if not _path.exists():
+            raise FileNotFoundError(f'ModuleLayout.loadFromJson(): {_path} does not exist')
+
+        with _path.open(mode='r') as fp:
+            self.layout = json.load(fp, object_hook=AttrDict)
+
+        return self.layout
+
+    def saveToJson(self, path: (str, Path)):
+        """Save the layout to json file path
+        :param path: the path where to save
+        """
+        if not isinstance(path, (str, Path)):
+            raise TypeError(f'ModuleLayout.loadFromJson(): expected str or Path instance, got {type(path)}')
+
+        _path = aPath(path).assureSuffix(JSON_SUFFIX)
+        _path.fetchParent()
+        self.updateDict()
+        self.updateData()
+        with _path.open(mode='w') as fp:
+            json.dump(self.layout, fp, sort_keys=False, indent=4, separators=(',', ': '))
+
+    def getProjectLayoutPath(self) -> Path:
+        """:return the project's default layout path
+        """
+        return self.project.statePath / defaultProjectFileName
 
 
-def fetchLayoutFile(application):
-    """Get teh current layout file.
-    Create folder as required
-    """
-    path = aPath(application.statePath) / DefaultLayoutFileName
-    if not path.exists():
-        _createLayoutFile(application)
-    return path.asString()
+# def _createLayoutFile(application):
+#     try:
+#         if application.project.isReadOnly:
+#             # project is read-only, don't create new file
+#             return
+#
+#         path = aPath(application.statePath) / defaultProjectFileName
+#
+#         if General in defaultLayoutDict:
+#             if ApplicationName in defaultLayoutDict[General]:
+#                 defaultLayoutDict[General][ApplicationName] = application.applicationName
+#             if ApplicationVersion in defaultLayoutDict[General]:
+#                 defaultLayoutDict[General][ApplicationVersion] = application.applicationVersion
+#             if LayoutVersionName in defaultLayoutDict[General]:
+#                 defaultLayoutDict[General][LayoutVersionName] = LayoutVersion
+#
+#         with open(path, "w") as file:
+#             json.dump(defaultLayoutDict, file, sort_keys=False, indent=4, separators=(',', ': '))
+#
+#     except (PermissionError, FileNotFoundError):
+#         getLogger().debug('Folder may be read-only')
+#
+#     except Exception as es:
+#         getLogger().debug(f'Impossible to create a layout File {es}')
 
 
-def _updateGeneral(mainWindow, layout):
-    application = mainWindow.application
-    applicationName = application.applicationName
-    applicationVersion = application.applicationVersion
-    if General in layout:
-        general = layout.get(General)  #getattr(layout, General)
-        if ApplicationName in general:
-            # setattr(general, ApplicationName, applicationName)
-            general[ApplicationName] = applicationName
-        if ApplicationVersion in general:
-            # setattr(general, ApplicationVersion, applicationVersion)
-            general[ApplicationVersion] = applicationVersion
+# def getLayoutFile(application):
+#     """Return the path to the layout-file, file may not exist
+#     """
+#     path = aPath(application.statePath) / defaultProjectFileName
+#     return path.asString()
 
 
-def _updateFileNames(mainWindow, layout):
+# def fetchLayoutFile(application):
+#     """Get teh current layout file.
+#     Create folder as required
+#     """
+#     path = aPath(application.statePath) / defaultProjectFileName
+#     if not path.exists():
+#         _createLayoutFile(application)
+#     return path.asString()
+
+
+# def _updateGeneral(mainWindow, layout):
+#     application = mainWindow.application
+#     applicationName = application.applicationName
+#     applicationVersion = application.applicationVersion
+#     if General in layout:
+#         general = layout.get(General)  #getattr(layout, General)
+#         if ApplicationName in general:
+#             # setattr(general, ApplicationName, applicationName)
+#             general[ApplicationName] = applicationName
+#         if ApplicationVersion in general:
+#             # setattr(general, ApplicationVersion, applicationVersion)
+#             general[ApplicationVersion] = applicationVersion
+
+
+def _updateFileNames(mainWindow) -> list:
     """
     :param mainWindow:
-    :param layout:
-    :return: #updates the fileNames needed for importing the module. list of file name from the full path
+    :return: the list with fileNames needed for importing the module.
     """
+    # local import to avoid cycles
+    from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
+
     guiModules = mainWindow.moduleArea.ccpnModules
     names = set()
     for guiModule in guiModules:
@@ -149,110 +231,112 @@ def _updateFileNames(mainWindow, layout):
                 file = pyModule.__file__
                 if file:
                     names.add(aPath(file).basename)
+    return list(names)
 
-    if len(names) > 0:
-        if FileNames in layout:
-            # setattr(layout, FileNames, list(names))
-            layout[FileNames] = list(names)
+    # if len(names) > 0:
+    #     if FileNames in layout:
+    #         # setattr(layout, FileNames, list(names))
+    #         layout[FileNames] = list(names)
 
 
-def _updateGuiModules(mainWindow, layout):
+def _updateGuiModules(mainWindow) -> list[tuple]:
     """
-
     :param mainWindow:
-    :param layout:
     :return: #updates classNameModuleNameTupleList on layout with list of tuples [(className, ModuleName), (className, ModuleName)]
     list of tuples because a multiple modules of the same class type can exist. E.g. two peakListTable modules!
     """
     guiModules = mainWindow.moduleArea.ccpnModules
 
-    classNames_ModuleNames = []  #list of tuples [(className, ModuleName), (className, ModuleName)]
+    result = []  #list of tuples [(className, ModuleName), (className, ModuleName)]
     for module in guiModules:
         # if not isinstance(module, GuiSpectrumDisplay): # Displays are not stored here but in the DataModel
         if not module.isHidden():
-            classNames_ModuleNames.append((module.name(), module.className))
+            result.append((module.name(), module.className))
 
-    if GuiModules in layout:
-        # if ClassNameModuleName in layout.guiModules:
-        #     setattr(layout.guiModules, ClassNameModuleName, classNames_ModuleNames )
-        layout[GuiModules] = classNames_ModuleNames
-        # setattr(layout, GuiModules, classNames_ModuleNames)
+    return result
 
-
-def _updateLayoutState(mainWindow, layout):
-    if LayoutState in layout:
-        # setattr(layout, LayoutState, mainWindow.moduleArea.saveState())
-        layout[LayoutState] = mainWindow.moduleArea.saveState()
+    # if GuiModules in layout:
+    #     # if ClassNameModuleName in layout.guiModules:
+    #     #     setattr(layout.guiModules, ClassNameModuleName, classNames_ModuleNames )
+    #     layout[GuiModules] = classNames_ModuleNames
+    #     # setattr(layout, GuiModules, classNames_ModuleNames)
 
 
-def _updateSpectrumDisplays(mainWindow, layout):
-    sds = _getSpectrumDisplaysState(mainWindow.project.spectrumDisplays)
-    layout[SpectrumDisplays] = sds
+# def _updateLayoutState(mainWindow, layout):
+#     if LayoutState in layout:
+#         # setattr(layout, LayoutState, mainWindow.moduleArea.saveState())
+#         layout[LayoutState] = mainWindow.moduleArea.saveState()
 
 
-def _updateWarning(mainWindow, layout):
-    if Warning in layout:
-        # setattr(layout, Warning, WarningMessage)
-        layout[Warning] = WarningMessage
+# def _updateSpectrumDisplays(mainWindow, layout):
+#     sds = _getSpectrumDisplaysState(mainWindow.project.spectrumDisplays)
+#     layout[SpectrumDisplays] = sds
 
 
-def _checkLayoutFormat(mainWindow, layout):
-    if not isinstance(layout, dict):
-        # assume that this is a 'future' format and remove metadata
-        getLogger().warning('Layout is not the correct format, converting to a dict')
-
-        newLayout = DefaultLayoutFile.copy()
-        if General in newLayout:
-            if ApplicationName in newLayout[General]:
-                newLayout[General][ApplicationName] = mainWindow.application.applicationName
-            if ApplicationVersion in newLayout[General]:
-                newLayout[General][ApplicationVersion] = mainWindow.application.applicationVersion
-
-        mainWindow.application.layout = newLayout
-
-    return mainWindow.application.layout
+# def _updateWarning(mainWindow, layout):
+#     if Warning in layout:
+#         # setattr(layout, Warning, WarningMessage)
+#         layout[Warning] = WarningMessage
 
 
-def updateSavedLayout(mainWindow):
-    """
-    Updates the application.layout Dict
-    :param mainWindow: needed to get application
-    :return: an up to date layout dictionary with the current state of GuiModules
-    """
-    layout = mainWindow.application.layout
-    layout = _checkLayoutFormat(mainWindow, layout)
+# def _checkLayoutFormat(mainWindow, layout):
+#
+#     if not isinstance(layout, dict):
+#         # assume that this is a 'future' format and remove metadata
+#         getLogger().warning('Layout is not the correct format, converting to a dict')
+#
+#         newLayout = defaultLayoutDict.copy()
+#         if General in newLayout:
+#             if ApplicationName in newLayout[General]:
+#                 newLayout[General][ApplicationName] = mainWindow.application.applicationName
+#             if ApplicationVersion in newLayout[General]:
+#                 newLayout[General][ApplicationVersion] = mainWindow.application.applicationVersion
+#
+#         _setLayout(newLayout)
+#
+#     return _getLayout()
 
-    _updateGeneral(mainWindow, layout)
-    _updateSpectrumDisplays(mainWindow, layout)
-    _updateFileNames(mainWindow, layout)
-    _updateGuiModules(mainWindow, layout)
-    _updateLayoutState(mainWindow, layout)
-    _updateWarning(mainWindow, layout)
 
-
-def saveLayoutToJson(mainWindow, jsonFilePath=None):
-    """
-    :param mainWindow:
-    :param jsonFilePath: User defined file path where to save the layout. Default is in .ccpn/layout/v3Layout.json
-    :return: None
-    """
-    try:
-        if mainWindow.application.project.isReadOnly:
-            getLogger().debug('SaveLayout skipped: Project is read-only')
-
-        updateSavedLayout(mainWindow)
-        layout = mainWindow.application.layout
-        if not jsonFilePath:
-            jsonFilePath = fetchLayoutFile(mainWindow.application)
-
-        with open(jsonFilePath, "w") as file:
-            json.dump(layout, file, sort_keys=False, indent=4, separators=(',', ': '))
-
-    except (PermissionError, FileNotFoundError):
-        getLogger().debug('Folder may be read-only')
-
-    except Exception as e:
-        getLogger().debug(f'Error saving Layout to "{jsonFilePath}":  {e}')
+# def updateSavedLayout(mainWindow):
+#     """
+#     Updates the layout Dict
+#     :param mainWindow: needed to get application
+#     :return: an up to date layout dictionary with the current state of GuiModules
+#     """
+#     layout = _getLayout()
+#     layout = _checkLayoutFormat(mainWindow, layout)
+#
+#     _updateGeneral(mainWindow, layout)
+#     _updateSpectrumDisplays(mainWindow, layout)
+#     _updateFileNames(mainWindow, layout)
+#     _updateGuiModules(mainWindow, layout)
+#     _updateLayoutState(mainWindow, layout)
+#     _updateWarning(mainWindow, layout)
+#
+#
+# def saveLayoutToJson(mainWindow, jsonFilePath=None):
+#     """
+#     :param mainWindow:
+#     :param jsonFilePath: User defined file path where to save the layout. Default is in .ccpn/layout/v3Layout.json
+#     :return: None
+#     """
+#     try:
+#         if mainWindow.application.project.isReadOnly:
+#             getLogger().debug('SaveLayout skipped: Project is read-only')
+#
+#         updateSavedLayout(mainWindow)
+#         layout = _getLayout()
+#         if not jsonFilePath:
+#             jsonFilePath = fetchLayoutFile(mainWindow.application)
+#
+#         with open(jsonFilePath, "w") as file:
+#             json.dump(layout, file, sort_keys=False, indent=4, separators=(',', ': '))
+#
+#     except (PermissionError, FileNotFoundError):
+#         getLogger().debug('Folder may be read-only')
+#
+#     except Exception as e:
+#         getLogger().debug(f'Error saving Layout to "{jsonFilePath}":  {e}')
 
 
 def _ccpnModulesImporter(path, neededModules):
@@ -414,22 +498,28 @@ def _getModuleNamesFromState(layoutState):
 
 def _openSpectrumDisplays(mainWindow, spectrumDisplaysState):
     """
-
     """
     project = mainWindow.project
     with undoStackBlocking() as _:  # Do not add to undo/redo stack
+
         for dd in spectrumDisplaysState:
+
             spectrumDisplayKeys = ["displayAxisCodes", "axisOrder", "title",
                                    "positions", "widths", "units", "stripDirection", "is1D"]
             fd = {i: dd.get(i) for i in spectrumDisplayKeys}
+
             spectraPids = dd.get("spectra")
             spectra = [project.getByPid(p) for p in spectraPids if project.getByPid(p)]
+
             stripsZoomStates = dd.get("stripsZoomStates")
+
             if len(spectra) > 0:
-                sd = mainWindow.newSpectrumDisplay(spectra[0], axisCodes=fd.get('displayAxisCodes'),
+                sd = mainWindow.newSpectrumDisplay(spectra[0],
+                                                   axisCodes=fd.get('displayAxisCodes'),
                                                    stripDirection=fd.get('stripDirection'))
                 for sp in spectra[1:]:
                     sd.displaySpectrum(sp)
+
                 if len(stripsZoomStates) > 0:
                     if len(sd.strips) > 0:
                         sd.strips[0].restoreZoomFromState(stripsZoomStates[0])
@@ -437,16 +527,13 @@ def _openSpectrumDisplays(mainWindow, spectrumDisplaysState):
                             newStrip = sd.addStrip()
                             newStrip.restoreZoomFromState(stripState)
             else:
-                project.newSpectrumDisplay(axisCodes=fd.get('displayAxisCodes'),
-                                           stripDirection=fd.get('stripDirection'))
+                mainWindow.newSpectrumDisplay(axisCodes=fd.get('displayAxisCodes'),
+                                              stripDirection=fd.get('stripDirection'))
 
 
-def restoreLayout(mainWindow, layout, restoreSpectrumDisplay=False):
-    ## import all the ccpnModules classes specific for the application.
-    # mainWindow.moduleArea._closeAll()
+def restoreLayout(mainWindow, layout, restoreSpectrumDisplays=False):
 
-    layout = _checkLayoutFormat(mainWindow, layout)
-    if restoreSpectrumDisplay:
+    if restoreSpectrumDisplays:
         if SpectrumDisplays in layout:
             _openSpectrumDisplays(mainWindow, layout[SpectrumDisplays])
 
@@ -482,9 +569,9 @@ def restoreLayout(mainWindow, layout, restoreSpectrumDisplay=False):
         # Very important step:
         # Checks if the all the modules opened are present in the layout state. If not, will not restore the geometries
         state = layout.get(LayoutState)  # getattr(layout, LayoutState)
-
         if not state:
             return
+
         namesFromState = _getModuleNamesFromState(state)
         openedModulesName = [i.name() for i in mainWindow.moduleArea.ccpnModules]
         compare = list(set(namesFromState) & set(openedModulesName))
@@ -499,45 +586,49 @@ def restoreLayout(mainWindow, layout, restoreSpectrumDisplay=False):
                 getLogger().debug2("Layout error: Some of the modules are missing. Geometries could not be restored")
 
 
-def _getSpectrumDisplaysState(spectrumDisplays):
+def _getSpectrumDisplaysState(mainWindow):
     """
     :return: list of dict with serialisable attributes needed to restore the SpDisplay status
     AbstractWrapperClasses will be converted as pid, EG spectrumDisplay.spectra
     """
     ll = []
-    for spectrumDisplay in spectrumDisplays:
+    for spectrumDisplay in mainWindow.spectrumDisplays:
+
         dd = spectrumDisplay.getAsDict()
         stripDirection = dd.get("stripArrangement")
         axisCodes = dd.get("axisCodes")
         spectrumDisplayKeys = ["longPid", "axisOrder", "title", "positions", "widths", "units", "is1D"]
         fd = {i: dd.get(i) for i in spectrumDisplayKeys}
+
         fd.update({'stripDirection': stripDirection})
         fd.update({'displayAxisCodes': axisCodes})
         fd.update({'spectra': [sp.pid for sp in spectrumDisplay._getSpectra()]})
-        # strips informations
+        # strips information
         stripsZoomStates = [strip.zoomState for strip in spectrumDisplay.strips]
         fd.update({"stripsZoomStates": stripsZoomStates})
+
         ll.append(fd)
+
     return ll
 
 
-def _getFileNameFromPath(path):
-    name = aPath(path).basename
-    return name
+# def _getFileNameFromPath(path):
+#     name = aPath(path).basename
+#     return name
 
 
-def _getLayouts(dirPath):
-    """:return a list of all pre-defined layouts in dirPath as path instances
-    :param dirPath: directory to use;
-    """
-    if dirPath is None:
-        raise ValueError(f'Undefined dirPath')
-
-    dirPath = aPath(dirPath)
-    if not dirPath.exists():
-        raise FileNotFoundError(f'{dirPath} does not exist')
-
-    return list(dirPath.glob('*.json'))
+# def _getLayouts(dirPath):
+#     """:return a list of all pre-defined layouts in dirPath as path instances
+#     :param dirPath: directory to use;
+#     """
+#     if dirPath is None:
+#         raise ValueError(f'Undefined dirPath')
+#
+#     dirPath = aPath(dirPath)
+#     if not dirPath.exists():
+#         raise FileNotFoundError(f'{dirPath} does not exist')
+#
+#     return list(dirPath.glob('*.json'))
 
 
 def _getPredefinedLayouts(dirPath=None) -> list:
@@ -548,25 +639,25 @@ def _getPredefinedLayouts(dirPath=None) -> list:
 
     if dirPath is None:
         dirPath = predefinedLayouts
-    return _getLayouts(dirPath)
 
-    # # path has to finish with /
-    # sp = (aPath(dirPath) / '*.json').asString()
-    # layoutsFiles = glob.glob(sp)
-    # return layoutsFiles
+    if not dirPath.exists():
+        raise FileNotFoundError(f'{dirPath} does not exist')
 
-
-def _dictLayoutsNamePath(paths):
-    dd = od()
-    for path in paths:
-        name = _getFileNameFromPath(path)
-        dd[name] = path
-    return dd
+    return list(dirPath.glob('*.json'))
 
 
-def isLayoutFile(filePath):
-    with open(filePath) as fp:
-        layout = json.load(fp, object_hook=AttrDict)
-        if layout.get(LayoutState):
-            return True
-    return False
+
+# def _dictLayoutsNamePath(paths):
+#     dd = od()
+#     for path in paths:
+#         name = _getFileNameFromPath(path)
+#         dd[name] = path
+#     return dd
+
+#
+# def isLayoutFile(filePath):
+#     with open(filePath) as fp:
+#         layout = json.load(fp, object_hook=AttrDict)
+#         if layout.get(LayoutState):
+#             return True
+#     return False

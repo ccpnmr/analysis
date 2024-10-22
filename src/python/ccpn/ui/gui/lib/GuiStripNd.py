@@ -55,7 +55,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
-from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
+from ccpn.ui.gui.menus.StripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
     _getNdIntegralMenu, _getNdMultipletMenu, _getNdAxisMenu
 from ccpn.ui.gui.lib.StripLib import copyStripAxisPositionsAndWidths
 from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes

@@ -1,77 +1,102 @@
-
-import sys
 import os
-import typing
-import re
-import platform
 import subprocess
+import platform
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from ccpn.core.Project import Project
-
-from ccpn.framework.Application import getApplication
-from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_SAVEAS_SUB_DIRECTORIES
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import _checkPathForDataLoader
-
-from ccpn.core.lib.ContextManagers import notificationEchoBlocking, catchExceptions, \
-    logCommandManager, undoStackBlocking
-
-from ccpn.ui.Ui import Ui
-from ccpn.ui.gui import Layout
-from ccpn.ui.gui.Menus import getMenuDefs
-
-from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
-from ccpn.ui.gui.widgets.Application import Application
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets import FileDialog
-from ccpn.ui.gui.widgets.Font import getSystemFonts
-from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
+from ccpn.ui.gui.widgets.Application import Application as PyQtApplication
 
 # This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
 from ccpn.ui.gui.guiSettings import FontSettings, consoleStyle
-from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.util.Logging import getLogger
-from ccpn.util import Logging
-from ccpn.util import Register
-from ccpn.util.Path import aPath, Path
+from ccpn.util.Path import aPath
 from ccpn.util.decorators import logCommand
 
+from ccpn.ui.gui.guiSettings import LIGHT, DARK
 
 
-class _Gui(object):
+
+class _Gui_V3_V4(object):
     """
     All methods, to be retained for a 4.x refactored version
     """
 
+    def _initQtApp(self) -> PyQtApplication:
+        # On the Mac (at least) it does not matter what you set the applicationName to be,
+        # it will come out as the executable you are running (e.g. "python3")
+
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+
+        # NOTE:ED - this is essential for multi-window applications
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, True)
+
+        # fm = QtGui.QSurfaceFormat()
+        # fm.setSamples(4)
+        # # NOTE:ED - Do not do this, they cause QT to exhibit strange behaviour
+        # # fm.setSwapInterval(0)  # disable VSync
+        # # fm.setSwapBehavior(QtGui.QSurfaceFormat.DoubleBuffer)
+        # QtGui.QSurfaceFormat.setDefaultFormat(fm)
+
+        _qtApp = PyQtApplication(self.application.applicationName,
+                                 self.application.applicationVersion,
+                                 organizationName='CCPN',
+                                 organizationDomain='ccpn.ac.uk'
+                                )
+
+        # patch for icon sizes in menus, etc.
+        styles = QtWidgets.QStyleFactory()
+        myStyle = _MyAppProxyStyle(styles.create('fusion'))
+        _qtApp.setStyle(myStyle)
+
+        return _qtApp
+
+    def _getMenuDefs(self):
+        """:return the MenuDefs instance
+        Subclassed for modification in various AnalysisAssign, AnalysisScreen, ... programmes
+        """
+        from ccpn.ui.gui.menus.MenuDefs import getMenuDefs
+        return getMenuDefs()
+
+    def _getColourScheme(self) -> str:
+        """get the colourScheme as determined by arguments --dark, --light or preferences
+        """
+        _app = self.application
+        if _app.args.darkColourScheme:
+            colourScheme = DARK
+        elif _app.args.lightColourScheme:
+            colourScheme = LIGHT
+        else:
+            colourScheme = _app.preferences.general.colourScheme
+
+        if colourScheme is None:
+            raise RuntimeError('invalid colourScheme')
+
+        return colourScheme
+
+    def _getStyleSheet(self, colourScheme: str) -> str:
+        """Get the stylesheet
+        """
+        from ccpn.framework.PathsAndUrls import widgetsPath
+
+        _qssPath = widgetsPath / ('%sStyleSheet.qss' % colourScheme.capitalize())
+        with _qssPath.open(mode='r') as fp:
+            styleSheet = fp.read()
+
+        if platform.system() == 'Linux':
+            _qssPath = widgetsPath / ('%sAdditionsLinux.qss' % colourScheme.capitalize())
+            with _qssPath.open(mode='r') as fp:
+                additions = fp.read()
+            styleSheet += additions
+
+        return styleSheet
 
     #-----------------------------------------------------------------------------------------
     # Spectrum
     #-----------------------------------------------------------------------------------------
-
-    @logCommand('ui.')
-    def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
-        """Make a strip plot from peaks or nmrChains
-        """
-        if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:
-            getLogger().warning('Cannot make strip plot, nothing to display')
-            MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
-            return
-
-        if self.current.strip is None or self.current.strip.isDeleted:
-            MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
-            return
-
-        from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
-        popup = StripPlotPopup(parent=self.mainWindow, mainWindow=self.mainWindow,
-                               spectrumDisplay=self.current.strip.spectrumDisplay,
-                               includePeakLists=includePeakLists,
-                               includeNmrChains=includeNmrChains,
-                               includeNmrChainPullSelection=includeNmrChainPullSelection,
-                               includeSpectrumTable=False)
-        popup.exec_()
 
     def _flipArbitraryAxes(self, strip, usePosition=False):
         """Flip arbitrary axes of strip (defaults to current.strip)
@@ -187,3 +212,27 @@ class _Gui(object):
     def _showCCPNVideos(self):
         from ccpn.framework.PathsAndUrls import ccpnVideos
         self._showHtmlFile('Video Tutorials', ccpnVideos)
+
+
+#=========================================================================================
+# _MyAppProxyStyle
+#=========================================================================================
+
+class _MyAppProxyStyle(QtWidgets.QProxyStyle):
+    """Class to handle resizing icons in menus
+    """
+
+    def drawControl(self, element, option, painter, widget=None):
+        if (element in {QtWidgets.QStyle.CE_MenuItem} and isinstance(option, QtWidgets.QStyleOptionMenuItem) and
+                (_actionGeometries := getattr(widget, '_actionGeometries', None)) and
+                (action := _actionGeometries.get(str(option.rect))) and
+                (colour := getattr(action, '_foregroundColour', None))):
+            # Customise the foreground colour for the menu-item from the QAction
+            option.palette.setColor(option.palette.Text, colour)
+        return super().drawControl(element, option, painter, widget)
+
+    def standardIcon(self, standardIcon, option=None, widget=None) -> QtGui.QIcon:
+        # change the close-button of the line-edit to a cleaner icon, set by setClearButtonEnabled
+        if standardIcon == QtWidgets.QStyle.SP_LineEditClearButton:
+            return Icon('icons/close-lineedit')
+        return super().standardIcon(standardIcon, option, widget)

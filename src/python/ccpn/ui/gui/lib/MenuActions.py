@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:23:56 +0100 (Fri, August 23, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-12 11:48:51 +0100 (Thu, September 12, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -407,7 +407,8 @@ class OpenItemABC:
     objectArgumentName = 'obj'  # argument name set to obj passed to openItemClass instantiation
     objectClassName = None
     openItemDirectMethod = None  # parent argument name set to obj passed to openItemClass instantiation when useParent==True
-    useApplication = True
+    useApplication = True  # use application.`openItemMethod`
+    useUi = False   # use ui.`openItemMethod`
     hasOpenMethod = True
     contextMenuText = 'Open as a Module'
 
@@ -432,8 +433,8 @@ class OpenItemABC:
                      : if false, use openItemDirectMethod for opening object in ccpnModuleArea
         useNone: set obj to None
         """
-        if self.useApplication is False and self.openItemDirectMethod is None:
-            raise RuntimeError(f'useApplication==False requires definition of openItemDirectMethod ({self})')
+        if not (self.useApplication or self.useUi) and self.openItemDirectMethod is None:
+            raise RuntimeError(f'useApplication==False and self.useUi==False requires definition of openItemDirectMethod ({self})')
 
         self.objectClassName = self.objectArgumentName[0].upper() + self.objectArgumentName[1:]
         self.useNone = useNone
@@ -487,13 +488,16 @@ class OpenItemABC:
             openableObjs = objs
 
         if self.hasOpenMethod and openableObjs:
+            func = None
             if self.useApplication:
-                func = getattr(self.application, self.openItemMethod)
+                func = getattr(self.application, self.openItemMethod, None)
+            elif self.useUi:
+                func = getattr(self.application.ui, self.openItemMethod, None)
             else:
                 func = self.openItemDirectMethod
 
             if func is None:
-                raise RuntimeError(f'Undefined function; cannot open object ({dataPid})')
+                raise RuntimeError(f'{self.__class__.__name__}: No function defined to open object <{dataPid}>')
 
             self.openAction = partial(func, **self.kwds)
 
@@ -890,7 +894,13 @@ class AddToCollectionPopup(SpeechBalloon):
 
 
 class _openItemChemicalShiftListTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showChemicalShiftTable'
+
+    # from ccpn.ui.gui.Gui import Gui
+    # openItemDirectMethod = Gui.showChemicalShiftTable
+
     objectArgumentName = 'chemicalShiftList'
 
     def _openContextMenu(self, parentWidget, position, thisObj, objs, deferExec=False):
@@ -962,16 +972,22 @@ class _openItemChemicalShiftListTable(OpenItemABC):
 
 
 class _openItemPeakListTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showPeakTable'
     objectArgumentName = 'peakList'
 
 
 class _openItemIntegralListTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showIntegralTable'
     objectArgumentName = 'integralList'
 
 
 class _openItemMultipletListTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showMultipletTable'
     objectArgumentName = 'multipletList'
 
@@ -1021,6 +1037,8 @@ class _openItemNmrClass(OpenItemABC):
 
 
 class _openItemNmrChainTable(_openItemNmrClass):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showNmrResidueTable'
     objectArgumentName = 'nmrChain'
 
@@ -1094,6 +1112,8 @@ class _openItemAtomItem(OpenItemABC):
 
 
 class _openItemChainTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showResidueTable'
     objectArgumentName = 'chain'
 
@@ -1160,11 +1180,15 @@ class _openItemResidueTable(OpenItemABC):
 
 
 class _openItemNoteTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showNotesEditor'
     objectArgumentName = 'note'
 
 
 class _openItemRestraintTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showRestraintTable'
     objectArgumentName = 'restraintTable'
 
@@ -1412,16 +1436,22 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
 
 
 class _openItemStructureEnsembleTable(OpenItemABC):
-    openItemMethod = 'showStructureTable'
+    useApplication = False
+    useUi = True
+    openItemMethod = 'showStructureEnsembleTable'
     objectArgumentName = 'structureEnsemble'
 
 
 class _openItemDataTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showDataTable'
     objectArgumentName = 'dataTable'
 
 
 class _openItemViolationTable(OpenItemABC):
+    useApplication = False
+    useUi = True
     openItemMethod = 'showViolationTable'
     objectArgumentName = 'violationTable'
 

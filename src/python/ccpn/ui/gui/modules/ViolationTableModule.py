@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-21 19:48:44 +0100 (Fri, June 21, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-11 14:59:18 +0100 (Wed, September 11, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -70,7 +70,7 @@ class ViolationTableModule(CcpnTableModule):
     className = 'ViolationTableModule'
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
-    settingsPosition = 'top'
+    settingsPosition = 'left'
     _allowRename = True
     activePulldownClass = KlassTable
     _includeInLastSeen = False
@@ -96,7 +96,7 @@ class ViolationTableModule(CcpnTableModule):
         self._setCallbacks()
 
         if table is not None:
-            self._selectTable(table)
+            self.selectTable(table)
         elif selectFirstItem:
             self._modulePulldown.selectFirstItem()
 
@@ -296,7 +296,7 @@ class ViolationTableModule(CcpnTableModule):
 
         super()._closeModule()
 
-    def _selectTable(self, table=None):
+    def selectTable(self, table=None):
         """
         Manually select a ViolationTable from the pullDown
         """

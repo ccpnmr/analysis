@@ -116,9 +116,9 @@ import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from ccpn.ui.gui.lib.ModuleLib import getBlockingDialogs
-from ccpn.ui.gui.lib.GuiStripContextMenus import (_hidePeaksSingleActionItems, _hideMultipletsSingleActionItems,
-                                                  _setEnabledAllItems, _ARRANGELABELS,
-                                                  _RESETLABELS)
+from ccpn.ui.gui.menus.StripContextMenus import (_hidePeaksSingleActionItems, _hideMultipletsSingleActionItems,
+                                                 _setEnabledAllItems, _ARRANGELABELS,
+                                                 _RESETLABELS)
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking, undoStackBlocking
 from ccpn.core.lib.Notifiers import Notifier

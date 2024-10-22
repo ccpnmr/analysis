@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: eliza $"
-__dateModified__ = "$dateModified: 2023-12-15 12:43:32 +0000 (Fri, December 15, 2023) $"
-__version__ = "$Revision: 3.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-11 10:39:22 +0100 (Wed, September 11, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -407,8 +408,9 @@ class EnsembleData(DataFrameABC):
         """
         dfs = mmcif2df(filename)
 
-        print(dfs.head())
-        print(dfs.dtypes)
+        # print('>>> from_mmcif >>>')
+        # print(dfs.head())
+        # print(dfs.dtypes)
 
         ensemble = cls()
 
@@ -432,9 +434,8 @@ class EnsembleData(DataFrameABC):
         ensemble['nmrAtomName'] = None
         ensemble['comment'] = None
 
-        print(ensemble.head())
-        print(ensemble.dtypes)
-
+        # print(ensemble.head())
+        # print(ensemble.dtypes)
 
         return cls(ensemble)
 
@@ -578,7 +579,8 @@ def mmcif2df(filename: str) -> pd.DataFrame:
     atomData = []
     loop_ = False
     _atom_siteLoop = False
-    print(filename)
+
+    # print(f'>>> {mmcif2df}: {filename}')
     with open(filename) as f:
         for l in f:
             l = l.strip()
@@ -602,11 +604,7 @@ def mmcif2df(filename: str) -> pd.DataFrame:
     df['idx'] = numpy.arange(1, df.shape[0] + 1)  # Create an 'idx' column
     df.set_index('idx', inplace=True)  # Set 'idx' as the index
 
-
     return df
-
-
-
 
 
 def _pdbStringToDf(modelLines: list, modelNumber=1):

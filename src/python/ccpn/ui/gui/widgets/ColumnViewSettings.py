@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:24 +0100 (Thu, April 04, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-08-19 13:56:37 +0100 (Mon, August 19, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -54,8 +55,10 @@ class ColumnViewSettingsPopup(CcpnDialogMainWidget):
         self.setCloseButton(callback=self._close, tipText='Close')
         self.setDefaultButton(self.CLOSEBUTTON)
 
-    def getHiddenColumns(self):
-        return self.widgetColumnViewSettings.hiddenColumns
+    def getHiddenColumns(self) -> list:
+        # GWV had attribute errors. patched it and says FIXME
+        _collumns = getattr(self.widgetColumnViewSettings, 'hiddenColumns', [])
+        return _collumns
 
     # def setHiddenColumns(self, texts):
     #     self.widgetColumnViewSettings._hiddenColumns = texts
@@ -127,7 +130,8 @@ class ColumnViewSettings(Frame):
     def _initCheckBoxes(self):
         i = 1
         if columns := list(self._df.columns):
-            hiddenColumns = self.tableHandler.hiddenColumns or []
+            # gwv had attribute errors; patched and says FIXME
+            hiddenColumns = getattr(self.tableHandler, 'hiddenColumns', [])
 
             for i, colum in enumerate(columns):
 

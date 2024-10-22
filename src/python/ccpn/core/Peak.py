@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-10 15:45:25 +0100 (Thu, October 10, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-20 17:14:07 +0100 (Sun, October 20, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -303,7 +303,8 @@ class Peak(AbstractWrapperObject):
 
     @property
     def position(self) -> Tuple[float, ...]:
-        """Peak position in ppm (or other relevant unit) in dimension order."""
+        """Peak position in ppm (or other relevant unit) in dimension order.
+        """
         return tuple(x.value for x in self._wrappedData.sortedPeakDims())
 
     @position.setter
@@ -847,14 +848,15 @@ class Peak(AbstractWrapperObject):
     listtuple = list[str | NmrAtom | None | nmrSeq] | tuple[str | NmrAtom | None | nmrSeq, ...] | None
 
     @logCommand(get='self')
-    def assignDimension(self, axisCode: list[str] | tuple[str, ...],
+    def assignDimension(self,
+                        axisCode: list[str] | tuple[str, ...],
                         value: nmrSeq | None = None):
         """Assign dimension with axisCode to value (NmrAtom, or Pid or sequence of either, or None).
         """
 
         axisCodes = self.spectrum.axisCodes
         try:
-            axis = axisCodes.index(axisCode)
+            dimIndex = axisCodes.index(axisCode)
         except ValueError:
             raise ValueError(f"axisCode {axisCode} not recognised") from None
 
@@ -869,12 +871,12 @@ class Peak(AbstractWrapperObject):
         if not all(isinstance(val, NmrAtom) for val in value):
             raise TypeError(f'{self.__class__.__name__}.assignDimension: value contains bad objects {value}')
         dimensionNmrAtoms = list(self.dimensionNmrAtoms)
-        dimensionNmrAtoms[axis] = value
+        dimensionNmrAtoms[dimIndex] = value
 
         with undoBlockWithoutSideBar():
             # set all the nmrAtoms
             self.dimensionNmrAtoms = dimensionNmrAtoms
-            dimIso = self.spectrum.isotopeCodes[axis]
+            dimIso = self.spectrum.isotopeCodes[dimIndex]
             # isotopeCode. if not defined, assign to the nmrAtoms from the spectrum isotopeCodes
             for nmrAtm in value:
                 if nmrAtm.isotopeCode in [UnknownIsotopeCode, self._UNKNOWN_VALUE_STRING, None]:
@@ -1119,10 +1121,13 @@ class Peak(AbstractWrapperObject):
         if self.isDeleted:
             return f"<{self.pid}>"
         _digits = {'1H': 3, '15N': 2, '13C': 2, '19F': 3}
-        # _digits.get(iCode,2)
-        ppms = tuple(round(p, _digits.get(iCode, 2)) if p is not None else None
-                     for p, iCode in zip(self.ppmPositions, self.spectrum.isotopeCodes))
-        return f"<{self.pid}: @{ppms!r}>"
+        # GWV fixing odd error
+        if not self.isDeleted:
+            ppms = tuple(round(p, _digits.get(iCode, 2)) if p is not None else None
+                         for p, iCode in zip(self.ppmPositions, self.spectrum.isotopeCodes))
+            return f"<%s: @%r>" % (self.pid, ppms)
+        else:
+            return f"<%s: {self.pid} (deleted)>"
 
     #=========================================================================================
     # CCPN functions

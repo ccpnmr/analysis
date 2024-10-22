@@ -62,7 +62,6 @@ ccpnBinPath                     = ccpnCodePath / 'bin'
 ccpnBatchPath                   = ccpnCodePath / 'bat'
 ccpnRunTerminal                 = ccpnBinPath / 'runTerminal.sh'
 defaultPreferencesPath          = ccpnConfigPath / 'defaultv3settings.json'
-tipOfTheDayConfig               = ccpnConfigPath / 'tipConfig.hjson'
 
 _ccpnPythonPath                 = Path.aPath(Path.getPythonDirectory())
 ccpnmodelPythonPath             = _ccpnPythonPath / 'ccpnmodel'

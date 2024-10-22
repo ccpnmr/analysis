@@ -83,8 +83,9 @@ objCopy2.print()
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -95,7 +96,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-10 09:42:04 +0100 (Mon, June 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-07 19:44:44 +0100 (Mon, October 07, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -109,6 +110,7 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 import sys
 import pathlib
 import inspect
+import numpy as np
 
 from collections import OrderedDict
 from traitlets import \
@@ -233,6 +235,14 @@ class Instance(_Instance, _CcpNmrTrait):
         _Instance.__init__(self, **kwargs)
         _CcpNmrTrait.__init__(self)
 
+    def validate(self, obj, value):
+        if value is None and self.allow_none:
+            return None
+        assert self.klass is not None
+        if not isinstance(value, self.klass):
+            raise TypeError(f'{self._fullName(obj)}: invalid {_classType(value)}; expected {self.info()}')
+        return value
+
 
 class Int(_Int, _CcpNmrTrait):
     def __init__(self, **kwargs):
@@ -301,8 +311,12 @@ class CFloat(Float):
     def validate(self, obj, value):
         if value is None and self.allow_none:
             return value
-        else:
-            return _CFloat.validate(self, obj, value)
+        if not isinstance(value, float):
+            try:
+                value = float(value)
+            except:
+                raise TypeError(f'{self._fullName(obj)}: unable to cast {value} to float')
+        return _CFloat.validate(self, obj, value)
 
     def info(self):
         """:return info string
@@ -316,6 +330,7 @@ class Unicode(_Unicode, _CcpNmrTrait):
     def __init__(self, *args, **kwargs):
         _Unicode.__init__(self, *args, **kwargs)
         _CcpNmrTrait.__init__(self)
+
     def validate(self, obj, value):
         if value is None and self.allow_none:
             return value
@@ -393,13 +408,15 @@ class CEnum(Enum):
     # Json serialisation will store the value (and automatically revert to enum-value)
     # upon restore.
     """
-    def __init__(self, mapping, *args, **kwargs):
+    def __init__(self, mapping, alternatives: dict = None, *args, **kwargs):
         """
         :param mapping: A list, mapping-dict or DataEnum instance that defines the
                         mapping: i.e.
                         list, tuple: will yield a (index, item) dict
                         dict: should be (value, enum-value) dict
                         DataEnum: will yield a (value, name) dict
+        :param alternatives: an optional dict of (alternative, actual) key, value pairs.
+                             Used for correction of previous/different/'wrong' values
         :param args: optional arguments
         :param kwargs: optional keyword arguments
         """
@@ -412,6 +429,8 @@ class CEnum(Enum):
         else:
             raise ValueError(f'CEnum.__init__(): invalid mapping {mapping}')
 
+        self._alternatives = alternatives
+
         Enum.__init__(self, list(self._mapping.values()), *args, **kwargs)
 
     def validate(self, obj, value):
@@ -419,6 +438,10 @@ class CEnum(Enum):
         """
         if value is None and self.allow_none:
             return value
+
+        if self._alternatives is not None:
+            # see if this is an 'alternative' value and
+            value = self._alternatives.get(value, value)
 
         # Special provision for Enum types derived from DataEnum's
         if isinstance(value, DataEnum) or issubclass(value.__class__, DataEnum):
@@ -527,6 +550,57 @@ class CList(List):
             raise ValueError(f'{self._fullName(obj)}: expected list or iterable, got {theList}')
 
 
+class CArray(TraitType, _CcpNmrTrait):
+    """An numpy ndarray with casting from any suitable iterable object as defined by
+    numpy.array
+    """
+
+    klass = np.ndarray
+    info_text = 'A numpy ndarray'
+
+    def __init__(self, *args, **kwargs):
+        TraitType.__init__(self, *args, **kwargs)
+        _CcpNmrTrait.__init__(self)
+
+    def validate(self, obj, value) -> np.ndarray:
+        """
+        Validate value; tries casting to numpy.array
+        :param obj: object containing trait
+        :param value: new value for the trait to be validated or None
+        :return: validated (and optionally converted) value
+        :raises: ValueError
+        """
+        if value is None and self.allow_none:
+            return None
+
+        if isinstance(value, np.ndarray):
+            return value
+
+        try:
+            value = np.array(value)
+        except Exception as es:
+            raise ValueError(f'{self._fullName(obj)}: casting into numpy array failed; {es}')
+
+        return value
+
+    class jsonHandler(CcpNmrJsonClassHandlerABC):
+        # encode / decode the ndarray as a list (of lists)
+        def encode(self, value):
+            _klass = self.trait.klass
+            if not isinstance(value, _klass):
+                raise TypeError(f'encode value: expected  {_classType(_klass)} instance; got {_classType(value)}')
+            _value = value.tolist()
+            return _value
+
+        def decode(self, value):
+            # decode value; i.e. a list of lists defining a numpy ndarray
+            _klass = self.trait.klass
+            if not _klass._isEncodedObject(value):
+                raise RuntimeError(f'decode value: error decoding and initialising {_classType(_klass)} instance')
+            _value = np.array(value)
+            return _value
+
+
 class _TypedList(list):
     """A list with only specific type of items as defined by itemTrait;
     to be used by CcpNmr TList trait only
@@ -566,7 +640,7 @@ class _TypedList(list):
         """
         Validate an item
         :param item: the index, i.e. item, in the list
-        :param value: value for the item to be validated used self._itemTrait (if
+        :param value: value for the item to be validated using self._itemTrait (if
                       self._itemTrait is not None and not Any)
         :return: validated (and optionally converted) value
         :raises: ValueError, TypeError
@@ -576,10 +650,10 @@ class _TypedList(list):
 
         try:
             value = self._itemTrait.validate(self._obj, value)
-        except (TraitError, ValueError):
-            raise ValueError(f'{self._fullName}[{item}]: invalid value {repr(value)}, expected {self._itemTrait.info()}; got value "{value}"')
-        except TypeError:
-            raise ValueError(f'{self._fullName}[{item}]: invalid type, expected {self._itemTrait.info()}; got {_classType(value)} with value "{value}"')
+        except (TraitError, ValueError) as es:
+            raise ValueError(f'{self._fullName}[{item}]: invalid value {value!r}, expected {self._itemTrait.info()}')
+        except TypeError as es:
+            raise ValueError(f'{self._fullName}[{item}]: invalid type {_classType(value)} with value {value!r}, expected {self._itemTrait.info()}')
 
         return value
 

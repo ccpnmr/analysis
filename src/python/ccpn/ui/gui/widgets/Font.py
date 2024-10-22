@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:54 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-12 10:40:58 +0100 (Thu, September 12, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -89,7 +90,7 @@ def setWidgetFont(widget, name=DEFAULTFONT, size='MEDIUM', bold=False, italic=Fa
     """Set the font in the specified widget
     """
     # local import to avoid cycles
-    from ccpn.ui.gui.Gui import getFontSettings
+    # from ccpn.ui.gui.Gui import getFontSettings
 
     try:
         # GWV: this code is a bit odd; raising an exception and then catching it: just an
@@ -107,7 +108,7 @@ def getWidgetFontHeight(name=DEFAULTFONT, size='MEDIUM', bold=False, italic=Fals
     """Get the font height form the specified font
     """
     # local import to avoid cycles
-    from ccpn.ui.gui.Gui import getFontSettings
+    # from ccpn.ui.gui.Gui import getFontSettings
 
     try:
         # GWV: this code is a bit odd; raising an exception and then catching it: just an
@@ -126,7 +127,7 @@ def getFontHeight(name=DEFAULTFONT, size='MEDIUM'):
     """Get the font height form the specified font
     """
     # local import to avoid cycles
-    from ccpn.ui.gui.Gui import getFontSettings
+    # from ccpn.ui.gui.Gui import getFontSettings
 
     try:
         # GWV: this code is a bit odd; raising an exception and then catching it: just an
@@ -145,7 +146,7 @@ def getFont(name=DEFAULTFONT, size='MEDIUM'):
     """Get the specified font from the fonts dict
     """
     # local import to avoid cycles
-    from ccpn.ui.gui.Gui import getFontSettings
+    # from ccpn.ui.gui.Gui import getFontSettings
 
     try:
         # GWV: this code is a bit odd; raising an exception and then catching it: just an
@@ -163,7 +164,7 @@ def getTextDimensionsFromFont(name=DEFAULTFONT, size='MEDIUM', bold=False, itali
     """Get the bounding box for the specified text
     """
     # local import to avoid cycles
-    from ccpn.ui.gui.Gui import getFontSettings
+    # from ccpn.ui.gui.Gui import getFontSettings
 
     try:
         # GWV: this code is a bit odd; raising an exception and then catching it: just an
@@ -314,3 +315,14 @@ def getSystemFont(name, style=None, pointSize=DEFAULTFONTSIZE):
         return fnts._fontDb.font(name, style, pointSize)
     except Exception:
         return fnts._fontDb.font(DEFAULTFONTNAME, None, DEFAULTFONTSIZE)
+
+
+def getFontSettings():
+    """:return the font settings object, initialised by Gui or None if non-gui
+    """
+    from ccpn.framework.Application import getApplication
+    app = getApplication()
+    if app.hasGui:
+        return app.ui._fontSettings
+    else:
+        return None

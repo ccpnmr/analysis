@@ -52,7 +52,8 @@ from ccpn.ui.gui.guiSettings import GUISTRIP_PIVOT, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.DropBase import DropBase
-# from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
@@ -1206,7 +1207,7 @@ class GuiStrip(Frame):
     def _addItemsToCopyAxisFromMenusAxes(self, viewPort, thisMenu, is1D):
         """Set up the menu for the axis views
         """
-        from ccpn.ui.gui.lib.GuiStripContextMenus import _addCopyMenuItems
+        from ccpn.ui.gui.menus.StripContextMenus import _addCopyMenuItems
 
         copyAttribs, matchAttribs = _addCopyMenuItems(self, viewPort, thisMenu, is1D, overwrite=True)
 

@@ -28,7 +28,8 @@ import sys
 import os
 import datetime
 import tempfile
-from collections import OrderedDict as od
+# from collections import OrderedDict as od
+from collections import OrderedDict
 
 from pyqode.python.widgets import PyInteractiveConsole
 from pyqode.core.api import TextHelper
@@ -48,7 +49,6 @@ from ccpn.ui.gui.modules.macroEditorUtil.QPythonEditor import PyCodeEditor
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Action import Action
-from collections import OrderedDict
 
 
 DoubleUnderscore = '__'
@@ -446,35 +446,35 @@ class MacroEditor(CcpnModule):
     def _getToolBarDefs(self):
 
         toolBarDefs = (
-            ('Open', od((
+            ('Open', OrderedDict((
                 ('text', 'Open'),
                 ('toolTip', 'Open a Python File'),
                 ('icon', Icon('icons/document_open_recent')),
                 ('callback', self._openMacroFile),
                 ('enabled', True)
                 ))),
-            ('Save', od((
+            ('Save', OrderedDict((
                 ('text', 'Save'),
                 ('toolTip', 'Save file'),
                 ('icon', Icon('icons/save')),
                 ('callback', self.saveMacro),
                 ('enabled', True)
                 ))),
-            ('Save as', od((
+            ('Save as', OrderedDict((
                 ('text', 'SaveAs'),
                 ('toolTip', 'Save file with a new name to a new location. '),
                 ('icon', Icon('icons/saveAs')),
                 ('callback', self.saveMacroAs),
                 ('enabled', True)
                 ))),
-            ('Export', od((
+            ('Export', OrderedDict((
                 ('text', 'Export'),
                 ('toolTip', 'Export code to PDF'),
                 ('icon', Icon('icons/pdf')),
                 ('callback', self.exportToPdf),
                 ('enabled', True)
                 ))),
-            ('Add to shortcut', od((
+            ('Add to shortcut', OrderedDict((
                 ('text', 'Add to shortcut'),
                 ('toolTip', 'Add macro to a shortcut'),
                 ('icon', Icon('icons/shortcut')),
@@ -482,14 +482,14 @@ class MacroEditor(CcpnModule):
                 ('enabled', True)
                 ))),
             (),
-            ('Find', od((
+            ('Find', OrderedDict((
                 ('text', 'Find'),
                 ('toolTip', ''),
                 ('icon', Icon('icons/find')),
                 ('callback', self._showFindWidgets),
                 ('enabled', True)
                 ))),
-            ('Replace', od((
+            ('Replace', OrderedDict((
                 ('text', 'Find and Replace'),
                 ('toolTip', 'Find and Replace'),
                 ('icon', Icon('icons/find-replace')),
@@ -497,21 +497,21 @@ class MacroEditor(CcpnModule):
                 ('enabled', True)
                 ))),
             (),
-            ('Undo', od((
+            ('Undo', OrderedDict((
                 ('text', 'Undo'),
                 ('toolTip', ''),
                 ('icon', Icon('icons/undo')),
                 ('callback', self.textEditor.undo),
                 ('enabled', True)
                 ))),
-            ('Redo', od((
+            ('Redo', OrderedDict((
                 ('text', 'Redo'),
                 ('toolTip', ''),
                 ('icon', Icon('icons/redo')),
                 ('callback', self.textEditor.redo),
                 ('enabled', True)
                 ))),
-            ('Revert', od((
+            ('Revert', OrderedDict((
                 ('text', 'Revert'),
                 ('toolTip', 'Revert all changes to initial state'),
                 ('icon', Icon('icons/revert4')),
@@ -519,7 +519,7 @@ class MacroEditor(CcpnModule):
                 ('enabled', True)
                 ))),
             (),
-            ('Run', od((
+            ('Run', OrderedDict((
                 ('text', 'Run'),
                 ('toolTip', 'Run the macro in the IpythonConsole.\nShortcut: cmd(ctrl)+r'),
                 ('icon', Icon('icons/play')),
@@ -527,7 +527,7 @@ class MacroEditor(CcpnModule):
                 ('enabled', True),
                 ('shortcut', '⌃r')
                 ))),
-            ('Run-Profile', od((
+            ('Run-Profile', OrderedDict((
                 ('text', 'Run with a profiler'),
                 ('toolTip', 'Run the macro in the IpythonConsole with a profiler.\nShortcut: cmd(ctrl)+p'),
                 ('icon', Icon('icons/profiler')),
@@ -549,7 +549,7 @@ class MacroEditor(CcpnModule):
     def _setToolBar(self):
         for v in self._getToolBarDefs():
             if len(v) == 2:
-                if isinstance(v[1], od):
+                if isinstance(v[1], OrderedDict):
                     action = Action(self, **v[1])
                     action.setObjectName(v[0])
                     self.toolbar.addAction(action)
@@ -702,7 +702,7 @@ class MacroEditor(CcpnModule):
         :param widgetsState:
         """
         # self._setNestedWidgetsAttrToModule()
-        # widgetsState = od(sorted(widgetsState.items()))
+        # widgetsState = OrderedDict(sorted(widgetsState.items()))
         # for variableName, value in widgetsState.items():
         #     try:
         #         widget = getattr(self, str(variableName))
@@ -721,7 +721,7 @@ class MacroEditor(CcpnModule):
         #         getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
         if self._restore:
             wDict = self._setNestedWidgetsAttrToModule()
-            widgetsState = od(sorted(widgetsState.items()))
+            widgetsState = OrderedDict(sorted(widgetsState.items()))
             for variableName, value in widgetsState.items():
                 try:
                     widget = wDict.get(str(variableName))

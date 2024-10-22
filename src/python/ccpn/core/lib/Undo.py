@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-18 17:05:41 +0100 (Thu, July 18, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-21 09:29:03 +0100 (Mon, October 21, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -392,7 +392,7 @@ class Undo(deque):
             return
 
         if self._debug:
-            getLogger().debug('undo.newItem %s %s %s %s %s %s %s' % (self.undoItemBlocking, undoMethod,
+            getLogger().debug2('undo.newItem %s %s %s %s %s %s %s' % (self.undoItemBlocking, undoMethod,
                                                                      redoMethod, undoArgs,
                                                                      undoKwargs, redoArgs,
                                                                      redoKwargs))

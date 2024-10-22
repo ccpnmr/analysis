@@ -43,15 +43,11 @@ try:
     # set the soft limits for the maximum number of open files
     if platform.system() == 'Windows':
         import win32file
-
-
         # set soft limit for Windows
         win32file._setmaxstdio(2048)
 
     else:
         import resource
-
-
         # soft limit imposed by the current configuration, hard limit imposed by the operating system.
         soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
 
@@ -78,7 +74,7 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.Pid import Pid
 from ccpn.core.lib.ContextManagers import \
-    logCommandManager, undoBlockWithSideBar, rebuildSidebar, inactivity
+    logCommandManager, undoBlockWithSideBar, undoBlock, rebuildSidebar, inactivity
 
 from ccpn.framework.Application import Arguments
 from ccpn.framework import Version
@@ -87,20 +83,14 @@ from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
 from ccpn.framework.Translation import defaultLanguage
 from ccpn.framework.Translation import translator
-from ccpn.framework.Preferences import Preferences, \
-    RECENT_MACROS, RECENT_FILES, USER_PLUGIN_PATH
+from ccpn.framework.Preferences import Preferences, USER_PLUGIN_PATH
 from ccpn.framework.PathsAndUrls import \
     userCcpnMacroPath, \
-    tipOfTheDayConfig, \
     ccpnCodePath, \
     CCPN_DIRECTORY_SUFFIX
 from ccpn.framework.lib.resources.Resources import Resources
-from ccpn.ui.gui.Gui import Gui
-# from ccpn.ui.gui.GuiBase import GuiBase
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.modules.MacroEditor import MacroEditor
+
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS, loadTipsSetup
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 from ccpn.ui.gui import Layout
@@ -116,9 +106,9 @@ from ccpn.util.decorators import logCommand
 logger = getLogger()
 
 #-----------------------------------------------------------------------------------------
-# how frequently to check if license dialog has closed when waiting to show the tip of the day
-WAIT_EVENT_LOOP_EMPTY = 0
-WAIT_LICENSE_DIALOG_CLOSE_TIME = 100
+# # how frequently to check if license dialog has closed when waiting to show the tip of the day
+# WAIT_EVENT_LOOP_EMPTY = 0
+# WAIT_LICENSE_DIALOG_CLOSE_TIME = 100
 
 _DEBUG = False
 
@@ -151,6 +141,8 @@ class Framework(NotifierBase):
         NotifierBase.__init__(self)
         # GuiBase.__init__(self)
 
+        assert self.applicationName is not None
+        assert self.applicationVersion is not None
         printCreditsText(sys.stderr, self.applicationName, self.applicationVersion)
 
         #-----------------------------------------------------------------------------------------
@@ -229,14 +221,8 @@ class Framework(NotifierBase):
         # language; (requires self.args and self.preferences)
         self._language = self._setLanguage()
 
-        self.layout = None  # initialised by self._getUserLayout
-
         # set by _updateAutoBackup(), called from  _startApplication()
         self._autoBackupThread = None
-
-        self._tip_of_the_day = None
-        self._initial_show_timer = None
-        self._key_concepts = None
 
         # initialised in _startApplication
         self._registrationDict = {}
@@ -248,7 +234,6 @@ class Framework(NotifierBase):
         self._disableModuleException = getattr(self.args, 'disableModuleException', False)
         self._disableQueueException = getattr(self.args, 'disableQueueException', False)
         self._applicationReadOnlyMode = getattr(self.args, 'readOnly', False)
-        self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
@@ -491,6 +476,7 @@ class Framework(NotifierBase):
             return
 
         if self.preferences.general.checkUpdatesAtStartup and not getattr(self.args, '_skipUpdates', False):
+            sys.stderr.write('==> Checking for updates ...\n')
             self.ui._checkForUpdates()
 
         if not self.ui._checkRegistration():
@@ -764,46 +750,47 @@ class Framework(NotifierBase):
 
     #-----------------------------------------------------------------------------------------
 
-    def _correctColours(self):
-        """Autocorrect all colours that are too close to the background colour
-        """
-        from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
-
-        if self.preferences.general.autoCorrectColours:
-            project = self.project
-            # change sp colours
-            for sp in project.spectra:
-                if len(sp.axisCodes) > 1:
-                    if sp.positiveContourColour and sp.positiveContourColour.startswith('#'):
-                        sp.positiveContourColour = autoCorrectHexColour(sp.positiveContourColour,
-                                                                        getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                    if sp.negativeContourColour and sp.negativeContourColour.startswith('#'):
-                        sp.negativeContourColour = autoCorrectHexColour(sp.negativeContourColour,
-                                                                        getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                elif sp.sliceColour and sp.sliceColour.startswith('#'):
-                    sp.sliceColour = autoCorrectHexColour(sp.sliceColour,
-                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-            # change peakList colours
-            for objList in project.peakLists:
-                objList.textColour = autoCorrectHexColour(objList.textColour,
-                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
-                                                            getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-            # change integralList colours
-            for objList in project.integralLists:
-                objList.textColour = autoCorrectHexColour(objList.textColour,
-                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
-                                                            getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-            # change multipletList colours
-            for objList in project.multipletLists:
-                objList.textColour = autoCorrectHexColour(objList.textColour,
-                                                          getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
-                                                            getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-            for mark in project.marks:
-                mark.colour = autoCorrectHexColour(mark.colour,
-                                                   getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    # GWV 07/08/2024: Moved to Gui.py
+    # def _correctColours(self):
+    #     """Autocorrect all colours that are too close to the background colour
+    #     """
+    #     from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
+    #
+    #     if self.preferences.general.autoCorrectColours:
+    #         project = self.project
+    #         # change sp colours
+    #         for sp in project.spectra:
+    #             if len(sp.axisCodes) > 1:
+    #                 if sp.positiveContourColour and sp.positiveContourColour.startswith('#'):
+    #                     sp.positiveContourColour = autoCorrectHexColour(sp.positiveContourColour,
+    #                                                                     getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #                 if sp.negativeContourColour and sp.negativeContourColour.startswith('#'):
+    #                     sp.negativeContourColour = autoCorrectHexColour(sp.negativeContourColour,
+    #                                                                     getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #             elif sp.sliceColour and sp.sliceColour.startswith('#'):
+    #                 sp.sliceColour = autoCorrectHexColour(sp.sliceColour,
+    #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #         # change peakList colours
+    #         for objList in project.peakLists:
+    #             objList.textColour = autoCorrectHexColour(objList.textColour,
+    #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #             objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
+    #                                                         getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #         # change integralList colours
+    #         for objList in project.integralLists:
+    #             objList.textColour = autoCorrectHexColour(objList.textColour,
+    #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #             objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
+    #                                                         getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #         # change multipletList colours
+    #         for objList in project.multipletLists:
+    #             objList.textColour = autoCorrectHexColour(objList.textColour,
+    #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #             objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
+    #                                                         getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+    #         for mark in project.marks:
+    #             mark.colour = autoCorrectHexColour(mark.colour,
+    #                                                getColours()[CCPNGLWIDGET_HEXBACKGROUND])
 
     # GWV 24/1/24: moved to Gui
     # def _initGraphics(self):
@@ -937,109 +924,109 @@ class Framework(NotifierBase):
     #     getLogger().warning(f'Error restoring current.strip: {e}')
 
     #-----------------------------------------------------------------------------------------
-
-    def _initTipOfTheDay(self):
-        # GST slightly complicated as we have to wait for any license or other
-        # startup dialogs to close before we display tip of the day
-        loadTipsSetup(tipOfTheDayConfig, [ccpnCodePath])
-        self._tip_of_the_day_wait_dialogs = (RegisterPopup,)
-        self._startupShowTipofTheDay()
-
-    def _startupShowTipofTheDay(self):
-        if self._shouldDisplayTipOfTheDay():
-            self._initial_show_timer = QTimer(parent=self._mainWindow)
-            self._initial_show_timer.timeout.connect(self._startupDisplayTipOfTheDayCallback)
-            self._initial_show_timer.setInterval(0)
-            self._initial_show_timer.start()
-
-    def _canTipOfTheDayShow(self):
-        result = True
-        for widget in QApplication.topLevelWidgets():
-            if isinstance(widget, self._tip_of_the_day_wait_dialogs) and widget.isVisible():
-                result = False
-                break
-        return result
-
-    def _startupDisplayTipOfTheDayCallback(self):
-
-        is_first_time_tip_of_the_day = self.preferences['general'].setdefault('firstTimeShowKeyConcepts', True)
-
-        # GST this waits till any inhibiting dialogs aren't show and then awaits till the event loop is empty
-        # effectively it swaps between waiting for WAIT_LICENSE_DIALOG_CLOSE_TIME or until the event loop is empty
-        if not self._canTipOfTheDayShow() or self._initial_show_timer.interval() == WAIT_LICENSE_DIALOG_CLOSE_TIME:
-            if self._initial_show_timer.interval() == WAIT_EVENT_LOOP_EMPTY:
-                self._initial_show_timer.setInterval(WAIT_LICENSE_DIALOG_CLOSE_TIME)
-            else:
-                self._initial_show_timer.setInterval(WAIT_EVENT_LOOP_EMPTY)
-
-            self._initial_show_timer.start()
-        else:
-            # this should only happen when the event loop is empty...
-            if is_first_time_tip_of_the_day:
-                self._displayKeyConcepts()
-                self.preferences['general']['firstTimeShowKeyConcepts'] = False
-            else:
-                try:
-                    self._displayTipOfTheDay()
-                except Exception as e:
-                    self._initial_show_timer.stop()
-                    self._initial_show_timer.deleteLater()
-                    self._initial_show_timer = None
-                    raise e
-
-            if self._initial_show_timer:
-                self._initial_show_timer.stop()
-                self._initial_show_timer.deleteLater()
-                self._initial_show_timer = None
-
-    def _displayKeyConcepts(self):
-        if not self._key_concepts:
-            self._key_concepts = TipOfTheDayWindow(mode=MODE_KEY_CONCEPTS)
-        self._key_concepts.show()
-        self._key_concepts.raise_()
-
-    def _displayTipOfTheDay(self, standalone=False):
-
-        # tip of the day allocated standalone already
-        if self._tip_of_the_day and standalone and self._tip_of_the_day.isStandalone():
-            self._tip_of_the_day.show()
-            self._tip_of_the_day.raise_()
-
-        # tip of the day hanging around from startup
-        elif self._tip_of_the_day and standalone and not self._tip_of_the_day.isStandalone():
-
-            self._tip_of_the_day.hide()
-            self._tip_of_the_day.deleteLater()
-            self._tip_of_the_day = None
-
-        if not self._tip_of_the_day:
-            dont_show_tips = not self.preferences['general']['showTipOfTheDay']
-
-            seen_tip_list = []
-            # if not standalone:
-            seen_tip_list = self.preferences['general']['seenTipsOfTheDay']
-
-            self._tip_of_the_day = TipOfTheDayWindow(dont_show_tips=dont_show_tips,
-                                                     seen_perma_ids=seen_tip_list, standalone=standalone)
-            self._tip_of_the_day.dont_show.connect(self._tip_of_the_day_dont_show_callback)
-            # if not standalone:
-            self._tip_of_the_day.seen_tips.connect(self._tip_of_the_day_seen_tips_callback)
-
-            self._tip_of_the_day.show()
-            self._tip_of_the_day.raise_()
-
-    def _tip_of_the_day_dont_show_callback(self, dont_show):
-        self.preferences['general']['showTipOfTheDay'] = not dont_show
-
-    def _tip_of_the_day_seen_tips_callback(self, seen_tips):
-        seen_tip_list = self.preferences['general']['seenTipsOfTheDay']
-        previous_seen_tips = set(seen_tip_list)
-        previous_seen_tips.update(seen_tips)
-        seen_tip_list.clear()
-        seen_tip_list.extend(previous_seen_tips)
-
-    def _shouldDisplayTipOfTheDay(self):
-        return self.preferences['general'].setdefault('showTipOfTheDay', True)
+    # GWV 18/9/2024: code now in gui.lib.TipOfTheDayManager
+    # def _initTipOfTheDay(self):
+    #     # GST slightly complicated as we have to wait for any license or other
+    #     # startup dialogs to close before we display tip of the day
+    #     loadTipsSetup(tipOfTheDayConfig, [ccpnCodePath])
+    #     self._tip_of_the_day_wait_dialogs = (RegisterPopup,)
+    #     self._startupShowTipofTheDay()
+    #
+    # def _startupShowTipofTheDay(self):
+    #     if self._shouldDisplayTipOfTheDay():
+    #         self._initial_show_timer = QTimer(parent=self._mainWindow)
+    #         self._initial_show_timer.timeout.connect(self._startupDisplayTipOfTheDayCallback)
+    #         self._initial_show_timer.setInterval(0)
+    #         self._initial_show_timer.start()
+    #
+    # def _canTipOfTheDayShow(self):
+    #     result = True
+    #     for widget in QApplication.topLevelWidgets():
+    #         if isinstance(widget, self._tip_of_the_day_wait_dialogs) and widget.isVisible():
+    #             result = False
+    #             break
+    #     return result
+    #
+    # def _startupDisplayTipOfTheDayCallback(self):
+    #
+    #     is_first_time_tip_of_the_day = self.preferences['general'].setdefault('firstTimeShowKeyConcepts', True)
+    #
+    #     # GST this waits till any inhibiting dialogs aren't show and then awaits till the event loop is empty
+    #     # effectively it swaps between waiting for WAIT_LICENSE_DIALOG_CLOSE_TIME or until the event loop is empty
+    #     if not self._canTipOfTheDayShow() or self._initial_show_timer.interval() == WAIT_LICENSE_DIALOG_CLOSE_TIME:
+    #         if self._initial_show_timer.interval() == WAIT_EVENT_LOOP_EMPTY:
+    #             self._initial_show_timer.setInterval(WAIT_LICENSE_DIALOG_CLOSE_TIME)
+    #         else:
+    #             self._initial_show_timer.setInterval(WAIT_EVENT_LOOP_EMPTY)
+    #
+    #         self._initial_show_timer.start()
+    #     else:
+    #         # this should only happen when the event loop is empty...
+    #         if is_first_time_tip_of_the_day:
+    #             self._displayKeyConcepts()
+    #             self.preferences['general']['firstTimeShowKeyConcepts'] = False
+    #         else:
+    #             try:
+    #                 self._displayTipOfTheDay()
+    #             except Exception as e:
+    #                 self._initial_show_timer.stop()
+    #                 self._initial_show_timer.deleteLater()
+    #                 self._initial_show_timer = None
+    #                 raise e
+    #
+    #         if self._initial_show_timer:
+    #             self._initial_show_timer.stop()
+    #             self._initial_show_timer.deleteLater()
+    #             self._initial_show_timer = None
+    #
+    # def _displayKeyConcepts(self):
+    #     if not self._key_concepts:
+    #         self._key_concepts = TipOfTheDayWindow(mode=MODE_KEY_CONCEPTS)
+    #     self._key_concepts.show()
+    #     self._key_concepts.raise_()
+    #
+    # def _displayTipOfTheDay(self, standalone=False):
+    #
+    #     # tip of the day allocated standalone already
+    #     if self._tip_of_the_day and standalone and self._tip_of_the_day.isStandalone():
+    #         self._tip_of_the_day.show()
+    #         self._tip_of_the_day.raise_()
+    #
+    #     # tip of the day hanging around from startup
+    #     elif self._tip_of_the_day and standalone and not self._tip_of_the_day.isStandalone():
+    #
+    #         self._tip_of_the_day.hide()
+    #         self._tip_of_the_day.deleteLater()
+    #         self._tip_of_the_day = None
+    #
+    #     if not self._tip_of_the_day:
+    #         dont_show_tips = not self.preferences['general']['showTipOfTheDay']
+    #
+    #         seen_tip_list = []
+    #         # if not standalone:
+    #         seen_tip_list = self.preferences['general']['seenTipsOfTheDay']
+    #
+    #         self._tip_of_the_day = TipOfTheDayWindow(dont_show_tips=dont_show_tips,
+    #                                                  seen_perma_ids=seen_tip_list, standalone=standalone)
+    #         self._tip_of_the_day.dont_show.connect(self._tip_of_the_day_dont_show_callback)
+    #         # if not standalone:
+    #         self._tip_of_the_day.seen_tips.connect(self._tip_of_the_day_seen_tips_callback)
+    #
+    #         self._tip_of_the_day.show()
+    #         self._tip_of_the_day.raise_()
+    #
+    # def _tip_of_the_day_dont_show_callback(self, dont_show):
+    #     self.preferences['general']['showTipOfTheDay'] = not dont_show
+    #
+    # def _tip_of_the_day_seen_tips_callback(self, seen_tips):
+    #     seen_tip_list = self.preferences['general']['seenTipsOfTheDay']
+    #     previous_seen_tips = set(seen_tip_list)
+    #     previous_seen_tips.update(seen_tips)
+    #     seen_tip_list.clear()
+    #     seen_tip_list.extend(previous_seen_tips)
+    #
+    # def _shouldDisplayTipOfTheDay(self):
+    #     return self.preferences['general'].setdefault('showTipOfTheDay', True)
 
     #-----------------------------------------------------------------------------------------
     # Project related methods
@@ -1139,7 +1126,8 @@ class Framework(NotifierBase):
         with self.project._setSaveOverride():
             try:
                 self.project.saveAs(newPath=newPath, overwrite=overwrite, copySubDirectories=copySubDirectories)
-                Layout.saveLayoutToJson(self.ui.mainWindow)
+                # Layout.saveLayoutToJson(self.ui.mainWindow)
+                self.ui.mainWindow._saveLayoutToFile(reportErrors=False)
                 self.current._dumpStateToFile(self.statePath)
                 self._getUndo().markSave()
                 self.preferences._addRecentFiles(self.project.path)
@@ -1182,7 +1170,8 @@ class Framework(NotifierBase):
 
             try:
                 self.project.save()
-                Layout.saveLayoutToJson(self.ui.mainWindow)
+                # Layout.saveLayoutToJson(self.ui.mainWindow)
+                self.ui.mainWindow._saveLayoutToFile(reportErrors=False)
                 self.current._dumpStateToFile(self.statePath)
                 self._getUndo().markSave()
 
@@ -1365,60 +1354,61 @@ class Framework(NotifierBase):
         """
         return self.ui.loadSpectra(*paths)
 
-    @staticmethod
-    def _finaliseV2Upgrade(project):
-        """Final step of upgrading from v2 to v3 projects.
-        """
-        # Copy all the internal validationStores to v3-dataTables
-        import pandas as pd
-        from collections import OrderedDict
-        from xml.sax.saxutils import escape
-
-        getLogger().debug(f'Finalise upgrade v2-v3')
-        fields = ['_ID', 'className', 'createdBy', 'guid', 'name',
-                  'packageName', 'packageShortName',
-                  'qualifiedName', 'structureEnsemble']
-        columns = ['serial', 'context', 'keyword', 'keywordDefinition',
-                   'figOfMerit', 'textValue', 'intValue', 'floatValue',
-                   'booleanValue', 'details']
-        wrp = project._wrappedData
-        vStores = list(wrp.validationStores)
-        for vs in vStores:
-            out = []
-            for vr in vs.validationResults:
-                out.append([str(val) if not hasattr(val, '_ID') else val.name
-                            for col in columns
-                            for val in [getattr(vr, col, '')]])
-            df = pd.DataFrame(out, columns=columns)
-            dTable = project.newDataTable(name=vs.name, data=df)
-            # think that internally is using a dict and losing order :|
-            meta = [(k, str(val)) if not hasattr(val, '_ID') else (k, val.name)
-                    for k in fields
-                    for val in [getattr(vs, k, '')]]
-            if sft := getattr(vs, 'software', ''):
-                # try and convert the software information to something serializable
-                meta.append(('software',
-                             ':'.join(map(lambda _ss: escape(str(_ss)),
-                                          filter(None, [sft.name, sft.version, sft.details, sft.tasks,
-                                                        sft.vendorName, sft.vendorAddress,
-                                                        sft.vendorWebAddress])))))
-            dTable.updateMetadata(OrderedDict(meta))
-            getLogger().debug(f'extracting dataTable {vs.name} for {vs.className}')
-            vs.delete()
-
-        columns = ['serial', 'name',
-                   'generationType', 'nmrConstraintStore',
-                   'details']
-        out = []
-        for sg in wrp.structureGenerations:
-            out.append([str(val) if not hasattr(val, '_ID') else val.name
-                        for col in columns
-                        for val in [getattr(sg, col, '')]])
-            sg.delete()
-        df = pd.DataFrame(out, columns=columns)
-        dTable = project.newDataTable(name='structureGenerations', data=df)
-        dTable.updateMetadata({'name': 'structureGenerations'})
-        getLogger().debug(f'extracting dataTable structureGenerations')
+    # GWV 12/09/2024: to ProjectLib
+    # @staticmethod
+    # def _finaliseV2Upgrade(project):
+    #     """Final step of upgrading from v2 to v3 projects.
+    #     """
+    #     # Copy all the internal validationStores to v3-dataTables
+    #     import pandas as pd
+    #     from collections import OrderedDict
+    #     from xml.sax.saxutils import escape
+    #
+    #     getLogger().debug(f'Finalise upgrade v2-v3')
+    #     fields = ['_ID', 'className', 'createdBy', 'guid', 'name',
+    #               'packageName', 'packageShortName',
+    #               'qualifiedName', 'structureEnsemble']
+    #     columns = ['serial', 'context', 'keyword', 'keywordDefinition',
+    #                'figOfMerit', 'textValue', 'intValue', 'floatValue',
+    #                'booleanValue', 'details']
+    #     wrp = project._wrappedData
+    #     vStores = list(wrp.validationStores)
+    #     for vs in vStores:
+    #         out = []
+    #         for vr in vs.validationResults:
+    #             out.append([str(val) if not hasattr(val, '_ID') else val.name
+    #                         for col in columns
+    #                         for val in [getattr(vr, col, '')]])
+    #         df = pd.DataFrame(out, columns=columns)
+    #         dTable = project.newDataTable(name=vs.name, data=df)
+    #         # think that internally is using a dict and losing order :|
+    #         meta = [(k, str(val)) if not hasattr(val, '_ID') else (k, val.name)
+    #                 for k in fields
+    #                 for val in [getattr(vs, k, '')]]
+    #         if sft := getattr(vs, 'software', ''):
+    #             # try and convert the software information to something serializable
+    #             meta.append(('software',
+    #                          ':'.join(map(lambda _ss: escape(str(_ss)),
+    #                                       filter(None, [sft.name, sft.version, sft.details, sft.tasks,
+    #                                                     sft.vendorName, sft.vendorAddress,
+    #                                                     sft.vendorWebAddress])))))
+    #         dTable.updateMetadata(OrderedDict(meta))
+    #         getLogger().debug(f'extracting dataTable {vs.name} for {vs.className}')
+    #         vs.delete()
+    #
+    #     columns = ['serial', 'name',
+    #                'generationType', 'nmrConstraintStore',
+    #                'details']
+    #     out = []
+    #     for sg in wrp.structureGenerations:
+    #         out.append([str(val) if not hasattr(val, '_ID') else val.name
+    #                     for col in columns
+    #                     for val in [getattr(sg, col, '')]])
+    #         sg.delete()
+    #     df = pd.DataFrame(out, columns=columns)
+    #     dTable = project.newDataTable(name='structureGenerations', data=df)
+    #     dTable.updateMetadata({'name': 'structureGenerations'})
+    #     getLogger().debug(f'extracting dataTable structureGenerations')
 
     def _loadV2Project(self, path) -> list[Project]:
         """Actual V2 project loader
@@ -1427,6 +1417,7 @@ class Framework(NotifierBase):
         CCPNINTERNAL: called from CcpNmrV2ProjectDataLoader
         """
         from ccpn.core.Project import _loadV2Project
+        from ccpn.core.lib.ProjectLib import _finaliseV2Upgrade
 
         try:
             project = _loadV2Project(application=self, path=path)
@@ -1435,7 +1426,7 @@ class Framework(NotifierBase):
         else:
             self._closeProject()  # always close old project AFTER valid load
             self._initialiseProject(project)  # This also sets the linkages
-            self._finaliseV2Upgrade(project)
+            _finaliseV2Upgrade(project)
             return [project]
         return []
 
@@ -1505,9 +1496,10 @@ class Framework(NotifierBase):
         """Load python file path into the macro editor
         CCPNINTERNAL: called from PythonDataLoader
         """
-        mainWindow = self.mainWindow
-        macroEditor = MacroEditor(mainWindow=mainWindow, filePath=str(path))
-        mainWindow.moduleArea.addModule(macroEditor, position='top', relativeTo=mainWindow.moduleArea)
+        if self.hasGui:
+            self.ui.showMacroEditor(path=path)
+        else:
+            raise RuntimeError(f'Cannot load Python file {path}')
         return []
 
     def _loadHtmlFile(self, path):
@@ -1743,35 +1735,36 @@ class Framework(NotifierBase):
     #     newPath.assureSuffix(jsonType)
     #     return newPath
 
-    def _getUserLayout(self, userPath=None):
-        """defines the application.layout dictionary.
-        For a saved project: uses the auto-generated during the saving process, if a user specified json file is given then
-        is used that one instead.
-        For a new project, it is used the default.
-        """
-        # try:
-        if userPath:
-            with open(userPath) as fp:
-                layout = json.load(fp, object_hook=AttrDict)
-                self.layout = layout
-
-        else:
-            # opens the autogenerated if an existing project
-            savedLayoutPath = self._getAutogeneratedLayoutFile()
-            if savedLayoutPath:
-                with open(savedLayoutPath) as fp:
-                    layout = json.load(fp, object_hook=AttrDict)
-                    self.layout = layout
-
-            else:  # opens the default
-                if not self.project.isReadOnly:
-                    Layout._createLayoutFile(self)
-                    self._getUserLayout()
-
-        # except Exception as e:
-        #   getLogger().warning('No layout found. %s' %e)
-
-        return self.layout
+    # GWV 12/09/2024: replaced with code in Layout.ModuleLayout class
+    # def _getUserLayout(self, userPath=None):
+    #     """defines the application.layout dictionary.
+    #     For a saved project: uses the auto-generated during the saving process, if a user specified json file is given then
+    #     is used that one instead.
+    #     For a new project, it is used the default.
+    #     """
+    #     # try:
+    #     if userPath:
+    #         with open(userPath) as fp:
+    #             layout = json.load(fp, object_hook=AttrDict)
+    #             Layout._setLayout(layout)
+    #
+    #     else:
+    #         # opens the autogenerated if an existing project
+    #         savedLayoutPath = self._getAutogeneratedLayoutFile()
+    #         if savedLayoutPath:
+    #             with open(savedLayoutPath) as fp:
+    #                 layout = json.load(fp, object_hook=AttrDict)
+    #                 Layout._setLayout(layout)
+    #
+    #         else:  # opens the default
+    #             if not self.project.isReadOnly:
+    #                 Layout._createLayoutFile(self)
+    #                 self._getUserLayout()
+    #
+    #     # except Exception as e:
+    #     #   getLogger().warning('No layout found. %s' %e)
+    #
+    #     return Layout._getLayout()
 
     # def _saveLayoutCallback(self):
     #     Layout.updateSavedLayout(self.ui.mainWindow)
@@ -1789,29 +1782,30 @@ class Framework(NotifierBase):
     #     self.ui.mainWindow.moduleArea._closeAll()
     #     Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
 
-    def _restoreLayoutFromFile(self, path):
-        if path is None:
-            raise ValueError('_restoreLayoutFromFile: undefined path')
-        try:
-            self._getUserLayout(path)
-            self.ui.mainWindow.moduleArea._closeAll()
-            Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
+    # GWV: equivalent to GuiMainWindow
+    # def _restoreLayoutFromFile(self, path):
+    #     if path is None:
+    #         raise ValueError('_restoreLayoutFromFile: undefined path')
+    #     try:
+    #         self._getUserLayout(path)
+    #         self.ui.mainWindow.moduleArea._closeAll()
+    #         Layout.restoreLayout(self.ui.mainWindow, restoreSpectrumDisplay=True)
+    #
+    #     except (PermissionError, FileNotFoundError):
+    #         getLogger().debug('Folder may be read-only')
+    #
+    #     except Exception as e:
+    #         getLogger().warning(f'Impossible to restore layout. {e}')
 
-        except (PermissionError, FileNotFoundError):
-            getLogger().debug('Folder may be read-only')
+    # def _getAutogeneratedLayoutFile(self):
+    #     if self.project:
+    #         layoutFile = Layout.getLayoutFile(self)
+    #         return layoutFile
 
-        except Exception as e:
-            getLogger().warning(f'Impossible to restore layout. {e}')
-
-    def _getAutogeneratedLayoutFile(self):
-        if self.project:
-            layoutFile = Layout.getLayoutFile(self)
-            return layoutFile
-
-    def _fetchAutogeneratedLayoutFile(self):
-        if self.project:
-            layoutFile = Layout.fetchLayoutFile(self)
-            return layoutFile
+    # def _fetchAutogeneratedLayoutFile(self):
+    #     if self.project:
+    #         layoutFile = Layout.fetchLayoutFile(self)
+    #         return layoutFile
 
     ###################################################################################################################
     ## MENU callbacks:  Spectrum
@@ -1995,7 +1989,7 @@ class Framework(NotifierBase):
     #         getLogger().warning('Estimate Current Volumes: no current.peaks')
     #         MessageDialog.showWarning('Estimate Current Volumes', 'no current.peaks')
     #
-    # GWV 27/324: copied to _Gui
+    # GWV 27/324: copied to _Gui_V3_V4
     # @logCommand('application.')
     # def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
     #     """Make a strip plot from peaks or nmrChains
@@ -2117,195 +2111,206 @@ class Framework(NotifierBase):
     ## MENU callbacks:  VIEW
     ###################################################################################################################
 
-    @logCommand('application.')
-    def showChemicalShiftTable(self,
-                               position: str = 'bottom',
-                               relativeTo: CcpnModule = None,
-                               chemicalShiftList=None, selectFirstItem=False):
-        """Displays Chemical Shift table.
-        """
-        from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTableModule
+    # GWV moved to Gui.py
+    # @logCommand('application.')
+    # def showChemicalShiftTable(self,
+    #                            position: str = 'bottom',
+    #                            relativeTo: CcpnModule = None,
+    #                            chemicalShiftList=None, selectFirstItem=False):
+    #     """Displays Chemical Shift table.
+    #     """
+    #     from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(chemicalShiftTableModule, position=position, relativeTo=relativeTo)
+    #     if chemicalShiftList:
+    #         chemicalShiftTableModule.selectTable(chemicalShiftList)
+    #     return chemicalShiftTableModule
 
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(chemicalShiftTableModule, position=position, relativeTo=relativeTo)
-        if chemicalShiftList:
-            chemicalShiftTableModule.selectTable(chemicalShiftList)
-        return chemicalShiftTableModule
+    # GWV 07/08/2024: Moved to Gui.py
+    # @logCommand('application.')
+    # def showNmrResidueTable(self, position='bottom', relativeTo=None,
+    #                         nmrChain=None, selectFirstItem=False):
+    #     """Displays Nmr Residue Table
+    #     """
+    #     from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
+    #     if nmrChain:
+    #         nmrResidueTableModule.selectTable(nmrChain)
+    #     return nmrResidueTableModule
 
-    @logCommand('application.')
-    def showNmrResidueTable(self, position='bottom', relativeTo=None,
-                            nmrChain=None, selectFirstItem=False):
-        """Displays Nmr Residue Table
-        """
-        from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
+    # GWV 08/08/2024: moved to Gui
+    # @logCommand('application.')
+    # def showResidueTable(self, position='bottom', relativeTo=None,
+    #                      chain=None, selectFirstItem=False):
+    #     """Displays  Residue Table
+    #     """
+    #     from ccpn.ui.gui.modules.ResidueTable import ResidueTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     residueTableModule = ResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(residueTableModule, position=position, relativeTo=relativeTo)
+    #     if chain:
+    #         residueTableModule.selectTable(chain)
+    #     return residueTableModule
 
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
-        if nmrChain:
-            nmrResidueTableModule.selectTable(nmrChain)
-        return nmrResidueTableModule
+    # GWV 08/08/2024: moved to Gui
+    # @logCommand('application.')
+    # def showPeakTable(self, position: str = 'left', relativeTo: CcpnModule = None,
+    #                   peakList: PeakList = None, selectFirstItem=False):
+    #     """Displays Peak table on left of main window with specified list selected.
+    #     """
+    #     from ccpn.ui.gui.modules.PeakTable import PeakTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     peakTableModule = PeakTableModule(mainWindow, selectFirstItem=False)  #selection is done by the current peaks.
+    #     if self.current.peak and not peakList:
+    #         peakList = self.current.peak.peakList
+    #     if peakList:
+    #         peakTableModule.selectTable(peakList)
+    #         peakTableModule.selectPeaks(self.current.peaks)
+    #
+    #     mainWindow.moduleArea.addModule(peakTableModule, position=position, relativeTo=relativeTo)
+    #     return peakTableModule
 
-    @logCommand('application.')
-    def showResidueTable(self, position='bottom', relativeTo=None,
-                         chain=None, selectFirstItem=False):
-        """Displays  Residue Table
-        """
-        from ccpn.ui.gui.modules.ResidueTable import ResidueTableModule
+    # GWV 08/08/2024: moved to Gui
+    # @logCommand('application.')
+    # def showMultipletTable(self, position: str = 'left', relativeTo: CcpnModule = None,
+    #                        multipletList: MultipletList = None, selectFirstItem=False):
+    #     """Displays multipletList table on left of main window with specified list selected.
+    #     """
+    #     from ccpn.ui.gui.modules.MultipletTable import MultipletTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     multipletTableModule = MultipletTableModule(mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(multipletTableModule, position=position, relativeTo=relativeTo)
+    #     if multipletList:
+    #         multipletTableModule.selectTable(multipletList)
+    #     return multipletTableModule
+    #
+    # GWV 08/08/2024: moved to Gui
+    # @logCommand('application.')
+    # def showIntegralTable(self, position: str = 'left', relativeTo: CcpnModule = None,
+    #                       integralList: IntegralList = None, selectFirstItem=False):
+    #     """Displays integral table on left of main window with specified list selected.
+    #     """
+    #     from ccpn.ui.gui.modules.IntegralTable import IntegralTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     integralTableModule = IntegralTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(integralTableModule, position=position, relativeTo=relativeTo)
+    #     if integralList:
+    #         integralTableModule.selectTable(integralList)
+    #     return integralTableModule
 
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        residueTableModule = ResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(residueTableModule, position=position, relativeTo=relativeTo)
-        if chain:
-            residueTableModule.selectTable(chain)
-        return residueTableModule
+    # GWV 10/9/2024: to Gui.py
+    # @logCommand('application.')
+    # def showRestraintTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
+    #                        restraintTable=None, selectFirstItem=False):
+    #     """Displays Peak table on left of main window with specified list selected.
+    #     """
+    #     from ccpn.ui.gui.modules.RestraintTableModule import RestraintTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     restraintTableModule = RestraintTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(restraintTableModule, position=position, relativeTo=relativeTo)
+    #     if restraintTable:
+    #         restraintTableModule.selectRestraintTable(restraintTable)
+    #     return restraintTableModule
 
-    @logCommand('application.')
-    def showPeakTable(self, position: str = 'left', relativeTo: CcpnModule = None,
-                      peakList: PeakList = None, selectFirstItem=False):
-        """Displays Peak table on left of main window with specified list selected.
-        """
-        from ccpn.ui.gui.modules.PeakTable import PeakTableModule
+    # GWV 11/9/20245: moved to Gui
+    # @logCommand('application.')
+    # def showStructureTable(self, position='bottom', relativeTo=None,
+    #                        structureEnsemble=None, selectFirstItem=False):
+    #     """Displays Structure Table
+    #     """
+    #     from ccpn.ui.gui.modules.StructureTable import StructureTableModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     structureTableModule = StructureTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
+    #     if structureEnsemble:
+    #         structureTableModule.selectTable(structureEnsemble)
+    #     return structureTableModule
 
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        peakTableModule = PeakTableModule(mainWindow, selectFirstItem=False)  #selection is done by the current peaks.
-        if self.current.peak and not peakList:
-            peakList = self.current.peak.peakList
-        if peakList:
-            peakTableModule.selectTable(peakList)
-            peakTableModule.selectPeaks(self.current.peaks)
+    # GWV 08/08/2024: moved to Gui
+    # @logCommand('application.')
+    # def showDataTable(self, position='bottom', relativeTo=None,
+    #                   dataTable=None, selectFirstItem=False):
+    #     """Displays DataTable Table
+    #     """
+    #     # from ccpn.ui.gui.modules.DataTableModuleABC import DataTableModuleBC as _module
+    #     from ccpn.ui.gui.modules.DataTableModule import DataTableModule as _module
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #
+    #     _dataTableModule = _module(mainWindow=mainWindow, table=dataTable, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(_dataTableModule, position=position, relativeTo=relativeTo)
+    #     return _dataTableModule
 
-        mainWindow.moduleArea.addModule(peakTableModule, position=position, relativeTo=relativeTo)
-        return peakTableModule
+    # GWV 9/11/2024: moved to Gui.py
+    # @logCommand('application.')
+    # def showViolationTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
+    #                        violationTable=None, selectFirstItem=False):
+    #     """Displays Violation table on left of main window with specified list selected.
+    #     """
+    #     from ccpn.ui.gui.modules.ViolationTableModule import ViolationTableModule as _module
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #
+    #     _violationTableModule = _module(mainWindow=mainWindow, table=violationTable, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(_violationTableModule, position=position, relativeTo=relativeTo)
+    #     return _violationTableModule
 
-    @logCommand('application.')
-    def showMultipletTable(self, position: str = 'left', relativeTo: CcpnModule = None,
-                           multipletList: MultipletList = None, selectFirstItem=False):
-        """Displays multipletList table on left of main window with specified list selected.
-        """
-        from ccpn.ui.gui.modules.MultipletTable import MultipletTableModule
+    # @logCommand('application.')
+    # def showCollectionModule(self, position='bottom', relativeTo=None,
+    #                          collection=None, selectFirstItem=False):
+    #     """Displays Collection Module
+    #     """
+    #     MessageDialog.showNYI(parent=self.mainWindow)
+    #     # pass
 
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        multipletTableModule = MultipletTableModule(mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(multipletTableModule, position=position, relativeTo=relativeTo)
-        if multipletList:
-            multipletTableModule.selectTable(multipletList)
-        return multipletTableModule
-
-    @logCommand('application.')
-    def showIntegralTable(self, position: str = 'left', relativeTo: CcpnModule = None,
-                          integralList: IntegralList = None, selectFirstItem=False):
-        """Displays integral table on left of main window with specified list selected.
-        """
-        from ccpn.ui.gui.modules.IntegralTable import IntegralTableModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        integralTableModule = IntegralTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(integralTableModule, position=position, relativeTo=relativeTo)
-        if integralList:
-            integralTableModule.selectTable(integralList)
-        return integralTableModule
-
-    @logCommand('application.')
-    def showRestraintTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
-                           restraintTable=None, selectFirstItem=False):
-        """Displays Peak table on left of main window with specified list selected.
-        """
-        from ccpn.ui.gui.modules.RestraintTableModule import RestraintTableModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        restraintTableModule = RestraintTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(restraintTableModule, position=position, relativeTo=relativeTo)
-        if restraintTable:
-            restraintTableModule.selectTable(restraintTable)
-        return restraintTableModule
-
-    @logCommand('application.')
-    def showStructureTable(self, position='bottom', relativeTo=None,
-                           structureEnsemble=None, selectFirstItem=False):
-        """Displays Structure Table
-        """
-        from ccpn.ui.gui.modules.StructureTable import StructureTableModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        structureTableModule = StructureTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
-        if structureEnsemble:
-            structureTableModule.selectTable(structureEnsemble)
-        return structureTableModule
-
-    @logCommand('application.')
-    def showDataTable(self, position='bottom', relativeTo=None,
-                      dataTable=None, selectFirstItem=False):
-        """Displays DataTable Table
-        """
-        # from ccpn.ui.gui.modules.DataTableModuleABC import DataTableModuleBC as _module
-        from ccpn.ui.gui.modules.DataTableModule import DataTableModule as _module
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-
-        _dataTableModule = _module(mainWindow=mainWindow, table=dataTable, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(_dataTableModule, position=position, relativeTo=relativeTo)
-        return _dataTableModule
-
-    @logCommand('application.')
-    def showViolationTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
-                           violationTable=None, selectFirstItem=False):
-        """Displays Violation table on left of main window with specified list selected.
-        """
-        from ccpn.ui.gui.modules.ViolationTableModule import ViolationTableModule as _module
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-
-        _violationTableModule = _module(mainWindow=mainWindow, table=violationTable, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(_violationTableModule, position=position, relativeTo=relativeTo)
-        return _violationTableModule
-
-    @logCommand('application.')
-    def showCollectionModule(self, position='bottom', relativeTo=None,
-                             collection=None, selectFirstItem=False):
-        """Displays Collection Module
-        """
-        MessageDialog.showNYI(parent=self.mainWindow)
-        # pass
-
-    @logCommand('application.')
-    def showNotesEditor(self, position: str = 'bottom', relativeTo: CcpnModule = None,
-                        note=None, selectFirstItem=False):
-        """Displays Notes Editing Table
-        """
-        from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-
-        notesEditorModule = NotesEditorModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        mainWindow.moduleArea.addModule(notesEditorModule, position=position, relativeTo=relativeTo)
-        if note:
-            notesEditorModule.selectNote(note)
-        return notesEditorModule
+    # GWV 12/09/2024; moved to Gui.py
+    # @logCommand('application.')
+    # def showNotesEditor(self, position: str = 'bottom', relativeTo: CcpnModule = None,
+    #                     note=None, selectFirstItem=False):
+    #     """Displays Notes Editing Table
+    #     """
+    #     from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #
+    #     notesEditorModule = NotesEditorModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+    #     mainWindow.moduleArea.addModule(notesEditorModule, position=position, relativeTo=relativeTo)
+    #     if note:
+    #         notesEditorModule.selectNote(note)
+    #     return notesEditorModule
 
     # GWV 3/4/24 : moved to Gui.py
     # @logCommand('application.')
@@ -2458,7 +2463,7 @@ class Framework(NotifierBase):
     #     self.ui.mainWindow.toggleConsole()
 
     @deprecated('Use ui.showChemicalShiftMapping to access the latest implementation')
-    def showChemicalShiftMapping(self, position: str = 'top', relativeTo: CcpnModule = None):
+    def showChemicalShiftMapping(self, position: str = 'top', relativeTo = None):
         return self.ui.showChemicalShiftMapping(position=position)
 
     # GWV 02/04/24: to ui
@@ -2472,15 +2477,16 @@ class Framework(NotifierBase):
     #     mainWindow.moduleArea.addModule(cs, position=position, relativeTo=relativeTo)
     #     return cs
 
-    def showRelaxationModule(self, position: str = 'top', relativeTo: CcpnModule = None):
-        from ccpn.ui.gui.modules.experimentAnalysis.RelaxationGuiModule import RelaxationGuiModule
-
-        mainWindow = self.ui.mainWindow
-        if not relativeTo:
-            relativeTo = mainWindow.moduleArea
-        relGuiModule = RelaxationGuiModule(mainWindow=mainWindow)
-        mainWindow.moduleArea.addModule(relGuiModule, position=position, relativeTo=relativeTo)
-        return relGuiModule
+    # GWV 12/9/2024: Moved to Gui.py
+    # def showRelaxationModule(self, position: str = 'top', relativeTo: CcpnModule = None):
+    #     from ccpn.ui.gui.modules.experimentAnalysis.RelaxationGuiModule import RelaxationGuiModule
+    #
+    #     mainWindow = self.ui.mainWindow
+    #     if not relativeTo:
+    #         relativeTo = mainWindow.moduleArea
+    #     relGuiModule = RelaxationGuiModule(mainWindow=mainWindow)
+    #     mainWindow.moduleArea.addModule(relGuiModule, position=position, relativeTo=relativeTo)
+    #     return relGuiModule
 
     # GWV 5/2/24: to GuiBase
     # def toggleCrosshairAll(self):
@@ -2515,26 +2521,30 @@ class Framework(NotifierBase):
     #
     #     ShortcutsPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
 
-    def runMacro(self, macroFile: str = None, extraCommands=None):
+    @logCommand('application.')
+    def runMacro(self, path: str = None, extraCommands=None):
+        """Runs a macro if a macro defined by path
+        :param path: path to Python macro file
+        :param extraCommands:
         """
-        Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
-        runs the selected macro.
-        """
-        if macroFile is None:
-            fType = '*.py'
-            dialog = MacrosFileDialog(parent=self.ui.mainWindow, acceptMode='run', fileFilter=fType)
-            dialog._show()
-            macroFile = dialog.selectedFile()
-            if not macroFile:
-                return
+        if not isinstance(path, (str, Path)):
+            raise TypeError(f'Expected str or Path instance; got {type(path)}')
+
+        _path = aPath(path)
+        if not _path.exists():
+            raise FileNotFoundError(f'{path} does not exist')
+        if not _path.suffix == '.py':
+            raise ValueError(f'Expected a Python file, got {path}')
 
         if extraCommands is None:
-            self.preferences._addRecentMacro(macroFile)
-        self.ui.mainWindow.pythonConsole._runMacro(macroFile, extraCommands=extraCommands)
+            self.preferences._addRecentMacro(_path)
+
+        with undoBlock():
+            self.ui.mainWindow.pythonConsole._runMacro(_path, extraCommands=extraCommands)
 
     #################################################################################################
 
-    # GWV 28/3 to _Gui.py
+    # GWV 28/3 to _Gui_V3_V4.py
     # def _systemOpen(self, path):
     #     """Open path to pdf file on system
     #     """

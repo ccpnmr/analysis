@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-14 19:13:39 +0100 (Mon, October 14, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-21 11:25:10 +0100 (Mon, October 21, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,32 +30,33 @@ __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
 import os
 import time
 from functools import partial, partialmethod
+from copy import deepcopy
 
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtGui import QKeySequence
 from PyQt5.QtCore import pyqtSlot
 
-from ccpn.core import Multiplet
-from ccpn.util import Logging
+from ccpn.util.Logging import getLogger
+
 from ccpn.core.Project import Project
-
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 
-from ccpn.framework.Preferences import getPreferences, RECENT_MACROS, USE_NATIVE_MENUS
+from ccpn.framework.Preferences import getPreferences, USE_NATIVE_MENUS
 
 ## MainWindow class
 from ccpn.ui._implementation.Window import Window as _CoreClassMainWindow
 
 from ccpn.ui.gui import guiSettings
+from ccpn.ui.gui.guiSettings import getColours
 
-from ccpn.ui.gui.lib.mouseEvents import SELECT, PICK, MouseModes, \
-    setCurrentMouseMode, getCurrentMouseMode
+from ccpn.ui.gui.lib.mouseEvents import \
+    SELECT, PICK, MouseModes, setCurrentMouseMode, getCurrentMouseMode
 from ccpn.ui.gui.lib import GuiStrip
 from ccpn.ui.gui.lib.Shortcuts import Shortcuts
 from ccpn.ui.gui.guiSettings import (getColours, GUITABLE_SELECTED_BACKGROUND, consoleStyle)
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
+from ccpn.ui.gui import Layout
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.PlotterWidget import plotter
@@ -70,13 +71,12 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager, showInfo, showError
-from ccpn.util.Common import camelCaseToString
 
-from ccpn.util.Logging import getLogger
+from ccpn.util.Common import camelCaseToString
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
+from ccpn.util.Path import Path, aPath
 
-#from collections import OrderedDict
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
 
@@ -143,24 +143,19 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         super(Shortcuts, self).__init__()
         super(QtWidgets.QMainWindow, self).__init__()
 
-        logger = getLogger()
-
         # format = QtGui.QSurfaceFormat()
         # format.setSwapInterval(0)
         # QtGui.QSurfaceFormat.setDefaultFormat(format)
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
 
-        # Layout
-        layout = self.layout()
-        if layout is not None:
-            layout.setContentsMargins(0, 0, 0, 0)
-            layout.setSpacing(0)
-        # logger.debug2('GuiMainWindow: layout: %s' % layout)
+        # QMainWindow Layout
+        if (_layout := self.layout()) is not None:
+            _layout.setContentsMargins(0, 0, 0, 0)
+            _layout.setSpacing(0)
 
         self.setGeometry(200, 40, 1100, 900)
 
-        # GuiWindow.__init__(self, application)
         self.application = application
         # self.current : defined as a property derived from self.application
         # self._project set by model; and there is a property self.project
@@ -175,6 +170,9 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._hiddenModules = CcpnModuleArea(mainWindow=self)
         self._hiddenModules.setVisible(False)
 
+        # init Module layout dict
+        self._initModuleLayout()
+
         # Python console module; defined upon first time Class initialisation. Either by toggleConsole or Restoring layouts
         self.pythonConsoleModule = None
         # IPythonConsole instance; defined in _setupWindow()
@@ -182,16 +180,13 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # IPythonConsole namespace; filled in _setupWindow() and
         self.namespace = {}
 
-        # logger.debug('GuiMainWindow.moduleArea: layout: %s' % self.moduleArea.layout)  ## pyqtgraph object
-
-        # self.setCentralWidget(self.moduleArea)
         self._shortcutsDict = {}
 
-        setWidgetFont(self, )
+        setWidgetFont(widget=self )
 
         self._setupWindow()
         self._setupMenus()
-        self._initProject()
+        self._initProject(self.project)
         self._setShortcuts(mainWindow=self)
         self._setUserShortcuts(preferences=self.application.preferences, mainWindow=self)
         self._setMouseMode(SELECT)
@@ -223,6 +218,57 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
         # hide the window here and make visible later
         self.hide()
+
+    #-----------------------------------------------------------------------------------------
+    # Properties
+    #-----------------------------------------------------------------------------------------
+
+    @property
+    def spectrumDisplays(self) -> list:
+        """Return list of SpectrumDisplay instances
+        """
+        # STUB for now; inserted by model
+        return []
+
+    @property
+    def strips(self) -> list:
+        """Return list of Strip instances
+        """
+        # STUB for now; inserted by model
+        return []
+
+    @property
+    def axes(self) -> list:
+        """Return list of Axis instances
+        """
+        # STUB for now; inserted by model
+        return []
+
+    @property
+    def modules(self):
+        """Return tuple of modules currently displayed
+        """
+        return tuple(self.moduleArea.ccpnModules)
+
+    @property
+    def ui(self):
+        """The application.ui instance; eg. the gui
+        """
+        return self.application.ui
+
+    @property
+    def project(self) -> Project:
+        """The current project"""
+        #NB this linkage is set by the model (for now)
+        return self._project
+
+    @property
+    def current(self):
+        """:return the Current instance
+        """
+        return self.application.current
+
+    #-----------------------------------------------------------------------------------------
 
     def show(self):
         # self._checkPalette(self.palette())
@@ -389,23 +435,24 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._lastKeyStatus = Label(textColour='grey')
         self.statusBar().addPermanentWidget(self._lastKeyStatus, 0)
 
-    @property
-    def ui(self):
-        """The application.ui instance; eg. the gui
-        """
-        return self.application.ui
-
-    @property
-    def project(self) -> Project:
-        """The current project"""
-        #NB this linkage is set by the model (for now)
-        return self._project
-
-    @property
-    def current(self):
-        """:return the Current instance
-        """
-        return self.application.current
+    # GWV moved upward
+    # @property
+    # def ui(self):
+    #     """The application.ui instance; eg. the gui
+    #     """
+    #     return self.application.ui
+    #
+    # @property
+    # def project(self) -> Project:
+    #     """The current project"""
+    #     #NB this linkage is set by the model (for now)
+    #     return self._project
+    #
+    # @property
+    # def current(self):
+    #     """:return the Current instance
+    #     """
+    #     return self.application.current
 
     def makeDisabledFileIcon(self, icon):
         return icon
@@ -446,11 +493,12 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             if hasattr(spectrumDisplay, '_bottomGLAxis'):
                 spectrumDisplay._bottomGLAxis.refreshDevicePixelRatio()
 
-    @property
-    def modules(self):
-        """Return tuple of modules currently displayed
-        """
-        return tuple(self.moduleArea.ccpnModules)
+    # GWV moved upward
+    # @property
+    # def modules(self):
+    #     """Return tuple of modules currently displayed
+    #     """
+    #     return tuple(self.moduleArea.ccpnModules)
 
     def _setupNotifiers(self):
         """Setup notifiers connecting gui to current and project
@@ -497,30 +545,22 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
         event.ignore()
 
-    def _initProject(self):
+    def _initProject(self, project):
         """
         Puts relevant information from the project into the appropriate places in the main window.
         """
-        project = self.application.project
-        isNew = project.isNew
-
-        path = project.path
         self.namespace['project'] = project
         self.namespace['runMacro'] = self.pythonConsole._runMacro
 
-        msg = path + (' created' if isNew else ' opened')
+        path = project.path
+        msg = path + (' created' if project.isNew else ' opened')
         self.statusBar().showMessage(msg)
-        msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
 
-        # self._fillRecentProjectsMenu()
         self.pythonConsole.setProject(project)
         self._updateWindowTitle()
-        # if self.application.project.isTemporary:
-        #     self.getMenuAction('File->Archive').setEnabled(False)
-        # else:
-        #     self.getMenuAction('File->Archive').setEnabled(True)
 
         # sets working path to current path if required
+        # NOTE:GWV - move to framework
         if (genPrefs := self.application.preferences.general).useProjectPath == 'Alongside':
             genPrefs.userWorkingPath = project.projectPath.parent.asString()
         elif genPrefs.useProjectPath == 'Inside':
@@ -532,20 +572,15 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
         from copy import deepcopy
 
-        self._spectrumModuleLayouts = self.moduleLayouts = None
+        self._loadLayoutFromFile(reportErrors=False)
 
-        # get the project layout as soon as mainWindow is initialised
-        if self.application.preferences.general.restoreLayoutOnOpening:
-            try:
-                if _mLayouts := self.application._getUserLayout():
-                    self.moduleLayouts = _mLayouts
-                    self._spectrumModuleLayouts = deepcopy(self.moduleLayouts)
-
-            except (PermissionError):
-                getLogger().debug2('MainWindow._initProject restoring Layouts: Folder may be read-only')
-
-            except (FileNotFoundError):
-                getLogger().debug2('MainWindow._initProject restoring Layouts: File not found')
+        # self._spectrumModuleLayouts = self.moduleLayouts = None
+        #
+        # # get the project layout as soon as mainWindow is initialised
+        # if self.application.preferences.general.restoreLayoutOnOpening:
+        #     if (_mLayouts := self._loadLayoutFromFile(reportErrors=False)) is not None:
+        #         self.moduleLayouts = _mLayouts
+        #         self._spectrumModuleLayouts = deepcopy(self.moduleLayouts)
 
     def _updateWindowTitle(self):
         """
@@ -721,7 +756,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         return self.pythonConsoleModule
 
     #---------------------------------------------------------------------------------------------
-    # Menu's
+    # Menu and shortcut's
     #---------------------------------------------------------------------------------------------
 
     def _setupMenus(self):
@@ -729,11 +764,11 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         Creates menu bar for main window and creates the appropriate menus according to the arguments
         passed at startup.
         """
-        from ccpn.ui.gui.Menus import MenuManager
+        from ccpn.ui.gui.menus.MenuBarManager import MenuBarManager
 
         _useNativeMenus = getPreferences().get(USE_NATIVE_MENUS)
-        self._menuManager = MenuManager(mainWindow=self, menuDefs=self.ui._menuDefs)
-        self._menuManager.makeMenus(useNativeMenus=_useNativeMenus)
+        self._menuBarManager = MenuBarManager(mainWindow=self, menuDefs=self.ui._menuDefs)
+        self._menuBarManager.makeMenus(useNativeMenus=_useNativeMenus)
 
     #     # self._menuBar = self.menuBar()
     #     # for m in self.ui._menuDefs:
@@ -1344,11 +1379,87 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     # def clearLogFile(self):
     #     pass
 
-    def _addModule(self, module, position='top', relativeTo=None):
-        """Add module to the moduleArea
+    #-----------------------------------------------------------------------------------------
+    # Layout's
+    #-----------------------------------------------------------------------------------------
+
+    def _initModuleLayout(self):
+        """Initialise the ModuleLayout object
         """
-        # if relativeTo is None:
-        #     relativeTo = self.moduleArea
+        self._moduleLayout = Layout.ModuleLayout()
+
+    def _getLayoutDict(self) -> dict:
+        """:return a deepcopy of the layout dict
+        Backward compatibility with previous code
+        #CCPNINTERNAL: used is GuiSpectrumDisplay.restoreSpectrumState
+        """
+        return deepcopy(self._moduleLayout.layout)
+
+    def _loadLayoutFromFile(self, path: (str, Path, None) = None, reportErrors: bool = True) -> (dict, None):
+        """Load the layout from file path
+        :param path: path to valid layout file; if None defaults to project location
+        :param reportErrors: flag to report the errors via a popup
+        :return the layout dict or None on error
+        """
+        if path is None:
+            path = self._moduleLayout.getProjectLayoutPath()
+
+        if not isinstance(path, (str, Path)):
+            if reportErrors:
+                MessageDialog.showError('_loadLayoutFromFile', f'Invalid type; {path = }')
+            return None
+
+        try:
+            _layoutDict = self._moduleLayout.loadFromJson(path=path)
+        except (PermissionError, FileNotFoundError) as es:
+            getLogger().error(f'_loadLayoutFromFile(): {es}')
+            if reportErrors:
+                MessageDialog.showError('_loadLayoutFromFile',
+                                        f'{path} might not accessible\n{es}')
+            return None
+
+        return _layoutDict
+
+    def _saveLayoutToFile(self, path: (str, Path, None) = None, reportErrors: bool = True):
+        """Save the layout to file path
+        :param path: path to valid layout file; if None defaults to project location
+        :param reportErrors: flag to report the errors via a popup
+        """
+        if path is None:
+            path = self._moduleLayout.getProjectLayoutPath()
+
+        if not isinstance(path, (str, Path)):
+            if reportErrors:
+                MessageDialog.showError('_saveLayoutToFile', f'Invalid type; {path = }')
+            return
+
+        try:
+            self._moduleLayout.saveToJson(path=path)
+        except (PermissionError, FileNotFoundError) as es:
+            getLogger().error(f'_saveLayoutToFile(): {es}')
+            if reportErrors:
+                MessageDialog.showError('_saveLayoutToFile',
+                                        f'{path} might be readOnly\n{es}')
+
+    def _restoreLayout(self, restoreSpectrumDisplays=True):
+        """Restore the layouts from the current layout settings
+        """
+        if self._moduleLayout is None:
+            raise RuntimeError(f'_restoreLayout(): moduleLayout is undefined')
+
+        self.moduleArea._closeAll()
+        Layout.restoreLayout(mainWindow=self,
+                             layout=self._getLayoutDict(),
+                             restoreSpectrumDisplays=restoreSpectrumDisplays)
+
+    #-----------------------------------------------------------------------------------------
+    # Modules
+    #-----------------------------------------------------------------------------------------
+
+    def _addModule(self, module, position='top', relativeTo=None):
+        """Add module to the moduleArea; just pass the call on to moduleArea
+        """
+        # setting relativeTo default is done in modeuleArea.addModule
         self.moduleArea.addModule(module, position=position, relativeTo=relativeTo)
 
     def _closeMainWindowModules(self):
@@ -1475,6 +1586,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """
         Displays macro editor with contents of the log.
         """
+        from ccpn.ui.gui.modules.MacroEditor import MacroEditor
+
         editor = MacroEditor(self.moduleArea, self, "Macro Editor")
         with open(self.project._logger.logPath, 'r') as fp:
             l = fp.readlines()
@@ -1582,7 +1695,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # use an undoBlockWithoutSideBar, and ignore logging if MAXITEMLOGGING or more items
         # to stop overloading of the log
 
-        from ccpn.framework.lib.DataLoaders.DataLoaderABC import _getPotentialDataLoaders
         from ccpn.ui.gui.widgets.SideBar import SideBar
 
         urls = [str(url) for url in data.get(DropBase.URLS, []) if len(url) > 0]
@@ -1697,7 +1809,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     # Code moved from previously lib.GuiWindow
     #-----------------------------------------------------------------------------------------
 
-    @logCommand('mainWindow.')
+    # @logCommand('mainWindow.')
     def _deassignPeaks(self):
         """Deassign all from selected peaks
         """
@@ -1873,7 +1985,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """Peak: take self.application.currentPeak as default
         """
 
-        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar
+        from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
 
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
@@ -1931,7 +2043,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """
         Recalculates the peak height without changing the ppm position
         """
-        from ccpn.core.lib.peakUtils import estimateVolumes, updateHeight
+        from ccpn.core.lib.peakUtils import updateHeight
 
         getLogger().info('Recalculating peak height(s).')
 
@@ -1984,7 +2096,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """Estimate volumes of peaks selected by right-mouse menu
         If clicking on a selected peak then apply to all selected, otherwise apply to clicked peaks
         """
-        from ccpn.core.lib.peakUtils import estimateVolumes, updateHeight
+        from ccpn.core.lib.peakUtils import estimateVolumes
 
         current = self.application.current
         peaks = current.peaks
@@ -2659,6 +2771,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # GWV: Somehow the code (Layout restore?) cannot deal with the PythonConsoleModule
         # being initialised by MainWindow, but hidden until needed. So we initialise it here
         # if there is not PythonConsoleModule
+        from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+
         _init = False
         if self.pythonConsoleModule is None:
             # No pythonConsole module detected, so create one.
@@ -2756,7 +2870,7 @@ class MainWindow(_CoreClassMainWindow, GuiMainWindow):
     """GUI main window, corresponds to OS window"""
 
     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
-        logger = Logging.getLogger()
+        logger = getLogger()
         logger.debug3(f'MainWindow>> project: {project}')
         logger.debug3(f'MainWindow>> project.application: {project.application}')
 

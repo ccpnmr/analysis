@@ -54,9 +54,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-22 15:44:21 +0100 (Tue, October 22, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -90,6 +90,7 @@ from ccpn.core.lib.ContextManagers import \
     undoStackBlocking, renameObject, undoBlock, \
     ccpNmrV3CoreSetter, inactivity, undoBlockWithoutSideBar, notificationEchoBlocking
 
+from ccpn.core.lib.Notifiers import NotifierSignal
 from ccpn.core.lib.DataStore import DataStore
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC, getDataFormats
 from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
@@ -170,6 +171,11 @@ class Spectrum(AbstractWrapperObject):
     _SERIESITEMS = '_seriesItems'
     _DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
     _NEGATIVENOISELEVEL = 'negativeNoiseLevel'
+
+    # A property for which the graphics machinery sets an OBSERVE notifier
+    # Code potentially affecting graphics can do: mySpectrum._rebuildContours = True,
+    # which will advance the _rebuildContours counter by one, triggering any callbacks
+    _rebuildContours = NotifierSignal('_rebuildContours')
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure
@@ -814,6 +820,15 @@ class Spectrum(AbstractWrapperObject):
         self._wrappedData.experiment.name = str(value)
 
     @property
+    def pulseProgram(self):
+        """:return the pulse program if defined by the dataSource or None otherwise
+        """
+        if self.dataSource is not None:
+            return self.dataSource.pulseProgram
+        else:
+            return None
+
+    @property
     def filePath(self) -> Optional[str]:
         """Definition of the NMR (binary) dataSource file; can contain redirections (e.g. $DATA)
         Use Spectrum.path attribute for an absolute, decoded path
@@ -881,7 +896,6 @@ class Spectrum(AbstractWrapperObject):
         """Return True if the spectrum is already defined as Alongside
         """
         from ccpn.core.lib.DataStore import AlongsideRedirection
-
         return self._dataStore.redirectionIdentifier == AlongsideRedirection.identifier
 
     @property
@@ -889,7 +903,6 @@ class Spectrum(AbstractWrapperObject):
         """Return True if the spectrum is already defined as Inside
         """
         from ccpn.core.lib.DataStore import InsideRedirection
-
         return self._dataStore.redirectionIdentifier == InsideRedirection.identifier
 
     def _makeNewRelativePath(self, newPath) -> Path:
@@ -956,13 +969,15 @@ class Spectrum(AbstractWrapperObject):
                     redo=partial(self._openFileHelper, newDataStore, newDataSource)
                     )
 
-    def _openFile(self, path: str, dataFormat: str, checkParameters: bool = True, dataSource=None) -> bool:
+    def _openFile(self, path: str, dataFormat: str, checkParameters: bool = True,
+                  dataSource=None, update=True) -> bool:
         """Open the spectrum as defined by path and dataFormat, creating a dataSource object.
 
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
         :param dataFormat: a dataFormat defined by one of the SpectrumDataSource types
         :param checkParameters: flag to check a set of (limited) parameters
         :param dataSource: a SpectrumDataSource instance, overriding _getDataSource call
+        :param update: set the updateContour flag (potentially triggering contour updates)
         :return True if opened succesfully
 
         CCPNMRINTERNAL: also used in nef loader; ValidateSpectraPopup
@@ -1004,7 +1019,9 @@ class Spectrum(AbstractWrapperObject):
             # NOTE:ED - this is a bit of a hack :|
             _ = self.intensities
 
-        self._finaliseAction('change', _openFile=True)
+        if update:
+            self._rebuildContours = True
+
         return True
 
     @logCommand(get='self')
@@ -1016,12 +1033,12 @@ class Spectrum(AbstractWrapperObject):
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
                      defaults to self.filePath.
         """
-        path = path or self.filePath
-
+        _path = path or self.filePath
         self._closeFile()
-        self._openFile(path=path, dataFormat=self.dataFormat, checkParameters=False)
-        if self.dataSource is not None:
-            self.dataSource.exportToSpectrum(self, includePath=False)
+        if self._openFile(path=path, dataFormat=self.dataFormat, checkParameters=False, update=False):
+            if self.dataSource is not None:
+                self.dataSource.exportToSpectrum(self, includePath=False)
+            self._rebuildContours = True
 
     @property
     def path(self) -> Path:
@@ -2436,12 +2453,14 @@ class Spectrum(AbstractWrapperObject):
             self._setInternalParameter(self._NOISESD, None)  #ensure we don't go out of sync with the NoiseLevel.
 
         result = self._getInternalParameter(self._NOISESD)
-        if result is None and self.noiseLevel:
-            # We have the noiseLevel, we can back-calculate the noise sd
-            from ccpn.core.lib.SpectrumLib import _estimateNoiseSDforSpectrumNoiseLevel
-
-            result = _estimateNoiseSDforSpectrumNoiseLevel(self)
-            self._setInternalParameter(self._NOISESD, result)  #ensure we don't go out of sync with the NoiseLevel.
+        # GWV 17/10/2024: diabled; this is a bad idea as its triggers a read of the full spectrum;
+        # just imagine this is a 20GB 4D!
+        # if result is None and self.noiseLevel:
+        #     # We have the noiseLevel, we can back-calculate the noise sd
+        #     from ccpn.core.lib.SpectrumLib import _estimateNoiseSDforSpectrumNoiseLevel
+        #
+        #     result = _estimateNoiseSDforSpectrumNoiseLevel(self)
+        #     self._setInternalParameter(self._NOISESD, result)  #ensure we don't go out of sync with the NoiseLevel.
         return result
 
     @_noiseSD.setter
@@ -2879,10 +2898,11 @@ class Spectrum(AbstractWrapperObject):
         return newSpectrum
 
     @logCommand(get='self')
-    def convertToHdf5(self, path=None):
-        """Convert the binary data of self to an Hdf5 type file
+    def convertToNdf5(self, path=None, compressionMode=None):
+        """Convert the binary data of self to an ndf5 type file
         :param path: optional path, auto-generated from self.path when None
-        :return The newly created Hdf5DataStore instance
+        :param compressionMode: optional compressionMode
+        :return The newly created Hdf5DataSource instance
         """
         from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource as _Hdf5
 
@@ -2900,16 +2920,15 @@ class Spectrum(AbstractWrapperObject):
 
         _ds = self.dataSource
         if _ds.isNmrPipeSpectrum:
-            # Special case because of NmrPipe buffering
-            # _ds.closeHdf5Buffer()
-            # _ds.setBuffering(True, bufferIsTemporary=False, bufferPath=newDataStore.aPath())
-            # newDataSource = _ds.initialiseHdf5Buffer()
-            newDataSource = _ds.openHdf5Buffer(bufferIsTemporary=False, bufferPath=newDataStore.aPath())
+            # Special case because of NmrPipe buffering; this avoids first reading and writing the buffer
+            # file and then writing it again
+            newDataSource = _ds.openHdf5Buffer(bufferIsTemporary=False, bufferPath=newDataStore.aPath(),
+                                               compressionMode=compressionMode)
             _ds.fillHdf5Buffer()
 
         else:
             # Duplicate the data in an Hdf5 file
-            newDataSource = _ds.duplicateDataToHdf5(newDataStore.aPath())
+            newDataSource = _ds.duplicateDataToHdf5(newDataStore.aPath(), compressionMode=compressionMode)
 
         # Activate the new binary file
         self._openFileHelper(newDataStore=newDataStore, newDataSource=newDataSource)
@@ -3561,7 +3580,7 @@ class Spectrum(AbstractWrapperObject):
         """Handle post-initialising children after all children have been restored
         """
 
-        with inactivity(debugText=f'Spectrum {self} _postRestore'):
+        with inactivity(debugText=f'Spectrum <SP:{self.name}> _postRestore'):
             # This will set all Spectrum traits, including dataStore, dataSource and peakPicker
             self._spectrumTraits._restoreFromSpectrum()
 

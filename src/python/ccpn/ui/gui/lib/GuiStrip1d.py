@@ -37,7 +37,7 @@ from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.core.lib.ContextManagers import undoBlockWithSideBar as undoBlock
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, \
     IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
-from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu, \
+from ccpn.ui.gui.menus.StripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu, \
     _get1dPeakMenu, _get1dIntegralMenu, _get1dMultipletMenu, _get1dAxisMenu
 from ccpn.ui.gui.lib.StripLib import copyStripAxisPositionsAndWidths
 from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, StripLabelWidget

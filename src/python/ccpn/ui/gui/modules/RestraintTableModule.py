@@ -148,10 +148,12 @@ class RestraintTableModule(CcpnTableModule):
                                                          grid=(0, 0))
 
         # add the frame containing the pulldown and table
+        # NOTE:GWV - enableSearch=True?
         self._mainFrame = _RestraintTableFrame(parent=mainWidget,
                                                mainWindow=self.mainWindow,
                                                moduleParent=self,
-                                               restraintTable=restraintTable, selectFirstItem=selectFirstItem,
+                                               restraintTable=restraintTable,
+                                               selectFirstItem=selectFirstItem,
                                                grid=(0, 0))
 
         # get the widgets from the settings

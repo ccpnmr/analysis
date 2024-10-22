@@ -10,8 +10,9 @@ from __future__ import annotations
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -19,9 +20,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-19 10:04:46 +0100 (Fri, April 19, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-21 19:49:55 +0100 (Mon, October 21, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -68,7 +69,8 @@ class Path(_Path_):
 
     @property
     def filepath(self) -> Path:
-        """The folder without the filename"""
+        """:return: The folder of self without possible filename as a Path instance
+        """
         return self if self.is_dir() else self.parent
 
     @property
@@ -298,11 +300,15 @@ class Path(_Path_):
         """
         return Path(os.path.normpath(self.asString()))  # python <= 3.4; strings only
 
-    def open(self, *args, **kwds):
-        """Subclassing to catch any long file name errors that allegedly can occur on Windows
+    def open(self, mode='r', buffering=-1, encoding=None, errors=None, newline=None):
         """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        # Subclassed to catch any potential long file name errors
         try:
-            fp = super().open(*args, **kwds)
+            fp = super().open(mode=mode, buffering=buffering, encoding=encoding,
+                              errors=errors, newline=newline)
         except FileNotFoundError:
             if len(self.asString()) > 256:
                 raise FileNotFoundError('Error opening file "%s"; potentially path length (%d) is too large. Consider moving the file'
@@ -322,7 +328,7 @@ class Path(_Path_):
 
         Use in a with statement; ie.:
 
-        with myFile.saveWriteToFile as fp:
+        with myFile.saveWriteToFile(mode='w', validator=myValidatorFunc) as fp:
             sys.write(fp, 'text')
 
         :param mode: usual string defining write (w) or append (a) access, text or binary (b)
@@ -333,6 +339,8 @@ class Path(_Path_):
                           signature: validator(path:Path) -> bool
 
         :raise RunTimeError upon catching any error during open, write, close, ..
+
+        Loosely based on internet discussions using os.rename() as an atomic operation (on most platform's)
         """
 
         _tempFile = aPath(self + self._tempSuffix).uniqueVersion()
@@ -383,12 +391,12 @@ class Path(_Path_):
                 raise RuntimeError(f'While writing to {self} an error occured: {errorString}')
 
             else:
-                # We have successfully written (and optionally validated) the file to a temporary file.
-                # We already have checked if we can overwrite the file, so now just remove
-                # it and rename the temporary file
+                # We have successfully written (and optionally validated) the data as a temporary file.
+                # We already have checked if we can overwrite the file, so now just remove any existing
+                # "self" and rename the temporary file
                 if self.exists():
                     self.remove()
-                # use the os.rename call to cut out any intermediary
+                # use the os.rename call to make it an atomic operation
                 os.rename(_tempFile.asString(), aPath(self).asString())
 
     def globList(self, pattern='*') -> list:
@@ -403,8 +411,22 @@ class Path(_Path_):
             raise ValueError(f'{self!r} is not a directory')
         _rmdirs(str(self))
 
+    def fetchParent(self):
+        """Create, if needed, all directories upward of self;
+        different from mkdir as it does not attempt to create root and does not overwrite
+        or throws errors for existing directories.
+        """
+        _dirs = []
+        _p = self.parent
+        while _p != _p.root and not _p.exists():
+            _dirs.append(_p.name)
+            _p = _p.parent
+        # need to create in reversed order
+        _dirs = _dirs[::-1]
+        _p.fetchDir(*_dirs)
+
     def fetchDir(self, *dirNames) -> Path:
-        """Return and (if needed) create all dirNames relative to self
+        """Return and (if needed) create the downward tree all dirNames staring from self
         :return: Path instance of self / dirName[0] / dirName[1] ...
         """
         if not self.is_dir():
@@ -576,8 +598,15 @@ class Path(_Path_):
         """:return self as a string"""
         return str(self)
 
+    def endswith(self, postfix) -> bool:
+        """:return True if self ends with postfix
+        """
+        path = self.asString()
+        return path.endswith(postfix)
+
     def startswith(self, prefix) -> bool:
-        """:return True if self starts with prefix"""
+        """:return True if self starts with prefix
+        """
         path = self.asString()
         return path.startswith(prefix)
 
@@ -745,6 +774,7 @@ def joinPath(*args):
 def splitPath(path):
     """
     The same as os.path.split but with normalisation taken into account.
+    GWV: only used in chemBuild/memops/general/TextWriter_py_2_1
     """
 
     (head, tail) = os.path.split(unnormalisePath(path))
@@ -753,23 +783,23 @@ def splitPath(path):
     return head, tail
 
 
-def converseSplitPath(path):
-    """
-    Similar to splitPath but with head being the top directory and tail being the rest.
-    """
-
-    pair = splitPath(path)
-    head = None
-    tail = ''
-    while pair[0] and pair[0] not in ('.', '/'):
-        head = pair[0]
-        tail = joinPath(pair[1], tail)
-        pair = splitPath(head)
-
-    if head is None:
-        (head, tail) = pair
-
-    return head, tail
+# def converseSplitPath(path):
+#     """
+#     Similar to splitPath but with head being the top directory and tail being the rest.
+#     """
+#
+#     pair = splitPath(path)
+#     head = None
+#     tail = ''
+#     while pair[0] and pair[0] not in ('.', '/'):
+#         head = pair[0]
+#         tail = joinPath(pair[1], tail)
+#         pair = splitPath(head)
+#
+#     if head is None:
+#         (head, tail) = pair
+#
+#     return head, tail
 
 
 def getPathToImport(moduleString):
@@ -793,27 +823,27 @@ def getPythonDirectory():
     return os.path.dirname(getPathToImport('ccpn'))
 
 
-def deletePath(path):
-    """Removes path whether file or directory, taking into account whether symbolic link.
-    """
+# def deletePath(path):
+#     """Removes path whether file or directory, taking into account whether symbolic link.
+#     """
+#
+#     if not os.path.exists(path):
+#         return
+#
+#     if os.path.isfile(path) or os.path.islink(path):
+#         os.remove(path)
+#     else:
+#         shutil.rmtree(path)
 
-    if not os.path.exists(path):
-        return
 
-    if os.path.isfile(path) or os.path.islink(path):
-        os.remove(path)
-    else:
-        shutil.rmtree(path)
-
-
-def commonSuperDirectory(*fileNames):
-    """ Find lowest directory that contains all files in list
-    NB does not normalise file names.
-
-    Input: a list of file names
-    Output: lowest directory that contains all files. Does *not* end with a file
-    """
-    return os.path.dirname(os.path.commonprefix(fileNames))
+# def commonSuperDirectory(*fileNames):
+#     """ Find lowest directory that contains all files in list
+#     NB does not normalise file names.
+#
+#     Input: a list of file names
+#     Output: lowest directory that contains all files. Does *not* end with a file
+#     """
+#     return os.path.dirname(os.path.commonprefix(fileNames))
 
 
 def checkFilePath(filePath, allowDir=True):
@@ -849,70 +879,70 @@ def checkFilePath(filePath, allowDir=True):
     return isOk, msg
 
 
-def suggestFileLocations(fileNames, startDir=None):
-    """ From a list of files, return a common superdirectory and a list of
-    relative file names. If any of the files do not exist, search for an
-    alternative superdirectory that does contain the set of relative file names.
-    Searches in either a superdirectory of the starting/current directory,
-    or in a direct subdirectory.
-
-    Input: list of file names
-
-    Output: Superdirectory, list of relative file names.
-    If no suitable location is found, superdirectory is returned as None
-    """
-
-    if not fileNames:
-        return None, []
-
-    # set up startDir
-    if startDir is None:
-        startDir = os.getcwd()
-    startDir = normalisePath(startDir, makeAbsolute=True)
-
-    # find common baseDir and paths
-    files = [normalisePath(fp, makeAbsolute=True) for fp in fileNames]
-    baseDir = commonSuperDirectory(*files)
-    prefix = os.path.join(baseDir, '')
-    lenPrefix = len(prefix)
-    paths = [fp[lenPrefix:] for fp in files]
-
-    if [fp for fp in files if not os.path.exists(fp)]:
-        # some file not found.
-
-        # look in superdirectories
-        tail = 'junk'
-        baseDir = startDir
-        while tail:
-            for path in paths:
-                fp = os.path.join(baseDir, path)
-                if not os.path.exists(fp):
-                    # a file is not found. try new baseDir
-                    break
-            else:
-                # this one is OK - stop searching
-                break
-            #
-            baseDir, tail = os.path.split(baseDir)
-
-        else:
-            # No success - try in a subdirectory (one level) of startDir
-            matches = glob.glob(os.path.join(startDir, '*', paths[0]))
-            for aMatch in matches:
-                baseDir = normalisePath(aMatch[:-len(paths[0])])
-                for path in paths:
-                    fp = os.path.join(baseDir, path)
-                    if not os.path.exists(fp):
-                        # a file is not found. try new baseDir
-                        break
-                else:
-                    # this one is OK - stop searching
-                    break
-            else:
-                # we give up
-                baseDir = None
-    #
-    return baseDir, paths
+# def suggestFileLocations(fileNames, startDir=None):
+#     """ From a list of files, return a common superdirectory and a list of
+#     relative file names. If any of the files do not exist, search for an
+#     alternative superdirectory that does contain the set of relative file names.
+#     Searches in either a superdirectory of the starting/current directory,
+#     or in a direct subdirectory.
+#
+#     Input: list of file names
+#
+#     Output: Superdirectory, list of relative file names.
+#     If no suitable location is found, superdirectory is returned as None
+#     """
+#
+#     if not fileNames:
+#         return None, []
+#
+#     # set up startDir
+#     if startDir is None:
+#         startDir = os.getcwd()
+#     startDir = normalisePath(startDir, makeAbsolute=True)
+#
+#     # find common baseDir and paths
+#     files = [normalisePath(fp, makeAbsolute=True) for fp in fileNames]
+#     baseDir = commonSuperDirectory(*files)
+#     prefix = os.path.join(baseDir, '')
+#     lenPrefix = len(prefix)
+#     paths = [fp[lenPrefix:] for fp in files]
+#
+#     if [fp for fp in files if not os.path.exists(fp)]:
+#         # some file not found.
+#
+#         # look in superdirectories
+#         tail = 'junk'
+#         baseDir = startDir
+#         while tail:
+#             for path in paths:
+#                 fp = os.path.join(baseDir, path)
+#                 if not os.path.exists(fp):
+#                     # a file is not found. try new baseDir
+#                     break
+#             else:
+#                 # this one is OK - stop searching
+#                 break
+#             #
+#             baseDir, tail = os.path.split(baseDir)
+#
+#         else:
+#             # No success - try in a subdirectory (one level) of startDir
+#             matches = glob.glob(os.path.join(startDir, '*', paths[0]))
+#             for aMatch in matches:
+#                 baseDir = normalisePath(aMatch[:-len(paths[0])])
+#                 for path in paths:
+#                     fp = os.path.join(baseDir, path)
+#                     if not os.path.exists(fp):
+#                         # a file is not found. try new baseDir
+#                         break
+#                 else:
+#                     # this one is OK - stop searching
+#                     break
+#             else:
+#                 # we give up
+#                 baseDir = None
+#     #
+#     return baseDir, paths
 
 
 def fetchDir(path, dirName):
@@ -930,28 +960,28 @@ def fetchDir(path, dirName):
             return newPath
 
 
-# Original in util.Common
-defaultFileNameChar = '_'
-separatorFileNameChar = '+'
-validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
-                          'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-                          + defaultFileNameChar)
-validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
+# # Original in util.Common
+# defaultFileNameChar = '_'
+# separatorFileNameChar = '+'
+# validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
+#                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+#                           + defaultFileNameChar)
+# validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
 
 
-def makeValidCcpnFilePath(path):
-    """Replace invalid chars in path to assure Python 2.1 (used in ObjectDomain) compatibility
-    """
-    # used in ApiPath.py
-    ll = []
-    for ii, char in enumerate(path):
-        if char not in validFileNamePartChars:
-            char = defaultFileNameChar
-        ll.append(char)
-    return ''.join(ll)
-
-
-makeValidCcpnPath = makeValidCcpnFilePath
+# def makeValidCcpnFilePath(path):
+#     """Replace invalid chars in path to assure Python 2.1 (used in ObjectDomain) compatibility
+#     """
+#     # used in ApiPath.py
+#     ll = []
+#     for ii, char in enumerate(path):
+#         if char not in validFileNamePartChars:
+#             char = defaultFileNameChar
+#         ll.append(char)
+#     return ''.join(ll)
+#
+#
+# makeValidCcpnPath = makeValidCcpnFilePath
 
 
 # used in ccpnmodel/ccpncore/lib/chemComp/Io.py"

@@ -1,13 +1,7 @@
 """
-This file contains the HDF5 data access stuff
-it serves as an interface between the V3 Spectrum class and the actual Hdf5 data formats
-The Hdf5 format has writing capabilities
-
-Version history:
-No-version:     Luca's initial implementation
-1.0 (float):    Version info (float) stored as 'version' in parameters;
-                spectralWidth definition updated (if need be)
-1.0.1 (string): hdf5 metadata; stored in attributes top object (i.e. self.fp)
+This file contains the ndf5-file data access code
+it serves as an interface between the V3 Spectrum class and the actual ndf5 data format
+The ndf5 format has writing capabilities
 
 See SpectrumDataSourceABC for a description of the methods
 """
@@ -15,8 +9,9 @@ See SpectrumDataSourceABC for a description of the methods
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -24,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:48 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-14 16:34:40 +0200 (Mon, October 14, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,47 +32,22 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 #=========================================================================================
 
 from typing import Sequence, Tuple
-import h5py
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import isIterable
-from ccpn.util.traits.CcpNmrTraits import CString
+from ccpn.util.traits.CcpNmrTraits import CString, TList, CEnum
 from ccpn.framework.Version import VersionString
 
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionData
 
+from ccpn.core.lib.SpectrumDataSources.lib.Ndf5File import Ndf5File, NDF5_COMPRESSION_MODES
 
-# hdf5 metadata keys, as stored in the 'top' object and copied into the Hdf5Metadata object
-# NB:
-# this is different from the metadata of the SpectrumDataSouceABC, i.e. CcpNmrJson object
-# from which the Hdf5DataSource class is derived.
-# It is also different from the Traits metadata (as defined by the tag() method)
-#
-HDF5_VERSION_KEY = 'HDF5_Version'
-HDF5_TYPE_KEY = 'HDF5_DataType'
-HDF5_DATASET_KEY = 'HDF5_DatasetName'
-HDF5_KEYS = (HDF5_VERSION_KEY, HDF5_TYPE_KEY, HDF5_DATASET_KEY)
-
-NONE_STR = '__NONE__'
-
-
-class String(bytes):
-    "Bytes representation of string"
-
-    def __init__(self, value):
-        super().__init__(value, encoding='utf8')
-
-    def decode(self):
-        return super().decode(encoding='utf8')
-
-    def __str__(self):
-        return str(self.decode())
-
+# NONE_STR = '__NONE__'
 
 class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     """
-    CcpNmr HDF5-based binary nD (n=1-8) spectral data format. Allows for reading and writing.
+    CcpNmr ndf5-based binary nD (n=1-8) spectral data format. Allows for reading and writing.
     """
     #=========================================================================================
 
@@ -85,8 +55,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     # Conveniances; subclassed in the respective classes
     isHdf5Spectrum = True
 
-    isBlocked = False  # hdf5 format is inherently blocked, but we do not use the implemented
-    # routines in the ABC, but rather have hdf5 do the slicing
+    isBlocked = False  # ndf5 format is inherently blocked, but we do not use the implemented
+    # routines in the ABC, but rather have ndf5 do the slicing
     hasBlockCached = False  # Flag indicating if block data are cached
 
     wordSize = 4
@@ -96,22 +66,13 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     hasWritingAbility = True  # flag that defines if dataFormat implements writing methods
 
     suffixes = ['.ndf5', '.hdf5']
-    openMethod = h5py.File
+    openMethod = 'NOT-USED'
     defaultOpenReadMode = 'r'   # read/write, file must exists
     defaultOpenReadWriteMode = 'r+'
     defaultOpenWriteMode = 'w'  # creates, truncates if exists
     defaultAppendMode = 'a'
 
-    _HDF5version = VersionString('1.0.1')  # Curren HDF5 implementation version
-    _HDF5dataType = 'SpectrumData'
-    _HDF5dataSetName = 'spectrumData'
-
-    # lzf compression seems not to yield any improvement, but rather a increase in file size;
-    # gzip compression about 30% reductions, albeit at a great cost-penalty
-    compressionModes = ('lzf', 'gzip')  # 'szip' not in conda distribution
-    defaultCompressionMode = None  # hdf5 compression modes
-
-    _NONE = bytes(NONE_STR, 'utf8')
+    compressionMode = CEnum(mapping=NDF5_COMPRESSION_MODES, default_value=None)
 
     #=========================================================================================
 
@@ -125,121 +86,65 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         :param checkValid:flag to do validity check (default=False)
 
         """
-        self._hdf5Metadata = Hdf5Metadata()
+        self._ndf5File = Ndf5File(dataSource=self)
         super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount, checkValid=checkValid)
 
-    @property
-    def spectrumData(self):
-        if not self.hasOpenFile():
-            raise RuntimeError('File "%s" is not open' % self.path)
-        data = self.fp[self._HDF5dataSetName]
-        return data
-
-    @property
-    def spectrumParameters(self):
-        dataset = self.spectrumData
-        return dataset.attrs
-
-    def _checkHdf5Metadata(self):
-        """Check the hdf5 metadata for versioning, updates etc
+    def hasOpenFile(self) -> bool:
+        """:return True if there is an open file
         """
-        if not self.hasOpenFile():
-            getLogger().debug('File not open: hdf5 metadata check and update skipped')
-            return
+        return self._ndf5File.fp is not None
 
-        try:
-            _params = self.spectrumParameters
-        except Exception:
-            getLogger().debug('Error finding parameters: check and update skipped')
-            return
-
-        if HDF5_VERSION_KEY in self._hdf5Metadata:
-            # we are up-to-date to the current hdf5 version
-            self._hdf5Metadata.initCurrentValues()
-
-        elif 'version' in _params:
-            _mode = self.mode
-            if self.mode == self.defaultOpenReadMode:
-                self.closeFile()
-                self.openFile(mode=self.defaultOpenReadWriteMode, check=False)
-                _params = self.spectrumParameters
-
-            del _params['version']
-
-            # we are now up-to-date to the current hdf5 version
-            self._hdf5Metadata.initCurrentValues()
-            self._hdf5Metadata.saveToHdf5(self.fp)
-            self.closeFile()
-            self.openFile(mode=_mode)
-
-        elif HDF5_VERSION_KEY not in self._hdf5Metadata and 'version' not in _params:
-            # Earlier (Luca) hdf5 files, in which spectralWidth (sometimes)
-            # denoted the width in Hz
-
-            # for this, we need the file to open read/write
-            _mode = self.mode
-            if self.mode == self.defaultOpenReadMode:
-                self.closeFile()
-                self.openFile(mode=self.defaultOpenReadWriteMode, check=False)
-                _params = self.spectrumParameters
-
-            if 'spectralWidths' in _params:
-                sw = _params['spectralWidths']
-                _params['spectralWidthsHz'] = sw
-                del (_params['spectralWidths'])
-
-            # we are now up-to-date to the current hdf5 version
-            self._hdf5Metadata.initCurrentValues()
-            self._hdf5Metadata.saveToHdf5(self.fp)
-            self.closeFile()
-            self.openFile(mode=_mode)
-
-        else:
-            # This should not happen
-            getLogger().warning('Undetermined hdf5 version; skipping checks/upgrades')
-
-    @property
-    def _hdf5version(self)-> VersionString:
-        """:return the hdf5 version as stored in the hdf5 metadata
+    def closeFile(self):
+        """Close file if open.
         """
-        return VersionString(self._hdf5Metadata[HDF5_VERSION_KEY])
+        if self.hasOpenFile():
+            self._ndf5File.close()
+            self.mode = None
+        # call super to do any other admin, like optional closing buffer
+        super().closeFile()
 
-    def openFile(self, mode, check=True, **kwds):
+    def openFile(self, mode='r', overwrite:bool = False, sparse:bool = False, compressionMode = None, **kwds):
         """open self.path, set self.fp,
-        Raise Runtime error on opening errors
 
         :param mode: open file mode;
-                    from hdf5 documentation:
-                        r	Readonly, file must exist (default)
-                        r+	Read/write, file must exist
-                        w	Create file, truncate if exists
-                        w- or x	Create file, fail if exists
-                        a	Read/write if exists, create otherwise
-        :param check: check for metadata and old parameter definitions
+            from hdf5 documentation:
+                r	    Readonly, file must exist (default)
+                r+	    Read/write, file must exist
+                w	    Create file, truncate if exists
+                x	    Create file, fail if exists
+                a	    Read/write if exists, create otherwise
+        :param overwrite: overwrite flag (default: False).
+                          NB mode=='w' and overwrite==False amounts to mode=='x'
+                             mode=='x' sets overwrite==False
+        :param sparse: overwrite hdf5 default chunking for sparse matrices (default: False)
+        :param compressionMode: set the hdf5 compression; one of HDF5_COMPRESSION_MODES or None; (default: None)
+        :param **kwds: optional keyword arguments passed to open-method for this class.
+
         :return self.fp
+
+        :raises RuntimeError on opening errors
+
         """
 
         if mode is None:
             raise ValueError('%s.openFile: Undefined open mode' % self.__class__.__name__)
-        newFile = mode.startswith('w')
+
+        if mode[0:1] == 'x':
+            overwrite = False
+
+        newFile = not mode.startswith('r')
 
         if self.hasOpenFile():
             self.closeFile()
 
-        overwrite = kwds.pop('overwrite', False)
-        self._checkFilePath(newFile, mode, overwrite=overwrite)
+        self.disableCache()  # ndf5 has its own caching
 
         try:
-            self.disableCache()  # Hdf has its own caching
-            # Adjust hdf chunk caching parameters
-            kwds.setdefault('rdcc_nbytes', self.maxCacheSize)
-            kwds.setdefault('rdcc_nslots', 9973)  # large 'enough' prime number
-            kwds.setdefault('rdcc_w0', 0.25)  # most-often will read
-
-            self.fp = self.openMethod(str(self.path), mode, **kwds)
+            self._checkFilePath(newFile, mode=mode, overwrite=overwrite)
+            self._ndf5File.open(path=self.path, mode=mode, cacheSize=self.maxCacheSize)
             self.mode = mode
 
-        except Exception as es:
+        except (FileExistsError, FileNotFoundError) as es:
             self.closeFile()
             text = '%s.openFile(mode=%r): %s' % (self.__class__.__name__, mode, str(es))
             getLogger().warning(text)
@@ -247,163 +152,84 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         if not newFile:
             # old file
-            self._hdf5Metadata.restoreFromHdf5(self.fp)
-            if check:
-                self._checkHdf5Metadata()
             self.readParameters()
-
         else:
-            # New file; set the hdf5 metadata
-            self._hdf5Metadata.initCurrentValues()
-            self._hdf5Metadata.saveToHdf5(self.fp)
-
-            # create the spectrum dataset
-            dataSetKwds = {}
-            dataSetKwds.setdefault('fletcher32', True)
-            dataSetKwds.setdefault('fillvalue', 0.0)
-            if self.defaultCompressionMode is not None and self.defaultCompressionMode in self.compressionModes:
-                dataSetKwds.setdefault('compression', self.defaultCompressionMode)
-                dataSetKwds.setdefault('fletcher32', False)
-
-            self.fp.create_dataset(self._HDF5dataSetName,
-                                   self.pointCounts[::-1],  # data are organised numpy style z, y, x
-                                   dtype=self._dtype,
-                                   chunks=True,
-                                   track_times=False,  # to assure same hash after opening/storing
-                                   **dataSetKwds)
-            self.blockSizes = tuple(self.spectrumData.chunks[::-1])
-
+            # New file;
+            # create the spectrum ndarray
+            self._ndf5File.createSpectrumData(dimensionCount=self.dimensionCount,
+                                              pointCounts=self.pointCounts,
+                                              dtype=self.dtype,
+                                              sparse=sparse,
+                                              compressionMode=compressionMode
+                                             )
             self.writeParameters()
 
         # getLogger().debug2('openFile: %s; %s blocks with size %s; chunks=%s' %
         #                   (self, self._totalBlocks, self._totalBlockSize, tuple(self.blockSizes)))
 
-        return self.fp
+        return self._ndf5File.fp
 
     def readParameters(self):
-        """Read the parameter values from the hdf5 data structure
+        """Read the parameter values from the ndf5 data structure
         :return self
+        :raises RuntimeError
         """
-        def _convertValue(trait, value):
-            """Convert a value,  checking for bytes and CString type
-            return: converted value
-            """
-            if value == self._NONE or value == NONE_STR:
-                newValue = None
-            elif isinstance(trait, CString):
-                newValue = trait.fromBytes(value)
-            else:
-                newValue = value
-            return newValue
-
-        def _decode(parName, value):
-            """Encode CString traits as bytes, accouting for None values as well
-            """
-            if self.isDimensionalParameter(parName):
-                # dimensional parameter: optionally decode the items in the list
-                if not isIterable(value):
-                    raise RuntimeError('Decoding Hdf5 parameters, expected iterable but got "%s"' % value)
-                itemTrait = self.getItemTrait(parName)
-                newValue = []
-                for val in value:
-                    _convertedVal = _convertValue(itemTrait, val)
-                    newValue.append(_convertedVal)
-
-            else:
-                # non-dimensional parameter: optionally decode
-                trait = self.getTrait(parName)
-                newValue = _convertValue(trait, value)
-
-            return newValue
-
-        logger = getLogger()
-
         self.setDefaultParameters()
-
         try:
             if not self.hasOpenFile():
                 self.openFile(mode=self.defaultOpenReadMode)
 
-            params = self.spectrumParameters
-            #pDict = [(k, _decode(k, params[k])) for k in params.keys()]
+            params = self._ndf5File.getSpectrumParameters()
+            # loop over all parameters that are defined for the Spectrum class and present in the ndf5 parameters
+            for parName, value in [(p, params[p]) for p in self.keys(spectrumAttribute=lambda i: i is not None)
+                                    if p in params
+                                   ]:
 
-            # loop over all parameters that are defined for the Spectrum class and present in the hdf5 parameters
-            for parName, values in [(p, params[p]) for p in self.keys(spectrumAttribute=lambda i: i is not None) if p in params]:
-                if values is not None:
-                    values = _decode(parName, values)
-                    self.setTraitValue(parName, values)
+                self.setTraitValue(parName, value, force=True)
 
             # Get some dataset related parameters
-            dataset = self.spectrumData
-            self.dimensionCount = len(dataset.shape)
+            dataset = self._ndf5File.getSpectrumData()
             self.isBigEndian = self._bigEndian
-            # Get the number of points and blockSizes from the dataset
-            self.pointCounts = tuple(dataset.shape[::-1])
+            # get dimensionCount; some older parameter sets did not have this!
+            self.dimensionCount = len(dataset.shape)
+            # Get the blockSizes from the dataset
             self.blockSizes = tuple(dataset.chunks[::-1])
+            # some parameters are stored in the metadata
+            self.date = self._ndf5File.date
+            self.user = self._ndf5File.user
 
         except Exception as es:
-            logger.error('%s.readParameters: %s' % (self.__class__.__name__, es))
-            raise es
+            _txt = f'readParameters(): {es}'
+            getLogger().error(_txt)
+            raise RuntimeError(_txt)
 
         return super().readParameters()
 
     def writeParameters(self):
-        """write the parameter values into the hdf5 data structure
+        """write the parameter values into the ndf5 data structure
         :return self
+        :raises RuntimeError
         """
-        logger = getLogger()
+        if self.mode == 'r':
+            # self._ndf5File._reopen() # throws some error: "resource unavailable"
+            raise RuntimeError(f'writeParameters(): Cannot write to read-only file')
 
-        def _encode(parName, value):
-            """Encode CString traits as bytes, accounting for None values as well
-            """
-            if self.getMetadata(parName, 'isDimensional'):
-                # dimensional parameter: optionally encode the items in the list
-                if not isIterable(value):
-                    raise RuntimeError('Encoding Hdf5 parameters, expected iterable but got "%s"' % value)
-                itemTrait = self.getItemTrait(parName)
-                newValue = []
-                for val in value:
-                    if val is None:
-                        newValue.append(self._NONE)
-                    elif itemTrait is not None and isinstance(itemTrait, CString):
-                        newValue.append(itemTrait.asBytes(val))
-                    else:
-                        newValue.append(val)
-            else:
-                # non-dimensional parameter: optionally encode
-                trait = self.getTrait(parName)
-                if value is None:
-                    newValue = self._NONE
-                elif isinstance(trait, CString):
-                    newValue = trait.asBytes(value)
-                else:
-                    newValue = value
-
-            return newValue
+        if not self.hasOpenFile():
+            raise RuntimeError(f'writeParameters(): File {self} is not open')
 
         try:
-            if self.hasOpenFile() and self.mode == 'r':
-                # File was opened read-only; close it so it can be re-opened 'r+'
-                self.closeFile()
-                self.openFile(mode=self.defaultOpenReadWriteMode, check=False)
-
-            if not self.hasOpenFile():
-                raise RuntimeError('File %s is not open' % self)
-
-        except Exception as es:
-            logger.error('%s.writeParameters: %s' % (self.__class__.__name__, es))
-            raise es
-
-        try:
-            params = self.spectrumParameters
-            # values are stored in the hdf5 under the same attribute name as in the Spectrum class
-            for parName, values in self.items(spectrumAttribute=lambda i: i is not None):
-                values = _encode(parName, values)
-                params[parName] = values
+            # parameters are stored in the ndf5 under the same attribute name as in the Spectrum class
+            _params = dict(item for item in self.items(spectrumAttribute=lambda i: i is not None))
+            self._ndf5File.setSpectrumParameters(_params, clear=True)
+            # some parameters go into the metadata
+            self._ndf5File.date = self.date
+            self._ndf5File.user = self.user
+            self._ndf5File._saveMetadata()
 
         except Exception as es:
-            logger.error('%s.writeParameters: %s' % (self.__class__.__name__, es))
-            raise es
+            _txt = f'writeParameters(): {es}'
+            getLogger().error(_txt)
+            raise RuntimeError(_txt)
 
         return self
 
@@ -445,7 +271,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         planeData = PlaneData(dataSource=self, dimensions=(xDim, yDim), position=position)
 
-        dataset = self.spectrumData
+        dataset = self._ndf5File.getSpectrumData()
         slices = self._getSlices(position=position, dims=(firstAxis + 1, secondAxis + 1))  # --> slices are x,y,z ordered
         data = dataset[slices[::-1]]  # data are z,y,x ordered
         data = data.reshape((self.pointCounts[secondAxis], self.pointCounts[firstAxis]))
@@ -490,7 +316,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         if not self.hasOpenFile():
             self.openFile(mode=self.defaultAppendMode)
 
-        dataset = self.spectrumData
+        dataset = self._ndf5File.getSpectrumData()
         slices = self._getSlices(position=position, dims=(firstAxis + 1, secondAxis + 1))  # slices are x,y,z ordered
 
         # change 2D data to correct nD shape
@@ -516,7 +342,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         sliceData = SliceData(dataSource=self, dimensions=(sliceDim,), position=position)
 
-        dataset = self.spectrumData
+        dataset = self._ndf5File.getSpectrumData()
         slices = self._getSlices(position=position, dims=(sliceDim,))
         data = dataset[slices[::-1]]  # data are z,y,x ordered
         data = data.reshape((self.pointCounts[sliceDim-1],))
@@ -542,7 +368,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         if not self.hasOpenFile():
             self.openFile(mode=self.defaultAppendMode)
 
-        dataset = self.spectrumData
+        dataset = self._ndf5File.getSpectrumData()
         slices = self._getSlices(position=position, dims=(sliceDim,))
         dataset[slices[::-1]] = data  # data are z,y,x ordered
 
@@ -557,14 +383,14 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         if not self.hasOpenFile():
             self.openFile(mode=self.defaultOpenReadMode)
 
-        dataset = self.spectrumData
+        dataset = self._ndf5File.getSpectrumData()
         slices = self._getSlices(position=position, dims=[])
         data = dataset[slices[::-1]].flatten() # data are z,y,x ordered
         pointValue = float(data[0]) * self.dataScale
 
         return pointValue
 
-    def setPointData(self, value, position: Sequence = None) -> float:
+    def setPointData(self, value, position: Sequence = None):
         """Set point value defined by position (1-based)
         """
         if self.isBuffered:
@@ -581,7 +407,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         if not self.hasOpenFile():
             self.openFile(mode=self.defaultAppendMode)
 
-        dataset = self.spectrumData
+        dataset = self._ndf5File.getSpectrumData()
         slices = self._getSlices(position=position, dims=[])
         dataset[slices[::-1]] = value # data are z,y,x ordered
 
@@ -612,7 +438,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
                         for sliceTuple, np in zip(sliceTuples, self.pointCounts)]
         if all(withinLimits):
             # we can use the hdf extraction
-            dataset = self.spectrumData
+            dataset = self._ndf5File.getSpectrumData()
             sizes = [(stop-start+1) for start,stop in sliceTuples]
             regionData = RegionData(shape=sizes[::-1],
                                     dataSource=self, dimensions=self.dimensions,
@@ -629,41 +455,50 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         return regionData
 
+    def setRegionData(self, data, sliceTuples, aliasingFlags=None):
+        """Write an numpy array data containing the points defined by
+                sliceTuples=[(start_1,stop_1), (start_2,stop_2), ...],
+
+        sliceTuples are 1-based; sliceTuple stop values are inclusive (i.e. different
+        from the python slice object)
+
+        Optionally allow for aliasing per dimension:
+            0: No aliasing
+            1: aliasing with identical sign
+           -1: aliasing with inverted sign
+        """
+        _ndim = len(data.shape)
+        if _ndim != self.dimensionCount:
+            raise ValueError(f'Hdf5DataSource.setRegiondata(): incompatible data array (ndim={_ndim})')
+
+        if self.isBuffered:
+            return super().setRegionData(data=data, sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
+
+        if aliasingFlags is None:
+            aliasingFlags = [0] * self.dimensionCount
+
+        sliceTuples = self.checkForValidRegion(sliceTuples, aliasingFlags)
+
+        if not self.hasOpenFile():
+            self.openFile(mode=self.defaultOpenReadWriteMode)
+
+        withinLimits = [(sliceTuple[0] >= 1 and sliceTuple[1] <= np)
+                        for sliceTuple, np in zip(sliceTuples, self.pointCounts)]
+        if all(withinLimits):
+            # we can use the hdf methods
+            dataset = self._ndf5File.getSpectrumData()
+            sizes = [(stop-start+1) for start,stop in sliceTuples]
+            # regionData = RegionData(shape=sizes[::-1],
+            #                         dataSource=self, dimensions=self.dimensions,
+            #                         position = [st[0] for st in sliceTuples]
+            #                         )
+            slices = tuple(slice(start - 1, stop) for start, stop in sliceTuples)
+            dataset[slices[::-1]] = data[:] # data are ..,z,y,x ordered
+
+        else:
+            # Not yet implemented for now
+            raise NotImplementedError(f'Hdf5DataSource.setRegiondata(): folded data not yet implemented')
+
 # Register this format
 Hdf5SpectrumDataSource._registerFormat()
 
-
-class Hdf5Metadata(dict):
-    """A class to store/manage the Hdf5 metadata
-    """
-    # def __init__(self):
-    #     super().__init__()
-
-    def initCurrentValues(self):
-        """Initialise with default values"""
-        self[HDF5_TYPE_KEY] = Hdf5SpectrumDataSource._HDF5dataType
-        self[HDF5_DATASET_KEY] = Hdf5SpectrumDataSource._HDF5dataSetName
-        self[HDF5_VERSION_KEY] = str(Hdf5SpectrumDataSource._HDF5version)
-
-    def restoreFromHdf5(self, fp):
-        """Update self from the Hdf5 file
-        """
-        if fp is None:
-            raise ValueError('Undefined Hdf5 file')
-
-        _metadata = fp.attrs
-        # the _metadata object is unfortunately not a real dict
-        for key in HDF5_KEYS:
-            if key in _metadata:
-                self[key] = _metadata[key]
-
-    def saveToHdf5(self, fp):
-        """Update the Hdf5 file with self
-        """
-        if fp is None:
-            raise ValueError('Undefined Hdf5 file')
-
-        _metadata = fp.attrs
-        # the _metadata object is unfortunately not a real dict
-        for key, value in self.items():
-           _metadata[key] = value

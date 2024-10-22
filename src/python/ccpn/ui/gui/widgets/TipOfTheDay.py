@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:21:22 +0100 (Fri, August 23, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-09-18 14:14:00 +0100 (Wed, September 18, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -44,8 +44,7 @@ from PyQt5.QtWidgets import QApplication, QWizard, QWizardPage, QCheckBox, QPush
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Button import Button
 
-from ccpn.framework.PathsAndUrls import tipOfTheDayConfig
-
+from ccpn.framework.PathsAndUrls import ccpnConfigPath
 
 HJSON_ERROR = hjson.HjsonDecodeError
 
@@ -86,7 +85,6 @@ MAX_ORDER = sys.maxsize
 STYLE_FILE = 'style_file'
 
 TIPS_SETUP = None
-DEFAULT_CONFIG_PATH = 'tipConfig.hjson'
 
 
 def loadTipsSetup(path: Path, tip_paths: Optional[List[Path]] = None):
@@ -113,10 +111,12 @@ def loadTipsSetup(path: Path, tip_paths: Optional[List[Path]] = None):
     TIPS_SETUP = setup
 
 
-def _load_default_setup_if_required():
-    global TIPS_SETUP
-    if TIPS_SETUP is None:
-        TIPS_SETUP = loadTipsSetup(DEFAULT_CONFIG_PATH)
+# def _load_default_setup_if_required():
+#     # local importr to avoid cycles
+#     from ccpn.ui.gui.lib.TipOfTheDayManager import tipOfTheDayConfigPath
+#     global TIPS_SETUP
+#     if TIPS_SETUP is None:
+#         TIPS_SETUP = loadTipsSetup(tipOfTheDayConfigPath)
 
 
 BUTTON_IDS = {
@@ -329,7 +329,9 @@ class TipOfTheDayWindow(QWizard):
     def __init__(self, parent=None, seen_perma_ids=(), dont_show_tips=False, standalone=False,
                  mode=MODE_TIP_OF_THE_DAY):
 
-        _load_default_setup_if_required()
+        if TIPS_SETUP is None:
+            raise RuntimeError(f'Error starting TipOfTheDay: tips are not loaded')
+        # _load_default_setup_if_required()
 
         super(TipOfTheDayWindow, self).__init__(parent=parent)
 

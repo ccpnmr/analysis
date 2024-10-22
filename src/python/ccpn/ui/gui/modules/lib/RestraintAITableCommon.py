@@ -30,7 +30,7 @@ __date__ = "$Date: 2023-01-20 15:57:58 +0100 (Fri, January 20, 2023) $"
 from dataclasses import dataclass, field
 from PyQt5 import QtWidgets
 import pandas as pd
-from ccpn.ui.gui.lib.GuiStripContextMenus import (_selectedPeaksMenuItem, _addMenuItems,
+from ccpn.ui.gui.menus.StripContextMenus import (_selectedPeaksMenuItem, _addMenuItems,
                                                   _getNdPeakMenuItems, _setEnabledAllItems)
 from ccpn.ui.gui.widgets.table._TableAdditions import TableMenuABC
 from ccpn.ui.gui.widgets.SearchWidget import _TableFilterABC, Exclude, NotEqual

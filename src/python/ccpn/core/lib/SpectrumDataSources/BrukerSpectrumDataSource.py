@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-25 10:11:17 +0100 (Thu, July 25, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-10 20:47:58 +0100 (Thu, October 10, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,12 +33,14 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 
 from difflib import get_close_matches
 from itertools import permutations, combinations_with_replacement
+import numpy as np
 
 from ccpn.util.Path import Path, aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flatten
-from ccpn.util.traits.CcpNmrTraits import CPath
+from ccpn.util.traits.CcpNmrTraits import CPath, CString
 from ccpn.util.isotopes import DEFAULT_ISOTOPE_DICT
+
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 from ccpn.framework.constants import NO_SUFFIX
@@ -114,6 +116,8 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     _acqusFiles = 'acqus acqu2s acqu3s acqu4s acqu5s acqu6s acqu7s acqu8s'.split()
     _procFiles = 'procs proc2s proc3s proc4s proc5s proc6s proc7s proc8s'.split()
     _PDATA = 'pdata'
+    _pulseprogram = 'pulseprogram'
+    _nuslist = 'nuslist'
 
     termDict = {'AQ'         : 'acquisition time in seconds',
                 'AMP'        : 'amplitude of pulses',
@@ -208,12 +212,12 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 
     #=========================================================================================
 
-    _brukerRoot = CPath(default_value=None, allow_none=True).tag(info=
-                                                                 'an attribute to store the path to the Bruker root directory; used during parsing'
-                                                                 )
-    _pdataDir = CPath(default_value=None, allow_none=True).tag(info=
-                                                               'an attribute to store the path to the Bruker pdata directory; used during parsing'
-                                                               )
+    _brukerRoot = CPath(default_value=None).tag(
+                        info='The path to the Bruker root directory; used during parsing'
+                       )
+    _pdataDir = CPath(default_value=None).tag(
+                      info='The path to the Bruker pdata directory; used during parsing'
+                      )
 
     #=========================================================================================
 
@@ -538,9 +542,12 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             raise es
 
         try:
-            _comment = self.acqus[0].get('_comments')
-            if _comment is not None and isinstance(_comment, list):
-                self.comment = '\n'.join(_comment)
+            # Bruker comments are not really comments, but more date, user and other data
+            _comments = self.acqus[0].get('_comments', [])
+            if isinstance(_comments, list) and len(_comments) > 0:
+                _tmp = _comments[0].split()
+                self.date = ' '.join(_tmp[1:-1])
+                self.user = str(_tmp[-1])
 
             self.isBigEndian = self.procs[0].get('BYTORDP') == 1
 
@@ -554,7 +561,18 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self.temperature = None
                 getLogger().warning(f'Acqus defined temperature was 0.0; changed to undefined (None) instead')
 
-            # Dimensional parameters
+            # Try reading pulse program
+            _ppPath = self._brukerRoot / self._pulseprogram
+            if _ppPath.exists():
+                with _ppPath.open() as fp:
+                    self.pulseProgram = fp.read()
+
+            # Try reading nuslist
+            _nusPath = self._brukerRoot / self._nuslist
+            if _nusPath.exists():
+                self.nuslist = np.loadtxt(_nusPath, dtype=np.int32)
+
+            # Extract dimensional parameters
             for dimIndx in range(self.dimensionCount):
                 # collapse the acq and proc dicts into one, so we do not have to
                 # remember where the parameter lives

@@ -25,8 +25,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-18 16:32:46 +0100 (Wed, September 18, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-22 08:11:10 +0100 (Tue, October 22, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -498,7 +498,10 @@ class DataStore(CcpNmrJson):
         return text
 
     def __eq__(self, other):
-        return self._path == other._path
+        if not isinstance(other, DataStore):
+            return False
+        else:
+            return self._path == other._path
 
     def __ne__(self, other):
         return not self.__eq__(other)

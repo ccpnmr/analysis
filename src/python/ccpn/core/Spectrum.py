@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-22 15:44:21 +0100 (Tue, October 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-23 10:32:07 +0100 (Wed, October 23, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -172,10 +172,13 @@ class Spectrum(AbstractWrapperObject):
     _DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
     _NEGATIVENOISELEVEL = 'negativeNoiseLevel'
 
-    # A property for which the graphics machinery sets an OBSERVE notifier
-    # Code potentially affecting graphics can do: mySpectrum._rebuildContours = True,
-    # which will advance the _rebuildContours counter by one, triggering any callbacks
-    _rebuildContours = NotifierSignal('_rebuildContours')
+    # A properties for which the (graphics) machinery can set an OBSERVE notifier
+    #   Code potentially affecting graphics can do:
+    #       mySpectrum._rebuildContoursSignal = True,
+    #   which will advance the _rebuildContoursSignal counter by one, triggering any callbacks
+    _rebuildContoursSignal = NotifierSignal()
+    # Signal set by _openFile call
+    _openFileSignal = NotifierSignal()
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure
@@ -684,7 +687,7 @@ class Spectrum(AbstractWrapperObject):
 
         if self.dimensionCount == 1 and self._intensities is not None:
             # some 1D data were read before; update the intensities as the scale has changed
-            self._intensities = self.getSliceData()
+            self.getSliceData()
 
     @property
     @_includeInCopy
@@ -977,8 +980,8 @@ class Spectrum(AbstractWrapperObject):
         :param dataFormat: a dataFormat defined by one of the SpectrumDataSource types
         :param checkParameters: flag to check a set of (limited) parameters
         :param dataSource: a SpectrumDataSource instance, overriding _getDataSource call
-        :param update: set the updateContour flag (potentially triggering contour updates)
-        :return True if opened succesfully
+        :param update: set the _openFile flag (potentially triggering callbacks)
+        :return True if opened successfully
 
         CCPNMRINTERNAL: also used in nef loader; ValidateSpectraPopup
         """
@@ -1013,14 +1016,16 @@ class Spectrum(AbstractWrapperObject):
         # self._dataStore._saveInternal()
         # self._saveObject()
 
-        if self.dimensionCount == 1:
-            self._intensities = None
+        if self.dimensionCount == 1 and self._intensities is not None:
+            # data were read before; re-read and update the intensities attribute
+            self._intensities = self.getSliceData()
 
-            # NOTE:ED - this is a bit of a hack :|
-            _ = self.intensities
+        if self.dimensionCount == 1 and self._positions is not None:
+            # ppm-array was used before; re-set the positions attribute
+            self._positions = self.getPpmArray(dimension=1)
 
         if update:
-            self._rebuildContours = True
+            self._openFileSignal = True
 
         return True
 
@@ -1038,7 +1043,7 @@ class Spectrum(AbstractWrapperObject):
         if self._openFile(path=path, dataFormat=self.dataFormat, checkParameters=False, update=False):
             if self.dataSource is not None:
                 self.dataSource.exportToSpectrum(self, includePath=False)
-            self._rebuildContours = True
+            self._openFileSignal = True
 
     @property
     def path(self) -> Path:
@@ -1830,7 +1835,8 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def positions(self) -> np.array:
-        """ spectral region in ppm as NumPy array for 1D spectra """
+        """:return: spectral region in ppm as NumPy array (for 1D spectra only)
+        """
 
         if self.dimensionCount != 1:
             getLogger().warning('Currently this method only works for 1D spectra')

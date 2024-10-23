@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-22 15:44:21 +0100 (Tue, October 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-23 10:32:07 +0100 (Wed, October 23, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -1212,27 +1212,30 @@ class NotifierBase(object):
 
 
 class NotifierSignal(property):
-    """A class that defines a property that functions as a signal for other objects,
-    as these can set OBSERVE notifiers for its value changing.
+    """A class for cross-object signalling.
+    NotifierSignal defines a property that functions as a signal for other objects,
+    as the latter can set OBSERVE notifiers for its value changing.
 
     e.g. in type MyClass:
 
-        mySignal = NotifierSignal('mySignal')  # Unfortunately have to pass the name
+        mySignal = NotifierSignal()
 
         def func1(self):
             .....
             self.mySignal = True
 
-    elsewhere with myObject of type MyClass:
+    elsewhere:
+        myObject = MyClass()
         otherObject.setNotifier(myObject, [OBSERVE], 'mySignal', callback=someFunc)
 
     calling myObject.func1(), will trigger the callback someFunc()
     """
 
-    def __init__(self, name: str):
-        super().__init__(self._getter, self._setter, doc=f'NotifierSignal {name}')
+    def __init__(self):
+        super().__init__(self._getter, self._setter)
 
-        self.name: str = name
+        self.name: str | None = None   # initialised from first invocation of _setter()
+        self.klass = None       # initialised from first invocation of _setter()
         self.counter: int = 0
 
     def _getter(self, instance):
@@ -1241,6 +1244,12 @@ class NotifierSignal(property):
     def _setter(self, instance, value):
         """Any bool(value) == True will increment the counter and fire the notifiers
         """
+        if self.name is None:
+            self._findAttributeName(instance)
+
+        if self.name is None:
+            raise RuntimeError(f'NotifierSignal: unable to get attribute name from {instance}')
+
         if bool(value):
             self.counter += 1
             _callbackDict = {NotifierABC.ATTRIBUTE_NAME:self.name,
@@ -1249,6 +1258,29 @@ class NotifierSignal(property):
                              }
             instance._fireRegisteredNotifiers(trigger=Notifier.OBSERVE, targetName=self.name,
                                               callbackDict=_callbackDict)
+
+    def _findAttributeName(self, instance):
+        """Find the attribute name for self from the class of instance
+        sets self.klass and self.name
+        """
+        # find attributeName
+        self.klass = instance.__class__
+        found = None
+        for _attr in dir(self.klass):
+            try:
+                _obj = getattr(self.klass, _attr)
+            except AttributeError:
+                obj = None
+            finally:
+                if _obj == self:
+                    found = _attr
+
+        self.name = found
+
+    def __str__(self):
+        return(f'<NotifierSignal {self.name!r} of {self.klass}>')
+
+    __repr__ = __str__
 
     # def __get__(self, *args, **kwds):
     #     return super().__get__(*args, **kwds)

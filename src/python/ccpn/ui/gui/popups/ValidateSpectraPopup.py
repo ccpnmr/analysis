@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-18 14:14:27 +0100 (Wed, September 18, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-23 10:32:07 +0100 (Wed, October 23, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -639,7 +639,7 @@ class SpectrumPathRow(PathRowABC):
         # For speed reasons, we check if it any different from before, or was not valid to start with
         if self.hasChanged:
             try:
-                self.spectrum._openFile(path=path, dataFormat=self.dataFormat)
+                self.spectrum._openFile(path=path, dataFormat=self.dataFormat, dataSource=self.dataSource)
             except Exception as es:
                 getLogger().debug2(f'ignoring filePath, dataFormat error {es}')
 

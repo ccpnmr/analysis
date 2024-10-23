@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-18 14:14:00 +0100 (Wed, September 18, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-23 11:03:00 +0100 (Wed, October 23, 2024) $"
+__version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -23,7 +23,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
 
 import json
 import os
@@ -35,8 +34,6 @@ import faulthandler
 import contextlib
 from datetime import datetime
 import time
-
-from ccpn.util.decorators import deprecated
 
 
 try:
@@ -59,13 +56,6 @@ except Exception:
 
 faulthandler.enable()
 
-from typing import List
-
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QTimer
-
-from distutils.dir_util import copy_tree
 
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
@@ -95,15 +85,13 @@ from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 from ccpn.ui.gui import Layout
 
+from ccpn.util.decorators import deprecated
 from ccpn.util import Logging
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import Path, aPath, fetchDir
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable, getProcess
 from ccpn.util.decorators import logCommand
-
-
-logger = getLogger()
 
 #-----------------------------------------------------------------------------------------
 # # how frequently to check if license dialog has closed when waiting to show the tip of the day
@@ -202,6 +190,7 @@ class Framework(NotifierBase):
 
         # Logging: TODO: clean up these definitions and options
         # Optionally increase blocking level for command echo and logging
+        logger = getLogger()
         if getattr(self.args, 'noDebugLogging', False):
             self._increaseEchoBlocking()
         self._enableLoggingToConsole = True
@@ -627,10 +616,11 @@ class Framework(NotifierBase):
         # newProject._xmlLoader.setUnmodified()
         # # the project is now ready to use
 
-        # Now that all objects, including the graphics, are there restore current
+        # Now that all objects, including the graphics, are present restore current
         # for non-temporary projects
         if not self.project.isTemporary:
             self.current._restoreStateFromFile(self.statePath)
+
         # Load project specific resources.
         if self.resources:
             self.resources._initProjectResources()
@@ -2594,6 +2584,9 @@ def createFramework(projectPath=None, **kwds):
 
 
 def main():
+
+    from PyQt5 import QtWidgets
+
     # stop circular import when run from main entry point
     from ccpn.AnalysisAssign.AnalysisAssign import Assign
 

@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-18 15:00:18 +0100 (Fri, October 18, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-23 18:06:25 +0100 (Wed, October 23, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1341,7 +1341,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                 if cls._registerClassNotifiers:
                     className = cls._apiClassQualifiedName
                     Project._apiNotifiers[:0] = [
-                        ('_newApiObjectCallback', {'cls': cls}, className, '__init__'),
+                        # ('_newApiObjectCallback', {'cls': cls}, className, '__init__'),
                         ('_startDeleteCommandBlock', {}, className, 'startDeleteBlock'),
                         ('_finaliseApiDelete', {}, className, 'delete'),
                         ('_endDeleteCommandBlock', {}, className, 'endDeleteBlock'),

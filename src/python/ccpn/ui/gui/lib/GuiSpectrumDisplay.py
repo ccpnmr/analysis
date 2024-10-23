@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-23 10:32:07 +0100 (Wed, October 23, 2024) $"
-__version__ = "$Revision: 3.2.5.GWV $"
+__dateModified__ = "$dateModified: 2024-10-23 16:18:27 +0100 (Wed, October 23, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -268,9 +268,6 @@ class GuiSpectrumDisplay(CcpnModule):
         self.stripScaleFactor = 1.0
 
         self._setNotifiers()
-        # # A dict of (spectrum-pid, []) pairs, maintaining the notifiers set for spectrum
-        # # Maintained by _setSpectrumNotifiers() and _deleteSpectrumNotifiers()
-        # self._spectrumNotifiersDict: dict = {}
 
         self._fillToolBar()
 
@@ -549,7 +546,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     def _updateSettingsAxesUnits(self):
         """Update the settings of x- and y-axis units of the display
-        CCPNINTERNAL: used in _newS[ectrumDisplay and when setting Axis.unit attribute
+        CCPNINTERNAL: used in _newSpectrumDisplay and when setting Axis.unit attribute
         """
         xUnit = self._unitIndices[0]
         yUnit = self._unitIndices[1] if not self.is1D else None
@@ -698,18 +695,29 @@ class GuiSpectrumDisplay(CcpnModule):
         """Set the OBSERVE notifiers on spectrum.
         Used by displaySpectrum() and _postRestore() to set notifiers for each spectrum
         """
-        # Contours
-        targets = """
-        _rebuildContoursSignal
-        _openFileSignal
-        positiveContourBase positiveContourFactor positiveContourCount includePositiveContours
-        negativeContourBase negativeContourFactor negativeContourCount includeNegativeContours
-        scale
-        """.split()
-        self.setNotifier(spectrum, [Notifier.OBSERVE],
-                                   targetName = targets,
-                                   callback = self._buildContoursCallback
-                         )
+        if spectrum.dimensionCount > 1:
+            # nD: Contours
+            targets = """
+            _rebuildContoursSignal
+            _openFileSignal
+            positiveContourBase positiveContourFactor positiveContourCount includePositiveContours
+            negativeContourBase negativeContourFactor negativeContourCount includeNegativeContours
+            scale
+            """.split()
+            self.setNotifier(spectrum, [Notifier.OBSERVE],
+                                       targetName = targets,
+                                       callback = self._buildContoursCallback
+                             )
+        elif spectrum.dimensionCount == 1:
+            # 1D: plot
+            targets = """
+            _openFileSignal 
+            scale
+            """.split()
+            self.setNotifier(spectrum, [Notifier.OBSERVE],
+                                       targetName = targets,
+                                       callback = self._build1DPlotCallback
+                             )
 
         # pass  # for debugging breakpoint
 
@@ -838,8 +846,35 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        GLNotifier.GLMULTIPLETLISTLABELS
                                                        ])
 
+    def _build1DPlotForSpectrum(self, spectrum: Spectrum):
+        """(Re-)build the plot for 1D spectrum
+        """
+        # GWV 23/10/24
+        if not self.is1D:
+            return
+
+        if not isinstance(spectrum, Spectrum):
+            raise TypeError(f'_build1DPlotForSpectrumv(): expected Spectrum instance, got {type(spectrum)}')
+
+        _specViews = self.getSpectrumViewFromSpectrum(spectrum)
+        if not _specViews:
+            raise RuntimeError(f'_build1DPlotForSpectrum(): something has gone very wrong; no spectrumViews for {spectrum}')
+
+        for specView in _specViews:
+            specView.refreshData()
+
+    def _build1DPlotCallback(self, callbackDict):
+        """Callback for changing any of the 1D-plot parameters through OBSERVE notifier
+        """
+        # GWV 19/6/24
+        if (spectrum := callbackDict.get(Notifier.THEOBJECT)) is None:
+            raise RuntimeError(f'_build1DPlotCallback(): something has gone very wrong; no spectrum')
+        if not spectrum in self.spectra:
+            raise RuntimeError(f'_build1DPlotCallback(): {spectrum} not displayed in {self}')
+        self._build1DPlotForSpectrum(spectrum)
+
     def _buildContoursForSpectrum(self, spectrum: Spectrum):
-        """(Re-)build the contours for spectrum
+        """(Re-)build the contours for nD spectrum
         """
         # GWV 19/6/24
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -848,16 +883,16 @@ class GuiSpectrumDisplay(CcpnModule):
             return
 
         if not isinstance(spectrum, Spectrum):
-            raise TypeError(f'_rebuilsCOntours(): expected Spectrum instance, got {type(spectrum)}')
+            raise TypeError(f'_buildContoursForSpectrum(): expected Spectrum instance, got {type(spectrum)}')
 
         _specViews = self.getSpectrumViewFromSpectrum(spectrum)
         if not _specViews:
-            raise RuntimeError(f'_buildContoursCallback(): something has gone very wrong; no spectrumViews for {spectrum}')
+            raise RuntimeError(f'_buildContoursForSpectrum(): something has gone very wrong; no spectrumViews for {spectrum}')
 
         GLSignals = GLNotifier(parent=self)
 
-        for specViews in _specViews:
-            specViews.buildContoursOnly = True
+        for specView in _specViews:
+            specView.buildContoursOnly = True
 
         # repaint
         GLSignals.emitPaintEvent()

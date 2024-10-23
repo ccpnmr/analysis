@@ -31,8 +31,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-23 10:32:07 +0100 (Wed, October 23, 2024) $"
-__version__ = "$Revision: 3.2.5.GWV $"
+__dateModified__ = "$dateModified: 2024-10-23 16:18:27 +0100 (Wed, October 23, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -55,6 +55,7 @@ from ccpn.core.lib.WeakRefList import _WeakRefList
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.AttributeDict import AttributeDict
+from ccpn.util.Common import SENTINEL
 
 from ccpn.framework.Application import getCurrent, getProject
 
@@ -260,11 +261,11 @@ class NotifierABC(object):
         del(self)
 
     def newCallbackDict(self,
-                        previousValue=None, value=None, attributeName=None,
-                        obj=None, object=None,
-                        oldpid=None, pid=None,
+                        previousValue=SENTINEL, value=SENTINEL, attributeName=SENTINEL,
+                        obj=SENTINEL, object=SENTINEL,
+                        oldpid=SENTINEL, pid=SENTINEL,
                         specifiers=None,
-                        itemsChanged=None
+                        itemsChanged=SENTINEL
                         ) -> dict:
         """Create and return a dict with all the callback keys.
         Both the obj en object arguments are mapped to the OBJECT key
@@ -789,6 +790,9 @@ class NotifierBase(object):
     REGISTERED_NOTIFIERS_DICT = '_registeredNotifiersDict'
     #-----------------------------------------------------------------------------------------
 
+    # A dict that contains all NotifierSignal instances as (name, instance) pairs.
+    _notifierSignalsDict: dict = SENTINEL
+
     def __init__(self):
 
         # A dict that maintains the Notifiers initiated by the object; i.e. by setNotifier, setGuiNotifier,
@@ -798,6 +802,26 @@ class NotifierBase(object):
         # A dict that maintains the Notifiers registered for the object; i.e. those that will be called in
         # response to changes to the object
         self._registeredNotifiersDict = _NotifiersDict()
+
+        # Called with every init, but effectively only executed once per class;
+        # Alternatively, it would need to go in some form of register() method for the class,
+        # but as many Classes inherit from NotifierBase, and not all have this mechanism,
+        # this implementation is "easier".
+        self._findNotifierSignals()
+
+    @classmethod
+    def _findNotifierSignals(cls):
+        """Fill the _notifierSignalsDict with any instances of a NotifierSignal;
+        Called with every init, but only eeffectively xecuted once per class
+        """
+        if cls._notifierSignalsDict == SENTINEL:
+            cls._notifierSignalsDict = {}
+            for name, val in vars(cls).items():
+                if isinstance(val, NotifierSignal):
+                    val.klass = cls
+                    val.name = name
+                    cls._notifierSignalsDict[name] = val
+        # pass
 
     #-----------------------------------------------------------------------------------------
     # creating, registering and unregistering notifier set for self
@@ -1066,6 +1090,14 @@ class NotifierBase(object):
     # Notification firing
     #-----------------------------------------------------------------------------------------
 
+    def _checkForSentinels(self, notifier, callbackDict: dict, keys: list | tuple):
+        """Check callbackDict keys that have sentinel value
+        :raises ValueError when detected
+        """
+        for _key in keys:
+            if value := callbackDict.get(_key,SENTINEL) == SENTINEL:
+                raise RuntimeError(f'Firing {notifier}: expected value for key {_key!r}')
+
     def _fireSingleNotifier(self, notifier, callbackDict: dict):
         """Fire notifier passing callbackDict to callback function
         :param callbackDict: parameters passed to callback function as callbackDict
@@ -1090,6 +1122,20 @@ class NotifierBase(object):
         _callbackDict = notifier.newCallbackDict()
         _callbackDict.update(callbackDict)
 
+        # Some sanity checks on the callbackDict:
+        if notifier.trigger == NotifierABC.OBSERVE:
+            self._checkForSentinels(notifier, _callbackDict,
+                    [NotifierABC.ATTRIBUTE_NAME, NotifierABC.VALUE, NotifierABC.PREVIOUSVALUE]
+            )
+        elif notifier.trigger == NotifierABC.RENAME:
+            self._checkForSentinels(notifier, _callbackDict,
+                    [NotifierABC.OBJECT, NotifierABC.PID, NotifierABC.OLDPID]
+            )
+        elif notifier.trigger in (NotifierABC.DELETE, NotifierABC.CREATE):
+            self._checkForSentinels(notifier, _callbackDict,
+                    [NotifierABC.OBJECT]
+            )
+
         # execute the callback
         try:
             # V4NotifierBase._notifierStack.append((V4NotifierBase._notifierContextLevel, notifier))
@@ -1103,7 +1149,6 @@ class NotifierBase(object):
         finally:
             notifier._isExecuting = False
             # V4NotifierBase._notifierStack.pop()
-
 
     def _fireRegisteredNotifiers(self, trigger: str, targetName: str | None, callbackDict: dict ):
         """Fire notifiers registered with self of type trigger, targetName passing kwds to the callbackDict.
@@ -1244,36 +1289,40 @@ class NotifierSignal(property):
     def _setter(self, instance, value):
         """Any bool(value) == True will increment the counter and fire the notifiers
         """
-        if self.name is None:
-            self._findAttributeName(instance)
+        # if self.name is None:
+        #     self._findAttributeName(instance)
 
         if self.name is None:
-            raise RuntimeError(f'NotifierSignal: unable to get attribute name from {instance}')
+            raise RuntimeError(f'NotifierSignal: undefined attribute; cannot signal from {instance}')
+
+        if self.klass is None:
+            raise RuntimeError(f'NotifierSignal: undefined klass; cannot signal from {instance}')
 
         if bool(value):
             self.counter += 1
-            _callbackDict = {NotifierABC.ATTRIBUTE_NAME:self.name,
+            _callbackDict = {NotifierABC.OBJECT:instance,
+                             NotifierABC.ATTRIBUTE_NAME:self.name,
                              NotifierABC.PREVIOUSVALUE:self.counter-1,
                              NotifierABC.VALUE:self.counter
                              }
             instance._fireRegisteredNotifiers(trigger=Notifier.OBSERVE, targetName=self.name,
                                               callbackDict=_callbackDict)
 
-    def _findAttributeName(self, instance):
-        """Find the attribute name for self from the class of instance
-        sets self.klass and self.name
-        """
-        # find attributeName
-        self.klass = instance.__class__
-        found = None
-        for _attr in dir(self.klass):
-            try:
-                _obj = getattr(self.klass, _attr)
-            except AttributeError:
-                obj = None
-            finally:
-                if _obj == self:
-                    found = _attr
+    # def _findAttributeName(self, instance):
+    #     """Find the attribute name for self from the class of instance
+    #     sets self.klass and self.name
+    #     """
+    #     # find attributeName
+    #     self.klass = instance.__class__
+    #     found = None
+    #     for _attr in dir(self.klass):
+    #         try:
+    #             _obj = getattr(self.klass, _attr)
+    #         except AttributeError:
+    #             obj = None
+    #         finally:
+    #             if _obj == self:
+    #                 found = _attr
 
         self.name = found
 

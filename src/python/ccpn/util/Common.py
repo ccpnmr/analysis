@@ -10,8 +10,9 @@ from __future__ import unicode_literals
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -19,9 +20,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-13 17:18:05 +0100 (Mon, May 13, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-23 16:18:27 +0100 (Wed, October 23, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -52,6 +53,32 @@ from ccpn.util.decorators import singleton
 
 # define a simple sentinel
 NOTHING = object()
+
+@singleton
+class Sentinel(object):
+    """A sentinel object, whose len()==0, bool()==False
+    Ignores attribute or item assignment;
+    returns self for attribute or item evaluation
+    """
+    def __len__(self):
+        return 0
+    def __bool__(self):
+        return False
+    def __getatt__(self, item):
+        return self
+    def __setattr__(self, key, value):
+        pass
+    def __getitem__(self, item):
+        return self
+    def __setitem__(self, key, value):
+        pass
+
+    def __str__(self):
+        return '<Sentinel>'
+
+    __repr__ = __str__
+
+SENTINEL = Sentinel()
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt = 2000000000

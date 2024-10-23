@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-14 19:13:40 +0100 (Mon, October 14, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-23 16:51:37 +0100 (Wed, October 23, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -102,6 +102,7 @@ class DialogButtonBox(QtWidgets.QDialogButtonBox, Base):
                 newButton = self.addButton(button, QtWidgets.QDialogButtonBox.AcceptRole)
                 self._userButtonDict[button] = newButton
             self.clicked.connect(self._setButtonClicked)
+            self._clickedButtonId = 0
 
             if callbacks:
                 for button, callback, text, tipText, icon, enabledState, visibleState in \

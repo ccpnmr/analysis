@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-22 15:44:21 +0100 (Tue, October 22, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-23 10:32:07 +0100 (Wed, October 23, 2024) $"
 __version__ = "$Revision: 3.2.5.GWV $"
 #=========================================================================================
 # Created
@@ -695,9 +695,11 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         # Contours
         targets = """
-        _rebuildContours
-        positiveContourBase positiveContourFactor positiveContourCount
-        negativeContourBase negativeContourFactor negativeContourCount
+        _rebuildContoursSignal
+        _openFileSignal
+        positiveContourBase positiveContourFactor positiveContourCount includePositiveContours
+        negativeContourBase negativeContourFactor negativeContourCount includeNegativeContours
+        scale
         """.split()
         self.setNotifier(spectrum, [Notifier.OBSERVE],
                                    targetName = targets,
@@ -824,7 +826,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        ])
 
     def _buildContoursForSpectrum(self, spectrum: Spectrum):
-        """Rebuild the contours for spectrum
+        """(Re-)build the contours for spectrum
         """
         # GWV 19/6/24
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -3045,21 +3047,22 @@ class GuiSpectrumDisplay(CcpnModule):
                           orderedSpectrumViews=self.strips[0].getSpectrumViews())
             popup.exec_()
 
-    def _rebuildContours(self):
-        """Rebuild the contours (nD only)
-        """
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-        if self.is1D:
-            return
-
-        GLSignals = GLNotifier(parent=self)
-
-        for specViews in self.spectrumViews:
-            specViews.buildContoursOnly = True
-
-        # repaint
-        GLSignals.emitPaintEvent()
+    # GWV 23/10/2024; replaced by _buildContoursForSpectrum
+    # def _rebuildContours(self):
+    #     """Rebuild the contours (nD only)
+    #     """
+    #     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+    #
+    #     if self.is1D:
+    #         return
+    #
+    #     GLSignals = GLNotifier(parent=self)
+    #
+    #     for specViews in self.spectrumViews:
+    #         specViews.buildContoursOnly = True
+    #
+    #     # repaint
+    #     GLSignals.emitPaintEvent()
 
     def _loopOverSpectrumViews(self):
         """A generator object to loop over all spectrumViews,
@@ -3113,7 +3116,8 @@ class GuiSpectrumDisplay(CcpnModule):
                 else:
                     # Display has custom contour base - change that one only
                     spectrumView.negativeContourBase *= spectrumView.negativeContourFactor
-            spectrum._updateContours=True
+
+            spectrum._updateContoursSignal=True
 
     # @logCommand(get='self')
     def _lowerContourBase(self):
@@ -3148,7 +3152,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     # Display has custom contour base - change that one only
                     spectrumView.negativeContourBase /= spectrumView.negativeContourFactor
 
-            spectrum._updateContours = True
+            spectrum._updateContoursSignal = True
 
     # @logCommand(get='self')
     def _addContourLevel(self):
@@ -3181,7 +3185,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     # Display has custom contour count - change that one only
                     spectrumView.negativeContourCount += 1
 
-            spectrum._updateContours = True
+            spectrum._updateContoursSignal = True
 
     # @logCommand(get='self')
     def _removeContourLevel(self):
@@ -3218,7 +3222,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     if spectrumView.negativeContourCount:
                         spectrumView.negativeContourCount -= 1
 
-            spectrum._updateContours = True
+            spectrum._updateContoursSignal = True
 
     def updateTraces(self):
         for strip in self.strips:

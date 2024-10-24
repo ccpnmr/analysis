@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-24 17:29:34 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -79,6 +79,13 @@ class PMIListViewABC(AbstractWrapperObject):
 
     def _setListClasses(self):
         """Set the primary classType for the child list attached to this container
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
+    @property
+    def _listObject(self):
+        """:return: the Peak|Multiplet|Integral List object associated with this view
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
@@ -249,7 +256,7 @@ class PMIListViewABC(AbstractWrapperObject):
         Set ListView value to None to return to non-local value"""
         result = self._getInternalParameter(self._MERITCOLOUR)
         if result in (INHERITCOLOUR, None):
-            obj = self._childClass
+            obj = self._listObject
             result = obj and obj.meritColour
         return result
 
@@ -278,7 +285,7 @@ class PMIListViewABC(AbstractWrapperObject):
         Set ListView value to None to return to non-local value"""
         result = self._getInternalParameter(self._MERITENABLED)
         if result is None:
-            obj = self._childClass
+            obj = self._listObject
             result = obj and obj.meritEnabled
         return result
 
@@ -300,7 +307,7 @@ class PMIListViewABC(AbstractWrapperObject):
         Set ListView value to None to return to non-local value"""
         result = self._getInternalParameter(self._MERITTHRESHOLD)
         if result is None:
-            obj = self._childClass
+            obj = self._listObject
             result = obj and obj.meritThreshold
         return result
 
@@ -328,7 +335,7 @@ class PMIListViewABC(AbstractWrapperObject):
         Set ListView value to None to return to non-local value"""
         result = self._getInternalParameter(self._LINECOLOUR)
         if result in (INHERITCOLOUR, None):
-            obj = self._childClass
+            obj = self._listObject
             result = obj and obj.lineColour
         return result
 
@@ -360,7 +367,7 @@ class PMIListViewABC(AbstractWrapperObject):
         Set ListView value to None to return to non-local value"""
         result = self._getInternalParameter(self._ARROWCOLOUR)
         if result in (INHERITCOLOUR, None):
-            obj = self._childClass
+            obj = self._listObject
             result = obj and obj.arrowColour
         return result
 

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-24 17:29:34 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -79,18 +79,12 @@ class IntegralListView(PMIListViewABC):
         """ CCPN IntegralListView matching IntegralListView"""
         return self._wrappedData
 
-    # GWV 24/20/24: not used; also defined below
-    # and very odd name as it effectively return an IntegralList instance,
-    # not a class of some sort
-    # @property
-    # def _childClass(self):
-    #     """Ccpn core obj that integralListView refers to"""
-    #     return self.integralList
-
     @property
     def integralList(self) -> IntegralList:
         """IntegralList that IntegralListView refers to"""
         return self._project._data2Obj.get(self._wrappedData.integralListView.integralList)
+
+    _listObject = integralList
 
     @property
     def _key(self) -> str:

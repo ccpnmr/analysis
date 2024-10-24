@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-24 17:29:34 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -36,9 +36,12 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStrip
 from ccpn.core import _DEBUG
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
+from ccpn.core.PeakList import PeakList
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 
 from ccpn.core.lib import Pid
+from ccpn.core.lib.Notifiers import NotifierABC
+
 from ccpn.core.lib.ContextManagers import deleteWrapperWithoutSideBar, \
     ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSetter, newV3Object
 
@@ -80,7 +83,32 @@ class SpectrumView(AbstractWrapperObject):
 
     #=========================================================================================
 
-    # __init__ not required
+    def __init__(self, project, wrappedData):
+        AbstractWrapperObject.__init__(self, project, wrappedData)
+
+        # Set notifiers to create/delete peakList  --> affects PeakListView children
+        self.setNotifier(self.spectrum,
+                         triggers=[NotifierABC.CREATE, NotifierABC.DELETE],
+                         targetName=PeakList.className,
+                         callback=self._peakListCallback
+                         )
+
+    def _peakListCallback(self, callbackDict):
+        """Callback when peakList is created or deleted
+        """
+        from ccpn.ui.gui.lib.PeakListView import _newPeakListView
+
+        _trigger = callbackDict.get(NotifierABC.TRIGGER)
+        _obj = callbackDict.get(NotifierABC.OBJECT)
+
+        if _trigger == NotifierABC.CREATE:
+            _newPeakListView(spectrumView=self, peakList=_obj)
+
+        elif _trigger == NotifierABC.DELETE:
+            pass
+
+        else:
+            raise RuntimeError(f'SpectrumView._peakListCallback(): invalid {_trigger=}')
 
     @classmethod
     def _restoreObject(cls, project, apiObj):

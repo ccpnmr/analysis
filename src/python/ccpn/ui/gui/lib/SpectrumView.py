@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-24 17:29:34 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ from ccpn.ui.gui.lib.GuiSpectrumViewNd import GuiSpectrumViewNd as _GuiSpectrumV
 from ccpn.ui.gui.guiSettings import _styleBlue
 
 from ccpn.core.Project import Project
+from ccpn.core.lib.Notifiers import NotifierABC
 from ccpn.util.Logging import getLogger
 
 
@@ -77,7 +78,6 @@ class SpectrumView1d(_CoreClassSpectrumView, _GuiSpectrumView1d):
     """
 
     def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
-        # _CoreClassSpectrumView.__init__(self, project, wrappedData)
         _CoreClassSpectrumView.__init__(self, project, wrappedData)
         _GuiSpectrumView1d.__init__(self)
 
@@ -89,7 +89,6 @@ class SpectrumViewNd(_CoreClassSpectrumView, _GuiSpectrumViewNd):
     """
 
     def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
-        # _CoreClassSpectrumView.__init__(self, project, wrappedData)
         _CoreClassSpectrumView.__init__(self, project, wrappedData)
         _GuiSpectrumViewNd.__init__(self)
 

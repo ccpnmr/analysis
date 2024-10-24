@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-24 17:29:34 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -28,8 +28,11 @@ __date__ = "$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $"
 #=========================================================================================
 
 from ccpn.core.Project import Project
+from ccpn.core.PeakList import PeakList
+
 from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
 from ccpn.ui._implementation.PeakListView import PeakListView as _CoreClassPeakListView
+from ccpn.ui._implementation.PeakListView import _newApiPeakListView
 from ccpn.ui._implementation.PeakView import PeakView as KlassView
 from ccpn.ui.gui.guiSettings import _styleBlue
 
@@ -39,7 +42,6 @@ from ccpn.util.Logging import getLogger
 class GuiPeakListView(GuiListViewABC):
     """peakList is the CCPN wrapper object
     """
-
     def __init__(self, project: Project):
         super().__init__()
 
@@ -57,7 +59,6 @@ class GuiPeakListView(GuiListViewABC):
 class PeakListView(_CoreClassPeakListView, GuiPeakListView):
     """Peak List View for 1D or nD PeakList
     """
-
     def __init__(self, project: Project, wrappedData: 'ApiStripPeakListView'):
         """Init the CoreClass and Gui-part
         """
@@ -66,3 +67,14 @@ class PeakListView(_CoreClassPeakListView, GuiPeakListView):
 
         getLogger().debug(_styleBlue(f'PeakListView.__init__>> initialised {self}  {self.peakList=}'))
 
+
+def _newPeakListView(spectrumView, peakList: PeakList) -> PeakListView:
+    """Create a new PeakListView object
+    :param spectrumView: the (parent) SpectrumView object
+    :param peakList: the corresponding PeakList object
+    :return PeakListView instance
+    """
+    apiPeakListView = _newApiPeakListView(spectrumView=spectrumView, peakList=peakList)
+    if (result := PeakListView._newInstanceFromApiData(apiObj=apiPeakListView, project=peakList.project)) is None:
+        raise RuntimeError('Failed to generate new PeakListView instance')
+    return result

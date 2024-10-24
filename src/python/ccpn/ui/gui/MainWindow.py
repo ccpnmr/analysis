@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-22 17:58:54 +0100 (Tue, October 22, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -47,7 +47,7 @@ from ccpn.framework.Preferences import getPreferences, USE_NATIVE_MENUS
 from ccpn.ui._implementation.Window import Window as _CoreClassMainWindow
 
 from ccpn.ui.gui import guiSettings
-from ccpn.ui.gui.guiSettings import getColours
+from ccpn.ui.gui.guiSettings import getColours, _styleBlue
 
 from ccpn.ui.gui.lib.mouseEvents import \
     SELECT, PICK, MouseModes, setCurrentMouseMode, getCurrentMouseMode
@@ -2884,4 +2884,5 @@ class MainWindow(_CoreClassMainWindow, GuiMainWindow):
         # application._mainWindow = self
         # application.ui._mainWindow = self
 
-        getLogger().debug(f'Initialised {self}')
+        logger.debug(_styleBlue(f'MainWindow.__init__>> Initialised {self}')
+                     )

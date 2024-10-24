@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-18 14:25:34 +0100 (Fri, October 18, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,11 +30,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import numpy as np
 from PyQt5 import QtWidgets
 from functools import partial
+
 from ccpn.util import Phasing
 from ccpn.core.PeakList import PeakList
 
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.core.lib.ContextManagers import undoBlockWithSideBar as undoBlock
+
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, \
     IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
 from ccpn.ui.gui.menus.StripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu, \
@@ -43,6 +45,7 @@ from ccpn.ui.gui.lib.StripLib import copyStripAxisPositionsAndWidths
 from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, StripLabelWidget
 from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.Spacer import Spacer
+
 from ccpn.util.Colour import colorSchemeTable, hexToRgbRatio
 from ccpn.util.Constants import AXIS_FULLATOMNAME
 from ccpn.util.Logging import getLogger

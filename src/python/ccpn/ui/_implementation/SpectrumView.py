@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,14 +32,21 @@ from typing import Tuple
 
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
+
+from ccpn.core import _DEBUG
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+
 from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import deleteWrapperWithoutSideBar, \
     ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSetter, newV3Object
+
 from ccpn.ui._implementation.Strip import Strip
+from ccpn.ui.gui.guiSettings import _styleBlue
+
 from ccpn.util.decorators import logCommand
+from ccpn.util.Logging import getLogger
 
 
 class SpectrumView(AbstractWrapperObject):
@@ -86,6 +93,36 @@ class SpectrumView(AbstractWrapperObject):
             result._index = 0
 
         return result
+
+    @classmethod
+    def _newInstanceFromApiData(cls, apiObj, project=None):
+        """Return a new instance of cls, initialised with data from apiObj.
+        Checks for existence, 1D/nD and potential factory function.
+        """
+        from ccpn.framework.Application import getProject
+        from ccpn.ui.gui.lib.SpectrumView import SpectrumView1d, SpectrumViewNd
+
+        # override cls-type - 1D/nD display
+        klass = SpectrumView1d if ('intensity' in apiObj.strip.spectrumDisplay.axisCodes) else SpectrumViewNd
+        if project is None:
+            project = getProject()
+        if apiObj in project._data2Obj:
+            # This happens with Window, as it get initialised by the Window-Store and then once
+            # more as child of Project
+            newInstance = project._data2Obj[apiObj]
+            if _DEBUG:
+                getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
+                                             f'\n                     {apiObj}'
+                                             ))
+        elif (_factoryFunction := klass._factoryFunction) is not None:
+            newInstance = _factoryFunction(project, apiObj)
+        else:
+            newInstance = klass(project, apiObj)
+
+        if newInstance is None:
+            raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
+
+        return newInstance
 
     #=========================================================================================
     # CCPN properties

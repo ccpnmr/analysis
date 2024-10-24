@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-18 14:25:34 +0100 (Fri, October 18, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -3507,6 +3507,20 @@ class GuiStrip(Frame):
             # caught during the queue processing event, need to restart
             self._scheduler.signalRestart()
 
+    def _postRestore(self):
+        """Handle post-initialising children after all children have been restored
+        """
+        settings = self.spectrumDisplay._getSettingsDict()
+        prefs = self._preferences
+
+        # copy values from preferences
+        glWidget = self._CcpnGLWidget
+        glWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
+        glWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
+        glWidget._applyXLimit = prefs.zoomXLimitApply
+        glWidget._applyYLimit = prefs.zoomYLimitApply
+
+        super()._postRestore()
 
 #=========================================================================================
 # Notifiers:

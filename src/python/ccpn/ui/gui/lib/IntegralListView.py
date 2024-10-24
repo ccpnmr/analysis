@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,6 +32,9 @@ from ccpn.core.Project import Project
 from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
 from ccpn.ui._implementation.IntegralListView import IntegralListView as _CoreClassListView
 from ccpn.ui._implementation.IntegralView import IntegralView as KlassView
+
+from ccpn.ui.gui.guiSettings import _styleBlue
+from ccpn.util.Logging import getLogger
 
 
 class GuiIntegralListView(GuiListViewABC):
@@ -53,14 +56,12 @@ class GuiIntegralListView(GuiListViewABC):
 
 
 class IntegralListView(_CoreClassListView, GuiIntegralListView):
-    """Integral List View for 1D or nD IntegralList"""
+    """Core data part and Gui Integral List View for 1D or nD IntegralList
+    """
 
     def __init__(self, project: Project, wrappedData: 'ApiStripIntegralListView'):
-        """Local override init for Qt subclass"""
+        """Local override init for Qt subclass
+        """
         _CoreClassListView.__init__(self, project, wrappedData)
-
-        # hack for now
-        self.application = project.application
-        self._init()
-
         GuiIntegralListView.__init__(self, project)
+        getLogger().debug(_styleBlue(f'IntegralListView.__init__>> initialised {self}  {self.integralList=}'))

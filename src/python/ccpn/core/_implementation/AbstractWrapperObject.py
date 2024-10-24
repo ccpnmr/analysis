@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 08:55:32 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -46,30 +46,33 @@ from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
     apiNotificationBlanking, ccpNmrV3CoreSetter
 from ccpn.core.lib.Notifiers import NotifierBase
+
 from ccpn.framework.Version import VersionString
 from ccpn.framework.Application import getApplication
+
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 
-from ccpn.ui.gui.guiSettings import consoleStyle
+from ccpn.ui.gui.guiSettings import consoleStyle, _styleRed, _styleBlue
 
+from ccpn.core import _DEBUG
 
-def _styleRed(text: str) -> str:
-    """Get red text"""
-    return f'{consoleStyle.fg.red}{text}{consoleStyle.reset}'
-
-
-def _styleBlue(text: str) -> str:
-    """Get blue text"""
-    return f'{consoleStyle.fg.darkblue}{text}{consoleStyle.reset}'
+# def _styleRed(text: str) -> str:
+#     """Get red text"""
+#     return f'{consoleStyle.fg.red}{text}{consoleStyle.reset}'
+#
+#
+# def _styleBlue(text: str) -> str:
+#     """Get blue text"""
+#     return f'{consoleStyle.fg.darkblue}{text}{consoleStyle.reset}'
 
 
 _RENAME_SENTINEL = Pid.Pid('Dummy:_rename')
 ILLEGAL_PATH_CHARS = r'<>:"/\|?*&@'
 _DISCARD_METHODS = {'get_OldChemicalShift', 'get_OldChemicalShift', '_oldChemicalShifts', 'get_PeakCluster',
                     '_peakClusters'}
-_DEBUG = False
+
 
 
 @functools.total_ordering
@@ -1434,7 +1437,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         NB: the returned list of NmrResidues is sorted; if not: breaks the programme
         """
         from ccpn.core.NmrResidue import NmrResidue  # Local import to avoid cycles
-        from ccpn.ui.gui.lib.Strip import Strip
+        from ccpn.ui._implementation.Strip import Strip
         from ccpn.ui._implementation.PeakView import PeakView
         from ccpn.ui._implementation.MultipletView import MultipletView
         from ccpn.ui._implementation.IntegralView import IntegralView

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 08:55:32 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -45,6 +45,7 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.lib.SpectrumLib import DIMENSION_TIME, DIMENSION_SAMPLED
 from ccpn.core.lib.WeakRefList import _WeakRefList
+from ccpn.core import _DEBUG
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
 from ccpn.core.lib.Notifiers import Notifier
@@ -63,6 +64,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT
+from ccpn.ui.gui.guiSettings import _styleBlue
 
 from ccpn.ui.gui.widgets.GLAxis import GuiNdWidgetAxis, Gui1dWidgetAxis
 from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
@@ -231,7 +233,10 @@ class GuiSpectrumDisplay(CcpnModule):
             raise RuntimeError(f'MAXPEAKLABELTYPES == 0: cannot initialise')
 
         moduleTitle = str(self.id)  # the name that appears on the GUI Module
-        getLogger().debug('GuiSpectrumDisplay.__init__>> mainWindow %s; name: %s' % (mainWindow, moduleTitle))
+        # getLogger().debug(
+        #             _styleBlue('GuiSpectrumDisplay.__init__>> mainWindow %s; name: %s' % (mainWindow, moduleTitle))
+        # )
+
         super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=moduleTitle,
                                                  size=(1100, 1300), autoOrientation=False
                                                  )

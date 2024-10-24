@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,66 +36,61 @@ from ccpn.core.Project import Project
 from ccpn.util.Logging import getLogger
 
 
-_DEBUG = False
+from ccpn.core import _DEBUG
 
 
-class SpectrumView(_CoreClassSpectrumView):
+# class SpectrumView(_CoreClassSpectrumView):
 
-    @classmethod
-    def _newInstanceFromApiData(cls, apiObj, project=None):
-        """Return a new instance of cls, initialised with data from apiObj.
-        Checks for existence, and potential factory function.
-        """
-        from ccpn.framework.Application import getProject
+    # GWV 24/20/24: moved to _implementation.SpectrumView
+    # @classmethod
+    # def _newInstanceFromApiData(cls, apiObj, project=None):
+    #     """Return a new instance of cls, initialised with data from apiObj.
+    #     Checks for existence, and potential factory function.
+    #     """
+    #     from ccpn.framework.Application import getProject
+    #
+    #     # override cls-type - 1D/nD display
+    #     klass = SpectrumView1d if ('intensity' in apiObj.strip.spectrumDisplay.axisCodes) else SpectrumViewNd
+    #     if project is None:
+    #         project = getProject()
+    #     if apiObj in project._data2Obj:
+    #         # This happens with Window, as it get initialised by the Window-Store and then once
+    #         # more as child of Project
+    #         newInstance = project._data2Obj[apiObj]
+    #         if _DEBUG:
+    #             getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
+    #                                          f'\n                     {apiObj}'
+    #                                          ))
+    #     elif (_factoryFunction := klass._factoryFunction) is not None:
+    #         newInstance = _factoryFunction(project, apiObj)
+    #     else:
+    #         newInstance = klass(project, apiObj)
+    #
+    #     if newInstance is None:
+    #         raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
+    #
+    #     return newInstance
 
-        # override cls-type - 1D/nD display
-        klass = SpectrumView1d if ('intensity' in apiObj.strip.spectrumDisplay.axisCodes) else SpectrumViewNd
-        if project is None:
-            project = getProject()
-        if apiObj in project._data2Obj:
-            # This happens with Window, as it get initialised by the Window-Store and then once
-            # more as child of Project
-            newInstance = project._data2Obj[apiObj]
-            if _DEBUG:
-                getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
-                                             f'\n                     {apiObj}'
-                                             ))
-        elif (_factoryFunction := klass._factoryFunction) is not None:
-            newInstance = _factoryFunction(project, apiObj)
-        else:
-            newInstance = klass(project, apiObj)
 
-        if newInstance is None:
-            raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
-
-        return newInstance
-
-
-class SpectrumView1d(SpectrumView, _GuiSpectrumView1d):
-    """1D Spectrum View
+class SpectrumView1d(_CoreClassSpectrumView, _GuiSpectrumView1d):
+    """Class combining core-class data and 1D Gui Spectrum View
     """
 
     def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
         # _CoreClassSpectrumView.__init__(self, project, wrappedData)
-        SpectrumView.__init__(self, project, wrappedData)
-
-        # hack for now
-        self.application = project.application
-
-        getLogger().debug('SpectrumView1d>> %s' % self)
+        _CoreClassSpectrumView.__init__(self, project, wrappedData)
         _GuiSpectrumView1d.__init__(self)
 
+        getLogger().debug(_styleBlue(f'SpectrumView1d.__init__>> {self=}, {self.strip=}'))
 
-class SpectrumViewNd(SpectrumView, _GuiSpectrumViewNd):
-    """nD Spectrum View
+
+class SpectrumViewNd(_CoreClassSpectrumView, _GuiSpectrumViewNd):
+    """Class combining core-class data and nD Gui Spectrum View
     """
 
     def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
         # _CoreClassSpectrumView.__init__(self, project, wrappedData)
-        SpectrumView.__init__(self, project, wrappedData)
-
-        # hack for now
-        self.application = project.application
-
-        getLogger().debug('SpectrumViewNd>> self=%s strip=%s' % (self, self.strip))
+        _CoreClassSpectrumView.__init__(self, project, wrappedData)
         _GuiSpectrumViewNd.__init__(self)
+
+        getLogger().debug(_styleBlue(f'SpectrumViewNd.__init__>> {self=} {self.strip=}'))

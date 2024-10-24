@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,65 +39,72 @@ from ccpn.core.Project import Project
 from ccpn.util.Logging import getLogger
 
 
-_DEBUG = False
+from ccpn.core import _DEBUG
 
 
-class Strip(_CoreClassStrip):
 
-    @classmethod
-    def _newInstanceFromApiData(cls, apiObj, project=None):
-        """Return a new instance of cls, initialised with data from apiObj.
-        Checks for existence, and potential factory function.
-        """
-        from ccpn.framework.Application import getProject
+# class Strip(_CoreClassStrip):
+#
+    #GWV 24/10/24: to _Implementation/Strip
+    # @classmethod
+    # def _newInstanceFromApiData(cls, apiObj, project=None):
+    #     """Return a new instance of cls, initialised with data from apiObj.
+    #     Checks for existence, and potential factory function.
+    #     """
+    #     from ccpn.framework.Application import getProject
+    #
+    #     # override cls-type - 1D/nD display
+    #     klass = Strip1d if apiObj.spectrumDisplay.is1d else StripNd
+    #     if project is None:
+    #         project = getProject()
+    #     if apiObj in project._data2Obj:
+    #         # This happens with Window, as it get initialised by the Window-Store and then once
+    #         # more as child of Project
+    #         newInstance = project._data2Obj[apiObj]
+    #         if _DEBUG:
+    #             getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
+    #                                          f'\n                     {apiObj}'
+    #                                          ))
+    #     elif (_factoryFunction := klass._factoryFunction) is not None:
+    #         newInstance = _factoryFunction(project, apiObj)
+    #     else:
+    #         newInstance = klass(project, apiObj)
+    #
+    #     if newInstance is None:
+    #         raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
+    #
+    #     return newInstance
 
-        # override cls-type - 1D/nD display
-        klass = Strip1d if apiObj.spectrumDisplay.is1d else StripNd
-        if project is None:
-            project = getProject()
-        if apiObj in project._data2Obj:
-            # This happens with Window, as it get initialised by the Window-Store and then once
-            # more as child of Project
-            newInstance = project._data2Obj[apiObj]
-            if _DEBUG:
-                getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
-                                             f'\n                     {apiObj}'
-                                             ))
-        elif (_factoryFunction := klass._factoryFunction) is not None:
-            newInstance = _factoryFunction(project, apiObj)
-        else:
-            newInstance = klass(project, apiObj)
-
-        if newInstance is None:
-            raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
-
-        return newInstance
-
-    def _postRestore(self):
-        """Handle post-initialising children after all children have been restored
-        """
-        settings = self.spectrumDisplay._getSettingsDict()
-        prefs = self._preferences
-
-        # copy values from preferences
-        glWidget = self._CcpnGLWidget
-        glWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
-        glWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
-        glWidget._applyXLimit = prefs.zoomXLimitApply
-        glWidget._applyYLimit = prefs.zoomYLimitApply
-
-        super()._postRestore()
+    # GWV 24/20/24: moved to GuiStrip, as its "owns" the glWidget
+    # def _postRestore(self):
+    #     """Handle post-initialising children after all children have been restored
+    #     """
+    #     settings = self.spectrumDisplay._getSettingsDict()
+    #     prefs = self._preferences
+    #
+    #     # copy values from preferences
+    #     glWidget = self._CcpnGLWidget
+    #     glWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
+    #     glWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
+    #     glWidget._applyXLimit = prefs.zoomXLimitApply
+    #     glWidget._applyYLimit = prefs.zoomYLimitApply
+    #
+    #     super()._postRestore()
 
 
-class Strip1d(Strip, _GuiStrip1d):
-    """1D strip"""
+class Strip1d(_CoreClassStrip, _GuiStrip1d):
+    """Just a class to combine the "data" coreClass and Gui1D strip class
+    """
 
     def __init__(self, project: Project, wrappedData: 'ApiBoundStrip'):
 
         # _CoreClassStrip.__init__(self, project, wrappedData)
-        Strip.__init__(self, project, wrappedData)
+        _CoreClassStrip.__init__(self, project, wrappedData)
 
-        getLogger().debug(f'Strip1d>> spectrumDisplay: {self.spectrumDisplay}')
+        getLogger().debug(
+                    _styleBlue(f'Strip1d.__init__>> spectrumDisplay: {self.spectrumDisplay}')
+        )
+
         _GuiStrip1d.__init__(self, self.spectrumDisplay)
 
         # cannot add the Frame until fully done
@@ -139,15 +146,18 @@ class Strip1d(Strip, _GuiStrip1d):
             getLogger().warning(f'Strip direction is not defined for spectrumDisplay: {str(self.spectrumDisplay.pid)}')
 
 
-class StripNd(Strip, _GuiStripNd):
-    """ND strip """
-
+class StripNd(_CoreClassStrip, _GuiStripNd):
+    """Just a class to combine the "data" coreClass and Gui nD strip class
+    """
     def __init__(self, project: Project, wrappedData: 'ApiBoundStrip'):
 
         # _CoreClassStrip.__init__(self, project, wrappedData)
-        Strip.__init__(self, project, wrappedData)
+        _CoreClassStrip.__init__(self, project, wrappedData)
 
-        getLogger().debug(f'StripNd>> spectrumDisplay={self.spectrumDisplay}')
+        getLogger().debug(
+                _styleBlue(f'StripNd.__init__>> spectrumDisplay={self.spectrumDisplay}')
+        )
+
         _GuiStripNd.__init__(self, self.spectrumDisplay)
 
         # cannot add the Frame until fully done

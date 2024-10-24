@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-07 13:10:49 +0100 (Wed, August 07, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +30,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import numpy as np
 from itertools import product
 from PyQt5 import QtGui
+
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView, SpectrumCache
 from ccpn.util.Colour import spectrumColours, colorSchemeTable
 
@@ -42,10 +43,11 @@ class GuiSpectrumView1d(GuiSpectrumView):
     def __init__(self):
         """ spectrumPane is the parent
             spectrum is the Spectrum name or object
-            """
+        """
         GuiSpectrumView.__init__(self)
 
-        self._application = self.strip.spectrumDisplay.mainWindow.application
+        # GWV 24/10/24: no usage; if needed use getApplication or self.project.application
+        # self._application = self.strip.spectrumDisplay.mainWindow.application
 
         self.data = self.spectrum.positions, self.spectrum.intensities
         # print('>>>filePath', self.spectrum.filePath, self.spectrum.positions, self.spectrum.intensities)

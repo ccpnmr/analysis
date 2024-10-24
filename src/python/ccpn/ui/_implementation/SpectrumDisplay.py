@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 08:55:32 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -52,7 +52,7 @@ from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectumDisplay
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
 
 
-_DEBUG = False
+from ccpn.core import _DEBUG
 
 
 @updateObject(fromVersion='3.0.4',
@@ -819,8 +819,6 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     # local import to avoid cycles
     from ccpn.util.Constants import AXISUNIT_NUMBER, AXISUNIT_POINT, AXISUNIT_PPM
     from ccpn.framework.Application import getProject
-    # get the Module-version; which inherits from the above "data"-part
-    # from ccpn.ui.gui.modules.SpectrumDisplay import SpectrumDisplay as SpectrumDisplayModule
 
     if window is None or not isinstance(window, Window):
         raise ValueError('Expected window argument; got %r' % window)

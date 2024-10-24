@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-24 18:05:24 +0100 (Wed, July 24, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,6 +29,7 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 
 from PyQt5 import QtCore, QtWidgets
 
+from ccpn.framework.Application import getApplication
 
 NULL_RECT = QtCore.QRectF()
 
@@ -42,7 +43,8 @@ class GuiListViewABC(QtWidgets.QGraphicsItem):
         """
         QtWidgets.QGraphicsItem.__init__(self)
 
-        self.application = self.spectrumView.application
+        # GWV 24/10/24: Not sure why this is needed
+        # self.application = getApplication()
         self.setFlag(QtWidgets.QGraphicsItem.ItemHasNoContents, True)
 
         # flags to initiate updates to the GL windows

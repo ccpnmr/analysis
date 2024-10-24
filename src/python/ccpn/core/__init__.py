@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 08:55:31 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -313,6 +313,8 @@ _coreImportOrder = (
         '_PeakCluster',
     )
 
+_DEBUG = True
+
 # Register the classes
 from ccpn.core.Project import Project as _Project
 PROJECT_CLASSNAME = _Project.className
@@ -492,7 +494,7 @@ from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay as _Spectrum
 SPECTRUMDISPLAY_CLASSNAME = _SpectrumDisplay.className
 _SpectrumDisplay._registerCoreClass()
 
-from ccpn.ui.gui.lib.Strip import Strip as _Strip
+from ccpn.ui._implementation.Strip import Strip as _Strip
 STRIP_CLASSNAME = _Strip.className
 _Strip._registerCoreClass()
 
@@ -500,7 +502,7 @@ from ccpn.ui._implementation.Axis import Axis as _Axis
 AXIS_CLASSNAME = _Axis.className
 _Axis._registerCoreClass()
 
-from ccpn.ui.gui.lib.SpectrumView import SpectrumView as _SpectrumView
+from ccpn.ui._implementation.SpectrumView import SpectrumView as _SpectrumView
 SPECTRUMVIEW_CLASSNAME = _SpectrumView.className
 _SpectrumView._registerCoreClass()
 

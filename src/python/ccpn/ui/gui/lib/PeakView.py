@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-24 15:59:02 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -29,13 +29,13 @@ __date__ = "$Date: 2023-05-17 11:04:29 +0100 (Wed, May 17, 2023) $"
 
 from ccpn.core.Project import Project
 from ccpn.ui.gui.lib.GuiView import GuiViewABC
-from ccpn.ui._implementation.PeakView import PeakListView as _CoreClassPeakView
+from ccpn.ui._implementation.PeakView import PeakView as _CoreClassPeakView
 
 from ccpn.ui.gui.guiSettings import _styleBlue
 from ccpn.util.Logging import getLogger
 
 
-class GuiPeakView(Í):
+class GuiPeakView(GuiViewABC):
     """peakView is the CCPN wrapper object
     """
     def __init__(self):
@@ -50,6 +50,5 @@ class PeakView(_CoreClassPeakView, GuiPeakView):
         """Local override init for Qt subclass.
         """
         _CoreClassPeakView.__init__(self, project, wrappedData)
-        self._init()
         GuiPeakView.__init__(self)
-        getLogger().debug(_styleBlue(f'PeakView.__init__>> initialised {self}  {self.peakList=}'))
+        getLogger().debug(_styleBlue(f'PeakView.__init__>> initialised {self}  {self.peak=}'))

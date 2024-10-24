@@ -1,4 +1,4 @@
-"""Module Documentation here
+"""The file contains the Gui parts of the SpectrumDisplayModule
 
 """
 #=========================================================================================
@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-23 16:18:27 +0100 (Wed, October 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-24 08:55:32 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created

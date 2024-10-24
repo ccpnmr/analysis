@@ -31,49 +31,51 @@ from ccpn.core.Project import Project
 
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay as _CoreClassSpectrumDisplay
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpn.ui.gui.guiSettings import _styleBlue
+# from ccpn.ui.gui.guiSettings import _styleBlue
 from ccpn.util.Logging import getLogger
 
 
 # NB:
 # GWV any coreClass 'name' property creates conflicts as pyqtgraph descendants need name()
 # GWV 26Jan2023: Remark still valid??
-_DEBUG = False
+
+# _DEBUG = False
 
 
-class SpectrumDisplay(_CoreClassSpectrumDisplay):
+# GWV 24/10/24: Now in CoreClassSpectrumDisplay (where it belongs :)
+# class SpectrumDisplay(_CoreClassSpectrumDisplay):
+#
+#     @classmethod
+#     def _newInstanceFromApiData(cls, apiObj, project=None):
+#         """Return a new instance of cls, initialised with data from apiObj.
+#         Checks for existence, and potential factory function.
+#         """
+#         from ccpn.framework.Application import getProject
+#
+#         # override cls-type - 1D/nD display
+#         klass = SpectrumDisplay1d if apiObj.is1d else SpectrumDisplayNd
+#         if project is None:
+#             project = getProject()
+#         if apiObj in project._data2Obj:
+#             # This happens with Window, as it get initialised by the Window-Store and then once
+#             # more as child of Project
+#             newInstance = project._data2Obj[apiObj]
+#             if _DEBUG:
+#                 getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
+#                                              f'\n                     {apiObj}'
+#                                              ))
+#         elif (_factoryFunction := klass._factoryFunction) is not None:
+#             newInstance = _factoryFunction(project, apiObj)
+#         else:
+#             newInstance = klass(project, apiObj)
+#
+#         if newInstance is None:
+#             raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
+#
+#         return newInstance
 
-    @classmethod
-    def _newInstanceFromApiData(cls, apiObj, project=None):
-        """Return a new instance of cls, initialised with data from apiObj.
-        Checks for existence, and potential factory function.
-        """
-        from ccpn.framework.Application import getProject
 
-        # override cls-type - 1D/nD display
-        klass = SpectrumDisplay1d if apiObj.is1d else SpectrumDisplayNd
-        if project is None:
-            project = getProject()
-        if apiObj in project._data2Obj:
-            # This happens with Window, as it get initialised by the Window-Store and then once
-            # more as child of Project
-            newInstance = project._data2Obj[apiObj]
-            if _DEBUG:
-                getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
-                                             f'\n                     {apiObj}'
-                                             ))
-        elif (_factoryFunction := klass._factoryFunction) is not None:
-            newInstance = _factoryFunction(project, apiObj)
-        else:
-            newInstance = klass(project, apiObj)
-
-        if newInstance is None:
-            raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
-
-        return newInstance
-
-
-class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):
+class SpectrumDisplay1d(_CoreClassSpectrumDisplay, GuiSpectrumDisplay):
     """1D SpectrumDisplay
     """
 
@@ -114,13 +116,13 @@ class SpectrumDisplay1d(SpectrumDisplay, GuiSpectrumDisplay):
         Handles CoreClass SpectrumDisplay and GuiSpectrumDisplay
         """
         getLogger().debug(f'SpectrumDisplay1d>> project: {project}, project._mainWindow: {project._mainWindow}')
-        SpectrumDisplay.__init__(self, project, wrappedData)
+        _CoreClassSpectrumDisplay.__init__(self, project, wrappedData)
         # project (on restore) or ui (on newSpectrumDisplay) has _mainWindow
         _mainWindow = project._mainWindow or project.application.ui.mainWindow
         GuiSpectrumDisplay.__init__(self, mainWindow=_mainWindow, useScrollArea=True)
 
 
-class SpectrumDisplayNd(SpectrumDisplay, GuiSpectrumDisplay):
+class SpectrumDisplayNd(_CoreClassSpectrumDisplay, GuiSpectrumDisplay):
     """nD SpectrumDisplay
     """
 
@@ -166,7 +168,7 @@ class SpectrumDisplayNd(SpectrumDisplay, GuiSpectrumDisplay):
         Handles CoreClass SpectrumDisplay and GuiSpectrumDisplay
         """
         getLogger().debug(f'SpectrumDisplayNd>> project: {project}, project._mainWindow: {project._mainWindow}')
-        SpectrumDisplay.__init__(self, project, wrappedData)
+        _CoreClassSpectrumDisplay.__init__(self, project, wrappedData)
         # project (on restore) or ui (on newSpectrumDisplay) has _mainWindow
         _mainWindow = project._mainWindow or project.application.ui.mainWindow
         GuiSpectrumDisplay.__init__(self, mainWindow=_mainWindow, useScrollArea=True)

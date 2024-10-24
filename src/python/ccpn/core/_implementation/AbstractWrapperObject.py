@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-23 18:06:25 +0100 (Wed, October 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-24 08:55:32 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -143,6 +143,14 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     #
     # # List of child classes. Will be filled by child-classes registering.
     # _childClasses = []
+    #
+    # # the dict of (className, class) pairs
+    # _coreClassDict = {}
+    #
+    # # the dict of (shortClassName, class) pairs
+    # _coreClassShortNameDict = {}
+    #
+    # _isRegistered = False
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'abstractWrapperClasses'
@@ -1342,9 +1350,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                     className = cls._apiClassQualifiedName
                     Project._apiNotifiers[:0] = [
                         # ('_newApiObjectCallback', {'cls': cls}, className, '__init__'),
-                        ('_startDeleteCommandBlock', {}, className, 'startDeleteBlock'),
+                        # ('_startDeleteCommandBlock', {}, className, 'startDeleteBlock'),
                         ('_finaliseApiDelete', {}, className, 'delete'),
-                        ('_endDeleteCommandBlock', {}, className, 'endDeleteBlock'),
+                        # ('_endDeleteCommandBlock', {}, className, 'endDeleteBlock'),
                         ('_finaliseApiUnDelete', {}, className, 'undelete'),
                         ('_modifiedApiObject', {}, className, ''),
                         ]

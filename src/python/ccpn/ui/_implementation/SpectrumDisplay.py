@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-20 15:02:11 +0100 (Fri, September 20, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-24 08:55:32 +0100 (Thu, October 24, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,13 +42,17 @@ from ccpn.ui._implementation.Window import Window
 
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib import Pid
+from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject, notificationBlanking
 
 from ccpn.util import Common as commonUtil
-from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject, notificationBlanking
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.guiSettings import _styleBlue
 
 from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectumDisplay_3_0_4_to_3_1_0
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
+
+
+_DEBUG = False
 
 
 @updateObject(fromVersion='3.0.4',
@@ -243,6 +247,36 @@ class SpectrumDisplay(AbstractWrapperObject):
 
         # _isNew: Only set by newSpectrumDisplay and used in .displaySpectrum()
         self._isNew: bool = False
+
+    @classmethod
+    def _newInstanceFromApiData(cls, apiObj, project=None):
+        """Return a new instance of cls, initialised with data from apiObj.
+        Checks for existence, and potential factory function.
+        """
+        from ccpn.framework.Application import getProject
+        from ccpn.ui.gui.modules.SpectrumDisplayModule import SpectrumDisplay1d, SpectrumDisplayNd
+
+        # override cls-type - 1D/nD display
+        klass = SpectrumDisplay1d if apiObj.is1d else SpectrumDisplayNd
+        if project is None:
+            project = getProject()
+        if apiObj in project._data2Obj:
+            # This happens with Window, as it get initialised by the Window-Store and then once
+            # more as child of Project
+            newInstance = project._data2Obj[apiObj]
+            if _DEBUG:
+                getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
+                                             f'\n                     {apiObj}'
+                                             ))
+        elif (_factoryFunction := klass._factoryFunction) is not None:
+            newInstance = _factoryFunction(project, apiObj)
+        else:
+            newInstance = klass(project, apiObj)
+
+        if newInstance is None:
+            raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
+
+        return newInstance
 
     # @classmethod
     # def _restoreObject(cls, project, apiObj):
@@ -785,6 +819,8 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     # local import to avoid cycles
     from ccpn.util.Constants import AXISUNIT_NUMBER, AXISUNIT_POINT, AXISUNIT_PPM
     from ccpn.framework.Application import getProject
+    # get the Module-version; which inherits from the above "data"-part
+    # from ccpn.ui.gui.modules.SpectrumDisplay import SpectrumDisplay as SpectrumDisplayModule
 
     if window is None or not isinstance(window, Window):
         raise ValueError('Expected window argument; got %r' % window)
@@ -807,7 +843,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     is1D = (spectrum.dimensionCount == 1)
 
     if not is1D and flip1D:
-        raise ValueError('_newSpectrumDisplay: flid1D does not alpply to nD spectra')
+        raise ValueError('_newSpectrumDisplay: flip1D does not apply to nD spectra')
 
     # set api-parameters for display generation
     displayPars = dict(

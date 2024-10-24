@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-04 18:51:59 +0100 (Thu, July 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-24 08:55:32 +0100 (Thu, October 24, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -913,28 +913,30 @@ def deleteObject():
         self = args[0]
         application = getApplication()  # pass it in to reduce overhead
 
-        with undoStackBlocking(application=application) as addUndoItem:
-            # moved above so that the current objects are preserved
-            with notificationBlanking(application=application):
-                _storeDeleteObjectCurrent(self, addUndoItem)
+        with undoBlockWithoutSideBar():
 
-            self._finaliseAction('delete')
+            with undoStackBlocking(application=application) as addUndoItem:
+                # moved above so that the current objects are preserved
+                with notificationBlanking(application=application):
+                    _storeDeleteObjectCurrent(self, addUndoItem)
 
-            with notificationBlanking(application=application):
-                # retrieve list of created items from the api
-                apiObjectsCreated = self._getApiObjectTree()
-                addUndoItem(undo=BlankedPartial(self._wrappedData.root._unDelete,
-                                                topObjectsToCheck=(self._wrappedData.topObject,),
-                                                obj=self, trigger='create', preExecution=False,
-                                                objsToBeUnDeleted=apiObjectsCreated),
-                            # use 'func' so that it calls the wrapped method (was previously 'self.delete')
-                            # - shouldn't be any arguments
-                            redo=BlankedPartial(partial(func, self),
-                                                obj=self, trigger='delete', preExecution=True)
-                            )
+                self._finaliseAction('delete')
 
-                # call the wrapped delete function (shouldn't be any arguments)
-                result = func(self)  # *args, **kwds)
+                with notificationBlanking(application=application):
+                    # retrieve list of created items from the api
+                    apiObjectsCreated = self._getApiObjectTree()
+                    addUndoItem(undo=BlankedPartial(self._wrappedData.root._unDelete,
+                                                    topObjectsToCheck=(self._wrappedData.topObject,),
+                                                    obj=self, trigger='create', preExecution=False,
+                                                    objsToBeUnDeleted=apiObjectsCreated),
+                                # use 'func' so that it calls the wrapped method (was previously 'self.delete')
+                                # - shouldn't be any arguments
+                                redo=BlankedPartial(partial(func, self),
+                                                    obj=self, trigger='delete', preExecution=True)
+                                )
+
+                    # call the wrapped delete function (shouldn't be any arguments)
+                    result = func(self)  # *args, **kwds)
 
         return result
 

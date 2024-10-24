@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-17 11:54:50 +0100 (Sat, August 17, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-24 08:55:31 +0100 (Thu, October 24, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -488,7 +488,7 @@ from ccpn.ui._implementation.Mark import Mark as _Mark
 MARK_CLASSNAME = _Mark.className
 _Mark._registerCoreClass()
 
-from ccpn.ui.gui.modules.SpectrumDisplay import SpectrumDisplay as _SpectrumDisplay
+from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay as _SpectrumDisplay
 SPECTRUMDISPLAY_CLASSNAME = _SpectrumDisplay.className
 _SpectrumDisplay._registerCoreClass()
 

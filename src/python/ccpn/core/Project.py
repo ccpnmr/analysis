@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-23 18:06:25 +0100 (Wed, October 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-24 08:55:31 +0100 (Thu, October 24, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -2203,34 +2203,34 @@ class Project(AbstractWrapperObject):
     # Standard notified functions.
     # RESTRICTED. Use in core classes ONLY
 
-    def _startDeleteCommandBlock(self, *allWrappedData):
-        """Call startCommandBlock for wrapper object delete. Implementation only
-
-        If commented: _activateApiNotifier fails
-
-        Used by the preset Api notifiers populated for self._apiNotifiers;
-        have _newApiObject, _startDeleteCommandBlock, _finaliseApiDelete, _endDeleteCommandBlock, _finaliseApiUnDelete
-        and _modifiedApiObject for each V3 class
-        Initialised from _linkWrapperObjects in AbstractWrapperObject.py:954
-        """
-
-        undo = self._undo
-        if undo is not None:
-            # set undo step
-            undo.newWaypoint()  # DO NOT CHANGE THIS
-            undo.increaseWaypointBlocking()
-
-            # self.suspendNotification()
-
-    def _endDeleteCommandBlock(self, *dummyWrappedData):
-        """End block for delete command echoing
-
-        MUST be paired with _startDeleteCommandBlock call - use try ... finally to ensure both are called
-        """
-        undo = self._undo
-        if undo is not None:
-            # self.resumeNotification()
-            undo.decreaseWaypointBlocking()
+    # def _startDeleteCommandBlock(self, *allWrappedData):
+    #     """Call startCommandBlock for wrapper object delete. Implementation only
+    #
+    #     If commented: _activateApiNotifier fails
+    #
+    #     Used by the preset Api notifiers populated for self._apiNotifiers;
+    #     have _newApiObject, _startDeleteCommandBlock, _finaliseApiDelete, _endDeleteCommandBlock, _finaliseApiUnDelete
+    #     and _modifiedApiObject for each V3 class
+    #     Initialised from _linkWrapperObjects in AbstractWrapperObject.py:954
+    #     """
+    #
+    #     undo = self._undo
+    #     if undo is not None:
+    #         # set undo step
+    #         undo.newWaypoint()  # DO NOT CHANGE THIS
+    #         undo.increaseWaypointBlocking()
+    #
+    #         # self.suspendNotification()
+    #
+    # def _endDeleteCommandBlock(self, *dummyWrappedData):
+    #     """End block for delete command echoing
+    #
+    #     MUST be paired with _startDeleteCommandBlock call - use try ... finally to ensure both are called
+    #     """
+    #     undo = self._undo
+    #     if undo is not None:
+    #         # self.resumeNotification()
+    #         undo.decreaseWaypointBlocking()
 
     # def _newApiObjectCallback(self, wrappedData, cls: AbstractWrapperObject):
     #     """

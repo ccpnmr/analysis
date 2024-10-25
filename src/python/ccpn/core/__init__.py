@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -491,24 +491,28 @@ MARK_CLASSNAME = _Mark.className
 _Mark._registerCoreClass()
 
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay as _SpectrumDisplay
+from ccpn.ui.gui.modules.SpectrumDisplayModule import _factoryFunction
 SPECTRUMDISPLAY_CLASSNAME = _SpectrumDisplay.className
-_SpectrumDisplay._registerCoreClass()
+_SpectrumDisplay._registerCoreClass(_factoryFunction)
 
 from ccpn.ui._implementation.Strip import Strip as _Strip
+from ccpn.ui.gui.lib.Strip import _factoryFunction
 STRIP_CLASSNAME = _Strip.className
-_Strip._registerCoreClass()
+_Strip._registerCoreClass(_factoryFunction)
 
 from ccpn.ui._implementation.Axis import Axis as _Axis
 AXIS_CLASSNAME = _Axis.className
 _Axis._registerCoreClass()
 
 from ccpn.ui._implementation.SpectrumView import SpectrumView as _SpectrumView
+from ccpn.ui.gui.lib.SpectrumView import _factoryFunction
 SPECTRUMVIEW_CLASSNAME = _SpectrumView.className
-_SpectrumView._registerCoreClass()
+_SpectrumView._registerCoreClass(_factoryFunction)
 
-from ccpn.ui.gui.lib.PeakListView import PeakListView as _PeakListView
+from ccpn.ui._implementation.PeakListView import PeakListView as _PeakListView
+from ccpn.ui.gui.lib.PeakListView import _factoryFunction
 PEAKLISTVIEW_CLASSNAME = _PeakListView.className
-_PeakListView._registerCoreClass()
+_PeakListView._registerCoreClass(_factoryFunction)
 
 from ccpn.ui.gui.lib.MultipletListView import MultipletListView as _MultipletListView
 MULTIPLETLISTVIEW_CLASSNAME = _MultipletListView.className

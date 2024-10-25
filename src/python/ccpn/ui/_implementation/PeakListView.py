@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 17:29:34 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -43,6 +43,7 @@ from ccpn.ui._implementation.PMIListViewABC import PMIListViewABC
 class PeakListView(PMIListViewABC):
     """Peak List View for 1D or nD PeakList
     """
+    #-----------------------------------------------------------------------------------------
 
     #: Short class name, for PID.
     shortClassName = 'GL'
@@ -63,12 +64,20 @@ class PeakListView(PMIListViewABC):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiStripPeakListView._metaclass.qualifiedName()
 
+    #-----------------------------------------------------------------------------------------
+
     def _setListClasses(self):
         """Set the primary classType for the child list attached to this container
         """
         self._apiListView = self._wrappedData.peakListView
         self._apiListSerial = self._wrappedData.peakListView.peakListSerial
         self._apiList = self._wrappedData.peakListView.peakList
+
+    @property
+    def _listObject(self):
+        """:return: the Peak|Multiplet|Integral List object associated with this view
+        """
+        return self.peakList
 
     #=========================================================================================
     # CCPN properties
@@ -83,8 +92,6 @@ class PeakListView(PMIListViewABC):
     def peakList(self) -> PeakList:
         """PeakList that PeakListView refers to"""
         return self._project._data2Obj.get(self._wrappedData.peakListView.peakList)
-
-    _listObject = peakList
 
     @property
     def _key(self) -> str:
@@ -170,36 +177,34 @@ Project._apiNotifiers.append(
          ApiPeakListView._metaclass.qualifiedName(), '')
         )
 
-# GWV 24/20/24: replaced by notifiers on SpectrumView
-def _peakListAddPeakListViews(project: Project, apiPeakList: Nmr.PeakList):
-    """Add ApiPeakListView when ApiPeakList is created"""
+
+def _newApiPeakListCallback(project: Project, apiPeakList: Nmr.PeakList):
+    """Add ApiPeakListView when ApiPeakList is created
+    """
     from ccpn.core.lib.Notifiers import NotifierBase
-    # Need to use the "gui"
-    from ccpn.ui.gui.lib.PeakListView import PeakListView as _PeakListView
 
     if NotifierBase._apiNotificationBlanking == 0:
         # create new apiObjects if not blocked
         for apiSpectrumView in apiPeakList.dataSource.spectrumViews:
             apiPeakListView = apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial,
                                                               peakList=apiPeakList)
-            if _PeakListView._newInstanceFromApiData(apiObj=apiPeakListView.findFirstStripPeakListView(),
+            if PeakListView._newInstanceFromApiData(apiObj=apiPeakListView.findFirstStripPeakListView(),
                                                     project=project) is None:
                 raise RuntimeError('Unable to generate new PeakListView')
 
 
-Project._setupApiNotifier(_peakListAddPeakListViews, Nmr.PeakList, 'postInit')
+Project._setupApiNotifier(_newApiPeakListCallback, Nmr.PeakList, 'postInit')
 
 
-def _spectrumViewAddPeakListViews(project: Project, apiSpectrumView: ApiSpectrumView):
+def _newApiSpectrumViewAddPeakListViewCallback(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiPeakListView when ApiSpectrumView is created"""
-    # Need to use the "gui"
-    from ccpn.ui.gui.lib.PeakListView import PeakListView as _PeakListView
+
     for apiPeakList in apiSpectrumView.dataSource.peakLists:
         apiPeakListView = apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial,
                                                           peakList=apiPeakList)
-        if _PeakListView._newInstanceFromApiData(apiObj=apiPeakListView.findFirstStripPeakListView(),
+        if PeakListView._newInstanceFromApiData(apiObj=apiPeakListView.findFirstStripPeakListView(),
                                                 project=project) is None:
             raise RuntimeError('Unable to generate new PeakListView')
 
 
-Project._setupApiNotifier(_spectrumViewAddPeakListViews, ApiSpectrumView, 'postInit')
+Project._setupApiNotifier(_newApiSpectrumViewAddPeakListViewCallback, ApiSpectrumView, 'postInit')

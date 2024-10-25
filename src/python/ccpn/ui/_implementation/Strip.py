@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -44,15 +44,15 @@ from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
 from ccpn.util.Logging import getLogger
 
 
-from ccpn.core import _DEBUG
-
 
 @updateObject(fromVersion='3.0.4',
               toVersion='3.1.0',
               updateFunction=_updateStrip_3_0_4_to_3_1_0,
               updateMethod=UPDATE_POST_OBJECT_INITIALISATION)
 class Strip(AbstractWrapperObject):
-    """Display Strip for 1D or nD spectrum"""
+    """Display Strip for 1D or nD spectrum
+    """
+    #-----------------------------------------------------------------------------------------
 
     #: Short class name, for PID.
     shortClassName = 'GS'
@@ -71,6 +71,8 @@ class Strip(AbstractWrapperObject):
     _childClasses = []
 
     _isGuiClass = True
+
+    _ignoreNewApiObjectCallback = True
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiBoundStrip._metaclass.qualifiedName()
@@ -318,37 +320,6 @@ class Strip(AbstractWrapperObject):
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
-
-    @classmethod
-    def _newInstanceFromApiData(cls, apiObj, project=None):
-        """Return a new instance of cls, initialised with data from apiObj.
-        Checks for existence, and potential factory function.
-        """
-        from ccpn.framework.Application import getProject
-        from ccpn.ui.gui.lib.Strip import Strip1d, StripNd
-
-
-        # override cls-type - 1D/nD display
-        klass = Strip1d if apiObj.spectrumDisplay.is1d else StripNd
-        if project is None:
-            project = getProject()
-        if apiObj in project._data2Obj:
-            # This happens with Window, as it get initialised by the Window-Store and then once
-            # more as child of Project
-            newInstance = project._data2Obj[apiObj]
-            if _DEBUG:
-                getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
-                                             f'\n                     {apiObj}'
-                                             ))
-        elif (_factoryFunction := klass._factoryFunction) is not None:
-            newInstance = _factoryFunction(project, apiObj)
-        else:
-            newInstance = klass(project, apiObj)
-
-        if newInstance is None:
-            raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
-
-        return newInstance
 
     @classmethod
     def _getAllWrappedData(cls, parent: SpectrumDisplay) -> list:
@@ -619,7 +590,7 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
         # Put strip at the right, which means newIndex should be None
         if newIndex > stripCount:
             # warning
-            self._project._logger.warning(
+            getLogger().warning(
                     f"Attempt to copy strip to position {newIndex} in display with only {stripCount} strips"
                     )
         newIndex = None
@@ -661,10 +632,21 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
 
     return newStrip
 
-
 # GWV 10/12/21: in SpectrumDisplay
 # SpectrumDisplay.copyStrip = _copyStrip
 # del _copyStrip
+
+
+def _newStrip(spectrumDisplay) -> Strip:
+    """Create a new strip for spectrumDisplay
+    :param spectrumDisplay: a SpectrumDisplay instance
+    :returns A new Strip instance
+    """
+    apiSpectrumDisplay = spectrumDisplay._wrappedData
+    apiStrip = apiSpectrumDisplay.newBoundStrip()
+    if (strip := Strip._newInstanceFromApiData(apiObj=apiStrip)) is None:
+        raise RuntimeError('_newStrip(): Unable to generate new Strip')
+    return strip
 
 
 #=========================================================================================

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -76,6 +76,8 @@ class SpectrumDisplay(AbstractWrapperObject):
     _childClasses = []
 
     _isGuiClass = True
+
+    _ignoreNewApiObjectCallback = True
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiBoundDisplay._metaclass.qualifiedName()
@@ -247,36 +249,6 @@ class SpectrumDisplay(AbstractWrapperObject):
 
         # _isNew: Only set by newSpectrumDisplay and used in .displaySpectrum()
         self._isNew: bool = False
-
-    @classmethod
-    def _newInstanceFromApiData(cls, apiObj, project=None):
-        """Return a new instance of cls, initialised with data from apiObj.
-        Checks for existence, and potential factory function.
-        """
-        from ccpn.framework.Application import getProject
-        from ccpn.ui.gui.modules.SpectrumDisplayModule import SpectrumDisplay1d, SpectrumDisplayNd
-
-        # override cls-type - 1D/nD display
-        klass = SpectrumDisplay1d if apiObj.is1d else SpectrumDisplayNd
-        if project is None:
-            project = getProject()
-        if apiObj in project._data2Obj:
-            # This happens with Window, as it get initialised by the Window-Store and then once
-            # more as child of Project
-            newInstance = project._data2Obj[apiObj]
-            if _DEBUG:
-                getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
-                                             f'\n                     {apiObj}'
-                                             ))
-        elif (_factoryFunction := klass._factoryFunction) is not None:
-            newInstance = _factoryFunction(project, apiObj)
-        else:
-            newInstance = klass(project, apiObj)
-
-        if newInstance is None:
-            raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
-
-        return newInstance
 
     # @classmethod
     # def _restoreObject(cls, project, apiObj):
@@ -886,14 +858,14 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
         display.isGrouped = isGrouped
 
     # Create first strip; looks like we need this before other things, otherwise the api goes crazy
-    from ccpn.ui._implementation.Strip import Strip as _Strip
+    from ccpn.ui._implementation.Strip import _newStrip
     from ccpn.ui._implementation.Axis import Axis as _Axis
 
-    apiStrip = apiSpectrumDisplay.newBoundStrip()
-    # if (strip := project._data2Obj.get(apiStrip)) is None:
-    #     raise RuntimeError(f'Unable to generate new Strip for {display}')
-    if (strip := _Strip._newInstanceFromApiData(apiObj=apiStrip, project=project)) is None:
-        raise RuntimeError('Unable to generate new Strip')
+    # apiStrip = apiSpectrumDisplay.newBoundStrip()
+    # # if (strip := project._data2Obj.get(apiStrip)) is None:
+    # #     raise RuntimeError(f'Unable to generate new Strip for {display}')
+    strip = _newStrip(spectrumDisplay=display)
+    apiStrip = strip._wrappedData
 
     # Create axes
     if is1D:

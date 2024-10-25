@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-07 19:26:08 +0100 (Fri, June 07, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -150,7 +150,7 @@ Peak.getPeakView = getPeakView
 del getPeakView
 
 
-def _peakAddPeakViews(project: Project, apiPeak: Nmr.Peak):
+def _newApiPeakAddPeakViewsCallback(project: Project, apiPeak: Nmr.Peak):
     """Add ApiPeakViews when ApiPeak is created.
     """
     from ccpn.core.lib.Notifiers import NotifierBase
@@ -161,4 +161,4 @@ def _peakAddPeakViews(project: Project, apiPeak: Nmr.Peak):
             apiPeakListView.newPeakView(peak=apiPeak, peakSerial=0)
 
 
-Project._setupApiNotifier(_peakAddPeakViews, Nmr.Peak, 'postInit')
+Project._setupApiNotifier(_newApiPeakAddPeakViewsCallback, Nmr.Peak, 'postInit')

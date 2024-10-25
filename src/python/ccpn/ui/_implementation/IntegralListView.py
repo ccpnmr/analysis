@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 17:29:34 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -43,6 +43,7 @@ from ccpn.ui._implementation.PMIListViewABC import PMIListViewABC
 class IntegralListView(PMIListViewABC):
     """Integral List View for 1D or nD IntegralList
     """
+    #-----------------------------------------------------------------------------------------
 
     #: Short class name, for PID.
     shortClassName = 'GI'
@@ -63,12 +64,20 @@ class IntegralListView(PMIListViewABC):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiStripIntegralListView._metaclass.qualifiedName()
 
+    #-----------------------------------------------------------------------------------------
+
     def _setListClasses(self):
         """Set the primary classType for the child list attached to this container
         """
         self._apiListView = self._wrappedData.integralListView
         self._apiListSerial = self._wrappedData.integralListView.integralListSerial
         self._apiList = self._wrappedData.integralListView.integralList
+
+    @property
+    def _listObject(self):
+        """:return: the Peak|Multiplet|Integral List object associated with this view
+        """
+        return self.integralList
 
     #=========================================================================================
     # CCPN properties
@@ -83,8 +92,6 @@ class IntegralListView(PMIListViewABC):
     def integralList(self) -> IntegralList:
         """IntegralList that IntegralListView refers to"""
         return self._project._data2Obj.get(self._wrappedData.integralListView.integralList)
-
-    _listObject = integralList
 
     @property
     def _key(self) -> str:
@@ -172,31 +179,36 @@ Project._apiNotifiers.append(
         )
 
 
-def _integralListAddIntegralListViews(project: Project, apiIntegralList: Nmr.IntegralList):
+def _newApiIntegralListCallback(project: Project, apiIntegralList: Nmr.IntegralList):
     """Add ApiIntegralListView when ApiIntegralList is created"""
     from ccpn.core.lib.Notifiers import NotifierBase
+    # Need to use the "gui"
+    from ccpn.ui.gui.lib.IntegralListView import IntegralListView as _IntegralListView
 
     if NotifierBase._apiNotificationBlanking == 0:
         # create new apiObjects if not blocked
         for apiSpectrumView in apiIntegralList.dataSource.spectrumViews:
             apiIntegralListView = apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial,
                                                                       integralList=apiIntegralList)
-            if IntegralListView._newInstanceFromApiData(apiObj=apiIntegralListView.findFirstStripIntegralListView(),
+            if _IntegralListView._newInstanceFromApiData(apiObj=apiIntegralListView.findFirstStripIntegralListView(),
                                                         project=project) is None:
                 raise RuntimeError('Unable to generate new IntegralListView')
 
 
-Project._setupApiNotifier(_integralListAddIntegralListViews, Nmr.IntegralList, 'postInit')
+Project._setupApiNotifier(_newApiIntegralListCallback, Nmr.IntegralList, 'postInit')
 
 
-def _spectrumViewAddIntegralListViews(project: Project, apiSpectrumView: ApiSpectrumView):
+def _newApiSpectrumViewAddIntegralListViewCallback(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiIntegralListView when ApiSpectrumView is created"""
+    # Need to use the "gui"
+    from ccpn.ui.gui.lib.IntegralListView import IntegralListView as _IntegralListView
+
     for apiIntegralList in apiSpectrumView.dataSource.integralLists:
         apiIntegralListView = apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial,
                                                                   integralList=apiIntegralList)
-        if IntegralListView._newInstanceFromApiData(apiObj=apiIntegralListView.findFirstStripIntegralListView(),
-                                                    project=project) is None:
+        if _IntegralListView._newInstanceFromApiData(apiObj=apiIntegralListView.findFirstStripIntegralListView(),
+                                                     project=project) is None:
             raise RuntimeError('Unable to generate new IntegralListView')
 
 
-Project._setupApiNotifier(_spectrumViewAddIntegralListViews, ApiSpectrumView, 'postInit')
+Project._setupApiNotifier(_newApiSpectrumViewAddIntegralListViewCallback, ApiSpectrumView, 'postInit')

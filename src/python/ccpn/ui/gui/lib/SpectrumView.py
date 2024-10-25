@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 17:29:34 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui._implementation.SpectrumView import SpectrumView as _CoreClassSpectrumView
+from ccpn.ui._implementation.SpectrumView import SpectrumView as _SpectrumViewCoreClass
 from ccpn.ui.gui.lib.GuiSpectrumView1d import GuiSpectrumView1d as _GuiSpectrumView1d
 from ccpn.ui.gui.lib.GuiSpectrumViewNd import GuiSpectrumViewNd as _GuiSpectrumViewNd
 from ccpn.ui.gui.guiSettings import _styleBlue
@@ -37,59 +37,58 @@ from ccpn.core.lib.Notifiers import NotifierABC
 from ccpn.util.Logging import getLogger
 
 
-from ccpn.core import _DEBUG
+# GWV 24/10/24: Implementation change
+def _factoryFunction(project, wrappedData):
+    """The factory function used to create 1d or nD versions of the
+    SpectrumView object.
+    Used in core.__init__ to define the proper instantiation
+    """
+    klass = SpectrumView1d if (wrappedData.strip.spectrumDisplay.is1d) else SpectrumViewNd
+    return klass(project=project, wrappedData=wrappedData)
 
 
 # class SpectrumView(_CoreClassSpectrumView):
-
-    # GWV 24/20/24: moved to _implementation.SpectrumView
-    # @classmethod
-    # def _newInstanceFromApiData(cls, apiObj, project=None):
-    #     """Return a new instance of cls, initialised with data from apiObj.
-    #     Checks for existence, and potential factory function.
+#
+    # GWV reverting
+    #     # Set notifiers to create/delete peakList  --> affects PeakListView children
+    #     self.setNotifier(self.spectrum,
+    #                      triggers=[NotifierABC.CREATE, NotifierABC.DELETE],
+    #                      targetName=PeakList.className,
+    #                      callback=self._peakListCallback
+    #                      )
+    #
+    # def _peakListCallback(self, callbackDict):
+    #     """Callback when peakList is created or deleted
     #     """
-    #     from ccpn.framework.Application import getProject
+    #     from ccpn.ui.gui.lib.PeakListView import _newPeakListView
     #
-    #     # override cls-type - 1D/nD display
-    #     klass = SpectrumView1d if ('intensity' in apiObj.strip.spectrumDisplay.axisCodes) else SpectrumViewNd
-    #     if project is None:
-    #         project = getProject()
-    #     if apiObj in project._data2Obj:
-    #         # This happens with Window, as it get initialised by the Window-Store and then once
-    #         # more as child of Project
-    #         newInstance = project._data2Obj[apiObj]
-    #         if _DEBUG:
-    #             getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
-    #                                          f'\n                     {apiObj}'
-    #                                          ))
-    #     elif (_factoryFunction := klass._factoryFunction) is not None:
-    #         newInstance = _factoryFunction(project, apiObj)
+    #     _trigger = callbackDict.get(NotifierABC.TRIGGER)
+    #     _obj = callbackDict.get(NotifierABC.OBJECT)
+    #
+    #     if _trigger == NotifierABC.CREATE:
+    #         _newPeakListView(spectrumView=self, peakList=_obj)
+    #
+    #     elif _trigger == NotifierABC.DELETE:
+    #         pass
+    #
     #     else:
-    #         newInstance = klass(project, apiObj)
-    #
-    #     if newInstance is None:
-    #         raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
-    #
-    #     return newInstance
+    #         raise RuntimeError(f'SpectrumView._peakListCallback(): invalid {_trigger=}')
 
 
-class SpectrumView1d(_CoreClassSpectrumView, _GuiSpectrumView1d):
+class SpectrumView1d(_SpectrumViewCoreClass, _GuiSpectrumView1d):
     """Class combining core-class data and 1D Gui Spectrum View
     """
 
     def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
-        _CoreClassSpectrumView.__init__(self, project, wrappedData)
+        _SpectrumViewCoreClass.__init__(self, project, wrappedData)
         _GuiSpectrumView1d.__init__(self)
-
         getLogger().debug(_styleBlue(f'SpectrumView1d.__init__>> {self=}, {self.strip=}'))
 
 
-class SpectrumViewNd(_CoreClassSpectrumView, _GuiSpectrumViewNd):
+class SpectrumViewNd(_SpectrumViewCoreClass, _GuiSpectrumViewNd):
     """Class combining core-class data and nD Gui Spectrum View
     """
-
     def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
-        _CoreClassSpectrumView.__init__(self, project, wrappedData)
+        _SpectrumViewCoreClass.__init__(self, project, wrappedData)
         _GuiSpectrumViewNd.__init__(self)
-
         getLogger().debug(_styleBlue(f'SpectrumViewNd.__init__>> {self=} {self.strip=}'))

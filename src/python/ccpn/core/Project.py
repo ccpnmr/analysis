@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -85,7 +85,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 
 
-from ccpn.core import _DEBUG
+_DEBUG = True
 
 
 class Project(AbstractWrapperObject):
@@ -2232,27 +2232,28 @@ class Project(AbstractWrapperObject):
     #         # self.resumeNotification()
     #         undo.decreaseWaypointBlocking()
 
-    # def _newApiObjectCallback(self, wrappedData, cls: AbstractWrapperObject):
-    #     """
-    #     This method is called from the api upon creation of a corresponding api object
-    #     See AbstractWrapperObject._linkWrapperClasses where the apiNotifier is set for this callback
-    #     """
-    #     if self._apiBlocking != 0:
-    #         getLogger().debug(_styleRed(f'blocking _newApiObject {self} {wrappedData} {cls}'))
-    #         return
-    #     if (result := self._data2Obj.get(wrappedData)) is not None:
-    #         raise RuntimeError(
-    #                 f'Project._newApiObject: {result} already exists; Cannot create again and this should not happen!')
-    #     # if cls._ignoreNewApiObjectCallback:
-    #     #     return
-    #     # print(traceback.print_stack())  # useful for tracking the exact error
-    #
-    #     obj = cls._newInstanceFromApiData(project=self, apiObj=wrappedData)
-    #     if _DEBUG:
-    #         getLogger().debug(_styleRed(f'_newInstanceFromApiData {id(obj)} {obj}'
-    #                                     f'\n                                  {wrappedData}'
-    #                                     f'\n                                  {self}'
-    #                                     ))
+    def _newApiObjectCallback(self, wrappedData, cls: AbstractWrapperObject):
+        """
+        This method is called from the api upon creation of a corresponding api object
+        See AbstractWrapperObject._linkWrapperClasses where the apiNotifier is set for this callback
+        """
+        if self._apiBlocking != 0:
+            getLogger().debug(_styleRed(f'blocking _newApiObject {self} {wrappedData} {cls}'))
+            return
+        if (result := self._data2Obj.get(wrappedData)) is not None:
+            raise RuntimeError(
+                    f'Project._newApiObject: {result} already exists; Cannot create again and this should not happen!')
+        if cls._ignoreNewApiObjectCallback:
+            return
+        # print(traceback.print_stack())  # useful for tracking the exact error
+
+        obj = cls._newInstanceFromApiData(project=self, apiObj=wrappedData)
+        if _DEBUG:
+            getLogger().debug(_styleRed(
+                        f'==> _newApiObjectCallback  {obj} id={id(obj)} \n'
+                        f'    {wrappedData}'
+                )
+            )
 
     def _modifiedApiObject(self, wrappedData):
         """ call object-has-changed notifiers

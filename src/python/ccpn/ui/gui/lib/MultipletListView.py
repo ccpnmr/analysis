@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.util.Logging import getLogger
 
 
 class GuiMultipletListView(GuiListViewABC):
-    """multipletList is the CCPN wrapper object
+    """multipletList GUI PML wrapper object
     """
 
     def __init__(self, project: Project):
@@ -55,7 +55,7 @@ class GuiMultipletListView(GuiListViewABC):
 
 
 class MultipletListView(_CoreClassListView, GuiMultipletListView):
-    """Core data and Gui parts of Multiplet List View for 1D or nD MultipletList
+    """Core data and Gui parts of MultipletListView for 1D or nD MultipletList
     """
 
     def __init__(self, project: Project, wrappedData: 'ApiStripMultipletListView'):

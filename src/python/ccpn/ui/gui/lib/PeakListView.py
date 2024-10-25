@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 17:29:34 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -37,6 +37,15 @@ from ccpn.ui._implementation.PeakView import PeakView as KlassView
 from ccpn.ui.gui.guiSettings import _styleBlue
 
 from ccpn.util.Logging import getLogger
+
+
+# GWV 24/10/24: Implementation change
+def _factoryFunction(project, wrappedData):
+    """The factory function used to create the GUI-augmented
+    PeakListView object.
+    Used in core.__init__ to define the proper instantiation
+    """
+    return PeakListView(project=project, wrappedData=wrappedData)
 
 
 class GuiPeakListView(GuiListViewABC):
@@ -64,7 +73,6 @@ class PeakListView(_CoreClassPeakListView, GuiPeakListView):
         """
         _CoreClassPeakListView.__init__(self, project, wrappedData)
         GuiPeakListView.__init__(self, project)
-
         getLogger().debug(_styleBlue(f'PeakListView.__init__>> initialised {self}  {self.peakList=}'))
 
 

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:08:18 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -39,57 +39,18 @@ from ccpn.core.Project import Project
 from ccpn.util.Logging import getLogger
 
 
-from ccpn.core import _DEBUG
+# GWV 24/10/24: Implementation change
+def _factoryFunction(project, wrappedData):
+    """The factory function used to create 1d or nD versions of the
+    Strip object.
+    Used in core.__init__ to define the proper instantiation
+    """
+    klass = Strip1d if wrappedData.spectrumDisplay.is1d else StripNd
+    return klass(project=project, wrappedData=wrappedData)
 
 
-
-# class Strip(_CoreClassStrip):
+# class _Strip(_CoreClassStrip):
 #
-    #GWV 24/10/24: to _Implementation/Strip
-    # @classmethod
-    # def _newInstanceFromApiData(cls, apiObj, project=None):
-    #     """Return a new instance of cls, initialised with data from apiObj.
-    #     Checks for existence, and potential factory function.
-    #     """
-    #     from ccpn.framework.Application import getProject
-    #
-    #     # override cls-type - 1D/nD display
-    #     klass = Strip1d if apiObj.spectrumDisplay.is1d else StripNd
-    #     if project is None:
-    #         project = getProject()
-    #     if apiObj in project._data2Obj:
-    #         # This happens with Window, as it get initialised by the Window-Store and then once
-    #         # more as child of Project
-    #         newInstance = project._data2Obj[apiObj]
-    #         if _DEBUG:
-    #             getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
-    #                                          f'\n                     {apiObj}'
-    #                                          ))
-    #     elif (_factoryFunction := klass._factoryFunction) is not None:
-    #         newInstance = _factoryFunction(project, apiObj)
-    #     else:
-    #         newInstance = klass(project, apiObj)
-    #
-    #     if newInstance is None:
-    #         raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
-    #
-    #     return newInstance
-
-    # GWV 24/20/24: moved to GuiStrip, as its "owns" the glWidget
-    # def _postRestore(self):
-    #     """Handle post-initialising children after all children have been restored
-    #     """
-    #     settings = self.spectrumDisplay._getSettingsDict()
-    #     prefs = self._preferences
-    #
-    #     # copy values from preferences
-    #     glWidget = self._CcpnGLWidget
-    #     glWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
-    #     glWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
-    #     glWidget._applyXLimit = prefs.zoomXLimitApply
-    #     glWidget._applyYLimit = prefs.zoomYLimitApply
-    #
-    #     super()._postRestore()
 
 
 class Strip1d(_CoreClassStrip, _GuiStrip1d):
@@ -98,14 +59,12 @@ class Strip1d(_CoreClassStrip, _GuiStrip1d):
 
     def __init__(self, project: Project, wrappedData: 'ApiBoundStrip'):
 
-        # _CoreClassStrip.__init__(self, project, wrappedData)
         _CoreClassStrip.__init__(self, project, wrappedData)
+        _GuiStrip1d.__init__(self, self.spectrumDisplay)
 
         getLogger().debug(
                     _styleBlue(f'Strip1d.__init__>> spectrumDisplay: {self.spectrumDisplay}')
         )
-
-        _GuiStrip1d.__init__(self, self.spectrumDisplay)
 
         # cannot add the Frame until fully done
         strips = self.spectrumDisplay.orderedStrips
@@ -151,14 +110,12 @@ class StripNd(_CoreClassStrip, _GuiStripNd):
     """
     def __init__(self, project: Project, wrappedData: 'ApiBoundStrip'):
 
-        # _CoreClassStrip.__init__(self, project, wrappedData)
         _CoreClassStrip.__init__(self, project, wrappedData)
+        _GuiStripNd.__init__(self, self.spectrumDisplay)
 
         getLogger().debug(
                 _styleBlue(f'StripNd.__init__>> spectrumDisplay={self.spectrumDisplay}')
         )
-
-        _GuiStripNd.__init__(self, self.spectrumDisplay)
 
         # cannot add the Frame until fully done
         strips = self.spectrumDisplay.orderedStrips

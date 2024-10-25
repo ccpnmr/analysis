@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -1165,20 +1165,27 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     @classmethod
     def _newInstanceFromApiData(cls, apiObj, project=None):
         """Return a new instance of cls, initialised with data from apiObj.
-        Checks for existence, and potential factory function.
+        Checks first for prior instantiation from apiObj.
+        Uses potential cls._factoryFunction.
+        :param apiObj: the modeled dataObj representing a V3 object
+        :param project: the Project instance; retrieved from application if None
+        :return The instantiated V3 object of type cls (or whatever cls._factoryFunction yielded)
         """
         from ccpn.framework.Application import getProject
 
         if project is None:
             project = getProject()
+
         if apiObj in project._data2Obj:
             # This happens with Window, as it get initialised by the Window-Store and then once
             # more as child of Project
             newInstance = project._data2Obj[apiObj]
             if _DEBUG:
-                getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
-                                             f'\n                     {apiObj}'
-                                             ))
+                getLogger().debug(_styleRed(
+                        f'==> found  {newInstance} id={id(newInstance)} \n'
+                        f'    {apiObj}'
+                    )
+                )
         elif (_factoryFunction := cls._factoryFunction) is not None:
             newInstance = _factoryFunction(project, apiObj)
         else:
@@ -1352,7 +1359,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                 if cls._registerClassNotifiers:
                     className = cls._apiClassQualifiedName
                     Project._apiNotifiers[:0] = [
-                        # ('_newApiObjectCallback', {'cls': cls}, className, '__init__'),
+                        ('_newApiObjectCallback', {'cls': cls}, className, '__init__'),
                         # ('_startDeleteCommandBlock', {}, className, 'startDeleteBlock'),
                         ('_finaliseApiDelete', {}, className, 'delete'),
                         # ('_endDeleteCommandBlock', {}, className, 'endDeleteBlock'),

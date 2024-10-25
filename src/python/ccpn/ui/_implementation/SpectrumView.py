@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 17:29:34 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -53,7 +53,9 @@ from ccpn.util.Logging import getLogger
 
 
 class SpectrumView(AbstractWrapperObject):
-    """Spectrum View for 1D or nD spectrum"""
+    """Spectrum View for 1D or nD spectrum
+    """
+    #-----------------------------------------------------------------------------------------
 
     #: Short class name, for PID.
     shortClassName = 'GV'
@@ -71,8 +73,12 @@ class SpectrumView(AbstractWrapperObject):
 
     _isGuiClass = True
 
+    _ignoreNewApiObjectCallback = False
+
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiStripSpectrumView._metaclass.qualifiedName()
+
+    #-----------------------------------------------------------------------------------------
 
     _CONTOURATTRIBUTELIST = """negativeContourBase negativeContourCount negativeContourFactor
                                displayNegativeContours negativeContourColour
@@ -86,30 +92,6 @@ class SpectrumView(AbstractWrapperObject):
     def __init__(self, project, wrappedData):
         AbstractWrapperObject.__init__(self, project, wrappedData)
 
-        # Set notifiers to create/delete peakList  --> affects PeakListView children
-        self.setNotifier(self.spectrum,
-                         triggers=[NotifierABC.CREATE, NotifierABC.DELETE],
-                         targetName=PeakList.className,
-                         callback=self._peakListCallback
-                         )
-
-    def _peakListCallback(self, callbackDict):
-        """Callback when peakList is created or deleted
-        """
-        from ccpn.ui.gui.lib.PeakListView import _newPeakListView
-
-        _trigger = callbackDict.get(NotifierABC.TRIGGER)
-        _obj = callbackDict.get(NotifierABC.OBJECT)
-
-        if _trigger == NotifierABC.CREATE:
-            _newPeakListView(spectrumView=self, peakList=_obj)
-
-        elif _trigger == NotifierABC.DELETE:
-            pass
-
-        else:
-            raise RuntimeError(f'SpectrumView._peakListCallback(): invalid {_trigger=}')
-
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Subclassed to allow for initialisations on restore
@@ -121,36 +103,6 @@ class SpectrumView(AbstractWrapperObject):
             result._index = 0
 
         return result
-
-    @classmethod
-    def _newInstanceFromApiData(cls, apiObj, project=None):
-        """Return a new instance of cls, initialised with data from apiObj.
-        Checks for existence, 1D/nD and potential factory function.
-        """
-        from ccpn.framework.Application import getProject
-        from ccpn.ui.gui.lib.SpectrumView import SpectrumView1d, SpectrumViewNd
-
-        # override cls-type - 1D/nD display
-        klass = SpectrumView1d if ('intensity' in apiObj.strip.spectrumDisplay.axisCodes) else SpectrumViewNd
-        if project is None:
-            project = getProject()
-        if apiObj in project._data2Obj:
-            # This happens with Window, as it get initialised by the Window-Store and then once
-            # more as child of Project
-            newInstance = project._data2Obj[apiObj]
-            if _DEBUG:
-                getLogger().debug(_styleBlue(f'==> found  {id(newInstance)}  {newInstance}'
-                                             f'\n                     {apiObj}'
-                                             ))
-        elif (_factoryFunction := klass._factoryFunction) is not None:
-            newInstance = _factoryFunction(project, apiObj)
-        else:
-            newInstance = klass(project, apiObj)
-
-        if newInstance is None:
-            raise RuntimeError(f'Error creating new instance of class "{klass.__name__}"')
-
-        return newInstance
 
     #=========================================================================================
     # CCPN properties
@@ -728,18 +680,6 @@ class SpectrumView(AbstractWrapperObject):
 #=========================================================================================
 # New method
 #=========================================================================================
-
-# @newObject(SpectrumView)
-# Cannot use the decorator
-# """
-#   File "/Users/geerten/Code/CCPNv3/CcpNmr/src/python/ccpn/core/lib/ContextManagers.py", line 638, in theDecorator
-#     apiObjectsCreated = result._getApiObjectTree()
-#   File "/Users/geerten/Code/CCPNv3/CcpNmr/src/python/ccpn/core/_implementation/AbstractWrapperObject.py", line 683, in _getApiObjectTree
-#     obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter, topObjectsToCheck)  # This builds the list/set
-#   File "/Users/geerten/Code/CCPNv3/CcpNmr/src/python/ccpnmodel/ccpncore/api/ccpnmr/gui/Task.py", line 28366, in _checkDelete
-#     raise ApiError("StripSpectrumView %s: StripSpectrumViews can only be deleted when the SpectrumView or Strip is deleted." % self)
-# ccpnmodel.ccpncore.memops.ApiError.ApiError: StripSpectrumView <ccpnmr.gui.Task.StripSpectrumView ['user', 'View', '1D_H', 1, <ccpnmr.gui.Task.SpectrumView ['user', 'View', '1D_H', 'AcetatePE', 0]>]>: StripSpectrumViews can only be deleted when the SpectrumView or Strip is deleted.
-# """
 
 
 # NOTE:ED - this is the less complicated decorator

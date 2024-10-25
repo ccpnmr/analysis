@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 14:49:42 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -2263,7 +2263,7 @@ class Project(AbstractWrapperObject):
         if NotifierBase._apiNotificationBlanking != 0 or self._apiBlocking != 0:
             return
         if not (obj := self._data2Obj.get(wrappedData)):
-            # NOTE:GWV - it shouldn't get here but occasionally it does; e.g. when
+            # NB: GWV - it shouldn't get here but occasionally it does; e.g. when
             # upgrading a V2 project with correctFinalResult() routine
             getLogger().debug(f'_modifiedApiObject: no V3 object for {wrappedData}')
         else:
@@ -2334,7 +2334,7 @@ class Project(AbstractWrapperObject):
         for apiObj in targets:
             if not apiObj.isDeleted:
                 if (obj := self._data2Obj.get(apiObj)) is None:
-                    # NOTE:GWV - it shouldn't get here but occasionally it does; e.g. when
+                    # NB: GWV - it shouldn't get here but occasionally it does; e.g. when
                     # upgrading a V2 project with correctFinalResult() routine
                     getLogger().debug(f'_notifyRelatedApiObject: no V3 object for {apiObj}')
                 else:

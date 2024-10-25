@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-22 17:58:54 +0100 (Tue, October 22, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-25 14:49:42 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -837,8 +837,7 @@ class Gui(Ui, _Gui_V3_V4):
         return (dataLoader, createNewProject, ignore)
 
     def _getDataLoader(self, path, formatFilter=None, droppedOnSideBar=False) -> tuple[DataLoaderABC, bool, bool]:
-        """Get dataLoader for path (or None if not present), optionally only testing for
-        dataFormats defined in filter.
+        """Get dataLoader for path (or None if not present), optionally only testing for dataFormats defined in filter.
         Allows for reporting or checking through popups.
         Does not do the actual loading.
 
@@ -849,15 +848,6 @@ class Gui(Ui, _Gui_V3_V4):
 
         :raises RuntimeError in case of failure to define a proper dataLoader
         """
-        # local import here
-        from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
-        from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
-        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
-        from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
-        from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
-        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
-        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import NmrPipeSpectrumLoader
-
         _path = aPath(path)
         if not _path.exists():
             raise RuntimeError(f'Path "{path}" does not exist')
@@ -867,8 +857,7 @@ class Gui(Ui, _Gui_V3_V4):
         if len(_loaders) == 0:
             raise RuntimeError(f'Unknown error finding a loader for {path}')
 
-
-        # check the _loaders
+        # check the _loaders for a valid one
         if _loaders[-1].isValid:
             # there is a valid one; use that
             dataLoader = _loaders[-1]
@@ -884,13 +873,33 @@ class Gui(Ui, _Gui_V3_V4):
             getLogger().warning(errMsg)
             raise RuntimeError(errMsg)
 
+        return self._checkDataLoader(dataLoader, droppedOnSideBar=droppedOnSideBar)
+
+    def _checkDataLoader(self, dataLoader, droppedOnSideBar=False) -> tuple[DataLoaderABC, bool, bool]:
+        """Check dataLoader, reporting or checking through popups.
+        Does not do the actual loading.
+
+        :param dataLoader: dataLoader instance to be checked
+        :param: droppedOnSideBar: flag to indicate path dropped on the sidebar
+        :returns a tuple (dataLoader, createNewProject, ignore)
+        :raises RuntimeError in case of failure
+        """
+        # local import here
+        from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
+        from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
+        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+        from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
+        from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
+        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
+        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import NmrPipeSpectrumLoader
+
         createNewProject = dataLoader.createNewProject
         ignore = False
         path = dataLoader.path
 
         # Check that the path does not contain a bottom-level space
-        if dataLoader.dataFormat in [CcpNmrV2ProjectDataLoader.dataFormat, CcpNmrV3ProjectDataLoader.dataFormat] and \
-                ' ' in aPath(dataLoader.path).basename:
+        if dataLoader.dataFormat in [CcpNmrV2ProjectDataLoader.dataFormat, CcpNmrV3ProjectDataLoader.dataFormat] \
+                and ' ' in dataLoader.aPath().basename:
             MessageDialog.showWarning('Load Project', 'Encountered a problem loading:\n"%s"\n\n'
                                                       'Cannot load project folders where the project-name contains spaces.\n\n'
                                                       'Please rename the folder without spaces and try loading again.' % dataLoader.path)
@@ -943,8 +952,8 @@ class Gui(Ui, _Gui_V3_V4):
                 dataLoader.makeArchive = True
 
         elif dataLoader.dataFormat == NefDataLoader.dataFormat:
-            (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
-            if dataLoader and not createNewProject and not ignore:
+            (_tmp, createNewProject, ignore) = self._queryChoices(dataLoader)
+            if _tmp and not createNewProject and not ignore:
                 # we are importing; popup the import window
                 ok = self.mainWindow._showNefPopup(dataLoader)
                 if not ok:
@@ -988,8 +997,8 @@ class Gui(Ui, _Gui_V3_V4):
                         ignore = True
 
         elif dataLoader.dataFormat == StarDataLoader.dataFormat and dataLoader:
-            (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
-            if dataLoader and not ignore:
+            (_tmp, createNewProject, ignore) = self._queryChoices(dataLoader)
+            if _tmp and not ignore:
                 title = 'New project from NmrStar' if createNewProject \
                          else 'Import from NmrStar'
                 dataLoader.getDataBlock()  # this will read and parse the file
@@ -1386,7 +1395,7 @@ class Gui(Ui, _Gui_V3_V4):
     def _loadData(self, dataLoader) -> list:
         """Load the data defined by dataLoader instance, catching errors
         and suspending sidebar.
-        :return a list of loaded opjects
+        :return A list of loaded objects, as any dataLoader object returns a list
         """
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
@@ -1443,6 +1452,51 @@ class Gui(Ui, _Gui_V3_V4):
                 continue
 
             dataLoaders.append(dataLoader)
+
+        # load the project using the dataLoaders;
+        # We'll ask framework who will pass it back as ui._loadData calls
+        objs = self.application._loadData(dataLoaders)
+        if len(objs) == 0:
+            _pp = ','.join(f'"{p}"' for p in paths)
+            txt = f'No objects were loaded from {_pp}'
+            getLogger().warning(txt)
+            MessageDialog.showError('Load Data', txt, parent=self.mainWindow)
+
+        return objs
+
+    def _loadDataIgnoreExtension(self, dataLoaderClass=None) -> list | None:
+        """Load the data defined by dataLoader, provides file dialog.
+
+        :param dataLoaderClass: DataLoader class used to import data
+        :return: a list of loaded objects
+        """
+        from ccpn.ui.gui.widgets import FileDialog
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
+
+        if not issubclass(dataLoaderClass, DataLoaderABC):
+            getLogger().debug(f'_loadDataIgnoreExtension(): invalid {dataLoaderClass=}')
+            return
+
+        dialog = FileDialog.DataFileDialog(parent=self.mainWindow, acceptMode='load')
+        dialog._show()
+        if (path := dialog.selectedFile()) is None:
+            return []
+        paths = [path]
+
+        dataLoaders = []
+        for path in paths:
+            _path = aPath(path)
+            if not _path.exists():
+                txt = f'"{path}" does not exist'
+                getLogger().warning(txt)
+                MessageDialog.showError('Load Data', txt, parent=self)
+                continue
+
+            # loads data using the provided dataLoader
+            _dataLoader = dataLoaderClass(path)
+            _dataLoader, _tmp, ignore = self._checkDataLoader(_dataLoader)
+            if _dataLoader and not ignore:
+                dataLoaders.append(_dataLoader)
 
         # load the project using the dataLoaders;
         # We'll ask framework who will pass it back as ui._loadData calls

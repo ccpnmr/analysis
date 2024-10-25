@@ -85,8 +85,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-07 12:12:50 +0100 (Mon, October 07, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-25 14:49:42 +0100 (Fri, October 25, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -439,7 +439,8 @@ class MenusDefs(Menu, _ApplicationProperties):
         """
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
 
-        self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
+        # self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
+        self.ui._loadDataIgnoreExtension(NefDataLoader)
 
     def _exportNEFCallback(self):
         """
@@ -484,7 +485,8 @@ class MenusDefs(Menu, _ApplicationProperties):
         """
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
 
-        self.ui.loadData(formatFilter=(StarDataLoader.dataFormat,))
+        # self.ui.loadData(formatFilter=(StarDataLoader.dataFormat,))
+        self.ui._loadDataIgnoreExtension(StarDataLoader)
 
     def _saveCallback(self):
         """The project save callback"""
@@ -502,15 +504,14 @@ class MenusDefs(Menu, _ApplicationProperties):
         self.ui.saveProjectAs()
 
     def _archiveProjectCallback(self):
-
+        """Archive the project
+        """
         if (path := self.application.saveToArchive()) is None:
             MessageDialog.showInfo('Archive Project',
                                    'Unable to archive Project')
-
         else:
             MessageDialog.showInfo('Archive Project',
                                    'Project archived to %s' % path)
-            self.ui.mainWindow._updateRestoreArchiveMenu()
 
     def _restoreFromArchiveCallback(self):
         """Restore a project from archive
@@ -675,77 +676,83 @@ class MenusDefs(Menu, _ApplicationProperties):
         """
         Callback to display Peak Picking 1D Popup.
         """
+        from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
+
         if not self.project.peakLists:
             getLogger().warning('Peak Picking: Project has no peakLists.')
             MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
-        else:
-            spectra = [spec for spec in self.project.spectra if spec.dimensionCount == 1]
-            if spectra:
-                from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
+            return
 
-                popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-                popup.exec_()
-            else:
-                getLogger().warning('Peak Picking: Project has no 1d Spectra.')
-                MessageDialog.showWarning('Peak Picking', 'Project has no 1d Spectra.')
+        spectra = [spec for spec in self.project.spectra if spec.dimensionCount == 1]
+        if len(spectra) == 0:
+            getLogger().warning('Peak Picking: Project has no 1D Spectra.')
+            MessageDialog.showWarning('Peak Picking', 'Project has no 1D Spectra.')
+            return
+
+        popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+        popup.exec_()
 
     def _peakPickNDCallback(self):
         """
-        Callback to display Peak Picking ND Popup.
+        Callback to display Peak Picking nD Popup.
         """
+        from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+
         if not self.project.peakLists:
             getLogger().warning('Peak Picking: Project has no peakLists.')
             MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
-        else:
-            spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
-            if spectra:
-                from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+            return
 
-                popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-                popup.exec_()
-            else:
-                getLogger().warning('Peak Picking: Project has no Nd Spectra.')
-                MessageDialog.showWarning('Peak Picking', 'Project has no Nd Spectra.')
+        spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
+        if len(spectra) == 0:
+            getLogger().warning('Peak Picking: Project has no nD Spectra.')
+            MessageDialog.showWarning('Peak Picking', 'Project has no nD Spectra.')
+            return
+
+        popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+        popup.exec_()
 
     def _copyPeakListCallback(self):
         """Callback to display CopyPeakList popup
         """
+        from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
+
         if not self.project.peakLists:
             txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
             getLogger().warning(txt)
             MessageDialog.showWarning('Cannot perform a copy', txt)
             return
-        else:
-            from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
 
-            popup = CopyPeakListPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
+        popup = CopyPeakListPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+        popup.exec_()
 
     def _copyPeaksCallback(self):
         """Callback to display CopyPeaks popup
         """
+        from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
+
         if not self.project.peaks:
             getLogger().warning('Project has no Peaks: Peaks cannot be copied')
             MessageDialog.showWarning('Project has no Peaks', 'Peaks cannot be copied')
             return
-        else:
-            from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
 
-            popup = CopyPeaks(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            peaks = self.current.peaks
-            popup._selectPeaks(peaks)
-            popup.exec_()
+        popup = CopyPeaks(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+        peaks = self.current.peaks
+        popup._selectPeaks(peaks)
+        popup.exec_()
 
     def _peakCollectionsCallback(self):
+        """Callback to display the series peak collections popup
+        """
+        from ccpn.ui.gui.popups.SeriesPeakCollectionPopup import SeriesPeakCollectionPopup
+
         if not self.project.spectra:
             getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
             MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
-        else:
-            from ccpn.ui.gui.popups.SeriesPeakCollectionPopup import SeriesPeakCollectionPopup
+            return
 
-            popup = SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
-            # return popup
+        popup = SeriesPeakCollectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+        popup.exec_()
 
     def _estimateVolumesCallback(self):
         """
@@ -754,8 +761,7 @@ class MenusDefs(Menu, _ApplicationProperties):
         self.mainWindow._showEstimateVolumesPopup()
 
     def _estimateCurrentVolumesCallback(self):
-        """
-        Calculate volumes for the currently selected peaks
+        """Calculate volumes for the currently selected peaks
         """
         self.mainWindow._showEstimateCurrentVolumesPopup()
 
@@ -778,25 +784,31 @@ class MenusDefs(Menu, _ApplicationProperties):
         _popup.exec_()
 
     def _pseudoSpectrumCallback(self):
+        """Pseudo-spectrum to spectrumGrou popup
+        """
+        from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
+
         if not self.project.spectra:
             getLogger().warning('Project has no Spectra. Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
             MessageDialog.showWarning('Project contains no spectra.',
                                       'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
-        else:
-            from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
+            return
 
-            popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            popup.exec_()
+        popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+        popup.exec_()
 
     def _makeProjectionCallback(self):
+        """Make projection pupup callback
+        """
+        from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
+
         if not self.project.spectra:
             getLogger().warning('Project has no Spectra. Make Projection Popup cannot be displayed')
             MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
-        else:
-            from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
+            return
 
-            popup = SpectrumProjectionPopup(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
-            popup.exec_()
+        popup = SpectrumProjectionPopup(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
+        popup.exec_()
 
     def _printToFileCallback(self):
         """Show the print spectrumDisplay dialog
@@ -805,13 +817,14 @@ class MenusDefs(Menu, _ApplicationProperties):
 
         if len(self.mainWindow.spectrumDisplays) == 0:
             MessageDialog.showWarning('', 'No SpectrumDisplay found')
-        else:
-            exportDialog = ExportStripToFilePopup(parent=self.mainWindow._widget,
-                                                  mainWindow=self.mainWindow,
-                                                  strips=self.project.strips,
-                                                  selectedStrip=self.current.strip
-                                                  )
-            exportDialog.exec_()
+            return
+
+        exportDialog = ExportStripToFilePopup(parent=self.mainWindow._widget,
+                                              mainWindow=self.mainWindow,
+                                              strips=self.project.strips,
+                                              selectedStrip=self.current.strip
+                                              )
+        exportDialog.exec_()
 
     #-----------------------------------------------------------------------------------------
     # View -->

@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-20 19:28:10 +0100 (Fri, September 20, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-25 14:49:42 +0100 (Fri, October 25, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -148,13 +148,13 @@ class RestraintTableModule(CcpnTableModule):
                                                          grid=(0, 0))
 
         # add the frame containing the pulldown and table
-        # NOTE:GWV - enableSearch=True?
         self._mainFrame = _RestraintTableFrame(parent=mainWidget,
                                                mainWindow=self.mainWindow,
                                                moduleParent=self,
                                                restraintTable=restraintTable,
                                                selectFirstItem=selectFirstItem,
-                                               grid=(0, 0))
+                                               grid=(0, 0)
+                                               )
 
         # get the widgets from the settings
         self._displaysWidget = settings.getWidget(_DISPLAYS)
@@ -500,7 +500,9 @@ class _RestraintTableFrame(_CoreTableFrameABC):
     _PulldownKlass = RestraintTablePulldown
 
     def __init__(self, parent, mainWindow=None, moduleParent=None,
-                 restraintTable=None, selectFirstItem=False, **kwds):
+                 restraintTable=None, selectFirstItem=False, **kwds
+                 ):
+
         super().__init__(parent, mainWindow=mainWindow, moduleParent=moduleParent,
                          obj=restraintTable, selectFirstItem=selectFirstItem, **kwds)
 

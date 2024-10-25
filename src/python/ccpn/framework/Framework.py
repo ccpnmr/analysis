@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-23 11:03:00 +0100 (Wed, October 23, 2024) $"
-__version__ = "$Revision: 3.2.5.GWV $"
+__dateModified__ = "$dateModified: 2024-10-25 14:49:42 +0100 (Fri, October 25, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -638,6 +638,17 @@ class Framework(NotifierBase):
         # Load project specific resources.
         if self.resources:
             self.resources._initProjectResources()
+
+        # sets working path to current path if required
+        _genPrefs = self.preferences.general
+        if newProject.isTemporary:
+            _genPrefs.userWorkingPath = _genPrefs.userSetWorkingPath
+        elif _genPrefs.useProjectPath == 'Alongside':
+            _genPrefs.userWorkingPath = newProject.projectPath.parent.asString()
+        elif _genPrefs.useProjectPath == 'Inside':
+            _genPrefs.userWorkingPath = newProject.projectPath.asString()
+        else:
+            _genPrefs.userWorkingPath = _genPrefs.userSetWorkingPath
 
         self._setLastBackupTime()
         self.project._setUnmodified()

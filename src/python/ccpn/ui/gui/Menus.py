@@ -514,7 +514,6 @@
 #         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
 #
 #         # self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
-#         # NOTE:GWV
 #         self._loadDataIgnoreExtension(NefDataLoader)
 #
 #     def _exportNEFCallback(self):
@@ -561,10 +560,8 @@
 #         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
 #
 #         # self.ui.loadData(formatFilter=(StarDataLoader.dataFormat,))
-#         # NOTE:GWV
 #         self._loadDataIgnoreExtension(StarDataLoader)
 #
-#     # NOTE:GWV
 #     def _loadDataIgnoreExtension(self, dataLoader=None) -> list | None:
 #         """Load the data defined by dataLoader, provides file dialog.
 #

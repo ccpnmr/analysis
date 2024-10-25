@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 14:49:42 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -559,16 +559,16 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.pythonConsole.setProject(project)
         self._updateWindowTitle()
 
-        # sets working path to current path if required
-        # NOTE:GWV - move to framework
-        if (genPrefs := self.application.preferences.general).useProjectPath == 'Alongside':
-            genPrefs.userWorkingPath = project.projectPath.parent.asString()
-        elif genPrefs.useProjectPath == 'Inside':
-            genPrefs.userWorkingPath = project.projectPath.asString()
-
-        # if temporary file set working path to user defined
-        if project.isTemporary:
-            genPrefs.userWorkingPath = genPrefs.userSetWorkingPath
+        # # GWV - in Framework._initialiseProject
+        # # sets working path to current path if required
+        # if (genPrefs := self.application.preferences.general).useProjectPath == 'Alongside':
+        #     genPrefs.userWorkingPath = project.projectPath.parent.asString()
+        # elif genPrefs.useProjectPath == 'Inside':
+        #     genPrefs.userWorkingPath = project.projectPath.asString()
+        #
+        # # if temporary file set working path to user defined
+        # if project.isTemporary:
+        #     genPrefs.userWorkingPath = genPrefs.userSetWorkingPath
 
         from copy import deepcopy
 

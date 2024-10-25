@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:34:14 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ from ccpn.core.Project import Project
 from ccpn.core.PeakList import PeakList
 
 from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
-from ccpn.ui._implementation.PeakListView import PeakListView as _CoreClassPeakListView
+from ccpn.ui._implementation.PeakListView import PeakListView as _PeakListViewCoreClass
 from ccpn.ui._implementation.PeakListView import _newApiPeakListView
 from ccpn.ui._implementation.PeakView import PeakView as KlassView
 from ccpn.ui.gui.guiSettings import _styleBlue
@@ -48,7 +48,7 @@ def _factoryFunction(project, wrappedData):
     return PeakListView(project=project, wrappedData=wrappedData)
 
 
-class GuiPeakListView(GuiListViewABC):
+class _PeakListViewGuiClass(GuiListViewABC):
     """peakList is the CCPN wrapper object
     """
     def __init__(self, project: Project):
@@ -65,14 +65,14 @@ class GuiPeakListView(GuiListViewABC):
                     raise RuntimeError(f'Unable to generate new {KlassView.__name__}')
 
 
-class PeakListView(_CoreClassPeakListView, GuiPeakListView):
+class PeakListView(_PeakListViewCoreClass, _PeakListViewGuiClass):
     """Peak List View for 1D or nD PeakList
     """
     def __init__(self, project: Project, wrappedData: 'ApiStripPeakListView'):
         """Init the CoreClass and Gui-part
         """
-        _CoreClassPeakListView.__init__(self, project, wrappedData)
-        GuiPeakListView.__init__(self, project)
+        _PeakListViewCoreClass.__init__(self, project, wrappedData)
+        _PeakListViewGuiClass.__init__(self, project)
         getLogger().debug(_styleBlue(f'PeakListView.__init__>> initialised {self}  {self.peakList=}'))
 
 

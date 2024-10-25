@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:34:13 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -182,15 +182,13 @@ Project._apiNotifiers.append(
 def _newApiIntegralListCallback(project: Project, apiIntegralList: Nmr.IntegralList):
     """Add ApiIntegralListView when ApiIntegralList is created"""
     from ccpn.core.lib.Notifiers import NotifierBase
-    # Need to use the "gui"
-    from ccpn.ui.gui.lib.IntegralListView import IntegralListView as _IntegralListView
 
     if NotifierBase._apiNotificationBlanking == 0:
         # create new apiObjects if not blocked
         for apiSpectrumView in apiIntegralList.dataSource.spectrumViews:
             apiIntegralListView = apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial,
                                                                       integralList=apiIntegralList)
-            if _IntegralListView._newInstanceFromApiData(apiObj=apiIntegralListView.findFirstStripIntegralListView(),
+            if IntegralListView._newInstanceFromApiData(apiObj=apiIntegralListView.findFirstStripIntegralListView(),
                                                         project=project) is None:
                 raise RuntimeError('Unable to generate new IntegralListView')
 
@@ -200,13 +198,11 @@ Project._setupApiNotifier(_newApiIntegralListCallback, Nmr.IntegralList, 'postIn
 
 def _newApiSpectrumViewAddIntegralListViewCallback(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiIntegralListView when ApiSpectrumView is created"""
-    # Need to use the "gui"
-    from ccpn.ui.gui.lib.IntegralListView import IntegralListView as _IntegralListView
 
     for apiIntegralList in apiSpectrumView.dataSource.integralLists:
         apiIntegralListView = apiSpectrumView.newIntegralListView(integralListSerial=apiIntegralList.serial,
                                                                   integralList=apiIntegralList)
-        if _IntegralListView._newInstanceFromApiData(apiObj=apiIntegralListView.findFirstStripIntegralListView(),
+        if IntegralListView._newInstanceFromApiData(apiObj=apiIntegralListView.findFirstStripIntegralListView(),
                                                      project=project) is None:
             raise RuntimeError('Unable to generate new IntegralListView')
 

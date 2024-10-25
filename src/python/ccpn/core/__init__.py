@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:34:13 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -514,13 +514,15 @@ from ccpn.ui.gui.lib.PeakListView import _factoryFunction
 PEAKLISTVIEW_CLASSNAME = _PeakListView.className
 _PeakListView._registerCoreClass(_factoryFunction)
 
-from ccpn.ui.gui.lib.MultipletListView import MultipletListView as _MultipletListView
+from ccpn.ui._implementation.MultipletListView import MultipletListView as _MultipletListView
+from ccpn.ui.gui.lib.MultipletListView import _factoryFunction
 MULTIPLETLISTVIEW_CLASSNAME = _MultipletListView.className
-_MultipletListView._registerCoreClass()
+_MultipletListView._registerCoreClass(_factoryFunction)
 
-from ccpn.ui.gui.lib.IntegralListView import IntegralListView as _IntegralListView
+from ccpn.ui._implementation.IntegralListView import IntegralListView as _IntegralListView
+from ccpn.ui.gui.lib.IntegralListView import _factoryFunction
 INTEGRALLISTVIEW_CLASSNAME = _IntegralListView.className
-_IntegralListView._registerCoreClass()
+_IntegralListView._registerCoreClass(_factoryFunction)
 
 from ccpn.ui._implementation.PeakView import PeakView as _PeakView
 PEAKVIEW_CLASSNAME = _PeakView.className

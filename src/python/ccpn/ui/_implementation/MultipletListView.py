@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:34:13 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -191,15 +191,13 @@ Project._apiNotifiers.append(
 def _newApiMultipletListCallback(project: Project, apiMultipletList: Nmr.MultipletList):
     """Add ApiMultipletListView when ApiMultipletList is created"""
     from ccpn.core.lib.Notifiers import NotifierBase
-    # need to use the gui version
-    from ccpn.ui.gui.lib.MultipletListView import MultipletListView as _MultipletListView
 
     if NotifierBase._apiNotificationBlanking == 0:
         # create new apiObjects if not blocked
         for apiSpectrumView in apiMultipletList.dataSource.spectrumViews:
             apiMultipletListView = apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial,
                                                                         multipletList=apiMultipletList)
-            if _MultipletListView._newInstanceFromApiData(apiObj=apiMultipletListView.findFirstStripMultipletListView(),
+            if MultipletListView._newInstanceFromApiData(apiObj=apiMultipletListView.findFirstStripMultipletListView(),
                                                           project=project) is None:
                 raise RuntimeError('Unable to generate new MultipletListView')
 
@@ -210,13 +208,10 @@ Project._setupApiNotifier(_newApiMultipletListCallback, Nmr.MultipletList, 'post
 def _newApiSpectrumViewAddMultipletListViewCallback(project: Project, apiSpectrumView: ApiSpectrumView):
     """Add ApiMultipletListView when ApiSpectrumView is created
     """
-    # need to use the gui version
-    from ccpn.ui.gui.lib.MultipletListView import MultipletListView as _MultipletListView
-
     for apiMultipletList in apiSpectrumView.dataSource.multipletLists:
         apiMultipletListView = apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial,
                                                                     multipletList=apiMultipletList)
-        if _MultipletListView._newInstanceFromApiData(apiObj=apiMultipletListView.findFirstStripMultipletListView(),
+        if MultipletListView._newInstanceFromApiData(apiObj=apiMultipletListView.findFirstStripMultipletListView(),
                                                       project=project) is None:
             raise RuntimeError('Unable to generate new MultipletListView')
 

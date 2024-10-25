@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:34:14 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -30,14 +30,23 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 from ccpn.core.Project import Project
 from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
-from ccpn.ui._implementation.IntegralListView import IntegralListView as _CoreClassListView
+from ccpn.ui._implementation.IntegralListView import IntegralListView as _IntegralListViewCoreClass
 from ccpn.ui._implementation.IntegralView import IntegralView as KlassView
 
 from ccpn.ui.gui.guiSettings import _styleBlue
 from ccpn.util.Logging import getLogger
 
 
-class GuiIntegralListView(GuiListViewABC):
+# GWV 24/10/24: Implementation change
+def _factoryFunction(project, wrappedData):
+    """The factory function used to create the GUI-augmented
+    IntegralListView object.
+    Used in core.__init__ to define the proper instantiation
+    """
+    return IntegralListView(project=project, wrappedData=wrappedData)
+
+
+class _IntegralListViewGuiClass(GuiListViewABC):
     """integralList is the CCPN wrapper object
     """
 
@@ -55,13 +64,13 @@ class GuiIntegralListView(GuiListViewABC):
                     raise RuntimeError(f'Unable to generate new {KlassView.__name__}')
 
 
-class IntegralListView(_CoreClassListView, GuiIntegralListView):
+class IntegralListView(_IntegralListViewCoreClass, _IntegralListViewGuiClass):
     """Core data part and Gui Integral List View for 1D or nD IntegralList
     """
 
     def __init__(self, project: Project, wrappedData: 'ApiStripIntegralListView'):
         """Local override init for Qt subclass
         """
-        _CoreClassListView.__init__(self, project, wrappedData)
-        GuiIntegralListView.__init__(self, project)
+        _IntegralListViewCoreClass.__init__(self, project, wrappedData)
+        _IntegralListViewGuiClass.__init__(self, project)
         getLogger().debug(_styleBlue(f'IntegralListView.__init__>> initialised {self}  {self.integralList=}'))

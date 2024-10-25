@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 11:34:14 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -29,15 +29,24 @@ __date__ = "$Date: 2018-12-20 15:44:34 +0000 (Thu, December 20, 2018) $"
 
 from ccpn.core.Project import Project
 from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
-from ccpn.ui._implementation.MultipletListView import MultipletListView as _CoreClassListView
+from ccpn.ui._implementation.MultipletListView import MultipletListView as _MultipletListViewCoreClass
 from ccpn.ui._implementation.MultipletView import MultipletView as KlassView
 from ccpn.ui.gui.guiSettings import _styleBlue
 
 from ccpn.util.Logging import getLogger
 
 
-class GuiMultipletListView(GuiListViewABC):
-    """multipletList GUI PML wrapper object
+# GWV 24/10/24: Implementation change
+def _factoryFunction(project, wrappedData):
+    """The factory function used to create the GUI-augmented
+    MultipletListView object.
+    Used in core.__init__ to define the proper instantiation
+    """
+    return MultipletListView(project=project, wrappedData=wrappedData)
+
+
+class _MultipletListViewGuiClass(GuiListViewABC):
+    """MultipletList GUI PML wrapper object
     """
 
     def __init__(self, project: Project):
@@ -54,15 +63,14 @@ class GuiMultipletListView(GuiListViewABC):
                     raise RuntimeError(f'Unable to generate new {KlassView.__name__}')
 
 
-class MultipletListView(_CoreClassListView, GuiMultipletListView):
+class MultipletListView(_MultipletListViewCoreClass, _MultipletListViewGuiClass):
     """Core data and Gui parts of MultipletListView for 1D or nD MultipletList
     """
-
     def __init__(self, project: Project, wrappedData: 'ApiStripMultipletListView'):
         """Inits for both parts
         """
-        _CoreClassListView.__init__(self, project, wrappedData)
-        GuiMultipletListView.__init__(self, project)
+        _MultipletListViewCoreClass.__init__(self, project, wrappedData)
+        _MultipletListViewGuiClass.__init__(self, project)
 
         getLogger().debug(_styleBlue(f'MultiPletListView.__init__>> initialised {self}  {self.multipletList=}'))
 

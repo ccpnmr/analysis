@@ -6,8 +6,9 @@ ConvertSpectrumPopup, SpectrumProjectionPopup, PseudoToSpectrumGroup
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:53 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-25 18:02:31 +0100 (Fri, October 25, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +32,7 @@ from ccpn.core.lib.DataStore import DataStore
 
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit, LineEdit2
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.FileDialog import ExportFileDialog
 from ccpn.ui.gui.widgets.Button import Button
@@ -100,7 +101,7 @@ class CcpnDialogWithOutputPathPopupABC(CcpnDialogMainWidget):
         rowIndex += 1
 
         self.inPathLabel = Label(userFrame, 'Path', grid=(rowIndex, 0), **self._alignLabel)
-        self.inPathWidget = LineEdit2(userFrame, textAlignment='l', grid=(rowIndex, 1), gridSpan=(1, 1),
+        self.inPathWidget = LineEdit(userFrame, textAlignment='l', grid=(rowIndex, 1), gridSpan=(1, 1),
                                        editable=False, **self._align2)
         rowIndex += 1
 
@@ -130,7 +131,7 @@ class CcpnDialogWithOutputPathPopupABC(CcpnDialogMainWidget):
 
         # outpath
         Label(userFrame, 'Path', grid=(rowIndex, 0), **self._alignLabel)
-        self.outPathWidget = LineEdit2(userFrame, textAlignment='l', grid=(rowIndex, 1), gridSpan=(1, 1), editable=True,
+        self.outPathWidget = LineEdit(userFrame, textAlignment='l', grid=(rowIndex, 1), gridSpan=(1, 1), editable=True,
                                         **self._align2, callback=self._outPathCallback)
         self.fileButton = Button(userFrame,  hPolicy='fixed', icon='icons/directory', grid=(rowIndex,3), callback=self._fileButtonCallback)
         self.fileButton.setEnabled(False)

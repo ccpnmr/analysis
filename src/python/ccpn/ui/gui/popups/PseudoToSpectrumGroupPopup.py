@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:53 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-25 18:02:31 +0100 (Fri, October 25, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -43,22 +44,26 @@ class PseudoToSpectrumGroupPopup(CcpnDialogWithOutputPathPopupABC):  # ExportDia
     FIXEDHEIGHT = True
     FIXEDWIDTH = False
 
-    def __init__(self, parent=None, mainWindow=None, title='Pseudo-nD Spectrum to SpectrumGroup', **kwds):
+    def __init__(self, parent=None, mainWindow=None, spectrum=None, **kwds):
 
         # for CcpnDialogMainWidget:
-        super().__init__(parent=parent, mainWindow=mainWindow, title=title, **kwds)
+        super().__init__(parent=parent, mainWindow=mainWindow, title='Pseudo-nD Spectrum to SpectrumGroup', **kwds)
 
         if self.project:
-            # Only select 3D's for now
             self.validSpectra = [sp for sp in self.project.spectra if sp._getPseudoDimension() != 0]
 
         if not self.validSpectra:  # not None or len==0
-            showWarning('No valid spectra', 'No 3D spectra in current dataset')
+            showWarning('No valid spectra', 'No pseudo-spectra in current dataset')
+            self.errorFlag = True
+            return
+
+        if spectrum is not None and spectrum not in self.validSpectra:
+            showWarning('No valid spectrum', f'{spectrum} is not a valid pseudo-spectrum')
             self.errorFlag = True
             return
 
         self.pseudoDimension = None
-        self.spectrum = self.validSpectra[0]
+        self.spectrum = spectrum or self.validSpectra[0]
 
         # for CcpnDialogMainWidget:
         self.initialise(self.mainWidget)
@@ -86,9 +91,8 @@ class PseudoToSpectrumGroupPopup(CcpnDialogWithOutputPathPopupABC):  # ExportDia
 
         userFrame.addSpacer(5, 5, grid=(rowIndex, 1), expandX=True, expandY=True)
 
-    def actionButtons(self):
         self.setOkButton(callback=self.makeSpectrumGroup, text='Make SpectrumGroup', tipText='Extract spectra along pseudo dimensions and close dialog')
-        self.setCloseButton(callback=self.reject, text='Close', tipText='Close')
+        self.setCloseButton(callback=self.reject, text='Cancel', tipText='Cancel')
         self.setDefaultButton(ExportDialogABC.CLOSEBUTTON)
 
     def getInfoString(self) -> str:

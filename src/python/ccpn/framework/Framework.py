@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 14:49:42 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 18:02:31 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -1812,8 +1812,15 @@ class Framework(NotifierBase):
     ## MENU callbacks:  Spectrum
     ###################################################################################################################
 
-    # GWV 6/2/24: to GuiBase
-    # def showSpectrumGroupsPopup(self):
+    # GWV 6/2/24: to gui.py
+    @deprecated('ui.editSpectrumGroup')
+    def showSpectrumGroupsPopup(self):
+        """Deprecated method:
+        Use ui.editSpectrumGroup instead
+        """
+        editMode = len(self.project.spectrumGroups) > 0
+        return self.ui.editSpectrumGroup(editMode=editMode)
+
     #     if not self.project.spectra:
     #         getLogger().warning('Project has no Spectra. Spectrum groups cannot be displayed')
     #         MessageDialog.showWarning('Project contains no spectra.', 'Spectrum groups cannot be displayed')
@@ -1841,7 +1848,13 @@ class Framework(NotifierBase):
     # #         popup.exec_()
     # #         return popup
     #
-    # def showPseudoSpectrumPopup(self):
+    @deprecated('ui.newSpectrumGroupFromPseudoSpectrum')
+    def showPseudoSpectrumPopup(self):
+        """Deprecated method:
+        Use ui.newSpectrumGroupFromPseudoSpectrum instead
+        """
+        self.ui.newSpectrumGroupFromPseudoSpectrum()
+
     #     if not self.project.spectra:
     #         getLogger().warning('Project has no Spectra. Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
     #         MessageDialog.showWarning('Project contains no spectra.',

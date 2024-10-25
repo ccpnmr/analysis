@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 14:49:42 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 18:02:31 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -899,7 +899,7 @@ class Gui(Ui, _Gui_V3_V4):
 
         # Check that the path does not contain a bottom-level space
         if dataLoader.dataFormat in [CcpNmrV2ProjectDataLoader.dataFormat, CcpNmrV3ProjectDataLoader.dataFormat] \
-                and ' ' in dataLoader.aPath().basename:
+                and ' ' in dataLoader.path.basename:
             MessageDialog.showWarning('Load Project', 'Encountered a problem loading:\n"%s"\n\n'
                                                       'Cannot load project folders where the project-name contains spaces.\n\n'
                                                       'Please rename the folder without spaces and try loading again.' % dataLoader.path)
@@ -1769,6 +1769,51 @@ class Gui(Ui, _Gui_V3_V4):
         if note:
             _module.selectNote(note)
         return _module
+
+    #-----------------------------------------------------------------------------------------
+    # Spectra
+    #-----------------------------------------------------------------------------------------
+
+    @logCommand('ui.')
+    def editSpectrumGroup(self, editMode:bool = True):
+        """Show a popup to edit or create a SpectrumGroup
+        :param editMode: a flag to set edit (True) or create (False)
+        """
+        from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
+
+        if not editMode and not self.project.spectra:
+            getLogger().warning('Project contains no Specta. SpectrumGroup cannot be created')
+            MessageDialog.showWarning('Project contains no spectra.', 'SpectrumGroup cannot be created')
+            return
+
+        if editMode and not self.project.spectrumGroups:
+            _txt1, _txt2 = 'Project contains no SpectumGroups', 'SpectrumGroups cannot be edited'
+            getLogger().warning(_txt1 + _txt2)
+            MessageDialog.showWarning(_txt1, _txt2)
+            return
+
+        _mainWindow = self.mainWindow
+        _obj = self.project.spectrumGroups[0] if editMode else None
+        _popup = SpectrumGroupEditor(parent=_mainWindow._widget, mainWindow=_mainWindow,
+                                     editMode=editMode, obj=_obj)
+        _popup.exec_()
+
+    @logCommand('ui.')
+    def newSpectrumGroupFromPseudoSpectrum(self, spectrum=None):
+        """Show a popup to make a new SpectrumGroup from an nD pseudo-spectrum, extracting lower dimensional spectra
+        :param spectrum: Optional Spectrum instance
+        """
+        from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
+
+        if not self.project.spectra:
+            getLogger().warning('Project has no Spectra. Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+            MessageDialog.showWarning('Project contains no spectra.',
+                                      'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
+            return
+
+        _mainWindow = self.mainWindow
+        popup = PseudoToSpectrumGroupPopup(parent=_mainWindow._widget, mainWindow=_mainWindow, spectrum=spectrum)
+        popup.exec_()
 
     #-----------------------------------------------------------------------------------------
     # Molecules

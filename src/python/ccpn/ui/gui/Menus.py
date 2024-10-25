@@ -1,3 +1,4 @@
+# GWV This file is OBSOLETE
 # """
 #     The menus are specified by a (recursive) list of tuples composed of either:
 #

@@ -85,7 +85,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 14:49:42 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-25 18:02:31 +0100 (Fri, October 25, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -766,36 +766,19 @@ class MenusDefs(Menu, _ApplicationProperties):
         self.mainWindow._showEstimateCurrentVolumesPopup()
 
     def _editSpectrumGroupCallback(self):
-        from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
-
-        _mainWindow = self.mainWindow
-        _popup = SpectrumGroupEditor(parent=_mainWindow, mainWindow=_mainWindow,
-                                     editMode=True,
-                                     obj=self.project.spectrumGroups[0])
-        _popup.exec_()
+        """Callback to edit SpectrumGroup
+        """
+        self.ui.editSpectrumGroup(editMode=True)
 
     def _newSpectrumGroupCallback(self):
-        from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
-
-        _mainWindow = self.mainWindow
-        _popup = SpectrumGroupEditor(parent=_mainWindow, mainWindow=_mainWindow,
-                                     editMode=False,
-                                     )
-        _popup.exec_()
+        """Callback to edit SpectrumGroup
+        """
+        self.ui.editSpectrumGroup(editMode=False)
 
     def _pseudoSpectrumCallback(self):
-        """Pseudo-spectrum to spectrumGrou popup
+        """Pseudo-spectrum to spectrumGroup popup
         """
-        from ccpn.ui.gui.popups.PseudoToSpectrumGroupPopup import PseudoToSpectrumGroupPopup
-
-        if not self.project.spectra:
-            getLogger().warning('Project has no Spectra. Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
-            MessageDialog.showWarning('Project contains no spectra.',
-                                      'Pseudo Spectrum to SpectrumGroup Popup cannot be displayed')
-            return
-
-        popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-        popup.exec_()
+        self.ui.newSpectrumGroupFromPseudoSpectrum()
 
     def _makeProjectionCallback(self):
         """Make projection pupup callback

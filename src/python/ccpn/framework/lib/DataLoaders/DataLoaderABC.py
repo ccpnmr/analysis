@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 10:39:22 +0100 (Wed, September 11, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-25 18:02:31 +0100 (Fri, October 25, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -244,7 +244,7 @@ class DataLoaderABC(TraitBase):
     #=========================================================================================
 
     # traits
-    path = CPath().tag(info='a path to a file to be loaded')
+    path = CPath().tag(info='The (absolute) path to a file to be loaded')
     application = Any(default_value=None, allow_none=True)
     # NB: project derived via a property from application
 

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 11:48:51 +0100 (Thu, September 12, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-25 18:02:31 +0100 (Fri, October 25, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +30,7 @@ __date__ = "$Date: 2020-06-15 10:06:31 +0000 (Mon, June 15, 2020) $"
 from PyQt5 import QtGui, QtCore
 from functools import partial
 from collections import Counter
+
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.PeakList import PeakList
@@ -47,6 +48,7 @@ from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.DataTable import DataTable
 from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.Collection import Collection
+
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, showYesNoWarning, showOkCancel
@@ -77,9 +79,10 @@ from ccpn.ui.gui.popups.ViolationTablePopup import ViolationTablePopup
 from ccpn.ui.gui.popups.CollectionEditorPopup import CollectionEditorPopup
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, \
     undoBlockWithoutSideBar, undoStackBlocking
+
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
-from ccpn.framework.Application import getProject
+from ccpn.framework.Application import getProject, getApplication
 
 
 MAXITEMLOGGING = 2
@@ -505,18 +508,22 @@ class OpenItemABC:
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
+
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
-
+        contextMenu.addAction('Edit Properties...', partial(self.sideBar._raiseObjectProperties, self.node.widget))
         contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
+
+        contextMenu.addSeparator()
+
         self._addCollectionMenu(contextMenu, objs)
+
+        contextMenu.addSeparator()
+
         contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
         canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
         if canBeCloned:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
-
-        contextMenu.addSeparator()
-        contextMenu.addAction('Edit Properties', partial(self.sideBar._raiseObjectProperties, self.node.widget))
 
         contextMenu.move(position)
 
@@ -558,24 +565,6 @@ class OpenItemABC:
         from ccpn.util.Common import copyToClipboard
 
         copyToClipboard(objs)
-    #
-    # @staticmethod
-    # def _reloadSpectra(objs: list):
-    #     """Reload spectra
-    #     :param objs: reload the specified objs (spectra)
-    #     """
-    #     if not (_spectra := [sp for sp in objs if isinstance(sp, Spectrum) and not sp.isEmptySpectrum()]):
-    #         return
-    #     _sp = 'spectrum' if len(_spectra) == 1 else 'spectra'
-    #     if showOkCancel(f'Reloading {len(_spectra)} {_sp}',
-    #                     f'This will re-initialise the parameters from the (binary) data!',
-    #                     dontShowEnabled=True, defaultResponse=True, popupId='_reloadSpectra'):
-    #         try:
-    #             with undoBlockWithoutSideBar():
-    #                 for spec in _spectra:
-    #                     spec.reload()
-    #         except Exception as es:
-    #             showWarning(f'Reloading {len(_spectra)} {_sp}', str(es))
 
     def _addCollectionMenu(self, menu, objs):
         """Add a quick submenu containing a list of collections
@@ -670,14 +659,17 @@ class OpenItemABC:
 
     @staticmethod
     def _splitPlanesToSpectrumGroup(objs):
-        from ccpn.core.lib.SpectrumLib import splitPseudo3DSpectrumIntoPlanes
+        # from ccpn.core.lib.SpectrumLib import splitPseudo3DSpectrumIntoPlanes
 
         for obj in objs:
             if not any(obj.isTimeDomains):
-                showWarning('3.1.0 Alpha version',
-                            'This functionality has been implemented for Time Domain spectra only.')
+                showWarning('Only for pseudo-nD data',
+                            'This functionality has been implemented for pseudo-nD spectra only.')
                 return
-            splitPseudo3DSpectrumIntoPlanes(obj)
+
+            # splitPseudo3DSpectrumIntoPlanes(obj)
+            _app = getApplication()
+            _app.ui.newSpectrumGroupFromPseudoSpectrum(spectrum=obj)
 
     @staticmethod
     def _createNewCollection(pulldown, popup, items=None):
@@ -907,22 +899,24 @@ class _openItemChemicalShiftListTable(OpenItemABC):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
+
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
-            # contextMenu.addSeparator()
+        contextMenu.addAction('Edit Properties...', partial(self.sideBar._raiseObjectProperties, self.node.widget))
+        contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
+
+        contextMenu.addSeparator()
 
         contextMenu.addAction('Create Synthetic PeakList', partial(self._openCreateSyntheticPeakListFromCSLPopup, objs))
-
-        contextMenu.addSeparator()
-
-        contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
-        self._addCollectionMenu(contextMenu, objs)
         contextMenu.addAction('Duplicate', partial(self._duplicateAction, objs))
-        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
 
         contextMenu.addSeparator()
 
-        contextMenu.addAction('Edit Properties', partial(self.sideBar._raiseObjectProperties, self.node.widget))
+        self._addCollectionMenu(contextMenu, objs)
+
+        contextMenu.addSeparator()
+
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
 
         contextMenu.move(position)
         contextMenu.exec()
@@ -1105,7 +1099,7 @@ class _openItemAtomItem(OpenItemABC):
         self._addCollectionMenu(contextMenu, objs)
 
         contextMenu.addSeparator()
-        contextMenu.addAction('Edit Properties', partial(self.sideBar._raiseObjectProperties, self.node.widget))
+        contextMenu.addAction('Edit Properties...', partial(self.sideBar._raiseObjectProperties, self.node.widget))
 
         contextMenu.move(position)
         contextMenu.exec()
@@ -1173,7 +1167,7 @@ class _openItemResidueTable(OpenItemABC):
         self._addCollectionMenu(contextMenu, objs)
 
         contextMenu.addSeparator()
-        contextMenu.addAction('Edit Properties', partial(self.sideBar._raiseObjectProperties, self.node.widget))
+        contextMenu.addAction('Edit Properties...', partial(self.sideBar._raiseObjectProperties, self.node.widget))
 
         contextMenu.move(position)
         contextMenu.exec()
@@ -1266,33 +1260,36 @@ class _openItemSpectrumDisplay(OpenItemABC):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
+
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
+        contextMenu.addAction('Edit Properties...', partial(self.sideBar._raiseObjectProperties, self.node.widget))
+        contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
+
+        contextMenu.addSeparator()
 
         contextMenu.addAction('Reload', partial(self._reloadSpectra, objs))
-
         if len(objs) > 0:
-            contextMenu.addAction('Make SpectrumGroup From Selected',
+            contextMenu.addAction('New SpectrumGroup from Selected...',
                                   partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=objs),
                                           self.mainWindow, self.getObj(), self.node
                                          )
                                   )
 
-        _action = contextMenu.addAction('Split Planes to SpectrumGroup', partial(self._splitPlanesToSpectrumGroup, objs))
+        _action = contextMenu.addAction('New SpectrumGroup from Pseudo-nD...', partial(self._splitPlanesToSpectrumGroup, objs))
         _enable = any(any(sp.isTimeDomains) for sp in objs)  # 3.1.0 alpha feature from macro.
         _action.setDisabled(not _enable)
 
         contextMenu.addSeparator()
 
-        contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
+
+        contextMenu.addSeparator()
+
         contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
         canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
         if canBeCloned:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
-
-        contextMenu.addSeparator()
-        contextMenu.addAction('Edit Properties', partial(self.sideBar._raiseObjectProperties, self.node.widget))
 
         contextMenu.move(position)
 
@@ -1390,26 +1387,23 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
+
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
-
-        if spectra := [obj for obj in objs if isinstance(obj, Spectrum)]:
-            contextMenu.addAction('Make SpectrumGroup From Selected',
-                                  partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False,
-                                                                         defaultItems=spectra),
-                                          self.mainWindow, self.getObj(), self.node))
-
-            contextMenu.addAction('Remove from SpectrumGroup', partial(self._removeSpectrumObject, objs))
-            self._addCollectionMenu(contextMenu, objs)
-            contextMenu.addSeparator()
-
-        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
-        canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
-        if canBeCloned:
-            contextMenu.addAction('Clone', partial(self._cloneObject, objs))
+        contextMenu.addAction('Edit Properties...', partial(self.sideBar._raiseObjectProperties, self.node.widget))
+        contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
 
         contextMenu.addSeparator()
-        contextMenu.addAction('Edit Properties', partial(self.sideBar._raiseObjectProperties, self.node.widget))
+
+        contextMenu.addAction('Remove from SpectrumGroup', partial(self._removeSpectrumObject, objs))
+
+        contextMenu.addSeparator()
+
+        self._addCollectionMenu(contextMenu, objs)
+
+        contextMenu.addSeparator()
+
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
 
         contextMenu.move(position)
         contextMenu.exec()

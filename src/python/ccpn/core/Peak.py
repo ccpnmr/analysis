@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-20 17:14:07 +0100 (Sun, October 20, 2024) $"
-__version__ = "$Revision: 3.2.5.GWV $"
+__dateModified__ = "$dateModified: 2024-10-26 16:23:29 +0100 (Sat, October 26, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -720,7 +720,7 @@ class Peak(AbstractWrapperObject):
 
         isotopeCodes = tuple(None if x == UnknownIsotopeCode else x for x in self.peakList.spectrum.isotopeCodes)
 
-        #TODO: this needs to be implemented in V3 terms, using NmrAtom instances (and its attributes, methods) only
+        #TODO:GWV this needs to be implemented in V3 terms, using NmrAtom instances (and its attributes, methods) only
         apiPeak = self._wrappedData
         peakDims = apiPeak.sortedPeakDims()
         dimensionCount = len(peakDims)

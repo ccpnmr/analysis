@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-11 16:58:53 +0100 (Fri, October 11, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-26 16:23:30 +0100 (Sat, October 26, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -322,7 +322,7 @@ class PeakPickerABC(CcpNmrJson):
                 (sLeft + self.defaultPointExtension, sRight - self.defaultPointExtension)
                 for sLeft, sRight in self.sliceTuples]
 
-        # TODO: use Spectrum aliasing definitions once defined
+        # TODO:GWV use Spectrum aliasing definitions once defined
         data = self.spectrum.dataSource.getRegionData(self.sliceTuples,
                                                       aliasingFlags=[1] * self.spectrum.dimensionCount)
         data = data.copy(order='K') * self.spectrum.scale

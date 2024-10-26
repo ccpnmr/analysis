@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-26 16:23:29 +0100 (Sat, October 26, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -741,7 +741,7 @@ def _produceNmrAtom(self: Project, atomId: str = None, chainCode: str = None,
             if any(params):
                 raise ValueError("_produceNmrAtom: other parameters only allowed if atomId is None")
 
-            #TODO: use .fields attribute of Pid instance
+            #TODO:DT use .fields attribute of Pid instance
 
             # Remove colon prefix, if any
             atomId = atomId.split(Pid.PREFIXSEP, 1)[-1]

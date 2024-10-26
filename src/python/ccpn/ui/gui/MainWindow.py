@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 14:40:43 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 16:23:30 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -202,6 +202,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.statusBar().showMessage('Ready')
         setCurrentMouseMode(SELECT)
 
+        #TODO:ED This looks very suspecious; must be a better way with a Notifier
         self._project._undo.undoChanged.add(self._undoChangeCallback)
 
         # self.setUnifiedTitleAndToolBarOnMac(True) #uncomment this to remove the extra title bar on osx 10.14+
@@ -1350,7 +1351,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         if not pluginModule.aborted:
             self.application.ui.pluginModules.append(pluginModule)
             self._addModule(pluginModule)
-        # TODO: open as pop-out, not as part of MainWindow
+        # TODO:LM decide on this; ? open as pop-out, not as part of MainWindow
         # self.moduleArea.moveModule(pluginModule, position='above', neighbor=None)
 
     # def _updateRestoreArchiveMenu(self):
@@ -2404,7 +2405,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             for chemicalShift in chemicalShifts[ii]:
                 atomId = chemicalShift.nmrAtom.id
                 atomName = chemicalShift.nmrAtom.name
-                # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
+                # TODO:EB the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
 
                 # colour = colourDict.get(atomName[:min(2,len(atomName))])
                 colourMarks = guiSettings.getColours().get(guiSettings.MARKS_COLOURS)

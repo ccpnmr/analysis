@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 14:40:43 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 16:23:30 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -185,7 +185,7 @@ class Framework(NotifierBase):
                    True].index(True) + 1) % 4
         self.setDebug(_level)
 
-        # Logging: TODO: clean up these definitions and options
+        # Logging: TODO:ED clean up these definitions and options
         # Optionally increase blocking level for command echo and logging
         logger = getLogger()
         if getattr(self.args, 'noDebugLogging', False):

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 14:49:42 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 12:39:01 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -56,7 +56,6 @@ from ccpn.ui.gui.lib.Shortcuts import Shortcuts
 from ccpn.ui.gui.guiSettings import (getColours, GUITABLE_SELECTED_BACKGROUND, consoleStyle)
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
-from ccpn.ui.gui import Layout
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.PlotterWidget import plotter
@@ -1386,6 +1385,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     def _initModuleLayout(self):
         """Initialise the ModuleLayout object
         """
+        # Local import to avoid cycles
+        from ccpn.ui.gui import Layout
         self._moduleLayout = Layout.ModuleLayout()
 
     def _getLayoutDict(self) -> dict:
@@ -1444,6 +1445,9 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     def _restoreLayout(self, restoreSpectrumDisplays=True):
         """Restore the layouts from the current layout settings
         """
+        # Local import to avoid cycles
+        from ccpn.ui.gui import Layout
+
         if self._moduleLayout is None:
             raise RuntimeError(f'_restoreLayout(): moduleLayout is undefined')
 

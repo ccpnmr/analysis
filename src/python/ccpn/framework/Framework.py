@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 18:02:31 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 12:39:01 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -81,9 +81,6 @@ from ccpn.framework.PathsAndUrls import \
 from ccpn.framework.lib.resources.Resources import Resources
 
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS, loadTipsSetup
-from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
-from ccpn.ui.gui import Layout
 
 from ccpn.util.decorators import deprecated
 from ccpn.util import Logging
@@ -2598,6 +2595,56 @@ class Framework(NotifierBase):
 #end class
 #-----------------------------------------------------------------------------------------
 
+
+class _FrameworkProperties(object):
+    """Convenience class to have easy Framework derived properties
+    """
+    def __init__(self):
+        from ccpn.framework.Application import getApplication
+        self._application = getApplication()
+
+    @property
+    def application(self):
+        """:return the Application instance
+        """
+        if self._application is None:
+            raise RuntimeError(f'Unable to retrieve application from {self}')
+        return self._application
+
+    @property
+    def project(self):
+        """:return the Project instance
+        """
+        if self._application is None:
+            raise RuntimeError(f'Unable to retrieve application from {self}')
+        return self._application.project
+
+    @property
+    def current(self):
+        """:return the Current instance
+        """
+        if self._application is None:
+            raise RuntimeError(f'Unable to retrieve application from {self}')
+        return self._application.current
+
+    @property
+    def mainWindow(self):
+        """:return the MainWindow instance or None
+        """
+        if self._application is None:
+            raise RuntimeError(f'Unable to retrieve application from {self}')
+        if self._application.hasGui:
+            return self.application.mainWindow
+        else:
+            return None
+
+    @property
+    def ui(self):
+        """:return the Ui instance
+        """
+        if self._application is None:
+            raise RuntimeError(f'Unable to retrieve application from {self}')
+        return self._application.ui
 
 #-----------------------------------------------------------------------------------------
 # code for testing purposes

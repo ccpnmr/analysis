@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 14:49:42 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 12:39:00 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -2266,6 +2266,7 @@ class Project(AbstractWrapperObject):
             # NB: GWV - it shouldn't get here but occasionally it does; e.g. when
             # upgrading a V2 project with correctFinalResult() routine
             getLogger().debug(f'_modifiedApiObject: no V3 object for {wrappedData}')
+            pass
         else:
             obj._finaliseAction('change')
 

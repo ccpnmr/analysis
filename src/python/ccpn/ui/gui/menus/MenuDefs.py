@@ -85,7 +85,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 18:02:31 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 12:39:01 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -109,7 +109,8 @@ from ccpn.framework.PathsAndUrls import \
     macroPath, \
     widgetsPath, \
     CCPN_ARCHIVES_DIRECTORY
-from ccpn.framework.Application import getApplication, getProject, getCurrent, _ApplicationProperties
+from ccpn.framework.Application import getApplication, getProject, getCurrent
+from ccpn.framework.Framework import _FrameworkProperties
 
 from ccpn.util.Common import isWindowsOS
 from ccpn.util.Logging import getLogger
@@ -149,7 +150,7 @@ def getMenuDefs():
 #-----------------------------------------------------------------------------------------
 
 @singleton
-class MenusDefs(Menu, _ApplicationProperties):
+class MenusDefs(Menu, _FrameworkProperties):
     """A Menu class (list) to define the menu definitions and callback routines
     Used by MainWindow to initialise the menuBar
 
@@ -1155,7 +1156,7 @@ class MenusDefs(Menu, _ApplicationProperties):
 
     def __init__(self):
         super().__init__(name='root')
-        _ApplicationProperties.__init__(self)
+        _FrameworkProperties.__init__(self)
         self._defineMenus()
 
     def insertAfter(self, menuKeys: list, menuDef: list):

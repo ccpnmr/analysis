@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 14:40:43 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 15:29:17 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -235,6 +235,8 @@ class MenusDefs(Menu, _FrameworkProperties):
 
         Action('Load Spectra...', self._loadSpectraCallback, shortcut='ls'),
         Action("Validate Paths...", self._validatePathsCallback, shortcut='vp', checkEnabled=_projectHasSpectra),
+
+        Separator(),
         Action("Copy Spectra into Project...", self._copyToProjectCallback, checkEnabled=_projectHasSpectra),
         Action("Convert...", self._convertSpectrumCallback, checkEnabled=_projectHasSpectra),
         Action("Make Projection...", self._makeProjectionCallback, shortcut='pj', checkEnabled=_projectHasSpectra),
@@ -574,9 +576,9 @@ class MenusDefs(Menu, _FrameworkProperties):
             getLogger().warning('Convert spectra: Project has no Spectra.')
             MessageDialog.showWarning('Convert spectra', 'Project has no Spectra.')
         else:
-            from ccpn.ui.gui.popups.ConvertToHdf5Popup import ConvertToHdf5Popup
+            from ccpn.ui.gui.popups.ConvertToNdf5Popup import ConvertToNdf5Popup
 
-            popup = ConvertToHdf5Popup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup = ConvertToNdf5Popup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
 
     def _makeStripPlotCallback(self):

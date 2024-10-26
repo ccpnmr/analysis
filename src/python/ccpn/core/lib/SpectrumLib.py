@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 18:02:31 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 15:29:17 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -182,7 +182,7 @@ SPECTRUM_INTENSITIES = 'intensities'
 
 MAXALIASINGRANGE = 6
 
-#
+# GWV 25/20/2024: replaced
 # def splitPseudo3DSpectrumIntoPlanes(spectrum, seriesUnits='ms'):
 #     if not 'Time' in spectrum.dimensionTypes:
 #         getLogger().warning('This functionality has been implemented for time pseudo-nD spectra only.')

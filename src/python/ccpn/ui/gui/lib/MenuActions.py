@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 11:01:09 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 15:29:17 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -664,8 +664,6 @@ class OpenItemABC:
 
     @staticmethod
     def _splitPlanesToSpectrumGroup(objs):
-        # from ccpn.core.lib.SpectrumLib import splitPseudo3DSpectrumIntoPlanes
-
         for obj in objs:
             if not any(obj.isTimeDomains):
                 showWarning('Only for pseudo-nD data',

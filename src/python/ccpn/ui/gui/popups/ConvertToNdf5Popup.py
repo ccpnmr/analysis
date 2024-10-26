@@ -33,11 +33,11 @@ from ccpn.ui.gui.popups._CcpnDialogWithOutputPathPopupABC import CcpnDialogWithO
 from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
 
 
-class ConvertToHdf5Popup(CcpnDialogWithOutputPathPopupABC):
+class ConvertToNdf5Popup(CcpnDialogWithOutputPathPopupABC):
     FIXEDHEIGHT = True
     FIXEDWIDTH = False
 
-    def __init__(self, parent=None, mainWindow=None, title='Convert spectrum (binary) data to Hdf5', **kwds):
+    def __init__(self, parent=None, mainWindow=None, title='Convert spectrum (binary) data to ndf5 format', **kwds):
 
         # for CcpnDialogMainWidget:
         super().__init__(parent=parent, mainWindow=mainWindow, title=title, **kwds)
@@ -57,10 +57,6 @@ class ConvertToHdf5Popup(CcpnDialogWithOutputPathPopupABC):
         # for CcpnDialogMainWidget:
         self.initialise(self.mainWidget)
         self.populate(self.mainWidget)
-        self.actionButtons()
-
-        # initialise the buttons and dialog size
-        self._postInit()
 
     def initialise(self, userFrame):
         """Create the widgets for the userFrame
@@ -80,9 +76,8 @@ class ConvertToHdf5Popup(CcpnDialogWithOutputPathPopupABC):
 
         userFrame.addSpacer(5, 5, grid=(rowIndex, 1), expandX=True, expandY=True)
 
-    def actionButtons(self):
-        self.setOkButton(callback=self.convertSpectrum, text='Convert to Hdf5', tipText='Convert spectrum to Hdf5 and close dialog')
-        self.setCloseButton(callback=self.reject, text='Close', tipText='Close')
+        self.setOkButton(callback=self.convertSpectrum, text='Convert to ndf5', tipText='Convert spectrum to ndf5 and close dialog')
+        self.setCloseButton(callback=self.reject, text='Cancel', tipText='Cancel conversion')
         self.setDefaultButton(ExportDialogABC.CLOSEBUTTON)
 
     def getInfoString(self) -> str:
@@ -119,6 +114,3 @@ class ConvertToHdf5Popup(CcpnDialogWithOutputPathPopupABC):
 
         self.accept()
 
-
-# popup = ConvertToHdf5Popup(parent=mainWindow, mainWindow=mainWindow)
-# popup.show()

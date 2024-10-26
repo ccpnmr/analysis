@@ -749,9 +749,9 @@
 #             getLogger().warning('Convert spectra: Project has no Spectra.')
 #             MessageDialog.showWarning('Convert spectra', 'Project has no Spectra.')
 #         else:
-#             from ccpn.ui.gui.popups.ConvertToHdf5Popup import ConvertToHdf5Popup
+#             from ccpn.ui.gui.popups.ConvertToNdf5Popup import ConvertToNdf5Popup
 #
-#             popup = ConvertToHdf5Popup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+#             popup = ConvertToNdf5Popup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
 #             popup.exec_()
 #
 #     def _copyToProjectCallback(self):

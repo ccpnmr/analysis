@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 18:02:31 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 11:01:09 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -406,18 +406,19 @@ class OpenItemABC:
     """
 
     # These should be subclassed
+    hasOpenMethod = True   # flag to activate an openMethod
     openItemMethod = None  # a method to open the item in ccpnModuleArea
     objectArgumentName = 'obj'  # argument name set to obj passed to openItemClass instantiation
     objectClassName = None
     openItemDirectMethod = None  # parent argument name set to obj passed to openItemClass instantiation when useParent==True
     useApplication = True  # use application.`openItemMethod`
     useUi = False   # use ui.`openItemMethod`
-    hasOpenMethod = True
     contextMenuText = 'Open as a Module'
 
     validActionTargets = (Spectrum, PeakList, MultipletList, IntegralList,
                           NmrChain, Chain, SpectrumGroup, Sample, ChemicalShiftList,
-                          RestraintTable, Note, StructureEnsemble, DataTable, ViolationTable, Collection
+                          RestraintTable, Note, StructureEnsemble, DataTable,
+                          ViolationTable, Collection
                           )
 
     # typeCheck: flag to enforce type checking
@@ -432,12 +433,15 @@ class OpenItemABC:
 
     def __init__(self, useNone=False, **kwds):
         """store kwds; acts as partial to openItemClass
-        useApplication: if true, use the method attached to application
-                     : if false, use openItemDirectMethod for opening object in ccpnModuleArea
+        if self.hasOpenMethod is True:
+            useApplication: if true, use the method attached to application
+            useUi:          if True, use the method attached to application.ui
+            else:           Use openItemDirectMethod for opening object in ccpnModuleArea
         useNone: set obj to None
         """
-        if not (self.useApplication or self.useUi) and self.openItemDirectMethod is None:
-            raise RuntimeError(f'useApplication==False and self.useUi==False requires definition of openItemDirectMethod ({self})')
+        if self.hasOpenMethod:
+            if not (self.useApplication or self.useUi) and self.openItemDirectMethod is None:
+                raise RuntimeError(f'Defining method to open: useApplication==False and self.useUi==False requires definition of openItemDirectMethod ({self})')
 
         self.objectClassName = self.objectArgumentName[0].upper() + self.objectArgumentName[1:]
         self.useNone = useNone
@@ -485,6 +489,7 @@ class OpenItemABC:
         """Initialise settings for the object.
         """
         self.application = self.mainWindow.application
+
         if self.typeCheck:
             openableObjs = [obj for obj in objs if isinstance(obj, self.validActionTargets)]
         else:
@@ -520,10 +525,10 @@ class OpenItemABC:
 
         contextMenu.addSeparator()
 
-        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
         canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
         if canBeCloned:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
 
         contextMenu.move(position)
 
@@ -1093,13 +1098,15 @@ class _openItemAtomItem(OpenItemABC):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
+
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
         contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
-        self._addCollectionMenu(contextMenu, objs)
+        contextMenu.addAction('Edit Properties...', partial(self.sideBar._raiseObjectProperties, self.node.widget))
 
         contextMenu.addSeparator()
-        contextMenu.addAction('Edit Properties...', partial(self.sideBar._raiseObjectProperties, self.node.widget))
+
+        self._addCollectionMenu(contextMenu, objs)
 
         contextMenu.move(position)
         contextMenu.exec()
@@ -1161,13 +1168,15 @@ class _openItemResidueTable(OpenItemABC):
         """Open a context menu.
         """
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
+
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
         contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
-        self._addCollectionMenu(contextMenu, objs)
+        contextMenu.addAction('Edit Properties...', partial(self.sideBar._raiseObjectProperties, self.node.widget))
 
         contextMenu.addSeparator()
-        contextMenu.addAction('Edit Properties...', partial(self.sideBar._raiseObjectProperties, self.node.widget))
+
+        self._addCollectionMenu(contextMenu, objs)
 
         contextMenu.move(position)
         contextMenu.exec()
@@ -1286,10 +1295,10 @@ class _openItemSpectrumDisplay(OpenItemABC):
 
         contextMenu.addSeparator()
 
-        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
         canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
         if canBeCloned:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
 
         contextMenu.move(position)
 
@@ -1451,6 +1460,7 @@ class _openItemViolationTable(OpenItemABC):
 
 
 class _openItemCollectionModule(OpenItemABC):
+    hasOpenMethod = False  # Nothing implemented for now
     openItemMethod = 'showCollectionModule'
     objectArgumentName = 'collection'
 

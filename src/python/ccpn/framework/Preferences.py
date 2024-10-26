@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-22 18:24:16 +0100 (Tue, October 22, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-10-26 14:40:43 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -293,6 +293,20 @@ class Preferences(AttrDict):
         _recentFiles = self.get(RECENT_FILES, [])
         _recentFiles = uniquify(_recentFiles, maxLen=self._maxRecentFiles)
         self[RECENT_FILES] = _recentFiles
+
+    def _setWorkingPath(self, project):
+        """Sets the working path dependent on project and options
+        :param project: A Project instance
+        """
+        _genPrefs = self.general
+        if project.isTemporary:
+            _genPrefs.userWorkingPath = _genPrefs.userSetWorkingPath
+        elif _genPrefs.useProjectPath == 'Alongside':
+            _genPrefs.userWorkingPath = project.projectPath.parent.asString()
+        elif _genPrefs.useProjectPath == 'Inside':
+            _genPrefs.userWorkingPath = project.projectPath.asString()
+        else:
+            _genPrefs.userWorkingPath = _genPrefs.userSetWorkingPath
 
     def __str__(self):
         return f'<Preferences: {repr(self._lastPath)}>'

@@ -3,71 +3,13 @@ The menus are specified by a (recursive) Menu's (i.e. lists) composed of either
 Action, Separator, Section, Menu or DynamicMenu instances (see _MenuItems for
 their definitions).
 
-Note: For Actions: Use a callback function defined as a methof of MenuDefs and pass on
+Note for Actions:
+      Use a callback function defined as a method of MenuDefs and pass on
       the action from there.
       This avoid the (V3) situation in that the MainWindow has not yet been defined,
       when initialising the MenuDefs; i.e. ui.mainWindow is None on initialisation of
       the MenuDefs instance, but is defined the moment the callback is executed.
 
----------------------------------------------------------------------------------------
-
-This code replaces <= 3.2.4 code:
-
-gui. -->
-    _updateCheckableMenuItems called from Gui.initialize
-
-mainWindow.
-    dynamic menus:; uses aboutToShow PyQt signal
-    _fill ....
-
-    -->
-    _createMenu
-    _addMenu
-    _setupMenus
-    _storeShortcut
-    _storeMainMenuShortcuts
-    _addMenuActions
-    _addPluginSubMenu
-    _attachModulesMenuAction
-    _attachCCPNMacrosMenuAction
-    _attachTutorialsMenuAction
-    _updateRestoreArchiveMenu
-    getMenuAction
-    searchMenuAction
-    findeMenuAction
-    _clearRecentProjects
-    _clearRecentMacros
-    _showModule
-
-GuiMainWindow.  -->
-    _attacheTutorialsMenuAction
-    _fillTutorialsMenu
-        --> How-to's menu
-    _fillCcpnPluginsMenu
-    _fillUserPluginsMenu
-    _fillPredefinedLayoutMenu
-    _fillMacrosMenu (Never reached/Used!)
-    _fillRecentProjectsMenu
-    _fillRecentMacrosMenu
-    _fillModulesMenu
-    _fillCCPNMacrosMenu
-    _fillUserMacrosMenu
-    _fillTutorialsMenu
-    _runCCPNMacro
-    _runUserMacro
-    _reloadUserPlugins
-    _reloadCCPNPlugins
-    _addPluginSubMenu
-
-FrameWork.  -->
-    _getProjectFiles
-    lots of callbacks
-
----------------------------------------------------------------------------------------
-
-STRANGE:
-In GuiMainWindow.__init__
-        self._project._undo.undoChanged.add(self._undoChangeCallback)
 """
 
 #=========================================================================================
@@ -85,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 12:39:01 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 14:40:43 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -117,7 +59,6 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
 from ccpn.util.decorators import singleton
 
-import ccpn.ui.gui.Layout as Layout
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import \
     ArchivesFileDialog, \
@@ -490,11 +431,11 @@ class MenusDefs(Menu, _FrameworkProperties):
         self.ui._loadDataIgnoreExtension(StarDataLoader)
 
     def _saveCallback(self):
-        """The project save callback"""
+        """The project save callback
+        """
         if self.project.isTemporary:
             # if temporary then use the saveAs dialog
             self.ui.saveProjectAs()
-
         else:
             self.application.saveProject()
 
@@ -532,16 +473,24 @@ class MenusDefs(Menu, _FrameworkProperties):
                                    'Project restored as %s' % newProject.path)
 
     def _saveLayoutCallback(self):
+        """Save layout without query for path
+        """
         self.mainWindow._saveLayoutToFile()
 
     def _restoreLastSavedLayoutCallback(self):
+        """Restore layout without query for path
+        """
         self.mainWindow._loadLayoutFromFile()
         self.mainWindow._restoreLayout()
 
     def _saveLayoutAsCallback(self):
+        """Save layout with query for path
+        """
         self.ui.saveLayoutToFile()
 
     def _restoreLayoutFromFileCallback(self):
+        """Restore layout with query for path
+        """
         self.ui.restoreLayoutFromFile()
 
     def _showProjectSummaryPopup(self):
@@ -549,8 +498,6 @@ class MenusDefs(Menu, _FrameworkProperties):
         """
         from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
         popup = ProjectSummaryPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, modal=True)
-        # popup.show()
-        # popup.raise_()
         popup.exec_()
 
     def _showApplicationPreferences(self):
@@ -638,7 +585,7 @@ class MenusDefs(Menu, _FrameworkProperties):
         self.ui.makeStripPlot()
 
     def _copyToProjectCallback(self):
-        """Callback for Spectrum -> Copy into Project
+        """Callback for Spectrum->Copy into Project
         """
         title = 'Copy Spectra into Project'
         if len(self.project.spectra) == 0:

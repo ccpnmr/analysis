@@ -1,0 +1,55 @@
+---------------------------------------------------------------------------------------
+
+This code in menu replaces <= 3.2.4 code:
+
+gui. -->
+    _updateCheckableMenuItems called from Gui.initialize
+
+mainWindow.
+    dynamic menus:; uses aboutToShow PyQt signal
+    _fill ....
+
+    -->
+    _createMenu
+    _addMenu
+    _setupMenus
+    _storeShortcut
+    _storeMainMenuShortcuts
+    _addMenuActions
+    _addPluginSubMenu
+    _attachModulesMenuAction
+    _attachCCPNMacrosMenuAction
+    _attachTutorialsMenuAction
+    _updateRestoreArchiveMenu
+    getMenuAction
+    searchMenuAction
+    findeMenuAction
+    _clearRecentProjects
+    _clearRecentMacros
+    _showModule
+
+GuiMainWindow.  -->
+    _attacheTutorialsMenuAction
+    _fillTutorialsMenu
+        --> How-to's menu
+    _fillCcpnPluginsMenu
+    _fillUserPluginsMenu
+    _fillPredefinedLayoutMenu
+    _fillMacrosMenu (Never reached/Used!)
+    _fillRecentProjectsMenu
+    _fillRecentMacrosMenu
+    _fillModulesMenu
+    _fillCCPNMacrosMenu
+    _fillUserMacrosMenu
+    _fillTutorialsMenu
+    _runCCPNMacro
+    _runUserMacro
+    _reloadUserPlugins
+    _reloadCCPNPlugins
+    _addPluginSubMenu
+
+FrameWork.  -->
+    _getProjectFiles
+    lots of callbacks
+
+---------------------------------------------------------------------------------------

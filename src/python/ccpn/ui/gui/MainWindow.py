@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 12:39:01 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 14:40:43 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -81,12 +81,6 @@ from ccpn.ui.gui.lib.MenuActions import _openItemObject
 
 from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
-
-# For readability there should be a class:
-# _MainWindowMenus which (Only!) has menu instantiations, the callbacks to initiate them, + relevant methods
-# The latter should all be private methods!
-#
-# The docstring of GuiMainWindow should detail how this setup is
 
 MAXITEMLOGGING = 4
 KEY_DELAY = 0.75
@@ -2871,7 +2865,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
 
 class MainWindow(_CoreClassMainWindow, GuiMainWindow):
-    """GUI main window, corresponds to OS window"""
+    """GUI main window, corresponds to OS window
+    """
 
     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
         logger = getLogger()

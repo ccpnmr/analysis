@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 18:02:31 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 14:40:43 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -1346,11 +1346,16 @@ class Gui(Ui, _Gui_V3_V4):
                     return False
 
         # NOTE:ED - need to find where this has moved
+        # GWV 24/10/2024: MainWindow needs to set a notifier; eg
+        # mainWindow.setNotifier(project, ['observe'], 'name', project._testCallback)
         # self.mainWindow._updateWindowTitle()
+        # GWV: no longer needed
         # self.application._getRecentProjectFiles()  # this will update the preferences-list
         # self.mainWindow._fillRecentProjectsMenu()  # Update the menu
         #
-        # # sets working path to current path if required
+        # GWV 25/20/2025: Preferences._setWorkingPath method
+        #                 Put in Framework.initialiseProject; Framework._saveProjectAs
+        # sets working path to current path if required
         # if (genPrefs := self.application.preferences.general).useProjectPath == 'Alongside':
         #     genPrefs.userWorkingPath = self.project.projectPath.parent.asString()
         # elif genPrefs.useProjectPath == 'Inside':
@@ -1579,29 +1584,6 @@ class Gui(Ui, _Gui_V3_V4):
         self.mainWindow._loadLayoutFromFile(path=path)
         self.mainWindow._restoreLayout()
 
-    @logCommand('ui.')
-    def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
-        """Make a strip plot from peaks or nmrChains
-        """
-        from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
-
-        if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:
-            getLogger().warning('Cannot make strip plot, nothing to display')
-            MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
-            return
-
-        if self.current.strip is None or self.current.strip.isDeleted:
-            MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
-            return
-
-        popup = StripPlotPopup(parent=self.mainWindow, mainWindow=self.mainWindow,
-                               spectrumDisplay=self.current.strip.spectrumDisplay,
-                               includePeakLists=includePeakLists,
-                               includeNmrChains=includeNmrChains,
-                               includeNmrChainPullSelection=includeNmrChainPullSelection,
-                               includeSpectrumTable=False)
-        popup.exec_()
-
     #-----------------------------------------------------------------------------------------
     # View
     #-----------------------------------------------------------------------------------------
@@ -1814,6 +1796,30 @@ class Gui(Ui, _Gui_V3_V4):
         _mainWindow = self.mainWindow
         popup = PseudoToSpectrumGroupPopup(parent=_mainWindow._widget, mainWindow=_mainWindow, spectrum=spectrum)
         popup.exec_()
+
+    @logCommand('ui.')
+    def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
+        """Make a strip plot from peaks or nmrChains
+        """
+        from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
+
+        if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:
+            getLogger().warning('Cannot make strip plot, nothing to display')
+            MessageDialog.showWarning('Cannot make strip plot,', 'nothing to display')
+            return
+
+        if self.current.strip is None or self.current.strip.isDeleted:
+            MessageDialog.showWarning('Make Strip Plot', 'No selected spectrumDisplay')
+            return
+
+        popup = StripPlotPopup(parent=self.mainWindow, mainWindow=self.mainWindow,
+                               spectrumDisplay=self.current.strip.spectrumDisplay,
+                               includePeakLists=includePeakLists,
+                               includeNmrChains=includeNmrChains,
+                               includeNmrChainPullSelection=includeNmrChainPullSelection,
+                               includeSpectrumTable=False)
+        popup.exec_()
+
 
     #-----------------------------------------------------------------------------------------
     # Molecules

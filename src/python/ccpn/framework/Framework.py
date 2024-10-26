@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 12:39:01 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-26 14:40:43 +0100 (Sat, October 26, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -637,15 +637,7 @@ class Framework(NotifierBase):
             self.resources._initProjectResources()
 
         # sets working path to current path if required
-        _genPrefs = self.preferences.general
-        if newProject.isTemporary:
-            _genPrefs.userWorkingPath = _genPrefs.userSetWorkingPath
-        elif _genPrefs.useProjectPath == 'Alongside':
-            _genPrefs.userWorkingPath = newProject.projectPath.parent.asString()
-        elif _genPrefs.useProjectPath == 'Inside':
-            _genPrefs.userWorkingPath = newProject.projectPath.asString()
-        else:
-            _genPrefs.userWorkingPath = _genPrefs.userSetWorkingPath
+        self.preferences._setWorkingPath(newProject)
 
         self._setLastBackupTime()
         self.project._setUnmodified()
@@ -1124,11 +1116,11 @@ class Framework(NotifierBase):
         with self.project._setSaveOverride():
             try:
                 self.project.saveAs(newPath=newPath, overwrite=overwrite, copySubDirectories=copySubDirectories)
-                # Layout.saveLayoutToJson(self.ui.mainWindow)
                 self.ui.mainWindow._saveLayoutToFile(reportErrors=False)
                 self.current._dumpStateToFile(self.statePath)
                 self._getUndo().markSave()
                 self.preferences._addRecentFiles(self.project.path)
+                self.preferences._setWorkingPath(self.project)
 
             except (PermissionError, FileNotFoundError) as es:
                 getLogger().debug(f'_saveProjectAs() caught: {es}')
@@ -1424,6 +1416,7 @@ class Framework(NotifierBase):
         else:
             self._closeProject()  # always close old project AFTER valid load
             self._initialiseProject(project)  # This also sets the linkages
+            #TODO:GWV/EB Should this go into _loadV2Project
             _finaliseV2Upgrade(project)
             return [project]
         return []

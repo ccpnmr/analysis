@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-27 12:19:12 +0000 (Sun, October 27, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -228,7 +228,11 @@ class _StripOverlay(QtWidgets.QWidget):
 #=========================================================================================
 
 class GuiStrip(Frame):
-    # inherits NotifierBase
+    """"A class with Gui-related methods and Attributes for a Strip.
+    Inherits from _implementation.Strip and therefore NotifierBase
+    """
+
+    #---------------------------------------------------------------------------------------------
 
     optionsChanged = QtCore.pyqtSignal(dict)
     stripResized = QtCore.pyqtSignal(object, tuple)
@@ -242,6 +246,8 @@ class GuiStrip(Frame):
     # set the queue handling parameters
     _maximumQueueLength = 40
     _logQueue = False
+
+    #---------------------------------------------------------------------------------------------
 
     def __init__(self, spectrumDisplay):
         """
@@ -259,7 +265,8 @@ class GuiStrip(Frame):
         self.application = self.mainWindow.application
         self.current = self.application.current
 
-        super().__init__(parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
+        super().__init__(parent=spectrumDisplay.stripFrame,
+                         setLayout=True, showBorder=False,
                          spacing=(0, 0), acceptDrops=True  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                          )
         self.setAutoFillBackground(False)
@@ -461,6 +468,19 @@ class GuiStrip(Frame):
         self._queuePending = UpdateQueue()
         self._queueActive = None
         self._lock = QtCore.QMutex()
+
+    #---------------------------------------------------------------------------------------------
+    # Version-3/4 compatibility functionalities
+    #---------------------------------------------------------------------------------------------
+
+    @property
+    def _widget(self):
+        """Property for forward Version-4 compatibility;
+        Top Widget for the SpectrumDisplay object; for Version-3 equals to self
+        """
+        return self
+
+    #---------------------------------------------------------------------------------------------
 
     @property
     def painted(self):

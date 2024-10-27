@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-27 12:19:12 +0000 (Sun, October 27, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -188,6 +188,7 @@ class GuiSpectrumDisplay(CcpnModule):
                           :param axisCode
                           :return axis
     """
+    #---------------------------------------------------------------------------------------------
 
     MAXPEAKLABELTYPES = 0
     MAXPEAKSYMBOLTYPES = 0
@@ -220,6 +221,8 @@ class GuiSpectrumDisplay(CcpnModule):
     _SHOWSPECTRAONPHASING = 'showSpectraOnPhasing'
     _SPECTRUMBORDERSVISIBLE = '_spectrumBordersVisible'
 
+    #---------------------------------------------------------------------------------------------
+
     def __init__(self, mainWindow, useScrollArea=False):
         """
         Initialise the Gui spectrum display object
@@ -240,6 +243,7 @@ class GuiSpectrumDisplay(CcpnModule):
         super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=moduleTitle,
                                                  size=(1100, 1300), autoOrientation=False
                                                  )
+
         self.mainWindow = mainWindow
         self.application = mainWindow.application
         # derive current from application
@@ -248,7 +252,7 @@ class GuiSpectrumDisplay(CcpnModule):
         # self.project = mainWindow.application.project
 
         # self.mainWidget will be the parent of all the subsequent widgets
-        self.qtParent = self.mainWidget
+        self.qtParent = self.mainWidget._widget
 
         # set up the widgets
         self._setWidgets(mainWindow, useScrollArea)
@@ -288,6 +292,19 @@ class GuiSpectrumDisplay(CcpnModule):
         self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
 
         self._spectrumUtilActions = {}  # Filled by _fillToolBar
+
+    #---------------------------------------------------------------------------------------------
+    # Version-3/4 compatibility functionalities
+    #---------------------------------------------------------------------------------------------
+
+    @property
+    def _widget(self):
+        """Property for forward Version-4 compatibility;
+        Top Widget for the SpectrumDisplay object; for Version-3 equals to self
+        """
+        return self
+
+    #---------------------------------------------------------------------------------------------
 
     # GWV 19/6/24: in SpectrumDisplay class, as it relates to the 'data' of
     #              this class

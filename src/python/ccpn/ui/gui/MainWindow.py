@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 11:52:37 +0000 (Sun, October 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-27 12:19:12 +0000 (Sun, October 27, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -558,8 +558,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # # if temporary file set working path to user defined
         # if project.isTemporary:
         #     genPrefs.userWorkingPath = genPrefs.userSetWorkingPath
-
-        from copy import deepcopy
 
         self._loadLayoutFromFile(reportErrors=False)
 

@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-23 10:32:07 +0100 (Wed, October 23, 2024) $"
-__version__ = "$Revision: 3.2.5.GWV $"
+__dateModified__ = "$dateModified: 2024-10-27 14:16:42 +0000 (Sun, October 27, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -172,11 +172,14 @@ class Spectrum(AbstractWrapperObject):
     _DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
     _NEGATIVENOISELEVEL = 'negativeNoiseLevel'
 
-    # A properties for which the (graphics) machinery can set an OBSERVE notifier
-    #   Code potentially affecting graphics can do:
-    #       mySpectrum._rebuildContoursSignal = True,
-    #   which will advance the _rebuildContoursSignal counter by one, triggering any callbacks
+    # A property for which the (graphics) machinery can set an OBSERVE notifier
+    # Code in the Spectrum class affecting graphics will do:
+    #    self._rebuildContoursSignal = True,
+    # which will advance the _rebuildContoursSignal counter by one, triggering any
+    # callbacks set for the signal.
+
     _rebuildContoursSignal = NotifierSignal()
+
     # Signal set by _openFile call
     _openFileSignal = NotifierSignal()
 

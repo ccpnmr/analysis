@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-27 14:16:42 +0000 (Sun, October 27, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -35,7 +35,8 @@ from ccpn.util.Logging import getLogger
 
 
 class CoreModel(object):
-    """Model-related methods; Only to be used for core objects via AbstractWrapperObject
+    """Model-related methods; Only to be used for core objects via
+    AbstractWrapperObject or V3CoreModelABC
     """
 
     #: Short class name, for PID. Must be overridden for each subclass
@@ -175,15 +176,15 @@ def _isV3coreClassInstance(obj) -> bool:
     """
     return isinstance(obj, CoreModel)
 
-def _isV3coreClass(obj) -> bool:
+def _isV3coreClass(klass) -> bool:
     """
-    Check if obj is a V3 core class
-    :param obj: object to check
+    Check if klass is of type V3 core class
+    :param klass: class to check
     :return: True if obj defines a core class
 
     CCPNINTERNAL: several places to make more readable code
     """
-    return obj in CoreModel._coreClassDict.values()
+    return klass in CoreModel._coreClassDict.values()
 
 def _getV3coreClass(className):
     """

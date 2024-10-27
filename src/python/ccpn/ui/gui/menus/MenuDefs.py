@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 15:29:17 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-27 11:52:37 +0000 (Sun, October 27, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -52,7 +52,7 @@ from ccpn.framework.PathsAndUrls import \
     widgetsPath, \
     CCPN_ARCHIVES_DIRECTORY
 from ccpn.framework.Application import getApplication, getProject, getCurrent
-from ccpn.framework.Framework import _FrameworkProperties
+from ccpn.framework._FrameWorkProperties import _FrameworkProperties
 
 from ccpn.util.Common import isWindowsOS
 from ccpn.util.Logging import getLogger

@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 12:39:01 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-27 11:52:37 +0000 (Sun, October 27, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -45,7 +45,7 @@ from ccpn.util.decorators import singleton
 from ccpn.framework.Application import ANALYSIS_ASSIGN
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY
 from ccpn.framework.Application import getApplication
-from ccpn.framework.Framework import _FrameworkProperties
+from ccpn.framework._FrameWorkProperties import _FrameworkProperties
 
 
 StateDirName = CCPN_STATE_DIRECTORY

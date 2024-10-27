@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 11:14:30 +0000 (Sun, October 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-27 11:52:37 +0000 (Sun, October 27, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -48,6 +48,7 @@ from ccpn.ui._implementation.Window import Window as _CoreClassMainWindow
 
 from ccpn.ui.gui import guiSettings
 from ccpn.ui.gui.guiSettings import getColours, _styleBlue
+from ccpn.ui.gui import Layout
 
 from ccpn.ui.gui.lib.mouseEvents import \
     SELECT, PICK, MouseModes, setCurrentMouseMode, getCurrentMouseMode
@@ -1377,8 +1378,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     def _initModuleLayout(self):
         """Initialise the ModuleLayout object
         """
-        # Local import to avoid cycles
-        from ccpn.ui.gui import Layout
         self._moduleLayout = Layout.ModuleLayout()
 
     def _getLayoutDict(self) -> dict:
@@ -1437,9 +1436,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     def _restoreLayout(self, restoreSpectrumDisplays=True):
         """Restore the layouts from the current layout settings
         """
-        # Local import to avoid cycles
-        from ccpn.ui.gui import Layout
-
         if self._moduleLayout is None:
             raise RuntimeError(f'_restoreLayout(): moduleLayout is undefined')
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 16:23:29 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-27 11:14:30 +0000 (Sun, October 27, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -55,7 +55,10 @@ class Peak(AbstractWrapperObject):
     (such as  splittings, J-couplings, MQ dimensions, reduced-dimensionality
     experiments etc.) are not supported (yet). Assignments can be viewed and set
     either as a list of assignments for each dimension (dimensionNmrAtoms) or as a
-    list of all possible assignment combinations (assignedNmrAtoms)"""
+    list of all possible assignment combinations (assignedNmrAtoms)
+    """
+
+    #-----------------------------------------------------------------------------------------
 
     #: Short class name, for PID.
     shortClassName = 'PK'
@@ -82,7 +85,9 @@ class Peak(AbstractWrapperObject):
     _tempAssignment = 0
     _SNAPFLAG = '_snapFlag'
 
+    #-----------------------------------------------------------------------------------------
     # CCPN properties
+    #-----------------------------------------------------------------------------------------
     @property
     def _apiPeak(self) -> Nmr.Peak:
         """API peaks matching Peak"""
@@ -111,6 +116,13 @@ class Peak(AbstractWrapperObject):
         """Convenience property to get the spectrum, equivalent to peak.peakList.spectrum
         """
         return self.peakList.spectrum
+
+    @property
+    def dimensionCount(self):
+        """Convenience property to get the dimensionCount, equivalent to
+        peak.peakList.spectrum.dimensionCount
+        """
+        return self.peakList.spectrum.dimensionCount
 
     @property
     def chemicalShiftList(self):
@@ -612,7 +624,7 @@ class Peak(AbstractWrapperObject):
     @dimensionNmrAtoms.setter
     @logCommand(get='self', isProperty=True)
     def dimensionNmrAtoms(self, value: Sequence):
-
+        """set dimensionNmrAtoms"""
         _pre = set(makeIterableList(self.assignedNmrAtoms))
         _post = set(makeIterableList(value))
         nmrResidues = {nmr.nmrResidue for nmr in (_pre | _post)}
@@ -944,6 +956,12 @@ class Peak(AbstractWrapperObject):
                         except Exception as err:
                             getLogger().debug(f'{self.__class__.__name__}.assignDimensions: '
                                               f'Impossible to set isotopeCode to {nmrAtm}. {err}')
+
+    def _deassignAllDimensions(self):
+        """Deassign all peak dimensions
+        """
+        self.assignmentsByDimensions = tuple(
+            [] for _ii in range(self.dimensionCount))
 
     def getByAxisCodes(self, parameterName: str, axisCodes: Sequence[str] = None,
                        exactMatch: bool = False) -> list:

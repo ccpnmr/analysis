@@ -94,8 +94,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-21 11:26:31 +0100 (Mon, October 21, 2024) $"
-__version__ = "$Revision: 3.2.5.GWV $"
+__dateModified__ = "$dateModified: 2024-10-27 11:14:30 +0000 (Sun, October 27, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1618,19 +1618,22 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         return [self.path]
 
-    def openFile(self, mode, overwrite: bool = False, **kwds):
-        """Check and open self.path, set self.fp
+    def openFile(self, mode: str, overwrite: bool = False, **kwds):
+        """Check and open self.path using self.openMethod and set self.fp;
+        disables cache in case of write access.
+
         :param mode: sequence of read/write flag(s) for opening:
-            from the python docs:
-                'r'  : open for reading (default)
-                'w'  : open for writing, truncating the file first
-                'x'  : open for exclusive creation, failing if the file already exists
-                'a'  : open for writing, appending to the end of file if it exists
-                'b'  : binary mode
-                '+'  : open for updating (reading and writing)
+                     from the python docs:
+                        'r'  : open for reading (default)
+                        'w'  : open for writing, truncating the file first
+                        'x'  : open for exclusive creation, failing if the file already exists
+                        'a'  : open for writing, appending to the end of file if it exists
+                        'b'  : binary mode
+                        '+'  : open for updating (reading and writing)
         :param overwrite: overwrite flag (default: False).
                           NB mode=='w' and overwrite==False amounts to mode=='x'
                              --> mode=='x' sets overwrite==False
+        :param kwds: (key, value) pairs passed to self.openMethod
         :raises RunTimeError on opening errors
         :return self.fp
         """

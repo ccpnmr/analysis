@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 08:50:02 +0100 (Thu, September 12, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-27 11:14:30 +0000 (Sun, October 27, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -437,11 +437,22 @@ def _editPeakAssignmentItem():
 
 def _deassignPeaksItem():
     from ccpn.framework.Application import getApplication
+    from ccpn.core.lib.ContextManagers import undoBlock
+
+    def _deassignPeaks():
+        """Deassign all current.peaks
+        """
+        _app = getApplication()
+        if (_peaks := _app.current.peaks):
+            with undoBlock():
+                for peak in _peaks:
+                    peak._deassignAllDimensions()
 
     _app = getApplication()
     return _SCMitem(name='Deassign Peak(s)',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Deassign Peaks',
-                    callback=_app.mainWindow._deassignPeaks)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Deassign currently selected peaks',
+                    callback=_deassignPeaks)
+
 
 
 def _propagateAssignmentsFromReferenceItem():

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 16:23:30 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-27 11:14:30 +0000 (Sun, October 27, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -164,6 +164,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._hiddenModules.setVisible(False)
 
         # init Module layout dict
+        self._moduleLayout = None
         self._initModuleLayout()
 
         # Python console module; defined upon first time Class initialisation. Either by toggleConsole or Restoring layouts
@@ -172,20 +173,20 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.pythonConsole = None
         # IPythonConsole namespace; filled in _setupWindow() and
         self.namespace = {}
-
-        self._shortcutsDict = {}
+        # can't init PythonConsoleModule, as restore from layout fails then
+        # self._initPythonConsoleModule()
 
         setWidgetFont(widget=self )
 
         self._setupWindow()
         self._setupMenus()
         self._initProject(self.project)
+
+        self._shortcutsDict = {}
         self._setShortcuts(mainWindow=self)
         self._setUserShortcuts(preferences=self.application.preferences, mainWindow=self)
-        self._setMouseMode(SELECT)
 
-        # can't init PythonConsoleModule, as restore from layout fails then
-        # self._initPythonConsoleModule()
+        self._setMouseMode(SELECT)
 
         # Notifiers
         self._setupNotifiers()
@@ -194,18 +195,11 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._previousStrip = None
         self._currentStrip = None
 
-        self.setWindowIcon(Icon('icons/ccpn-icon'))
-        # self.fileIcon = self.style().standardIcon(QtWidgets.QStyle.SP_FileIcon, None, self)
-        # self.disabledFileIcon = self.makeDisabledFileIcon(self.fileIcon)
-
         # blank display opened later by the _initLayout if there is nothing to show otherwise
-        self.statusBar().showMessage('Ready')
-        setCurrentMouseMode(SELECT)
+        self.writeStatusBar('Ready')
 
         #TODO:ED This looks very suspecious; must be a better way with a Notifier
         self._project._undo.undoChanged.add(self._undoChangeCallback)
-
-        # self.setUnifiedTitleAndToolBarOnMac(True) #uncomment this to remove the extra title bar on osx 10.14+
 
         self._initKeyTimer()
         self._initReadOnlyIcon()
@@ -397,7 +391,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._updateWindowTitle()
         self.sideBar.setProjectName(self.project)
         successMessage = f'Project successfully saved to "{self.project.path}"'
-        self.statusBar().showMessage(successMessage)
+        self.writeStatusBar(successMessage)
         getLogger().info(successMessage)
 
     def _projectNotifierCallback(self, data):
@@ -517,11 +511,11 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
     # def _activatedkeySequence(self, ev):
     #     key = ev.key()
-    #     self.statusBar().showMessage('key: %s' % str(key))
+    #     self.writeStatusBar('key: %s' % str(key))
     #
     # def _ambiguouskeySequence(self, ev):
     #     key = ev.key()
-    #     self.statusBar().showMessage('key: %s' % str(key))
+    #     self.writeStatusBar('key: %s' % str(key))
 
     def changeEvent(self, event):
         if event.type() == QtCore.QEvent.WindowStateChange:
@@ -548,7 +542,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
         path = project.path
         msg = path + (' created' if project.isNew else ' opened')
-        self.statusBar().showMessage(msg)
+        self.writeStatusBar(msg)
 
         self.pythonConsole.setProject(project)
         self._updateWindowTitle()
@@ -717,6 +711,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         #                    'color: {TOOLTIP_FOREGROUND}; '
         #                    'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
 
+
     #---------------------------------------------------------------------------------------------
     # Version-3/4 compatibility functionalities
     #---------------------------------------------------------------------------------------------
@@ -869,17 +864,19 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         from ccpn.ui.gui.popups.Dialog import showWarning
 
         badSpectra = [str(spectrum.pid) for spectrum in project.spectra if not spectrum.hasValidPath()]
+        if not badSpectra:
+            return
 
-        if badSpectra:
-            msg = 'Use menu "Spectrum --> Validate paths..." Or "VP" shortcut to correct\n\n'
-            details = 'Please inspect file path(s) for:\n'
-            for sp in badSpectra:  # these can be >1000 lines message. Added in a scrollable area.
-                details += f'{str(sp)}\n'
-            basicText = 'Detected invalid Spectrum file paths'
-            title = 'Invalid Spectra'
-            showWarning(title, basicText, msg, detailedText=details, parent=self,
-                        dontShowEnabled=True, defaultResponse=None,
-                        popupId=f'{self.__class__.__name__}BadSpectra')
+        msg = 'Use menu "Spectrum --> Validate paths..." Or "VP" shortcut to correct\n\n'
+        details = 'Please inspect file path(s) for:\n'
+        for sp in badSpectra:  # these can be >1000 lines message. Added in a scrollable area.
+            details += f'{str(sp)}\n'
+        basicText = 'Detected invalid Spectrum file paths'
+        title = 'Invalid Spectra'
+        showWarning(title, basicText, msg, detailedText=details,
+                    parent=self,
+                    dontShowEnabled=True, defaultResponse=None,
+                    popupId=f'{self.__class__.__name__}BadSpectra')
 
     def _showNefPopup(self, dataLoader):
         """Helper function; it allows the user to select the elements
@@ -1805,22 +1802,43 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             _openItemObject(self, objs, position=position, relativeTo=relativeTo)
 
     #-----------------------------------------------------------------------------------------
-    # Code moved from previously lib.GuiWindow
+    # Helper functions
+    # Including Code moved from previously lib.GuiWindow
     #-----------------------------------------------------------------------------------------
 
-    # @logCommand('mainWindow.')
-    def _deassignPeaks(self):
-        """Deassign all from selected peaks
+    # # GWV 26/10/2024; No-longer used as replaced by local function
+    # # @logCommand('mainWindow.')
+    # def _deassignPeaks(self):
+    #     """Deassign all from selected peaks
+    #     """
+    #     if self.current.peaks:
+    #         with undoBlockWithoutSideBar():
+    #             for peak in self.current.peaks:
+    #                 assignedDims = list(peak.dimensionNmrAtoms)
+    #                 assignedDims = tuple([] for dd in assignedDims)
+    #                 peak.dimensionNmrAtoms = assignedDims
+
+    # GWV added 27/10/2024; also in V4
+    def writeStatusBar(self, message:str):
+        """Write message to the statusBar
+        :param message: A string to be displayed (\n is appended)
         """
-        if self.current.peaks:
-            with undoBlockWithoutSideBar():
-                for peak in self.current.peaks:
-                    assignedDims = list(peak.dimensionNmrAtoms)
-                    assignedDims = tuple([] for dd in assignedDims)
-                    peak.dimensionNmrAtoms = assignedDims
+        self.statusBar().showMessage(f'{message}\n')
+
+    # GWV added 27/10/2024; also in V4
+    def writeConsole(self, message:str):
+        """Write message to the console
+        :param message: A string to be displayed (\n is appended)
+        """
+        console = self.pythonConsole
+        console._write(f'{message}\n')
 
     def _deleteSelectedItems(self, parent=None):
         """Delete peaks/integrals/multiplets from the project
+        This routine checks for presence of connected objects; e.g. peaks and integrals,
+        and queries the user for confirmation in case of additional items implicitly
+        being included.
+        #CCPNMRINTERNAL: used by right-mouse context menu's and Shortcuts
         """
         # show simple delete items popup
         from ccpn.ui.gui.popups.DeleteItems import DeleteItemsPopup
@@ -2722,7 +2740,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                 for strp in sd.strips:
                     strp.mouseModeAction.setChecked(mode == PICK)
             mouseModeText = ' Mouse Mode: '
-            self.statusBar().showMessage(mouseModeText + mode)
+            self.writeStatusBar(mouseModeText + mode)
 
     def switchMouseMode(self):
         # mode = self.mouseMode
@@ -2870,19 +2888,22 @@ class MainWindow(_CoreClassMainWindow, GuiMainWindow):
     """
 
     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
+        # this __init__ is called from Project._restoreChildren, as currently the
+        # Window (and its children) is a child of the Project modeled data.
+        # Hence, the convoluted way of initialising the Gui objects (MainWindow,
+        # SpectrumDisplay's, Strips, etc).
+
         logger = getLogger()
-        logger.debug3(f'MainWindow>> project: {project}')
-        logger.debug3(f'MainWindow>> project.application: {project.application}')
 
         _CoreClassMainWindow.__init__(self, project, wrappedData)
 
         application = project.application
         GuiMainWindow.__init__(self, application=application)
 
-        # patches for now; insert MainWindow back into project:
+        # patches for now; insert MainWindow back into project;
+        # it is being picked-up by Framework for calls to the subsequent
+        # initialisations.
         project._mainWindow = self
-        # application._mainWindow = self
-        # application.ui._mainWindow = self
 
         logger.debug(_styleBlue(f'MainWindow.__init__>> Initialised {self}')
                      )

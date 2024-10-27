@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 14:40:43 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-27 11:14:30 +0000 (Sun, October 27, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -96,7 +96,7 @@ def _ccpnExceptionhook(ccpnType, value, tback):
         #     MessageDialog.showError(title=title, message=text)
 
         if application.project and not application.project.isReadOnly:
-            application.project._updateLoggerState(readOnly=False, flush=True)
+            application.project._updateLoggerState(readOnly=False)
 
     sys.__excepthook__(ccpnType, value, tback)
 

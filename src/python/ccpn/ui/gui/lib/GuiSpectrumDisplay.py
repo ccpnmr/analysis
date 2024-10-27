@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 12:19:12 +0000 (Sun, October 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-27 22:10:24 +0000 (Sun, October 27, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -252,7 +252,7 @@ class GuiSpectrumDisplay(CcpnModule):
         # self.project = mainWindow.application.project
 
         # self.mainWidget will be the parent of all the subsequent widgets
-        self.qtParent = self.mainWidget._widget
+        self.qtParent = self.mainWidget
 
         # set up the widgets
         self._setWidgets(mainWindow, useScrollArea)

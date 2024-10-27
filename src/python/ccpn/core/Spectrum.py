@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 14:16:42 +0000 (Sun, October 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-27 22:10:24 +0000 (Sun, October 27, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -90,7 +90,7 @@ from ccpn.core.lib.ContextManagers import \
     undoStackBlocking, renameObject, undoBlock, \
     ccpNmrV3CoreSetter, inactivity, undoBlockWithoutSideBar, notificationEchoBlocking
 
-from ccpn.core.lib.Notifiers import NotifierSignal
+from ccpn.core.lib.Notifiers import NotifierSignal, NotifierProperty
 from ccpn.core.lib.DataStore import DataStore
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC, getDataFormats
 from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
@@ -643,19 +643,31 @@ class Spectrum(AbstractWrapperObject):
 
         self._setInternalParameter(self._INCLUDENEGATIVECONTOURS, value)
 
-    @property
-    @_includeInCopy
+    # @property
+    # @_includeInCopy
+    # def sliceColour(self) -> str:
+    #     """The colour of 1D slices.
+    #     """
+    #     return self._wrappedData.sliceColour
+    #
+    # @sliceColour.setter
+    # @logCommand(get='self', isProperty=True)
+    # def sliceColour(self, value):
+    #     self._wrappedData.sliceColour = value
+    #     # for spectrumView in self.spectrumViews:
+    #     #     spectrumView.setSliceColour()  # ejb - update colour here
+
+    @NotifierProperty(modelled=True, types=(str,))
+    # @_includeInCopy
     def sliceColour(self) -> str:
         """The colour of 1D slices.
         """
         return self._wrappedData.sliceColour
 
     @sliceColour.setter
-    @logCommand(get='self', isProperty=True)
+    # @logCommand(get='self', isProperty=True)
     def sliceColour(self, value):
         self._wrappedData.sliceColour = value
-        # for spectrumView in self.spectrumViews:
-        #     spectrumView.setSliceColour()  # ejb - update colour here
 
     @property
     @_includeInCopy

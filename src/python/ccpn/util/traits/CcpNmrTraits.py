@@ -96,7 +96,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 11:39:14 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 18:40:03 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -168,6 +168,9 @@ class _CcpNmrTrait(object):
         self.itemTrait = itemTrait
         self.valueTrait = valueTrait
         self.keyTrait = keyTrait
+
+        # initialisation; attributes used V3List subclasses
+        self.v3property = None
 
     def _fullName(self, obj) -> str:
         """:return a obj-class-name.trait-name string; eg.for error reporting
@@ -605,11 +608,17 @@ class _TypedList(list):
     """A list with only specific type of items as defined by itemTrait;
     to be used by CcpNmr TList trait only
     Changing a list value, i.e. mylist[item] = value, extend() and append(), or del trigger traitlets
-    change notifiers (if set on the TLict trait). The change-dict has an additional "itemsChanged"
+    change notifiers (if set on the TList trait). The change-dict has an additional "itemsChanged"
     key with (item/key, value) pairs of those elements that have changed.
     """
 
-    def __init__(self, obj, trait, values=[]):
+    def __init__(self, obj, trait, values=()):
+        """Initialise the object
+        :param obj: object containing trait
+        :param trait: trait defining the _TypedList
+        :param values: optional list of values to initialise the list
+        """
+
         if not isinstance(trait, TraitType):
             raise TypeError(f'Invalid trait; expected TraitType instance')
         if not isinstance(values, (list, tuple)):
@@ -619,7 +628,7 @@ class _TypedList(list):
             raise RuntimeError(f'trait.itemTrait is undefined')
 
         # we store these a private attributes, as the _TypedList instance becomes exposed
-        # to the users. Hence, it need to look and feel as a regular list
+        # to the users. Hence, it needs to look and feel as a regular list
         self._trait = trait
         self._itemTrait = trait.itemTrait
         self._obj = obj
@@ -667,6 +676,14 @@ class _TypedList(list):
         change.owner = self._obj
         change.old = list(self)
         return change
+
+    def _notifyChanged(self, change):
+        """Notify self._obj of the changes
+        :param change: the change-bunch instance
+        """
+        if not self._blanking:
+            change.new = self
+            self._obj.notify_change(change)
 
     def _handleSliceItem(self, item, count):
         """Handle the slice item and translate into (start, stop, step) tuple
@@ -717,9 +734,7 @@ class _TypedList(list):
 
         super().__setitem__(item, newValue)
 
-        if not self._blanking:
-            change.new = self
-            self._obj.notify_change(change)
+        self._notifyChanged(change)
 
     def __delitem__(self, item):
 
@@ -744,9 +759,7 @@ class _TypedList(list):
 
         super().__delitem__(item)
 
-        if not self._blanking:
-            change.new = self
-            self._obj.notify_change(change)
+        self._notifyChanged(change)
 
     def extend(self, values):
         """Extend self with values
@@ -762,9 +775,7 @@ class _TypedList(list):
 
         super().extend(values)
 
-        if not self._blanking:
-            change.new = self
-            self._obj.notify_change(change)
+        self._notifyChanged(change)
 
     def append(self, value):
         """Append self with value
@@ -780,9 +791,7 @@ class _TypedList(list):
 
         super().append(value)
 
-        if not self._blanking:
-            change.new = self
-            self._obj.notify_change(change)
+        self._notifyChanged(change)
 
     def remove(self, value): # real signature unknown
         """
@@ -794,7 +803,7 @@ class _TypedList(list):
         del self[idx]  # should also trigger notifier via __delitem__
 
     def copy(self):
-        return _TypedList(obj=self._obj, trait=self._trait, values=self[:])
+        return self.klass(obj=self._obj, trait=self._trait, values=self[:])
 
     @property
     def _fullName(self):
@@ -811,10 +820,12 @@ class _TypedList(list):
 
 
 class TList(List):
-    """An Typed-List trait with:
+    """A Type-checked List trait with:
     - casting from any iterable
     - Item validation; i.e. by the itemTrait defined in the init.
     """
+    klass = _TypedList
+
     def __init__(self, itemTrait, default_value=[], minlen=0, maxlen=sys.maxsize, **kwargs):
         """
         Initialise the object
@@ -850,12 +861,12 @@ class TList(List):
         if theList is None and self.allow_none:
             return None
 
-        if isinstance(theList, _TypedList):
+        if isinstance(theList, self.klass):
             return theList
 
         elif isIterable(theList):
             _tmp = [val for val in theList]
-            return _TypedList(obj=obj, trait=self, values=_tmp)
+            return self.klass(obj=obj, trait=self, values=_tmp)
 
         else:
             raise ValueError(f'{_fullName(obj, self)}: expected list or iterable, got {theList}')

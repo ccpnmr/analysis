@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 11:39:14 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 18:40:03 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -1203,7 +1203,7 @@ class NotifierBase(object):
     @classmethod
     def _increaseNotificationBlanking(cls):
         """Increase notification blanking for all notifiers;
-        The will disable notifiers until _decreaseNotifcationBlanking() has reset the situation.
+        This will disable notifiers until _decreaseNotifcationBlanking() has reset the situation.
         Caller is responsible to make sure necessary notifiers are called, and to decrease after use
         NB. classmethod allows for calling without an instance
         """
@@ -1227,20 +1227,21 @@ class NotifierBase(object):
             notifier.setBlanking(flag)
 
     @contextmanager
-    def blankNotifications(self):
-        """Convenience to method
+    @staticmethod
+    def blankNotifications():
+        """Convenience method to blank notifications
         """
-        self._increaseNotificationBlanking()
+        NotifierBase._increaseNotificationBlanking()
         try:
             # transfer control to the calling function
             yield
 
-        except AttributeError as es:
+        except Exception as es:
             raise es
 
         finally:
             # clean up after blocking notifications
-            self._decreaseNotificationBlanking()
+            NotifierBase._decreaseNotificationBlanking()
 
 
     #-----------------------------------------------------------------------------------------

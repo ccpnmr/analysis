@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 11:14:30 +0000 (Sun, October 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 18:40:02 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -32,20 +32,28 @@ import numpy as np
 from functools import partial
 from typing import Optional, Tuple, Union, Sequence, Any, List
 import pandas as pd
+
+from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+
 from ccpn.util import Common as commonUtil
+from ccpn.util.decorators import logCommand
+from ccpn.util.Logging import getLogger
+from ccpn.util.Common import makeIterableList
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.PeakList import PeakList, PARABOLICMETHOD
-from ccpn.core.NmrAtom import NmrAtom
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpn.core.NmrAtom import NmrAtom, UnknownIsotopeCode
 from ccpn.core.lib.peakUtils import _getPeakSNRatio, snapToExtremum as peakUtilsSnapToExtremum
-from ccpn.util.decorators import logCommand
+
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, \
     undoBlock, undoBlockWithoutSideBar, undoStackBlocking, ccpNmrV3CoreUndoBlock
-from ccpn.util.Logging import getLogger
-from ccpn.util.Common import makeIterableList
-# from ccpn.util.Constants import SCALETOLERANCE
-from ccpn.core.NmrAtom import UnknownIsotopeCode
+
+from ccpn.core.lib.Notifiers import NotifierSignal
+from ccpn.core.lib.Traities import V3Property
+from ccpn.core.lib.CoreTraits import V3Object, V3List
+from ccpn.util.traits.CcpNmrTraits import (
+    Int, Float, CEnum, TDict, TList, CTuple, Unicode, Bool)
 
 
 class Peak(AbstractWrapperObject):
@@ -313,9 +321,11 @@ class Peak(AbstractWrapperObject):
         """Spectrum axis codes in dimension order matching position."""
         return self.spectrum.axisCodes
 
-    @property
-    def position(self) -> Tuple[float, ...]:
-        """Peak position in ppm (or other relevant unit) in dimension order.
+    @V3Property(modelled=True,
+                validator=V3List(Float(allow_none=False))
+                )
+    def position(self) -> list:
+        """:return Peak position in ppm (or other relevant unit) in dimension order.
         """
         return tuple(x.value for x in self._wrappedData.sortedPeakDims())
 

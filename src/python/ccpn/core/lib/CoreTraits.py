@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 13:00:54 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 18:40:03 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -26,14 +26,18 @@ __date__ = "$Date: 2023-10-10 10:10:10 +0000 (Tue, October 10, 2023) $"
 # Start of code
 #=========================================================================================
 
+
 from ccpn.util.traits.CcpNmrTraits import \
-    Instance, OWTraits, List, Int, Float, Unicode, \
-    TraitError, TraitType, _CcpNmrTrait
+    Instance, OWTraits, TList, List, Int, Float, Unicode, \
+    TraitError, TraitType, _CcpNmrTrait, _TypedList, Bunch
 from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase
 
-from ccpn.util.Common import classType
 from ccpn.framework.Application import getApplication, getProject
+from ccpn.util.Common import classType
 from ccpn.util.Logging import getLogger
+
+from ccpn.core.lib.Notifiers import NotifierABC, NotifierBase
+from ccpn.core.lib.ContextManagers import notificationBlanking
 
 
 from ccpn.core.lib.PeakPickers import PeakPickerABC
@@ -188,86 +192,133 @@ class V3Object(TraitType, _CcpNmrTrait):
                 return result
 # end class
 
-#===========================================================================================================
-# GWV testing only
-#===========================================================================================================
 
-class SpectrumDimensionTrait(List):
+class _V3TypedList(_TypedList):
+    """A class that can be used as a typed-check list for V3Properties
     """
-    A trait to implement a Spectrum dimensional attribute; e.g. like spectrumFrequencies
+    # def __init__(self, obj, trait, values=[]):
+
+    def _newChangeBunch(self, subType) -> Bunch:
+        """Generate a new Bunch
+        """
+        from ccpn.core.lib.Notifiers import NotifierABC
+        bunch = Bunch()
+        bunch[NotifierABC.TRIGGER] = NotifierABC.OBSERVE
+        bunch.subType = subType
+        bunch[NotifierABC.OBJECT] = self._obj
+        bunch[NotifierABC.ATTRIBUTE_NAME] = self._trait.v3property.name
+        bunch[NotifierABC.PREVIOUSVALUE] = list(self)
+        return bunch
+
+    def _notifyChanged(self, change):
+        """Notify self._obj of the changes
+        :param change: the change-bunch instance
+        """
+        # If  self is blanked (e.g. happens during init), fire notifiers
+        if self._blanking:
+            return
+
+        # update the property value
+        _property = self._trait.v3property
+        with notificationBlanking():
+            try:
+                _property._fset(self._obj, self)
+            except Exception as ex:
+                raise ValueError(f'Setting {_property.name!r} of {self._obj}: {ex}')
+
+        # fire the notifiers
+        change[NotifierABC.VALUE] = self
+        for _trigger in [NotifierABC.CHANGE, NotifierABC.OBSERVE]:
+            self._obj._fireRegisteredNotifiers(trigger=_trigger,
+                                               targetName=self._trait.v3property.name,
+                                               callbackDict=change
+                                               )
+
+class V3List(TList):
+    """A type-checked List trait for usage with V3Properties
     """
-    # GWV test
-    # _spectrometerFrequencies = SpectrumDimensionTrait(trait=Float(min=0.0)).tag(
-    #                            attributeName='spectrometerFrequency',
-    #                            doCopy = True
-    # )
+    klass = _V3TypedList
 
-    isDimensional = True
-
-    def validate(self, obj, value):
-        """Validate the value
-        """
-        if len(value) != obj.dimensionCount:
-            raise TraitError('Setting "%s", invalid value "%s"' % (self.name, value))
-        value = self.validate_elements(obj, value)
-        return value
-
-    def _getValue(self, obj):
-        """Get the value of trait, obtained from the obj (i.e.spectrum) dimensions
-        """
-        if (dimensionAttributeName := self.get_metadata('attributeName', None)) is None:
-            raise RuntimeError('Undefined dimensional attributeName for trait %r' % self.name)
-        value = [getattr(specDim, dimensionAttributeName) for specDim in obj.spectrumReferences]
-        return value
-
-    def get(self, obj, cls=None):
-        try:
-            value = self._getValue(obj)
-
-        except (AttributeError, ValueError, RuntimeError):
-            # Check for a dynamic initializer.
-            dynamic_default = self._dynamic_default_callable(obj)
-            if dynamic_default is None:
-                raise TraitError("No default value found for %s trait of %r"
-                                 % (self.name, obj))
-            value = self._validate(obj, dynamic_default())
-            obj._trait_values[self.name] = value
-            return value
-
-        except Exception:
-            # This should never be reached.
-            raise TraitError('Unexpected error in DimensionTrait')
-
-        else:
-            self._obj = obj  # last obj used for get
-            return value
-
-    def _setValue(self, obj, value):
-        """Set the value of trait, stored in the obj (i.e.spectrum) dimensions
-        """
-        if (dimensionAttributeName := self.get_metadata('attributeName', None)) is None:
-            raise RuntimeError('Undefined dimensional attributeName for trait %r' % self.name)
-
-        for axis, val in enumerate(value):
-            setattr(obj.spectrumReferences[axis], dimensionAttributeName, val)
-
-    def set(self, obj, value):
-
-        new_value = self._validate(obj, value)
-        try:
-            old_value = self._getValue(obj)
-        except (AttributeError, ValueError, RuntimeError):
-            old_value = self.default_value
-
-        # obj._trait_values[self.name] = new_value
-        self._setValue(obj, new_value)
-
-        try:
-            silent = bool(old_value == new_value)
-        except:
-            # if there is an error in comparing, default to notify
-            silent = False
-        if silent is not True:
-            # we explicitly compare silent to True just in case the equality
-            # comparison above returns something other than True/False
-            obj._notify_trait(self.name, old_value, new_value)
+# #===========================================================================================================
+# # GWV testing only
+# #===========================================================================================================
+#
+# class SpectrumDimensionTrait(List):
+#     """
+#     A trait to implement a Spectrum dimensional attribute; e.g. like spectrumFrequencies
+#     """
+#     # GWV test
+#     # _spectrometerFrequencies = SpectrumDimensionTrait(trait=Float(min=0.0)).tag(
+#     #                            attributeName='spectrometerFrequency',
+#     #                            doCopy = True
+#     # )
+#
+#     isDimensional = True
+#
+#     def validate(self, obj, value):
+#         """Validate the value
+#         """
+#         if len(value) != obj.dimensionCount:
+#             raise TraitError('Setting "%s", invalid value "%s"' % (self.name, value))
+#         value = self.validate_elements(obj, value)
+#         return value
+#
+#     def _getValue(self, obj):
+#         """Get the value of trait, obtained from the obj (i.e.spectrum) dimensions
+#         """
+#         if (dimensionAttributeName := self.get_metadata('attributeName', None)) is None:
+#             raise RuntimeError('Undefined dimensional attributeName for trait %r' % self.name)
+#         value = [getattr(specDim, dimensionAttributeName) for specDim in obj.spectrumReferences]
+#         return value
+#
+#     def get(self, obj, cls=None):
+#         try:
+#             value = self._getValue(obj)
+#
+#         except (AttributeError, ValueError, RuntimeError):
+#             # Check for a dynamic initializer.
+#             dynamic_default = self._dynamic_default_callable(obj)
+#             if dynamic_default is None:
+#                 raise TraitError("No default value found for %s trait of %r"
+#                                  % (self.name, obj))
+#             value = self._validate(obj, dynamic_default())
+#             obj._trait_values[self.name] = value
+#             return value
+#
+#         except Exception:
+#             # This should never be reached.
+#             raise TraitError('Unexpected error in DimensionTrait')
+#
+#         else:
+#             self._obj = obj  # last obj used for get
+#             return value
+#
+#     def _setValue(self, obj, value):
+#         """Set the value of trait, stored in the obj (i.e.spectrum) dimensions
+#         """
+#         if (dimensionAttributeName := self.get_metadata('attributeName', None)) is None:
+#             raise RuntimeError('Undefined dimensional attributeName for trait %r' % self.name)
+#
+#         for axis, val in enumerate(value):
+#             setattr(obj.spectrumReferences[axis], dimensionAttributeName, val)
+#
+#     def set(self, obj, value):
+#
+#         new_value = self._validate(obj, value)
+#         try:
+#             old_value = self._getValue(obj)
+#         except (AttributeError, ValueError, RuntimeError):
+#             old_value = self.default_value
+#
+#         # obj._trait_values[self.name] = new_value
+#         self._setValue(obj, new_value)
+#
+#         try:
+#             silent = bool(old_value == new_value)
+#         except:
+#             # if there is an error in comparing, default to notify
+#             silent = False
+#         if silent is not True:
+#             # we explicitly compare silent to True just in case the equality
+#             # comparison above returns something other than True/False
+#             obj._notify_trait(self.name, old_value, new_value)

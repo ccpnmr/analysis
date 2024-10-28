@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 13:00:54 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 18:40:02 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -114,9 +114,10 @@ from ccpn.util.decorators import logCommand
 from ccpn.util.Path import Path, aPath
 
 from ccpn.core.lib.Notifiers import NotifierSignal
-from ccpn.core.lib.Traity import V3Property
-from ccpn.core.lib.CoreTraits import V3Object
-from ccpn.util.traits.CcpNmrTraits import Int, Float, CEnum, TDict, TList, CTuple, Unicode
+from ccpn.core.lib.Traities import V3Property
+from ccpn.core.lib.CoreTraits import V3Object, V3List
+from ccpn.util.traits.CcpNmrTraits import (
+    Int, Float, CEnum, TDict, TList, CTuple, Unicode, Bool)
 
 
 # defined here too as imported from Spectrum throughout the code base
@@ -520,6 +521,8 @@ class Spectrum(AbstractWrapperObject):
         """
         return tuple(z for z in zip(self.dimensionIndices, self.axisCodes, self.dimensions))
 
+    #-----------------------------------------------------------------------------------------
+
     @property
     @_includeInCopy
     def positiveContourCount(self) -> int:
@@ -656,20 +659,7 @@ class Spectrum(AbstractWrapperObject):
 
         self._setInternalParameter(self._INCLUDENEGATIVECONTOURS, value)
 
-    # @property
-    # @_includeInCopy
-    # def sliceColour(self) -> str:
-    #     """The colour of 1D slices.
-    #     """
-    #     return self._wrappedData.sliceColour
-    #
-    # @sliceColour.setter
-    # @logCommand(get='self', isProperty=True)
-    # def sliceColour(self, value):
-    #     self._wrappedData.sliceColour = value
-    #     # for spectrumView in self.spectrumViews:
-    #     #     spectrumView.setSliceColour()  # ejb - update colour here
-
+    # --- sliceColour property ---
     @V3Property(modelled=True,
                 validator=Unicode(default_value=None)
                 ).tag(includeInCopy=True)
@@ -719,8 +709,7 @@ class Spectrum(AbstractWrapperObject):
 
     @V3Property(modelled=True,
                 validator=Float(min=0.0, default_value=None)
-                )
-    @_includeInCopy
+                ).tag(includeInCopy=True)
     def spinningRate(self) -> float:
         """The NMR tube spinning rate (in Hz)
         """
@@ -1104,6 +1093,8 @@ class Spectrum(AbstractWrapperObject):
         """Conveniance function set the spectrumReference.attributeName to the items of value
         Assumes all checks have been done
         """
+        if len(value) != self.dimensionCount:
+            raise ValueError(f'Expected list or tuple with {self.dimensionCount} items; got {value}')
         specDims = self.spectrumDimensions  # local copy to avoid getting it N-times
         for idx, val in enumerate(value):
             setattr(specDims[idx], attributeName, val)
@@ -1134,17 +1125,19 @@ class Spectrum(AbstractWrapperObject):
     #             result[axis] *= 2
     #     return result
 
-    @property
-    @_includeInDimensionalCopy
+    # --- isComplex property ---
+    @V3Property(modelled=True,
+                validator=V3List(itemTrait=Bool())
+                ).tag(includeInDimensionalCopy=True)
     def isComplex(self) -> List[bool]:
         """Boolean denoting Complex data per dimension"""
         return self._getDimensionalAttributes('isComplex')
 
     @isComplex.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(bool, int, float))
     def isComplex(self, value: Sequence):
         self._setDimensionalAttributes('isComplex', value)
 
+    # --- dataTypes property ---
     @property
     def dataTypes(self) -> List[str]:
         """Data type identifier (nR, (nR)(nI), n(RI), n(PN)) along each dimension
@@ -1152,34 +1145,39 @@ class Spectrum(AbstractWrapperObject):
         """
         return self.dataSource.dataTypes
 
-    @property
-    @_includeInDimensionalCopy
+    # --- isAquisition property ---
+    @V3Property(modelled=True,
+                validator=V3List(itemTrait=Bool())
+               ).tag(includeInDimensionalCopy=True)
     def isAcquisition(self) -> List[bool]:
-        """Boolean per dimension denoting if it is the acquisition dimension"""
+        """:return Boolean per dimension denoting if it is the acquisition dimension"""
         return self._getDimensionalAttributes('isAcquisition')
 
     @isAcquisition.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(bool, int, float))
     def isAcquisition(self, value: Sequence):
         trues = [val for val in value if val == True]
         if len(trues) > 1:
             raise ValueError('Spectrum.isAcquisition: expected zero or one dimension; got %r' % value)
         self._setDimensionalAttributes('isAcquisition', value)
 
-    @property
-    @_includeInDimensionalCopy
+    # --- axisCodes property ---
+    @V3Property(modelled=True,
+                validator=V3List(itemTrait=Unicode(allow_none=True))
+                ).tag(includeInDimensionalCopy=True)
     def axisCodes(self) -> List[Optional[str]]:
-        """List of an unique axisCode per dimension"""
+        """:return List of an unique axisCode per dimension"""
         return self._getDimensionalAttributes('axisCode')
 
     @axisCodes.setter
-    @checkSpectrumPropertyValue(iterable=True, unique=True, allowNone=True, types=(str,))
     def axisCodes(self, value):
         self._setDimensionalAttributes('axisCode', value)
 
-    @property
+    # --- AcquisitionAxisCodes property ---
+    @V3Property(modelled=False,
+                validator=Unicode(allow_none=True)
+                )
     def acquisitionAxisCode(self) -> Optional[str]:
-        """Axis code of acquisition axis - None if not known"""
+        """:return Axis code of acquisition axis - None if not known"""
         trues = [idx for idx, val in enumerate(self.isAcquisition) if val == True]
         if len(trues) == 0:
             return None

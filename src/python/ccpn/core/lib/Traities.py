@@ -1,11 +1,18 @@
 """
-Implementing V property that allows for notifications
+Implementing V3 property that allows for type checking,
+notifications and tagging.
+Following Traitlets style
 
 e.g. in type MyClass:
 
-    @NotifierProperty(modeled=True, )
+    @V3Property(modelled=True
+                validator=Int(allow_none=False, min=0, default_value=0
+                ).tag(isImportant=True)
+
     def count(self) -> int:
+        ":return The number of spectra"
         return self._count
+
     @count.setter
     def count(self, value):
         self._count = value
@@ -48,15 +55,16 @@ __date__ = "$Date: 2024-10-27 11:20:30 +0100 (Sun, October 27, 2024) $"
 #
 
 from ccpn.util.Common import SENTINEL
+from ccpn.util.Logging import getLogger
 from ccpn.util.traits.CcpNmrTraits import TraitType
 
 
-class HasTraity(object):
+class HasTraities(object):
     """The class used for registering and functional behavior
     """
 
     @classmethod
-    def _registerTraity(cls):
+    def _registerTraities(cls):
         """Find and collect all traities in the _traitiesDict
         """
         cls._traitiesDict = {}
@@ -65,6 +73,10 @@ class HasTraity(object):
             if isinstance(val, V3Property):
                 val.klass = cls
                 val.name = name
+                # validator is of TraitType, it is set before
+                # the init had completed. Hence, update its name here too.
+                if val.validator is not None:
+                    val.validator.name = name
                 cls._traitiesDict[name] = val
 
     @classmethod
@@ -138,7 +150,12 @@ class V3Property(property):
         # optional validator
         if not isinstance(validator, TraitType):
             raise ValueError(f'V3Property: Invalid {validator = }')
+
         self.validator: TraitType | None = validator
+        if self.validator:
+            self.validator.v3property = self
+            # name Will be defined later after class inits complete
+            # self.validator.name
 
         self.metadata: dict = {}
 
@@ -175,6 +192,14 @@ class V3Property(property):
         except Exception as ex:
             raise AttributeError(f'Unable to get value for attribute {self.name!r} of {instance}; {ex}')
 
+        if self.validator:
+            # also run validator on get, as it will do any conversions to the set type
+            try:
+                _validatedValue = self.validator.validate(instance, self.value)
+                self.value = _validatedValue
+            except Exception as ex:
+                getLogger().debug(f'V3Property, {type(self.klass).__name__}.{self.name}: validating {self.value} failed; {ex}')
+
         return self.value
 
     #-----------------------------------------------------------------------------------------
@@ -196,9 +221,6 @@ class V3Property(property):
         :param value: the value to set attribute value for
         :raises AttributeError, TypeError
         """
-        # local import to avoid cycles
-        from ccpn.core.lib.Notifiers import NotifierABC
-
         if self.name is None:
             raise AttributeError(f'V3Property: undefined attribute; cannot set value of {instance}')
 
@@ -206,12 +228,11 @@ class V3Property(property):
             raise AttributeError(f'V3Property: undefined klass; cannot set value of {instance}')
 
         if self._fset is None:
-            raise AttributeError(f'V3Property: cannot set value of {type(instance).__name__}.{self.name}')
+            raise AttributeError(f'V3Property: cannot set {type(instance).__name__}.{self.name}')
 
         _previousValue = self.value
         try:
             if self.validator:
-                self.validator.name = self.name  # The enhance error reporting
                 value = self.validator.validate(instance, value)
             else:
                 value = value
@@ -221,19 +242,25 @@ class V3Property(property):
         except Exception as ex:
             raise ValueError(f'Setting {self.name!r} of {instance}: {ex}')
 
-        # successfully completed the setting; store the value
+        # successfully completed the setting; store the value and fire notifiers
         self.value = value
+        self.fireNotifiers(instance=instance, previousValue=_previousValue, value=self.value)
 
-        # fire notifiers
+    def fireNotifiers(self, instance, previousValue, value):
+        """Fire the Notifiers"""
+        # local import to avoid cycles
+        from ccpn.core.lib.Notifiers import NotifierABC
+
         _callbackDict = {NotifierABC.OBJECT        : instance,
                          NotifierABC.ATTRIBUTE_NAME: self.name,
-                         NotifierABC.PREVIOUSVALUE : _previousValue,
-                         NotifierABC.VALUE         : self.value
+                         NotifierABC.PREVIOUSVALUE : previousValue,
+                         NotifierABC.VALUE         : value
                          }
         instance._fireRegisteredNotifiers(trigger=NotifierABC.OBSERVE,
                                           targetName=self.name,
                                           callbackDict=_callbackDict
                                           )
+
 
     #-----------------------------------------------------------------------------------------
 

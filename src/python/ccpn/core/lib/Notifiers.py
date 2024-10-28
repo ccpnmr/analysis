@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 18:40:03 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 20:42:44 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -319,8 +319,10 @@ class NotifierABC(object):
 
             # return f'<{self.__class__.__name__} {self.id} (unregistered): theObject=None: {self._trigger!r}->{self._targetName!r}>'
 
+        _setter = self.setterObject.pid if hasattr(self.setterObject, 'pid') else self.setterObject.__class__.__name__
         _name = self.__class__.__name__
-        return f'<{_name} {self.id} ({_exec}): theObject={_pid}; {self._trigger!r}->{self._targetName!r}; appliesToObj={self._appliesToTheObject}>'
+
+        return f'<{_name} {self.id} ({_exec}): {_pid}:({self._trigger!r}->{self._targetName!r},{self._appliesToTheObject}); setter:{_setter}>'
 
 
 

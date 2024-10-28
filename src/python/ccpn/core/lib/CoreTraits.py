@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 18:40:03 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 20:42:44 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -233,6 +233,13 @@ class _V3TypedList(_TypedList):
                                                targetName=self._trait.v3property.name,
                                                callbackDict=change
                                                )
+        # Fire change for Project
+        _project = self._obj.project
+        _project._fireRegisteredNotifiers(trigger=NotifierABC.CHANGE,
+                                           targetName=self._obj.className,
+                                           callbackDict=change
+                                           )
+
 
 class V3List(TList):
     """A type-checked List trait for usage with V3Properties

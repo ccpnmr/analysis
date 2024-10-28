@@ -154,8 +154,6 @@ class V3Property(property):
         self.validator: TraitType | None = validator
         if self.validator:
             self.validator.v3property = self
-            # name Will be defined later after class inits complete
-            # self.validator.name
 
         self.metadata: dict = {}
 
@@ -167,7 +165,9 @@ class V3Property(property):
         """"""  # deliberately empty, as not to pollute the docstring
         self._fget = func
         self.__doc__ = func.__doc__
-        self.__name__ = func.__name__
+        self.name = self.__name__ = func.__name__
+        if self.validator:
+            self.validator.name = self.name
         return self
 
     # allow for decorator to be used in normal way without explicit "setter"

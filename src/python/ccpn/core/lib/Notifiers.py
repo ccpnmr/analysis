@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 08:23:53 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 11:39:14 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -811,7 +811,6 @@ class NotifierBase(object):
         # but as many Classes inherit from NotifierBase, and not all have this mechanism,
         # this implementation is "easier".
         self._findNotifierSignals()
-        self._findNotifierProperties()
 
     @classmethod
     def _findNotifierSignals(cls):
@@ -827,19 +826,19 @@ class NotifierBase(object):
                     cls._notifierSignalsDict[name] = val
         # pass
 
-    @classmethod
-    def _findNotifierProperties(cls):
-        """Fill the _notifierPropertiesDict with any instances of a NotifierProperty;
-        Called with every init, but only effectively executed once per class
-        """
-        if cls._notifierPropertiesDict == SENTINEL:
-            cls._notifierPropertiesDict = {}
-            for name, val in vars(cls).items():
-                if isinstance(val, NotifierProperty):
-                    val.klass = cls
-                    val.name = name
-                    cls._notifierPropertiesDict[name] = val
-        # pass
+    # @classmethod
+    # def _findNotifierProperties(cls):
+    #     """Fill the _notifierPropertiesDict with any instances of a NotifierProperty;
+    #     Called with every init, but only effectively executed once per class
+    #     """
+    #     if cls._notifierPropertiesDict == SENTINEL:
+    #         cls._notifierPropertiesDict = {}
+    #         for name, val in vars(cls).items():
+    #             if isinstance(val, NotifierProperty):
+    #                 val.klass = cls
+    #                 val.name = name
+    #                 cls._notifierPropertiesDict[name] = val
+    #     # pass
     #-----------------------------------------------------------------------------------------
     # creating, registering and unregistering notifier set for self
     #-----------------------------------------------------------------------------------------
@@ -1352,148 +1351,6 @@ class NotifierSignal(property):
     #
     # def __set__(self, *args, **kwds):
     #     super().__set__(*args, **kwds)
-
-#end class -----------------------------------------------------------------------------------------
-
-
-class NotifierProperty(property):
-    # Doc-string commented as otherwise it appears in addition to the description of the wrapped
-    # attribute ==> too much info
-
-    # """A property that allows for notifications
-    #
-    # e.g. in type MyClass:
-    #
-    #     @NotifierProperty(modeled=True, )
-    #     def count(self) -> int:
-    #         return self._count
-    #     @count.setter
-    #     def count(self, value):
-    #         self._count = value
-    #
-    # elsewhere:
-    #     myObject = MyClass()
-    #
-    #     otherObject.setNotifier(myObject, [OBSERVE], 'count', callback=someFunc)
-    #
-    #     myObject.count = 1, will trigger the callback someFunc()
-    # """
-
-    def __init__(self,
-                 modelled: bool,
-                 types: tuple = (),
-
-                 ):
-
-        super().__init__()
-
-        self.name: str | None = None
-        self.klass = None
-        self.value = SENTINEL
-
-        # getter get value from model; not need to call CHANGE /OBSERVE notifiers as api will do callback (for now)
-        self.modelled: bool = modelled
-
-        # types to check
-        if not isinstance(types, tuple):
-            raise ValueError(f'NotifierProperty: Invalid types argument {types}')
-        self.types = types
-
-    #-----------------------------------------------------------------------------------------
-    # getter routines
-    #-----------------------------------------------------------------------------------------
-
-    def getter(self, func):
-        """"""  # deliberately empty, as not to pollute the docstring
-        self._fget = func
-        self.doc = self.__doc__ = func.__doc__
-        self.__name__ = func.__name__
-        return self
-
-    # allow for decorator to be used in normal way without explicit "setter"
-    __call__ = getter
-
-    def __get__(self, instance, owner):
-        """"""  # deliberately empty, as not to pollute the docstring
-        if instance is None:
-            return self
-        else:
-            return self._getter(instance)
-
-    def _getter(self, instance):
-        if self.name is None:
-            raise AttributeError(f'NotifierProperty: undefined attribute; cannot get value from {instance}')
-
-        if self.klass is None:
-            raise AttributeError(f'NotifierProperty: undefined klass; ; cannot get value from {instance}')
-
-        try:
-            self.value = self._fget(instance)
-        except Exception as ex:
-            raise AttributeError(f'Unable to get value for attribute {self.name!r} of {instance}; {ex}')
-
-        return self.value
-
-    #-----------------------------------------------------------------------------------------
-    # setter routines
-    #-----------------------------------------------------------------------------------------
-
-    def setter(self, func):
-        """"""  # deliberately empty, as not to pollute the docstring
-        self._fset = func
-        return self
-
-    def __set__(self, instance, value):
-        """"""  # deliberately empty, as not to pollute the docstring
-        self._setter(instance, value)
-
-    def _setter(self, instance, value):
-        """Set the value, run optional validator and fire the notifiers
-        :param instance: the instance of self.klass to set attribute value for
-        :param value: the value to set attribute value for
-        :raises AttributeError, TypeError
-        """
-        if self.name is None:
-            raise AttributeError(f'NotifierProperty: undefined attribute; cannot set value of {instance}')
-
-        if self.klass is None:
-            raise AttributeError(f'NotifierProperty: undefined klass; cannot set value of {instance}')
-
-        _previousValue = self.value
-        value = self.validate(instance, value)
-
-        try:
-            self._fset(instance, value)
-        except Exception as ex:
-            raise AttributeError(f'Setting {self.name!r} of {instance}: {ex}')
-
-        self.value = value
-
-        _callbackDict = {NotifierABC.OBJECT        : instance,
-                         NotifierABC.ATTRIBUTE_NAME: self.name,
-                         NotifierABC.PREVIOUSVALUE : _previousValue,
-                         NotifierABC.VALUE         : self.value
-                         }
-        instance._fireRegisteredNotifiers(trigger=Notifier.OBSERVE,
-                                          targetName=self.name,
-                                          callbackDict=_callbackDict
-                                          )
-
-    def validate(self, instance, value):
-        """Validate value; return value or raise TypeError or ValueError
-        """
-        if self.types:
-            if not isinstance(value, self.types):
-                raise TypeError(f'Setting {self.name!r} of {instance}: '
-                                f'invalid type {type(value).__name__!r} of {value!r}; '
-                                f'expected {tuple(t.__name__ for t in self.types)}')
-
-    #-----------------------------------------------------------------------------------------
-
-    def __str__(self):
-        return (f'<NotifierProperty {self.name!r} of {self.klass} (modelled={self.modelled})>')
-
-    __repr__ = __str__
 
 #end class -----------------------------------------------------------------------------------------
 

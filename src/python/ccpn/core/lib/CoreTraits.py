@@ -2,8 +2,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-06-13 18:17:34 +0100 (Thu, June 13, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-28 11:39:14 +0000 (Mon, October 28, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,8 +30,9 @@ from ccpn.util.traits.CcpNmrTraits import \
     Instance, OWTraits, List, Int, Float, Unicode, \
     TraitError, TraitType, _CcpNmrTrait
 from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase
+
 from ccpn.util.Common import classType
-from ccpn.framework.Application import getApplication
+from ccpn.framework.Application import getApplication, getProject
 from ccpn.util.Logging import getLogger
 
 
@@ -80,6 +82,7 @@ class PidTrait(Unicode):
         else:
             raise ValueError(f'{self._fullName(obj)}: expected pid or object with pid, got {value}')
 
+
 class V3Object(TraitType, _CcpNmrTrait):
     """A trait that defines a V3-object, json serialisable through its Pid
     """
@@ -88,13 +91,14 @@ class V3Object(TraitType, _CcpNmrTrait):
 
     _overrideClassCheck = False  # flag for ccpnv4 testing
 
-    def __init__(self, klass=None, default_value=None, **kwargs):
+    def __init__(self, klass=None, default_value=None, allowPid=False, **kwargs):
         """
         Initialise the trait
         :param klass: only allow objects of type klass (V3object or className str);
                       ignored when None
         :param default_value: value set by default (None)
-        :param kwargs: optional
+        :param allowPid: allow conversion from Pid/str to V3object
+        :param kwargs: optional kwds to the TraitType invocation
         """
         from ccpn.core._implementation.CoreModel import _isV3coreClass, _isV3coreClassInstance, _getV3coreClass
 
@@ -122,16 +126,24 @@ class V3Object(TraitType, _CcpNmrTrait):
         if default_value is not None:
             self.default_value = default_value
 
+        self.allowPid = allowPid
+
     def validate(self, obj, value):
         """Assure a Core-class instance
         :raises TypeError, ValueError
         """
+        # Local import to avoid cycles
         from ccpn.core._implementation.CoreModel import _isV3coreClass, _isV3coreClassInstance, _getV3coreClass
 
         if value is None and not self.allow_none:
             raise ValueError(f'Expected an instance of a V3 class; got None')
 
-        elif self._overrideClassCheck:
+        if isinstance(value, (Pid, str)) and self.allowPid:
+            _app = getApplication()
+            if (value := _app.get(value)) is None:
+                raise ValueError(f'Unable to get a V3object from {value}')
+
+        if self._overrideClassCheck:
             pass
 
         elif self._klass is not None and not isinstance(value, self._klass):

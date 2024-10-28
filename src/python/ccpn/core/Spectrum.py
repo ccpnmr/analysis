@@ -1,23 +1,32 @@
 """Spectrum  class.
-Maintains the parameters of a spectrum, including per-dimension/axis values.
-Values that are not defined for a given dimension (e.g. sampled dimensions) are given as None.
+Maintains methods for accessing and manipulating spectra data and its parameters,
+including per-dimension values.
 
-Dimension identifiers run from 1 to the number of dimensions, i.e. dimensionCount,  (e.g. 1,2,3 for a 3D).
+==> Dimensions:
+Spectrum dimension identifiers are one-based, i.e. range from 1 to the number of dimensions,
+i.e. dimensionCount,  (e.g. 1,2,3 for a 3D).
 CCPN data the preferred convention is to have the acquisition dimension as dimension 1.
 
-Axes identifiers run from 0 to the dimensionCount-1 (e.g. 0,1,2 for a 3D)
-Per-axis values are given in the order data are stored in the spectrum file
+DimensionIndices run from 0 to the dimensionCount-1 (e.g. 0,1,2 for a 3D)
 
-The axisCodes are used as an alternative axis identifier. These are unique strings that typically
-reflect the isotope on the relevant axis.
+Dimensional parameters are returned as list or tuple in the order data are derived from
+the (binary) spectrum file. These list/tuple are (obviously) 0-based, ie. correspond to the
+dimensionIndices
+Values that are not defined for a given dimension (e.g. sampled dimensions)
+are returned as None.
+
+==> AxisCodes (historical misnomer, but a code for each dimension)
+The axisCodes are used as an alternative dimension identifier. These are unique strings that typically
+reflect the isotope on the relevant dimension.
 By default, upon loading a new spectrum, the axisCodes are derived from the isotopeCodes that define
 the experimental data for each dimension.
-They can match the dimension identifiers in the reference experiment templates, linking a dimension
+They can match the identifiers in the reference experiment templates, linking a dimension
 to the correct reference experiment dimension.
 They are also used to automatically map spectrum display-axes between different spectra on a first
 character basis.
-Axes that are linked by a one-bond magnetisation transfer could be given a lower-case suffix to
-show the nucleus bound to. Duplicate axis names should be distinguished by a numerical suffix.
+It is advocated that dimensions that are linked by a one-bond magnetisation transfer could be given a
+lower-case suffix to show the nucleus it is bound.
+Duplicate names should be distinguished by a numerical suffix.
 The rules are best illustrated by example:
 
 Experiment                          axisCodes
@@ -32,7 +41,8 @@ HCACO                               H, CA, CO
 1D Bromine NMR                      Br
 19F-13C-HSQC                        Fc, Cf
 
-Useful reordering methods exist to get dimensional/axis parameters in a particular order, i.e.:
+Useful reordering methods exist to get dimensional parameters in a particular order,
+i.e.:
 getByDimension(), setByDimension(), getByAxisCode(), setByAxisCode()
 See doc strings of these methods for detailed documentation
 
@@ -55,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 08:23:53 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 11:39:13 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -72,8 +82,9 @@ from itertools import permutations
 import numpy as np
 import pandas as pd
 
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpnmodel.ccpncore.api.ccp.nmr import Nmr as ApiNmr
 
+import ccpn.core as CcpnCore
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.SpectrumTraits import SpectrumTraits
 from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionData
@@ -90,7 +101,6 @@ from ccpn.core.lib.ContextManagers import \
     undoStackBlocking, renameObject, undoBlock, \
     ccpNmrV3CoreSetter, inactivity, undoBlockWithoutSideBar, notificationEchoBlocking
 
-from ccpn.core.lib.Notifiers import NotifierSignal, NotifierProperty
 from ccpn.core.lib.DataStore import DataStore
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC, getDataFormats
 from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
@@ -103,6 +113,11 @@ from ccpn.util.Common import isIterable
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.util.Path import Path, aPath
+
+from ccpn.core.lib.Notifiers import NotifierSignal
+from ccpn.core.lib.Traity import V3Property
+from ccpn.core.lib.CoreTraits import V3Object
+from ccpn.util.traits.CcpNmrTraits import Int, Float, CEnum, TDict, TList, CTuple, Unicode
 
 
 # defined here too as imported from Spectrum throughout the code base
@@ -146,7 +161,7 @@ class Spectrum(AbstractWrapperObject):
     _childClasses = []
 
     # Qualified name of matching API class
-    _apiClassQualifiedName = Nmr.DataSource._metaclass.qualifiedName()
+    _apiClassQualifiedName = ApiNmr.DataSource._metaclass.qualifiedName()
 
     _ignoreNewApiObjectCallback = True
 
@@ -382,7 +397,7 @@ class Spectrum(AbstractWrapperObject):
 
     #-----------------------------------------------------------------------------------------
 
-    def __init__(self, project: Project, wrappedData: Nmr.DataSource):
+    def __init__(self, project: Project, wrappedData: ApiNmr.DataSource):
 
         # super().__init__(project, wrappedData)
         # CcpNmrJson.__init__(self)
@@ -657,22 +672,23 @@ class Spectrum(AbstractWrapperObject):
     #     # for spectrumView in self.spectrumViews:
     #     #     spectrumView.setSliceColour()  # ejb - update colour here
 
-    @NotifierProperty(modelled=True, types=(str,))
-    # @_includeInCopy
+    @V3Property(modelled=True,
+                validator=Unicode(default_value=None)
+                ).tag(includeInCopy=True)
     def sliceColour(self) -> str:
         """:return The colour of 1D slices.
         """
         return self._wrappedData.sliceColour
 
     @sliceColour.setter
-    # @logCommand(get='self', isProperty=True)
+    @logCommand(get='self', isProperty=True)
     def sliceColour(self, value):
         self._wrappedData.sliceColour = value
 
     @property
     @_includeInCopy
     def scale(self) -> float:
-        """The scaling factor for data in the spectrum.
+        """:return The scaling factor for data in the spectrum.
         """
         value = self._wrappedData.scale
         if value is None:
@@ -680,7 +696,6 @@ class Spectrum(AbstractWrapperObject):
             value = 1.0
         if -SCALETOLERANCE < value < SCALETOLERANCE:
             getLogger().warning(f'Scaling {self} by minimum tolerance (±{SCALETOLERANCE})')
-
         return value
 
     @scale.setter
@@ -704,7 +719,9 @@ class Spectrum(AbstractWrapperObject):
             # some 1D data were read before; update the intensities as the scale has changed
             self.getSliceData()
 
-    @property
+    @V3Property(modelled=True,
+                validator=Float(min=0.0, default_value=None)
+                )
     @_includeInCopy
     def spinningRate(self) -> float:
         """The NMR tube spinning rate (in Hz)
@@ -3910,7 +3927,7 @@ class Spectrum(AbstractWrapperObject):
         self._wrappedData.__dict__['_serialDict']['peakLists'] = 0
 
     @property
-    def _apiDataSource(self) -> Nmr.DataSource:
+    def _apiDataSource(self) -> ApiNmr.DataSource:
         """ CCPN DataSource matching Spectrum"""
         return self._wrappedData
 

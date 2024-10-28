@@ -96,8 +96,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-07 19:44:44 +0100 (Mon, October 07, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-10-28 11:39:14 +0000 (Mon, October 28, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -300,7 +300,7 @@ class Float(_Float, _CcpNmrTrait):
         """
         _min = '-inf' if self.min is None else str(self.min)
         _max = '+inf' if self.max is None else str(self.max)
-        return f'an float between ({_min},{_max})'
+        return f'a float between ({_min},{_max})'
 
 
 class CFloat(Float):
@@ -1233,14 +1233,14 @@ class TDict(Dict):
         if 'trait' in kwargs:
             valueTrait = kwargs['trait']
             del kwargs['trait']
-            getLogger().warning(f'TList trait: depricated {repr("trait")} keyword, use {repr("valueTrait")} instead')
+            getLogger().warning(f'TList trait: deprecated {repr("trait")} keyword, use {repr("valueTrait")} instead')
 
         if valueTrait is None or not isinstance(valueTrait, TraitType):
             raise ValueError(f'parameter valueTrait: invalid, got {valueTrait}')
 
         super().__init__(default_value=default_value, **kwargs)
 
-        self.valueTrait = valueTrait  # This is also store by traitlets, but do not like using private attributes
+        self.valueTrait = valueTrait  # This is also stored by traitlets, but do not like using private attributes
 
     def validate(self, obj, theDict) -> _TypedDict | None:
         """

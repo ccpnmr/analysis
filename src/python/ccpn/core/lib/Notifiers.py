@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 22:10:24 +0000 (Sun, October 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 08:23:53 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -1403,18 +1403,18 @@ class NotifierProperty(property):
     # getter routines
     #-----------------------------------------------------------------------------------------
 
-    def getter(self, __fget):
+    def getter(self, func):
         """"""  # deliberately empty, as not to pollute the docstring
-        self._fget = __fget
-        self.doc = self.__doc__ = __fget.__doc__
-        self.__name__ = __fget.__name__
+        self._fget = func
+        self.doc = self.__doc__ = func.__doc__
+        self.__name__ = func.__name__
         return self
 
     # allow for decorator to be used in normal way without explicit "setter"
     __call__ = getter
 
     def __get__(self, instance, owner):
-        """"""
+        """"""  # deliberately empty, as not to pollute the docstring
         if instance is None:
             return self
         else:
@@ -1438,9 +1438,9 @@ class NotifierProperty(property):
     # setter routines
     #-----------------------------------------------------------------------------------------
 
-    def setter(self, __fset):
+    def setter(self, func):
         """"""  # deliberately empty, as not to pollute the docstring
-        self._fset = __fset
+        self._fset = func
         return self
 
     def __set__(self, instance, value):
@@ -1448,7 +1448,7 @@ class NotifierProperty(property):
         self._setter(instance, value)
 
     def _setter(self, instance, value):
-        """Set the value and fire the notifiers
+        """Set the value, run optional validator and fire the notifiers
         :param instance: the instance of self.klass to set attribute value for
         :param value: the value to set attribute value for
         :raises AttributeError, TypeError

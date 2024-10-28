@@ -55,7 +55,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 22:10:24 +0000 (Sun, October 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 08:23:53 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -660,7 +660,7 @@ class Spectrum(AbstractWrapperObject):
     @NotifierProperty(modelled=True, types=(str,))
     # @_includeInCopy
     def sliceColour(self) -> str:
-        """The colour of 1D slices.
+        """:return The colour of 1D slices.
         """
         return self._wrappedData.sliceColour
 

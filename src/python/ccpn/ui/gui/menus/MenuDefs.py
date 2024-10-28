@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 11:52:37 +0000 (Sun, October 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 08:23:53 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -39,32 +39,24 @@ __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
 # Start of code
 #=========================================================================================
 
-import os
-import platform
-
 from functools import partial
-from typing import Optional, Callable, Any, TypeAlias
+from typing import Optional, Callable
 
 CallableOrNone = Optional[Callable]
 
 from ccpn.framework.PathsAndUrls import \
     macroPath, \
-    widgetsPath, \
     CCPN_ARCHIVES_DIRECTORY
 from ccpn.framework.Application import getApplication, getProject, getCurrent
-from ccpn.framework._FrameWorkProperties import _FrameworkProperties
+from ccpn.framework.lib.FrameWorkProperties import FrameworkProperties
 
-from ccpn.util.Common import isWindowsOS
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
 from ccpn.util.decorators import singleton
 
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import \
-    ArchivesFileDialog, \
-    LayoutsFileDialog, \
-    NMRStarFileDialog
-
+    ArchivesFileDialog
 
 from ccpn.ui.gui.menus._MenuItems import Menu, Action, Section, Separator, DynamicMenu
 
@@ -91,7 +83,7 @@ def getMenuDefs():
 #-----------------------------------------------------------------------------------------
 
 @singleton
-class MenusDefs(Menu, _FrameworkProperties):
+class MenusDefs(Menu, FrameworkProperties):
     """A Menu class (list) to define the menu definitions and callback routines
     Used by MainWindow to initialise the menuBar
 
@@ -1105,7 +1097,7 @@ class MenusDefs(Menu, _FrameworkProperties):
 
     def __init__(self):
         super().__init__(name='root')
-        _FrameworkProperties.__init__(self)
+        FrameworkProperties.__init__(self)
         self._defineMenus()
 
     def insertAfter(self, menuKeys: list, menuDef: list):
@@ -1305,7 +1297,7 @@ def _fillMacroRunCCPNCallback(node) -> list:
 def _fillUserPluginsCallback(node) -> list:
     """Callback to fill Plugins->User Plugins
     """
-    from ccpn.plugins import loadedPlugins, loadedUserPlugins
+    from ccpn.plugins import loadedUserPlugins
 
     _app = getApplication()
     _mainWindow = _app.ui.mainWindow
@@ -1316,7 +1308,7 @@ def _fillUserPluginsCallback(node) -> list:
 def _fillCCPNPluginsCallback(node) -> list:
     """Callback to fill Plugins->CCPN Plugins
     """
-    from ccpn.plugins import loadedPlugins, loadedUserPlugins
+    from ccpn.plugins import loadedPlugins
 
     _app = getApplication()
     _mainWindow = _app.ui.mainWindow

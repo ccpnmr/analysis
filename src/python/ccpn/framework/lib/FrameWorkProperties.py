@@ -30,7 +30,7 @@ __date__ = "$Date: 2024-10-27 11:20:30 +0100 (Sun, October 27, 2024) $"
 #=========================================================================================
 #
 
-class _FrameworkProperties(object):
+class FrameworkProperties(object):
     """Convenience class to have easy Framework derived properties
     """
     def __init__(self):

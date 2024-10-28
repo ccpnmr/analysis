@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 11:52:37 +0000 (Sun, October 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 08:23:53 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -29,10 +29,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import glob
 import json
 import sys
-from collections import OrderedDict as od
 from copy import deepcopy
 
 from ccpn.core.lib.ContextManagers import undoStackBlocking
@@ -44,8 +42,7 @@ from ccpn.util.decorators import singleton
 
 from ccpn.framework.Application import ANALYSIS_ASSIGN
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY
-from ccpn.framework.Application import getApplication
-from ccpn.framework._FrameWorkProperties import _FrameworkProperties
+from ccpn.framework.lib.FrameWorkProperties import FrameworkProperties
 
 
 StateDirName = CCPN_STATE_DIRECTORY
@@ -86,7 +83,7 @@ MODULES = 'modules'
 
 
 @singleton
-class ModuleLayout(_FrameworkProperties):
+class ModuleLayout(FrameworkProperties):
     """Class holding module layout information
     """
     def __init__(self):

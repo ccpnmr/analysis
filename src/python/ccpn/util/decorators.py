@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 18:02:31 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 13:00:54 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -447,11 +447,12 @@ def logCommand(prefix='', get=None, isProperty=False):
                 _pref += f"get('{args[0].pid}')."
 
             if isProperty:
-                from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-                from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
+                from ccpn.core._implementation.CoreModel import _isV3coreClassInstance
+                # from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+                # from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
                 ##could replace these imports with hasattr(args[1], 'pid')
-                if isinstance(args[1], (AbstractWrapperObject, V3CoreObjectABC)):
-                    logS = f"{_pref}{func.__name__} = get({args[1].pid})"
+                if _isV3coreClassInstance(args[1]):
+                    logS = f"{_pref}{func.__name__} = get('{args[1].pid}')"
                 elif isinstance(args[1], pd.DataFrame):
                     logS = f"{_pref}{func.__name__} = $TableFrame"
                 else:

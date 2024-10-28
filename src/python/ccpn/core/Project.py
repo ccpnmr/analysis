@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 12:39:00 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 13:00:54 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -3367,6 +3367,7 @@ class Project(AbstractWrapperObject):
         :param spectra:
         :return: a new ChemicalShiftList instance.
         """
+        # local import to avoid cycles
         from ccpn.core.ChemicalShiftList import _newChemicalShiftList
         from ccpn.core.Spectrum import Spectrum
 
@@ -3375,7 +3376,10 @@ class Project(AbstractWrapperObject):
             if spectra:
                 getByPid = self._project.getByPid
                 if (spectra := list(filter(lambda sp: isinstance(sp, Spectrum),
-                                           map(lambda sp: getByPid(sp) if isinstance(sp, str) else sp, spectra)))):
+                                           map(lambda sp: getByPid(sp) if isinstance(sp, str) else sp, spectra)
+                                           )
+                                    )
+                   ):
                     # add/transfer the spectra
                     result.spectra = spectra
 

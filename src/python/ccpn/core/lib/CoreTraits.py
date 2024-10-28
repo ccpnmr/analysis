@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 11:39:14 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 13:00:54 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -104,21 +104,27 @@ class V3Object(TraitType, _CcpNmrTrait):
 
         if klass is None:
             self._klass = None
+            self._klassName = None
 
         elif self._overrideClassCheck:
             self._klass = klass
+            self._klassName = None
 
         else:
 
             if _isV3coreClass(klass):
                 self._klass = klass
+                self._klassName = None
 
-            elif isinstance(klass, str) and \
-               (_klass := _getV3coreClass(klass)) is not None:
-                self._klass = _klass
+            elif isinstance(klass, str) :
+               # postphone this check until later, as we otherwise run into
+               # trouble with not-yet registered classes
+               # (_klass := _getV3coreClass(klass)) is not None:
+                self._klass = None
+                self._klassName = klass
 
             else:
-                raise ValueError(f'parameter klass: expected a valid V3 class; got {klass}')
+                raise ValueError(f'parameter klass: expected a valid V3 class; got {klass!r}')
 
         TraitType.__init__(self, default_value=default_value, **kwargs)
         _CcpNmrTrait.__init__(self)
@@ -148,6 +154,12 @@ class V3Object(TraitType, _CcpNmrTrait):
 
         elif self._klass is not None and not isinstance(value, self._klass):
             raise TypeError(f'Expected an instance of {classType(self._klass)}; got {value} {classType(value)}')
+
+        elif (self._klass is None and self._klassName is not None):
+            if (_klass := _getV3coreClass(self._klassName)) is None:
+                raise RuntimeError(f'V3Object: invalid className {self._klassName!r}')
+            if not isinstance(value, _klass):
+                raise TypeError(f'Expected an instance of {classType(_klass)}; got {value} {classType(value)}')
 
         elif not _isV3coreClassInstance(value):
             raise TypeError(f'Expected an instance of a V3 class; got {value} {classType(value)}')

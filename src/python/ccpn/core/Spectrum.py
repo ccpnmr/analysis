@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 11:39:13 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-28 13:00:54 +0000 (Mon, October 28, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -84,7 +84,6 @@ import pandas as pd
 
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr as ApiNmr
 
-import ccpn.core as CcpnCore
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.SpectrumTraits import SpectrumTraits
 from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionData
@@ -202,6 +201,17 @@ class Spectrum(AbstractWrapperObject):
     # Attributes of the data structure
     #-----------------------------------------------------------------------------------------
 
+    # Inherited from AbstractWrapperObject
+    # @property
+    # def project(self) -> 'Project':
+    #     """The Project (root)containing the object."""
+    #     return self._project
+
+    @property
+    def _parent(self) -> Project:
+        """Parent (containing) object."""
+        return self._project
+
     @property
     def spectrumViews(self) -> tuple:
         """Return a tuple of SpectrumView instances associated with this spectrum"""
@@ -210,30 +220,31 @@ class Spectrum(AbstractWrapperObject):
                      for y in x.sortedStripSpectrumViews()]
         return tuple(specViews)
 
-    @property
+    # --- chemicalShiftList property ---
+    @V3Property(modelled=True,
+                validator=V3Object(klass='ChemicalShiftList',
+                                   allow_none=False,
+                                   allowPid=True
+                                   )
+                )
     def chemicalShiftList(self):
         """:return: the ChemicalShiftList instance for spectrum
         """
         return self._project._data2Obj.get(self._wrappedData.experiment.shiftList)
 
     @chemicalShiftList.setter
-    def chemicalShiftList(self, chemicalShiftList):
+    @logCommand(get='self', isProperty=True)
+    def chemicalShiftList(self, value):
         """Set the chemicalShiftList for the spectrum
         """
-        from ccpn.core.ChemicalShiftList import ChemicalShiftList
+        value.spectra = set(value.spectra) | {self}
 
-        _shiftList = self.getByPid(chemicalShiftList) if isinstance(chemicalShiftList, str) else chemicalShiftList
-        if _shiftList is None:
-            raise ValueError(f'{self.className}.chemicalShiftList: cannot set to None')
+        # TODO:ED There was an error catching for Nef related problems;
+        #  should fix in Nef importer, not here
+        #  Don't raise errors here or you crash-out a perfectly valid project/Nef from loading
+        # getLogger().warning(f'Could not set chemicalShiftList for Spectrum {self}. Invalid type {_shiftList}.')
 
-        if isinstance(_shiftList, ChemicalShiftList):
-            # add the spectrum to the chemicalShiftList - undo handled in .spectra setter
-            _shiftList.spectra = set(_shiftList.spectra) | {self}
-
-        else:
-            # Don't raise errors here or you crash-out a perfectly valid project/Nef from loading
-            getLogger().warning(f'Could not set chemicalShiftList for Spectrum {self}. Invalid type {_shiftList}.')
-
+    # --- spectrumDimensions property ---
     @property
     def spectrumDimensions(self) -> tuple:
         """A tuple with the spectrum dimensions (== SpectrumReference or PseudoDimension) instances
@@ -252,27 +263,16 @@ class Spectrum(AbstractWrapperObject):
             self._spectrumDimensions = tuple(sDims)
         return tuple(self._spectrumDimensions)
 
+    #-----------------------------------------------------------------------------------------
+    # property STUBS: hot-fixed later
+    #-----------------------------------------------------------------------------------------
+
     @property
     def sample(self):
         """STUB: hot-fixed later
         :return: an instance of Sample, or None
         """
         return None
-
-    # Inherited from AbstractWrapperObject
-    # @property
-    # def project(self) -> 'Project':
-    #     """The Project (root)containing the object."""
-    #     return self._project
-
-    @property
-    def _parent(self) -> Project:
-        """Parent (containing) object."""
-        return self._project
-
-    #-----------------------------------------------------------------------------------------
-    # property STUBS: hot-fixed later
-    #-----------------------------------------------------------------------------------------
 
     @property
     def integralLists(self) -> list['IntegralList']:
@@ -399,8 +399,6 @@ class Spectrum(AbstractWrapperObject):
 
     def __init__(self, project: Project, wrappedData: ApiNmr.DataSource):
 
-        # super().__init__(project, wrappedData)
-        # CcpNmrJson.__init__(self)
         AbstractWrapperObject.__init__(self, project, wrappedData)
 
         self._spectrumTraits = SpectrumTraits(spectrum=self)
@@ -473,7 +471,7 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def name(self) -> str:
-        """The name of the spectrum.
+        """:return The name of the spectrum.
         """
         return self._wrappedData.name
 

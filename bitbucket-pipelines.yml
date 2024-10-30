@@ -1,6 +1,6 @@
 # Push release/updates/edge to GitHub
 
-image: atlassian/default-image:3
+image: atlassian/default-image:latest
 
 definitions:
   services:
@@ -15,8 +15,8 @@ definitions:
         caches:
           - docker
         script:
-          - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis.git"
-          - git push --force github main
+          - git remote add github-ccpnmr "https://$GITHUB_TOKEN@github.com/ccpnmr/$BITBUCKET_REPO_SLUG.git"
+          - git push --force github-ccpnmr "$BITBUCKET_BRANCH"
 
     - step: &Push-to-GitHub-Updates
         name: Push code changes to GitHub
@@ -25,8 +25,8 @@ definitions:
         caches:
           - docker
         script:
-          - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis.git"
-          - git push --force github updates
+          - git remote add github-ccpnmr "https://$GITHUB_TOKEN@github.com/ccpnmr/$BITBUCKET_REPO_SLUG.git"
+          - git push --force github-ccpnmr updates
 
     - step: &Push-to-GitHub-Edge
         name: Push code changes to GitHub
@@ -35,8 +35,8 @@ definitions:
         caches:
           - docker
         script:
-          - git remote add github "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis-private.git"
-          - git push --force github $BITBUCKET_BRANCH
+          - git remote add github-ccpnmr "https://$GITHUB_TOKEN@github.com/ccpnmr/analysis-private.git"
+          - git push --force github-ccpnmr "$BITBUCKET_BRANCH"
 
 pipelines:
   branches:
@@ -46,13 +46,13 @@ pipelines:
     #     X major - a single digit currently = 3
     #     Y minor - 1 or 2 digits
     #     Z patch - 1 or 2 digits
-    "_SKIP[0-9].[0-9].[0-9]":
+    "3.[0-9].[0-9]":
       - step: *Push-to-GitHub-Main
-    "_SKIP[0-9].[0-9].[0-9][0-9]":
+    "3.[0-9].[0-9][0-9]":
       - step: *Push-to-GitHub-Main
-    "_SKIP[0-9].[0-9][0-9].[0-9]":
+    "3.[0-9][0-9].[0-9]":
       - step: *Push-to-GitHub-Main
-    "_SKIP[0-9].[0-9][0-9].[0-9][0-9]":
+    "3.[0-9][0-9].[0-9][0-9]":
       - step: *Push-to-GitHub-Main
 
     # release + hotfixes to update server

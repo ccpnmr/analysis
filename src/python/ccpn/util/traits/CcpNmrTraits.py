@@ -96,7 +96,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 18:40:03 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-30 14:15:09 +0000 (Wed, October 30, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -813,7 +813,7 @@ class _TypedList(list):
 
     def __str__(self):
         # Need to define this, as I do define __repr__ and it will otherwise map to __str__ as well
-        return super().__repr__()
+        return super().__str__()
 
     def __repr__(self):
         return f'{self.__class__.__name__}({super().__repr__()})'

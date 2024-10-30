@@ -53,10 +53,12 @@ __date__ = "$Date: 2024-10-27 11:20:30 +0100 (Sun, October 27, 2024) $"
 # Start of code
 #=========================================================================================
 #
+from typing import Tuple, Any
 
 from ccpn.util.Common import SENTINEL
 from ccpn.util.Logging import getLogger
-from ccpn.util.traits.CcpNmrTraits import TraitType
+from ccpn.util.traits.CcpNmrTraits import TraitType, Bunch
+from ccpn.core.lib.ContextManagers import apiNotificationBlanking, notificationBlanking
 
 
 class HasTraities(object):
@@ -72,11 +74,13 @@ class HasTraities(object):
         for name, val in vars(cls).items():
             if isinstance(val, V3Property):
                 val.klass = cls
-                val.name = name
-                # validator is of TraitType, it is set before
-                # the init had completed. Hence, update its name here too.
-                if val.validator is not None:
-                    val.validator.name = name
+                # All name-related stuff handled by .setter decorator
+
+                # val.name = name
+                # # validator is of TraitType, it is set before
+                # # the init had completed. Hence, update its name here too.
+                # if val.validator is not None:
+                #     val.validator.name = name
                 cls._traitiesDict[name] = val
 
     @classmethod
@@ -181,25 +185,35 @@ class V3Property(property):
             return self._getter(__instance)
 
     def _getter(self, instance):
+        """Get the values from the instance, using the _fget method
+        Performs a validator (if defined) on the value of fget, catching any errors and
+        returning the SENTINEL
+        Sets and returns self.value if properly validated
+        """
         if self.name is None:
-            raise AttributeError(f'V3Property: undefined attribute; cannot get value from {instance}')
+            raise AttributeError(f'V3Property: undefined attribute name; cannot get value from {instance}')
 
         if self.klass is None:
             raise AttributeError(f'V3Property: undefined klass; cannot get value from {instance}')
 
+        if self._fget is None:
+            raise AttributeError(f'V3Property: cannot get {type(instance).__name__}.{self.name}')
+
+        _value = SENTINEL
         try:
-            self.value = self._fget(instance)
+            _value = self._fget(instance)
         except Exception as ex:
             raise AttributeError(f'Unable to get value for attribute {self.name!r} of {instance}; {ex}')
 
         if self.validator:
             # also run validator on get, as it will do any conversions to the set type
             try:
-                _validatedValue = self.validator.validate(instance, self.value)
-                self.value = _validatedValue
+                _value = self.validator.validate(instance, _value)
             except Exception as ex:
-                getLogger().debug(f'V3Property, {type(self.klass).__name__}.{self.name}: validating {self.value} failed; {ex}')
+                getLogger().debug(f'V3Property, {type(self.klass).__name__}.{self.name}: validating {_value} failed; {ex}')
+                return SENTINEL
 
+        self.value = _value
         return self.value
 
     #-----------------------------------------------------------------------------------------
@@ -213,16 +227,19 @@ class V3Property(property):
 
     def __set__(self, __instance, __value):
         """"""  # deliberately empty, as not to pollute the docstring
-        self._setter(__instance, __value)
+        _previousValue, _value = self._setter(__instance, __value)
+        self._fireNotifiers(instance=__instance, previousValue=_previousValue, value=_value)
 
-    def _setter(self, instance, value):
+    def _setter(self, instance, value, validate=True) -> Tuple[Any, Any]:
         """Set the value, run optional validator and fire the notifiers
         :param instance: the instance of self.klass to set attribute value for
         :param value: the value to set attribute value for
+        :param validate: boolean, default True. Do validation if validator is set
+        :return: (previousValue, value) tuple
         :raises AttributeError, TypeError
         """
         if self.name is None:
-            raise AttributeError(f'V3Property: undefined attribute; cannot set value of {instance}')
+            raise AttributeError(f'V3Property: undefined attribute name; cannot set value of {instance}')
 
         if self.klass is None:
             raise AttributeError(f'V3Property: undefined klass; cannot set value of {instance}')
@@ -230,24 +247,32 @@ class V3Property(property):
         if self._fset is None:
             raise AttributeError(f'V3Property: cannot set {type(instance).__name__}.{self.name}')
 
-        _previousValue = self.value
-        try:
-            if self.validator:
-                value = self.validator.validate(instance, value)
-            else:
-                value = value
+        _previousValue = self.value if self.value is not SENTINEL \
+                                    else self._getter(instance)
 
-            self._fset(instance, value)
+        with notificationBlanking():
+            with apiNotificationBlanking():
+                try:
+                    if validate and self.validator:
+                        value = self.validator.validate(instance, value)
 
-        except Exception as ex:
-            raise ValueError(f'Setting {self.name!r} of {instance}: {ex}')
+                    self._fset(instance, value)
+
+                except Exception as ex:
+                    raise ValueError(f'Setting {self.name!r} of {instance}: {ex}')
 
         # successfully completed the setting; store the value and fire notifiers
         self.value = value
-        self.fireNotifiers(instance=instance, previousValue=_previousValue, value=self.value)
+        # self._fireNotifiers(instance=instance, previousValue=_previousValue, value=self.value)
+        return (_previousValue, value)
 
-    def fireNotifiers(self, instance, previousValue, value):
-        """Fire the Notifiers"""
+    def _fireNotifiers(self, instance, previousValue, value, callbackDict={}):
+        """Fire the Notifiers
+        :param instance: the instance of self.klass to set attribute value for
+        :param previousValue: the previous value of the attribute
+        :param value: the new value of the attribute
+        :param callbackDict: an optional dict of (key, callback) passed-on to the notifiers
+        """
         # local import to avoid cycles
         from ccpn.core.lib.Notifiers import NotifierABC
 
@@ -256,10 +281,56 @@ class V3Property(property):
                          NotifierABC.PREVIOUSVALUE : previousValue,
                          NotifierABC.VALUE         : value
                          }
+        _callbackDict.update(callbackDict)
+
         instance._fireRegisteredNotifiers(trigger=NotifierABC.OBSERVE,
                                           targetName=self.name,
                                           callbackDict=_callbackDict
                                           )
+
+        instance._finaliseAction(NotifierABC.CHANGE)
+
+    def _itemChangedCallback(self, bunch: Bunch):
+        """Callback from the _TypedList, (_TypedDict) instances
+        """
+        # local import to avoid cycles
+        from ccpn.core.lib.Notifiers import NotifierABC
+
+        #convert some of the bunch (i.e. traitlets) values to callbackDict ones:
+        _callbackDict = {}
+        for key in [NotifierABC.ITEMS_CHANGED, NotifierABC.SUBTYPE]:
+            _callbackDict[key] = bunch[key]
+
+        # Set the value. No need for the validator, as this is a callback from a validated
+        # _TypedList object
+        _instance = bunch.owner
+        self._setter(instance=_instance, value=bunch.new, validate=False)
+        # Fire notifiers
+        self._fireNotifiers(instance=_instance,
+                            previousValue=bunch.old,
+                            value=bunch.new,
+                            callbackDict=_callbackDict)
+
+        # with notificationBlanking():
+        #     try:
+        #         self._fset(self._obj, self)
+        #     except Exception as ex:
+        #         raise ValueError(f'Setting {self.name!r} of {self._obj}: {ex}')
+
+        # # fire the notifiers
+        # # bunch[NotifierABC.VALUE] = self
+        # for _trigger in [NotifierABC.CHANGE, NotifierABC.OBSERVE]:
+        #     self._obj._fireRegisteredNotifiers(trigger=_trigger,
+        #                                        targetName=self._trait.v3property.name,
+        #                                        callbackDict=bunch
+        #                                        )
+        # # Fire change for Project
+        # # bunch[NotifierABC.TRIGGER] = NotifierABC.CHANGE
+        # _project = self._obj.project
+        # _project._fireRegisteredNotifiers(trigger=NotifierABC.CHANGE,
+        #                                    targetName=self._obj.className,
+        #                                    callbackDict=bunch
+        #                                    )
 
 
     #-----------------------------------------------------------------------------------------

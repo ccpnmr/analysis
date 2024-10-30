@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-30 14:15:09 +0000 (Wed, October 30, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -221,9 +221,13 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         # self._oldPid = None
         self._oldRenamePid = self.pid
 
-        # tuple to hold children that explicitly need finalising after atomic operations
+        # list of (obj, action) tuples to hold object that explicitly
+        # need finalising after atomic operations
         self._finaliseChildren = []
-        self._childActions = []
+
+        # list of functions that MUST be performed during _finalise
+        # irrespective of whether notifiers fire to external objects
+        self._childActions: typing.List[callable] = []
 
         # Assign an unique id (per class) if it does not yet exists
         if not hasattr(self._wrappedData, '_uniqueId') or \

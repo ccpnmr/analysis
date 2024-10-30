@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 18:40:02 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-30 14:15:09 +0000 (Wed, October 30, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -331,7 +331,7 @@ class Peak(AbstractWrapperObject):
 
     @position.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    # @ccpNmrV3CoreSetter()
     def position(self, value: Sequence):
         # call api changes
         shifts = set()

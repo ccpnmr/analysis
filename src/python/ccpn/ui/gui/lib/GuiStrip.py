@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 12:19:12 +0000 (Sun, October 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-30 14:15:09 +0000 (Wed, October 30, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -623,27 +623,27 @@ class GuiStrip(Frame):
         self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                             self.spectrumDisplay._processDroppedItems)
 
-    def _queueGeneralNotifier(self, func, objType, data):
+    def _queueGeneralNotifier(self, func, objType, callbackDict):
         """Add the notifier to the queue handler
         """
         try:
-            if data[Notifier.TRIGGER] == 'delete':
+            if callbackDict[Notifier.TRIGGER] == 'delete':
                 if objType == 'Peak':
-                    objList = data[Notifier.OBJECT].peakList
+                    objList = callbackDict[Notifier.OBJECT].peakList
                     spectrum = objList.spectrum
                 elif objType == 'Integral':
-                    objList = data[Notifier.OBJECT].integralList
+                    objList = callbackDict[Notifier.OBJECT].integralList
                     spectrum = objList.spectrum
                 elif objType == 'Multiplet':
-                    objList = data[Notifier.OBJECT].multipletList
+                    objList = callbackDict[Notifier.OBJECT].multipletList
                     spectrum = objList.spectrum
                 else:
                     objList = spectrum = None
-                data['_list'] = objList
-                data['_spectrum'] = spectrum
+                callbackDict['_list'] = objList
+                callbackDict['_spectrum'] = spectrum
         except Exception:
             pass
-        self._queueAppend([func, data])
+        self._queueAppend([func, callbackDict])
 
     def viewRange(self):
         return self._CcpnGLWidget.viewRange()

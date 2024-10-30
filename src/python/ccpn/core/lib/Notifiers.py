@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 20:42:44 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-10-30 14:15:09 +0000 (Wed, October 30, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -102,13 +102,14 @@ class NotifierABC(object):
     TARGETNAME = 'targetName'           # The traget name for trigger (see below)
 
     # The actual callback values/object
-    OBJECT = 'object'                   # the object created or deleted (trigger CREATE or DELETE)
+    OBJECT = 'object'                   # the object created, deleted, changed or observed
     PID = 'pid'                         # the pid of the object (trigger RENAME)
     OLDPID = 'oldPid'                   # the old or previous pid of the object (trigger RENAME)
-    VALUE = 'value'                     # the (new) value (trigger CHANGE)
-    PREVIOUSVALUE = 'previousValue'     # the old or previous value (trigger CHANGE)
-    ATTRIBUTE_NAME = 'attributeName'    # the name of the attribute that has changed
-    ITEMS_CHANGED = 'itemsChanged'      # The items in list/dict that have changed (trigger CHANGE)
+    VALUE = 'value'                     # the (new) value (trigger CHANGE, OBSERVE)
+    PREVIOUSVALUE = 'previousValue'     # the old or previous value (trigger CHANGE, OBSERVE)
+    ATTRIBUTE_NAME = 'attributeName'    # the name of the attribute that has changed (trigger CHANGE, OBSERVE)
+    ITEMS_CHANGED = 'itemsChanged'      # The items in list/dict that have changed (trigger OBSERVE)
+    SUBTYPE = 'subType'                 # The operation, e.g. __setitem__, that changed the list/dict
     SPECIFIERS = 'specifiers'
 
     def __init__(self, theObject: Any,
@@ -270,24 +271,18 @@ class NotifierABC(object):
         """Create and return a dict with all the callback keys.
         Both the obj en object arguments are mapped to the OBJECT key
         """
-        # if specifiers is not None:
-        #     pass  # for debug breakpoint
-
-        callbackDict = AttributeDict({
-            self.NOTIFIER       : self,
-            self.THEOBJECT      : self._theObject,
-            self.TRIGGER        : self._trigger,
-            self.TARGETNAME     : self._targetName,
-            self.ATTRIBUTE_NAME : attributeName,
-            self.PREVIOUSVALUE  : previousValue,
-            self.VALUE          : value,
-            self.ITEMS_CHANGED  : itemsChanged,
-            self.OBJECT         : obj or object,
-            self.OLDPID         : oldpid,
-            self.PID            : pid,
-            self.SPECIFIERS     : specifiers,
-        })
-
+        callbackDict = CallbackDict(
+                previousValue=previousValue,
+                value=value,
+                attributeName=attributeName,
+                obj=obj,
+                object=object,
+                oldpid=oldpid,
+                pid=pid,
+                specifiers=specifiers,
+                itemsChanged=itemsChanged
+        )
+        callbackDict.updateFromNotifier(self)
         return callbackDict
 
     @staticmethod
@@ -324,9 +319,75 @@ class NotifierABC(object):
 
         return f'<{_name} {self.id} ({_exec}): {_pid}:({self._trigger!r}->{self._targetName!r},{self._appliesToTheObject}); setter:{_setter}>'
 
-
-
     __repr__ = __str__
+
+
+class CallbackDict(AttributeDict):
+    """A class to implement the callbackDict, assuring all keys
+    """
+
+    def __init__(self, previousValue=SENTINEL, value=SENTINEL, attributeName=SENTINEL,
+                 obj=SENTINEL, object=SENTINEL,
+                 oldpid=SENTINEL, pid=SENTINEL,
+                 specifiers=None,
+                 itemsChanged=SENTINEL
+                 ) -> dict:
+        """Create and return a dict with all the callback keys.
+        Both the obj en object arguments are mapped to the OBJECT key
+        """
+        _temp = {
+            NotifierABC.NOTIFIER      : SENTINEL,
+            NotifierABC.THEOBJECT     : SENTINEL,
+            NotifierABC.TRIGGER       : SENTINEL,
+            NotifierABC.TARGETNAME    : SENTINEL,
+            NotifierABC.ATTRIBUTE_NAME: attributeName,
+            NotifierABC.PREVIOUSVALUE : previousValue,
+            NotifierABC.VALUE         : value,
+            NotifierABC.ITEMS_CHANGED : itemsChanged,
+            NotifierABC.OBJECT        : obj or object,
+            NotifierABC.OLDPID        : oldpid,
+            NotifierABC.PID           : pid,
+            NotifierABC.SPECIFIERS    : specifiers,
+        }
+        self.update(_temp)
+
+    def updateFromNotifier(self, notifier):
+        """Update self with values from the notifier
+        """
+        self[NotifierABC.NOTIFIER] = notifier
+        self[NotifierABC.THEOBJECT] = notifier.theObject
+        self[NotifierABC.TRIGGER] = notifier.trigger
+        self[NotifierABC.TARGETNAME] = notifier.targetName
+
+    def checkForSentinels(self, keys: list | tuple):
+        """Check callbackDict keys that have sentinel value
+        :param keys: the list or tuple with keys to check
+        :raises ValueError when detected
+        """
+        for _key in keys:
+            if value := self.get(_key,SENTINEL) == SENTINEL:
+                _notifier = self.get(NotifierABC.NOTIFIER)
+                raise ValueError(f'Checking {_notifier}: expected value for key {_key!r}')
+
+    def check(self):
+        """check self for presence of required values for notifier depending on trigger
+        :raises ValueError when errors are detected
+        """
+        if (notifier := self.get(NotifierABC.NOTIFIER)) == SENTINEL:
+            raise ValueError(f'Checking CallbackDict: notifier undefined')
+        # Some sanity checks on the callbackDict:
+        if notifier.trigger == NotifierABC.OBSERVE:
+            self.checkForSentinels(
+                    [NotifierABC.ATTRIBUTE_NAME, NotifierABC.VALUE, NotifierABC.PREVIOUSVALUE]
+            )
+        elif notifier.trigger == NotifierABC.RENAME:
+            self.checkForSentinels(
+                    [NotifierABC.OBJECT, NotifierABC.PID, NotifierABC.OLDPID]
+            )
+        elif notifier.trigger in (NotifierABC.DELETE, NotifierABC.CREATE):
+            self.checkForSentinels(
+                    [NotifierABC.OBJECT]
+            )
 
 
 class Notifier(NotifierABC):
@@ -469,16 +530,16 @@ class Notifier(NotifierABC):
                     f'Notifier.__init__(): invalid targetName {targetName!r} for {theObject}')
 
             self._attributeName = targetName
-            self._previousValue = getattr(theObject, self._attributeName)
+            # self._previousValue = getattr(theObject, self._attributeName)
+            self._appliesToTheObject = True
 
             # Now change the signature when registering in the V3 machinery
-            func = _project._registerV3Notifier(className=theObject.className,
-                                                target=Notifier.CHANGE,
-                                                func=self,
-                                                onceOnly=onceOnly)
-            self._appliesToTheObject = True
+            # func = _project._registerV3Notifier(className=theObject.className,
+            #                                     target=Notifier.CHANGE,
+            #                                     func=self,
+            #                                     onceOnly=onceOnly)
             # The info needed for unregistering
-            self._unregister = (theObject.className, Notifier.CHANGE, func)
+            # self._unregister = (theObject.className, Notifier.CHANGE, func)
 
         else:
             func = _project._registerV3Notifier(className=targetName,
@@ -509,8 +570,10 @@ class Notifier(NotifierABC):
             return
 
         # Unregister from the V3 notifier machinery
-        targetName, trigger, func = self._unregister
-        self.project._unRegisterV3Notifier(targetName, trigger, func)
+        # (if it was registered; not for OBSERVE!)
+        if self._unregister:
+            targetName, trigger, func = self._unregister
+            self.project._unRegisterV3Notifier(targetName, trigger, func)
 
         # at the end as it clears all attributes
         super().unRegisterNotifier()
@@ -530,7 +593,9 @@ class Notifier(NotifierABC):
             raise RuntimeError('Notifier.__call__(): obj is None')
 
         if self._debug:
-            sys.stderr.write(f'>>> {self}.__call__(): {obj = }  {parameter2 = }\n' )
+            sys.stderr.write(f'>>> {self}.__call__():\n')
+            sys.stderr.write(f'    {obj = }\n' )
+            sys.stderr.write(f'    {parameter2 = }\n' )
 
         # check if the trigger applies:
         notifierFired = False
@@ -1108,14 +1173,6 @@ class NotifierBase(object):
     # Notification firing
     #-----------------------------------------------------------------------------------------
 
-    def _checkForSentinels(self, notifier, callbackDict: dict, keys: list | tuple):
-        """Check callbackDict keys that have sentinel value
-        :raises ValueError when detected
-        """
-        for _key in keys:
-            if value := callbackDict.get(_key,SENTINEL) == SENTINEL:
-                raise RuntimeError(f'Firing {notifier}: expected value for key {_key!r}')
-
     def _fireSingleNotifier(self, notifier, callbackDict: dict):
         """Fire notifier passing callbackDict to callback function
         :param callbackDict: parameters passed to callback function as callbackDict
@@ -1133,26 +1190,19 @@ class NotifierBase(object):
         if notifier.isBlanked:
             return
 
-        if notifier._debug:
-            sys.stderr.write(f'>>> _fireSingleNotifier(): {notifier}\n' )
-
         # get proper callbackDict and update with any values passed in
         _callbackDict = notifier.newCallbackDict()
         _callbackDict.update(callbackDict)
-
+        # to avoid the callbackdict inserting the incorrect value for this notifier;
+        # update it with the notifier settings
+        _callbackDict.updateFromNotifier(notifier)
         # Some sanity checks on the callbackDict:
-        if notifier.trigger == NotifierABC.OBSERVE:
-            self._checkForSentinels(notifier, _callbackDict,
-                    [NotifierABC.ATTRIBUTE_NAME, NotifierABC.VALUE, NotifierABC.PREVIOUSVALUE]
-            )
-        elif notifier.trigger == NotifierABC.RENAME:
-            self._checkForSentinels(notifier, _callbackDict,
-                    [NotifierABC.OBJECT, NotifierABC.PID, NotifierABC.OLDPID]
-            )
-        elif notifier.trigger in (NotifierABC.DELETE, NotifierABC.CREATE):
-            self._checkForSentinels(notifier, _callbackDict,
-                    [NotifierABC.OBJECT]
-            )
+        _callbackDict.check()
+
+        if notifier._debug:
+            sys.stderr.write(f'>>> _fireSingleNotifier(): {notifier}\n' )
+            sys.stderr.write(f'    callback = {notifier._callback}\n' )
+            sys.stderr.write(f'    callbackDict = {_callbackDict}\n' )
 
         # execute the callback
         try:

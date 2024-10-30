@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2023-02-02 13:23:38 +0000 (Thu, February 02, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-10-30 14:15:09 +0000 (Wed, October 30, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -88,6 +89,8 @@ class ChemicalShift(V3CoreObjectABC):
         super().__init__(project, chemicalShiftList, _uniqueId)
 
         self._oldValue = self._oldValueError = None
+        # GWV 30/10/24: for setting value without NmrAtom check as done from ._recalculateShiftValue
+        self._valueCheckOverride = False
 
         # All other properties are derived from the chemicalShiftList pandas dataframe
 
@@ -202,8 +205,8 @@ class ChemicalShift(V3CoreObjectABC):
         """
         if not isinstance(val, (float, int, type(None))):
             raise ValueError(f'{self.className}.value must be of type float, int or None')
-        if _nmrAtomPid := self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str):
-            raise ValueError(f'{self.className}.value cannot be changed with attached nmrAtom')
+        if not self._valueCheckOverride and (_nmrAtomPid := self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)):
+            raise ValueError(f'Attribute "value" cannot be changed for {self} with "{_nmrAtomPid}" defined')
         self._wrapperList._setAttribute(self._uniqueId, CS_VALUE, val)
 
     #~~~~~~~~~~~~~~~~
@@ -223,8 +226,8 @@ class ChemicalShift(V3CoreObjectABC):
         """
         if not isinstance(value, (float, int, type(None))):
             raise ValueError(f'{self.className}.valueError must be of type float, int or None')
-        if _nmrAtomPid := self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str):
-            raise ValueError(f'{self.className}.valueError cannot be changed with attached nmrAtom')
+        if not self._valueCheckOverride and (_nmrAtomPid := self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)):
+            raise ValueError(f'Attribute "valueError" cannot be changed for {self} with "{_nmrAtomPid}" defined')
         self._wrapperList._setAttribute(self._uniqueId, CS_VALUEERROR, value)
 
     #~~~~~~~~~~~~~~~~
@@ -541,11 +544,21 @@ class ChemicalShift(V3CoreObjectABC):
             # update the dataframe
             self._wrapperList._setAttribute(self._uniqueId, CS_VALUE, value)
             self._wrapperList._setAttribute(self._uniqueId, CS_VALUEERROR, valueError)
-
+            # GWV 29/10/24: Future: use the property setter; required for (future) notifier management
+            # self._valueCheckOverride = True
+            # self.value = value
+            # self.valueError = valueError
+            # self._valueCheckOverride = False
+        #
         elif self._oldValue is not None or self._oldValueError is not None:
             # make sure that the empty value does not change
             self._wrapperList._setAttribute(self._uniqueId, CS_VALUE, self._oldValue)
             self._wrapperList._setAttribute(self._uniqueId, CS_VALUEERROR, self._oldValueError)
+            # GWV 29/10/24: Future: use the property setter; required for (future) notifier management
+            # self._valueCheckOverride = True
+            # self.value = self._oldValue
+            # self.valueError = self._oldValueError
+            # self._valueCheckOverride = False
 
     def _renameNmrAtom(self, nmrAtom):
         """Update the values in the table for the renamed nmrAtom

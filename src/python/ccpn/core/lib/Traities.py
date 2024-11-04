@@ -54,11 +54,13 @@ __date__ = "$Date: 2024-10-27 11:20:30 +0100 (Sun, October 27, 2024) $"
 #=========================================================================================
 #
 from typing import Tuple, Any
+from functools import partial
 
-from ccpn.util.Common import SENTINEL
+from ccpn.util.Common import Sentinel
 from ccpn.util.Logging import getLogger
 from ccpn.util.traits.CcpNmrTraits import TraitType, Bunch
-from ccpn.core.lib.ContextManagers import apiNotificationBlanking, notificationBlanking
+from ccpn.core.lib.ContextManagers import \
+    apiNotificationBlanking, notificationBlanking, undoStack, undoBlock
 
 
 class HasTraities(object):
@@ -75,12 +77,6 @@ class HasTraities(object):
             if isinstance(val, V3Property):
                 val.klass = cls
                 # All name-related stuff handled by .setter decorator
-
-                # val.name = name
-                # # validator is of TraitType, it is set before
-                # # the init had completed. Hence, update its name here too.
-                # if val.validator is not None:
-                #     val.validator.name = name
                 cls._traitiesDict[name] = val
 
     @classmethod
@@ -130,26 +126,27 @@ class V3Property(property):
     # attribute ==> too much info
 
     def __init__(self,
-                 modelled: bool,
                  validator: TraitType = None,
+                 validateGetter: bool = True,
+                 crossReference: tuple[str, str] | None = None,
                  ):
         """V3Property decorator
-        :param modelled: bool: decorator is used for V3 property that is modelled in XML-Api
-        :param validator: TraitType
+        :param validator: TraitType: A trait instance used for validating
+        :param crossReference: tuple[str, str] | None: An optional (className, property-name) crossReference
         """
         super().__init__()
 
         self.name: str | None = None
         self.klass = None
-        self.value = SENTINEL
+        self.value = Sentinel
+        self.previousValue = Sentinel
 
         # Note that fset and fget are reserved properties of the property object
         self._fget: callable = None
         self._fset: callable = None
 
-        # getter gets value from model;
-        # no need to call CHANGE  notifiers as api will do callback (for now)
-        self.modelled: bool = modelled
+        self.validateGetter = validateGetter
+        self.crossReference = crossReference
 
         # optional validator
         if not isinstance(validator, TraitType):
@@ -184,12 +181,15 @@ class V3Property(property):
         else:
             return self._getter(__instance)
 
-    def _getter(self, instance, validate=True):
+    def _getter(self, instance):
         """Get the values from the instance, using the _fget method
         Performs a validator (if defined) on the value of fget, catching any errors and
-        returning the SENTINEL
+        returning the Sentinel
+
         Sets and returns self.value if properly validated
-        :param validate: boolean, default True. Do validation if validator is set
+        :param instance: The instance from which to get the attribute value
+        :return the value of the attribute
+        :raises AttributeError: if the attribute is not properly defined or cannot be retrieved
         """
         if self.name is None:
             raise AttributeError(f'V3Property: undefined attribute name; cannot get value from {instance}')
@@ -200,19 +200,19 @@ class V3Property(property):
         if self._fget is None:
             raise AttributeError(f'V3Property: cannot get {type(instance).__name__}.{self.name}')
 
-        _value = SENTINEL
+        _value = Sentinel
         try:
             _value = self._fget(instance)
         except Exception as ex:
             raise AttributeError(f'Unable to get value for attribute {self.name!r} of {instance}; {ex}')
 
-        if validate and self.validator:
+        if self.validateGetter and self.validator:
             # also run validator on get, as it will do any conversions to the set type
             try:
                 _value = self.validator.validate(instance, _value)
             except Exception as ex:
-                getLogger().debug(f'V3Property, {type(self.klass).__name__}.{self.name}: validating {_value} failed; {ex}')
-                return SENTINEL
+                getLogger().debug(f'V3Property {self.klass.__name__}.{self.name}: validating {_value} failed; {ex}')
+                return Sentinel
 
         self.value = _value
         return self.value
@@ -228,14 +228,29 @@ class V3Property(property):
 
     def __set__(self, __instance, __value):
         """"""  # deliberately empty, as not to pollute the docstring
-        _previousValue, _value = self._setter(__instance, __value)
-        self._fireNotifiers(instance=__instance, previousValue=_previousValue, value=_value)
 
-    def _setter(self, instance, value, validate=True) -> Tuple[Any, Any]:
+        with undoStack() as addUndoItem:
+
+            # split the undo in before and after, as to allow the _setter / _fset
+            # to add items to the undo-stack
+            addUndoItem(undo=None,
+                        redo=partial(self._setter, __instance, __value)
+                        )
+
+            _previousValue, _tmp = self._setter(__instance, __value,
+                                                  validate=True, fireNotifiers=True
+                                               )
+
+            addUndoItem(undo=partial(self._setter, __instance, _previousValue),
+                        redo=None
+                        )
+
+    def _setter(self, instance, value, validate=True, fireNotifiers=True) -> Tuple[Any, Any]:
         """Set the value, run optional validator and fire the notifiers
         :param instance: the instance of self.klass to set attribute value for
         :param value: the value to set attribute value for
         :param validate: boolean, default True. Do validation if validator is set
+        :param fireNotifiers: boolean, default True. Do fire notifiers if True
         :return: (previousValue, value) tuple
         :raises AttributeError, TypeError
         """
@@ -248,8 +263,8 @@ class V3Property(property):
         if self._fset is None:
             raise AttributeError(f'V3Property: cannot set {type(instance).__name__}.{self.name}')
 
-        _previousValue = self.value if self.value is not SENTINEL \
-                                    else self._getter(instance, validate=False)
+        previousValue = self.previousValue = self.value if self.value is not Sentinel \
+                                             else self._getter(instance)
 
         with notificationBlanking():
             with apiNotificationBlanking():
@@ -264,8 +279,9 @@ class V3Property(property):
 
         # successfully completed the setting; store the value and fire notifiers
         self.value = value
-        # self._fireNotifiers(instance=instance, previousValue=_previousValue, value=self.value)
-        return (_previousValue, value)
+        if fireNotifiers:
+            self._fireNotifiers(instance=instance, previousValue=previousValue, value=self.value)
+        return (previousValue, value)
 
     def _fireNotifiers(self, instance, previousValue, value, callbackDict={}):
         """Fire the Notifiers
@@ -302,37 +318,38 @@ class V3Property(property):
         for key in [NotifierABC.ITEMS_CHANGED, NotifierABC.SUBTYPE]:
             _callbackDict[key] = bunch[key]
 
-        # Set the value. No need for the validator, as this is a callback from a validated
-        # _TypedList object
         _instance = bunch.owner
-        self._setter(instance=_instance, value=bunch.new, validate=False)
+        with (undoStack() as addUndoItem):
+
+            # split the undo in before and after, as to allow the _setter / _fset
+            # to add items to the undo-stack
+            addUndoItem(undo=None,
+                        redo=partial(self._itemChangedCallback, bunch)
+                       )
+
+            # Set the value. No need for the validator, as this is a callback from a validated
+            # _TypedList object; The notifiers also get fired later
+            _tmp, _value = self._setter(_instance, bunch.new, validate=False, fireNotifiers=False)
+
+            # override previous value, as this is the Item-changed callback
+            _previousValue = self.previousValue = bunch.old
+
+            _undoBunch = Bunch()
+            _undoBunch.update(bunch)
+            _undoBunch.new = bunch.old
+            _undoBunch.old = bunch.new
+            for indx,val in bunch.itemsChanged:
+                _undoBunch.itemsChanged[indx] = (indx, _previousValue[indx])
+
+            addUndoItem(undo=partial(self._itemChangedCallback, _undoBunch),
+                        redo=None
+                        )
+
         # Fire notifiers
         self._fireNotifiers(instance=_instance,
-                            previousValue=bunch.old,
-                            value=bunch.new,
+                            previousValue=_previousValue,
+                            value=_value,
                             callbackDict=_callbackDict)
-
-        # with notificationBlanking():
-        #     try:
-        #         self._fset(self._obj, self)
-        #     except Exception as ex:
-        #         raise ValueError(f'Setting {self.name!r} of {self._obj}: {ex}')
-
-        # # fire the notifiers
-        # # bunch[NotifierABC.VALUE] = self
-        # for _trigger in [NotifierABC.CHANGE, NotifierABC.OBSERVE]:
-        #     self._obj._fireRegisteredNotifiers(trigger=_trigger,
-        #                                        targetName=self._trait.v3property.name,
-        #                                        callbackDict=bunch
-        #                                        )
-        # # Fire change for Project
-        # # bunch[NotifierABC.TRIGGER] = NotifierABC.CHANGE
-        # _project = self._obj.project
-        # _project._fireRegisteredNotifiers(trigger=NotifierABC.CHANGE,
-        #                                    targetName=self._obj.className,
-        #                                    callbackDict=bunch
-        #                                    )
-
 
     #-----------------------------------------------------------------------------------------
 
@@ -347,7 +364,7 @@ class V3Property(property):
     #-----------------------------------------------------------------------------------------
 
     def __str__(self):
-        return (f'<V3Property {self.name!r} of {self.klass} (modelled={self.modelled})>')
+        return (f'<V3Property {self.klass.__name__}.{self.name}>')
 
     __repr__ = __str__
 

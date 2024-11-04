@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-04 13:51:26 +0000 (Mon, November 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -275,7 +275,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         List must be iterable and of type Spectrum or str
         :param _spectra: Iterable or None
         """
-        from ccpn.util.Common import SENTINEL
+        from ccpn.util.Common import Sentinel
         if not isinstance(_spectra, Iterable):
             raise ValueError(f'{self.className}.spectra must be an iterable of items of type Spectrum or str')
 

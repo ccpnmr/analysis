@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-04 13:51:27 +0000 (Mon, November 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ from ccpn.util.traits.CcpNmrTraits import \
 from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase
 
 from ccpn.framework.Application import getApplication, getProject
-from ccpn.util.Common import classType
+from ccpn.util.Common import classType, Sentinel
 from ccpn.util.Logging import getLogger
 
 from ccpn.core.lib.Notifiers import NotifierABC, NotifierBase
@@ -90,17 +90,17 @@ class PidTrait(Unicode):
 class V3Object(TraitType, _CcpNmrTrait):
     """A trait that defines a V3-object, json serialisable through its Pid
     """
-    default_value = None
+    default_value = Sentinel
     info_text = "A V3-Object"
 
     _overrideClassCheck = False  # flag for ccpnv4 testing
 
-    def __init__(self, klass=None, default_value=None, allowPid=False, **kwargs):
+    def __init__(self, klass=None, default_value=Sentinel, allowPid=False, **kwargs):
         """
         Initialise the trait
         :param klass: only allow objects of type klass (V3object or className str);
                       ignored when None
-        :param default_value: value set by default (None)
+        :param default_value: value set by default (Sentinel)
         :param allowPid: allow conversion from Pid/str to V3object
         :param kwargs: optional kwds to the TraitType invocation
         """

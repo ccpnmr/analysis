@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-21 09:29:03 +0100 (Mon, October 21, 2024) $"
-__version__ = "$Revision: 3.2.5.GWV $"
+__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -755,22 +755,28 @@ class Undo(deque):
 
             _funcs = []
             for _func in item:
-                if isinstance(_func, partial):
-                    _func = _func.func
+                # if isinstance(_func, partial):
+                #     _func = _func.func
 
                 _func = str(_func)
 
-                # strip some not-useful text
-                for _text in ["<ccpn.core.lib.ContextManager",
+                # strip some non-useful text
+                for _text in ["functools.partial(<bound method V3Property._setter of <V3Property ",
+                              "<ccpn.core.lib.ContextManager",
+                              "functools.partial("
                               "<bound method ",
+                              # "V3Property._setter of "
+                              # "<V3Property",
                              ]:
+                    _func.strip()
                     if _func.startswith(_text):
                         _func = _func[len(_text):]
 
                 _funcs.append(_func)
 
             _ptr = f'>> {indx:2}' if self.nextIndex == indx else f'   {indx:2}'
-            print(f'{_ptr} : {reduceText(_funcs[0], textLength)}   {reduceText(_funcs[1], textLength)}   ')
+
+            print(f'{_ptr} : {reduceText(_funcs[0], textLength):<60}   {reduceText(_funcs[1], textLength):<60}   ')
             if indx in self.waypoints:
                 print(f'        > WAYPOINT <')
 

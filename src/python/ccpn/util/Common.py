@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-23 16:18:27 +0100 (Wed, October 23, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ from ccpn.util.decorators import singleton
 NOTHING = object()
 
 @singleton
-class Sentinel(object):
+class _Sentinel(object):
     """A sentinel object, whose len()==0, bool()==False
     Ignores attribute or item assignment;
     returns self for attribute or item evaluation
@@ -78,7 +78,7 @@ class Sentinel(object):
 
     __repr__ = __str__
 
-SENTINEL = Sentinel()
+Sentinel = _Sentinel()
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt = 2000000000

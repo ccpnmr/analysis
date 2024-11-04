@@ -1,5 +1,5 @@
 """Spectrum  class.
-Maintains methods for accessing and manipulating spectra data and its parameters,
+ÍMaintains methods for accessing and manipulating spectra data and its parameters,
 including per-dimension values.
 
 ==> Dimensions:
@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-04 13:51:27 +0000 (Mon, November 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -222,12 +222,13 @@ class Spectrum(AbstractWrapperObject):
         return tuple(specViews)
 
     # --- chemicalShiftList property ---
-    @V3Property(modelled=True,
-                validator=V3Object(klass='ChemicalShiftList',
-                                   allow_none=True,  # False breaks the cross refercing machinery
+    @V3Property(validator=V3Object(klass='ChemicalShiftList',
+                                   allow_none=False,
                                    allowPid=True
-                                   )
-                )
+                                  ),
+                validateGetter=False, # True: breaks the cross referencing machinery
+                crossReference=('ChemicalShiftList', 'spectra')
+               )
     def chemicalShiftList(self):
         """:return: the ChemicalShiftList instance for spectrum
         """
@@ -239,9 +240,9 @@ class Spectrum(AbstractWrapperObject):
     def chemicalShiftList(self, value):
         """Set the chemicalShiftList for the spectrum
         """
-        _oldSpecs = value.spectra
-        _newSpecs = set(_oldSpecs) | {self}
-        value.spectra = _newSpecs
+        # _oldSpecs = value.spectra
+        # _newSpecs = set(_oldSpecs) | {self}
+        value.spectra = set(value.spectra) | {self}
 
         # TODO:ED There was an error catching for Nef related problems;
         #  should fix in Nef importer, not here
@@ -663,8 +664,7 @@ class Spectrum(AbstractWrapperObject):
         self._setInternalParameter(self._INCLUDENEGATIVECONTOURS, value)
 
     # --- sliceColour property ---
-    @V3Property(modelled=True,
-                validator=Unicode(default_value=None)
+    @V3Property(validator=Unicode(default_value=None)
                 ).tag(includeInCopy=True)
     def sliceColour(self) -> str:
         """:return The colour of 1D slices.
@@ -710,8 +710,7 @@ class Spectrum(AbstractWrapperObject):
             # some 1D data were read before; update the intensities as the scale has changed
             self.getSliceData()
 
-    @V3Property(modelled=True,
-                validator=Float(min=0.0, default_value=None)
+    @V3Property(validator=Float(min=0.0, default_value=None)
                 ).tag(includeInCopy=True)
     def spinningRate(self) -> float:
         """The NMR tube spinning rate (in Hz)
@@ -1129,8 +1128,7 @@ class Spectrum(AbstractWrapperObject):
     #     return result
 
     # --- isComplex property ---
-    @V3Property(modelled=True,
-                validator=V3List(itemTrait=Bool())
+    @V3Property(validator=V3List(itemTrait=Bool())
                 ).tag(includeInDimensionalCopy=True)
     def isComplex(self) -> List[bool]:
         """Boolean denoting Complex data per dimension"""
@@ -1149,8 +1147,7 @@ class Spectrum(AbstractWrapperObject):
         return self.dataSource.dataTypes
 
     # --- isAquisition property ---
-    @V3Property(modelled=True,
-                validator=V3List(itemTrait=Bool())
+    @V3Property(validator=V3List(itemTrait=Bool())
                ).tag(includeInDimensionalCopy=True)
     def isAcquisition(self) -> List[bool]:
         """:return Boolean per dimension denoting if it is the acquisition dimension"""
@@ -1164,8 +1161,7 @@ class Spectrum(AbstractWrapperObject):
         self._setDimensionalAttributes('isAcquisition', value)
 
     # --- axisCodes property ---
-    @V3Property(modelled=True,
-                validator=V3List(itemTrait=Unicode(allow_none=True))
+    @V3Property(validator=V3List(itemTrait=Unicode(allow_none=True))
                 ).tag(includeInDimensionalCopy=True)
     def axisCodes(self) -> List[Optional[str]]:
         """:return List of an unique axisCode per dimension"""
@@ -1176,8 +1172,7 @@ class Spectrum(AbstractWrapperObject):
         self._setDimensionalAttributes('axisCode', value)
 
     # --- AcquisitionAxisCodes property ---
-    @V3Property(modelled=False,
-                validator=Unicode(allow_none=True)
+    @V3Property(validator=Unicode(allow_none=True)
                 )
     def acquisitionAxisCode(self) -> Optional[str]:
         """:return Axis code of acquisition axis - None if not known"""

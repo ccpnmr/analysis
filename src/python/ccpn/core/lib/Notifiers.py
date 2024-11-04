@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-30 14:15:09 +0000 (Wed, October 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ from ccpn.core.lib.WeakRefList import _WeakRefList
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.AttributeDict import AttributeDict
-from ccpn.util.Common import SENTINEL
+from ccpn.util.Common import Sentinel
 
 from ccpn.framework.Application import getCurrent, getProject
 
@@ -262,11 +262,11 @@ class NotifierABC(object):
         del(self)
 
     def newCallbackDict(self,
-                        previousValue=SENTINEL, value=SENTINEL, attributeName=SENTINEL,
-                        obj=SENTINEL, object=SENTINEL,
-                        oldpid=SENTINEL, pid=SENTINEL,
+                        previousValue=Sentinel, value=Sentinel, attributeName=Sentinel,
+                        obj=Sentinel, object=Sentinel,
+                        oldpid=Sentinel, pid=Sentinel,
                         specifiers=None,
-                        itemsChanged=SENTINEL
+                        itemsChanged=Sentinel
                         ) -> dict:
         """Create and return a dict with all the callback keys.
         Both the obj en object arguments are mapped to the OBJECT key
@@ -326,20 +326,20 @@ class CallbackDict(AttributeDict):
     """A class to implement the callbackDict, assuring all keys
     """
 
-    def __init__(self, previousValue=SENTINEL, value=SENTINEL, attributeName=SENTINEL,
-                 obj=SENTINEL, object=SENTINEL,
-                 oldpid=SENTINEL, pid=SENTINEL,
+    def __init__(self, previousValue=Sentinel, value=Sentinel, attributeName=Sentinel,
+                 obj=Sentinel, object=Sentinel,
+                 oldpid=Sentinel, pid=Sentinel,
                  specifiers=None,
-                 itemsChanged=SENTINEL
+                 itemsChanged=Sentinel
                  ) -> dict:
         """Create and return a dict with all the callback keys.
         Both the obj en object arguments are mapped to the OBJECT key
         """
         _temp = {
-            NotifierABC.NOTIFIER      : SENTINEL,
-            NotifierABC.THEOBJECT     : SENTINEL,
-            NotifierABC.TRIGGER       : SENTINEL,
-            NotifierABC.TARGETNAME    : SENTINEL,
+            NotifierABC.NOTIFIER      : Sentinel,
+            NotifierABC.THEOBJECT     : Sentinel,
+            NotifierABC.TRIGGER       : Sentinel,
+            NotifierABC.TARGETNAME    : Sentinel,
             NotifierABC.ATTRIBUTE_NAME: attributeName,
             NotifierABC.PREVIOUSVALUE : previousValue,
             NotifierABC.VALUE         : value,
@@ -365,7 +365,7 @@ class CallbackDict(AttributeDict):
         :raises ValueError when detected
         """
         for _key in keys:
-            if value := self.get(_key,SENTINEL) == SENTINEL:
+            if value := self.get(_key, Sentinel) == Sentinel:
                 _notifier = self.get(NotifierABC.NOTIFIER)
                 raise ValueError(f'Checking {_notifier}: expected value for key {_key!r}')
 
@@ -373,7 +373,7 @@ class CallbackDict(AttributeDict):
         """check self for presence of required values for notifier depending on trigger
         :raises ValueError when errors are detected
         """
-        if (notifier := self.get(NotifierABC.NOTIFIER)) == SENTINEL:
+        if (notifier := self.get(NotifierABC.NOTIFIER)) == Sentinel:
             raise ValueError(f'Checking CallbackDict: notifier undefined')
         # Some sanity checks on the callbackDict:
         if notifier.trigger == NotifierABC.OBSERVE:
@@ -858,10 +858,10 @@ class NotifierBase(object):
     #-----------------------------------------------------------------------------------------
 
     # A dict that contains all NotifierSignal instances as (name, instance) pairs.
-    _notifierSignalsDict: dict = SENTINEL
+    _notifierSignalsDict: dict = Sentinel
 
     # A dict that contains all NotifierProperty instances as (name, instance) pairs.
-    _notifierPropertiesDict: dict = SENTINEL
+    _notifierPropertiesDict: dict = Sentinel
 
     def __init__(self):
 
@@ -884,7 +884,7 @@ class NotifierBase(object):
         """Fill the _notifierSignalsDict with any instances of a NotifierSignal;
         Called with every init, but only effectively executed once per class
         """
-        if cls._notifierSignalsDict == SENTINEL:
+        if cls._notifierSignalsDict == Sentinel:
             cls._notifierSignalsDict = {}
             for name, val in vars(cls).items():
                 if isinstance(val, NotifierSignal):
@@ -898,7 +898,7 @@ class NotifierBase(object):
     #     """Fill the _notifierPropertiesDict with any instances of a NotifierProperty;
     #     Called with every init, but only effectively executed once per class
     #     """
-    #     if cls._notifierPropertiesDict == SENTINEL:
+    #     if cls._notifierPropertiesDict == Sentinel:
     #         cls._notifierPropertiesDict = {}
     #         for name, val in vars(cls).items():
     #             if isinstance(val, NotifierProperty):

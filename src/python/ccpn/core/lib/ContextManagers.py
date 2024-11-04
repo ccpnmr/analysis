@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 08:55:32 +0100 (Thu, October 24, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -651,7 +651,7 @@ def undoStackBlocking(application=None, project=None, debugText=''):
 
         _debugUndo(undo, f'UndoStackBlocking: {debugText}', enter=False)
 
-
+undoStack = undoStackBlocking
 
 @contextmanager
 def waypointBlocking(application=None):

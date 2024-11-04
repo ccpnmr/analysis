@@ -24,8 +24,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-14 16:34:41 +0200 (Mon, October 14, 2024) $"
-__version__ = "$Revision: 3.2.5.GWV $"
+__dateModified__ = "$dateModified: 2024-11-04 13:51:27 +0000 (Mon, November 04, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -75,42 +75,46 @@ _defaultNdf5MetadataDict = {
     NDF5_DATE_KEY : None,
     NDF5_SPECTROMETER_KEY : None,
 
-    # data types
+    # key to the data types present in the ndf5-file
     NDF5_DATATYPES_KEY : {},
+    # key to the spectrum-data descriptor
     NDF5_SPECTRUM_DATATYPE_KEY : None,
 
     # for backward compatibility, allowing older code to read newly generated ndf5 files
     HDF5_VERSION_KEY : '1.0.1',
     HDF5_DATATYPE_KEY: 'SpectrumData',
     HDF5_DATASET_KEY: 'spectrumData',
-
 }
 
 #--------------------------------------------------------------------------------------------------
-# ndf5 dataTypes
+# ndf5 dataTypes and data locations
 #--------------------------------------------------------------------------------------------------
 
 NDF5_SPECTRUM = 'spectrum'
-NDF5_NUS = 'nus'
-
-# spectrum: a complete (i.e. all dimensions), np.ndarray-like data matrix
-NDF5_DATATYPE_SPECTRUM_NDARRAY = f'dataType_{NDF5_SPECTRUM}_ndarray'
-
 # pulseprogram:
-NDF5_DATATYPE_PULSEPROGRAM =     f'dataType_pulseprogram'
+NDF5_DATATYPE_PULSEPROGRAM =        f'dataType_{NDF5_SPECTRUM}_pulseprogram'
+# spectrum: a complete (i.e. all dimensions), np.ndarray-like data matrix
+NDF5_DATATYPE_SPECTRUM_NDARRAY =    f'dataType_{NDF5_SPECTRUM}_ndarray'
 
 # NUS:
-NDF5_DATATYPE_NUSLIST =          f'dataType_{NDF5_NUS}_nuslist'
-NDF5_DATATYPE_NUSDATA =          f'dataType_{NDF5_NUS}_nusdata'
+NDF5_NUS = 'nus'
+NDF5_DATATYPE_NUSLIST =             f'dataType_{NDF5_NUS}_nuslist'
+NDF5_DATATYPE_NUSDATA =             f'dataType_{NDF5_NUS}_nusdata'
+
+# NEF
+NDF5_NEF = 'nef'
+NDF5_DATATYPE_NEFDATA =             f'dataType_{NDF5_NEF}_nefdata'
 
 # Dict of ndf5 data types and their (default) ndf5-file storage key;
 _ndf5DataTypes = {
-    NDF5_DATATYPE_PULSEPROGRAM : 'pulseprogram',
-    NDF5_DATATYPE_SPECTRUM_NDARRAY : 'spectrumData', # historical; keep for now
-    NDF5_DATATYPE_NUSLIST : 'nus/nuslist',
-    NDF5_DATATYPE_NUSDATA : 'nus/nusdata',
-}
+    NDF5_DATATYPE_SPECTRUM_NDARRAY  : 'spectrumData', # historical; keep for now
+    NDF5_DATATYPE_PULSEPROGRAM      : f'pulseprogram',
 
+    NDF5_DATATYPE_NUSLIST           : f'{NDF5_NUS}/nuslist',
+    NDF5_DATATYPE_NUSDATA           : f'{NDF5_NUS}/nusdata',
+
+    NDF5_DATATYPE_NEFDATA           : f'{NDF5_NEF}/nefdata',
+}
 
 #--------------------------------------------------------------------------------------------------
 # Compression modes
@@ -154,20 +158,20 @@ class _Property(property):
         self.cast = cast
         self.__doc__ = self.doc = doc
 
-    def _getter(self, instance):
-        if not self.key in instance.metadata:
-            raise AttributeError(f'Cannot get {instance.__class.__.__name__}.{self.attributeName}: invalid key "{self.key}"')
-        result = instance.metadata[self.key]
+    def _getter(self, __instance):
+        if not self.key in __instance.metadata:
+            raise AttributeError(f'Cannot get {__instance.__class.__.__name__}.{self.attributeName}: invalid key "{self.key}"')
+        result = __instance.metadata[self.key]
         if self.cast:
             result = self.cast(result)
         return result
 
-    def _setter(self, instance, value):
+    def _setter(self, __instance, value):
         if not self.hasSetter:
-            raise AttributeError(f'Cannot set {instance.__class.__.__name__}.{self.attributeName}')
-        if not self.key in instance.metadata:
-            raise AttributeError(f'Cannot set {instance.__class.__.__name__}.{self.attributeName}: invalid key "{self.key}"')
-        instance.metadata[self.key] = value
+            raise AttributeError(f'Cannot set {__instance.__class.__.__name__}.{self.attributeName}')
+        if not self.key in __instance.metadata:
+            raise AttributeError(f'Cannot set {__instance.__class.__.__name__}.{self.attributeName}: invalid key "{self.key}"')
+        __instance.metadata[self.key] = value
 
 #--------------------------------------------------------------------------------------------------
 
@@ -274,7 +278,7 @@ class Ndf5File(object):
         """
 
         self.dataSource = dataSource
-        self.metadata = {}  # The dict with metadata
+        self.metadata = {}  # The dict with metadata, upgraded later
         self.blockUpdate = 0   # blocking for when updating
 
         self.path = None

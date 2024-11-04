@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:49:47 +0100 (Thu, September 19, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-04 13:51:26 +0000 (Mon, November 04, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -263,9 +263,10 @@ class ChemicalShiftList(AbstractWrapperObject):
     def spectra(self) -> Tuple[Spectrum, ...]:
         """:return a tuple with the spectra that use this ChemicalShiftList instance
         """
-        ff = self._project._data2Obj.get
-        return tuple(sorted(ff(y) for x in self._wrappedData.experiments
-                            for y in x.dataSources))
+        _get = self._project._data2Obj.get
+        _spectra = [_get(y) for x in self._wrappedData.experiments
+                            for y in x.dataSources]
+        return tuple(sorted(_spectra))
 
     @spectra.setter
     @logCommand(get='self', isProperty=True)
@@ -274,6 +275,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         List must be iterable and of type Spectrum or str
         :param _spectra: Iterable or None
         """
+        from ccpn.util.Common import SENTINEL
         if not isinstance(_spectra, Iterable):
             raise ValueError(f'{self.className}.spectra must be an iterable of items of type Spectrum or str')
 
@@ -284,8 +286,10 @@ class ChemicalShiftList(AbstractWrapperObject):
 
         # add a spectrum/remove a spectrum
         _createSpectra = set(_spectra) - set(self.spectra)
-        _createCSL = {spec.chemicalShiftList for spec in _createSpectra} - {None}
         _deleteSpectra = set(self.spectra) - set(_spectra)
+        # GWV: This line breaks validation on Spectrum.chemicalShiftList, as when adding a spectrum, the value is initially None,
+        # but set via this method ChemicalShiftList.spectra
+        _createCSL = {spec.chemicalShiftList for spec in _createSpectra} - {None}
         _createNmrAtoms = self._getNmrAtomsFromSpectra(_createSpectra)  # new nmrAtoms to add
         _deleteNmrAtoms = self._getNmrAtomsFromSpectra(_deleteSpectra)  # old nmrAtoms to update
 

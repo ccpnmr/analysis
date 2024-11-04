@@ -184,11 +184,12 @@ class V3Property(property):
         else:
             return self._getter(__instance)
 
-    def _getter(self, instance):
+    def _getter(self, instance, validate=True):
         """Get the values from the instance, using the _fget method
         Performs a validator (if defined) on the value of fget, catching any errors and
         returning the SENTINEL
         Sets and returns self.value if properly validated
+        :param validate: boolean, default True. Do validation if validator is set
         """
         if self.name is None:
             raise AttributeError(f'V3Property: undefined attribute name; cannot get value from {instance}')
@@ -205,7 +206,7 @@ class V3Property(property):
         except Exception as ex:
             raise AttributeError(f'Unable to get value for attribute {self.name!r} of {instance}; {ex}')
 
-        if self.validator:
+        if validate and self.validator:
             # also run validator on get, as it will do any conversions to the set type
             try:
                 _value = self.validator.validate(instance, _value)
@@ -248,7 +249,7 @@ class V3Property(property):
             raise AttributeError(f'V3Property: cannot set {type(instance).__name__}.{self.name}')
 
         _previousValue = self.value if self.value is not SENTINEL \
-                                    else self._getter(instance)
+                                    else self._getter(instance, validate=False)
 
         with notificationBlanking():
             with apiNotificationBlanking():

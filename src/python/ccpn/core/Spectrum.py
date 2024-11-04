@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 18:40:02 +0000 (Mon, October 28, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-04 13:51:27 +0000 (Mon, November 04, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -224,21 +224,24 @@ class Spectrum(AbstractWrapperObject):
     # --- chemicalShiftList property ---
     @V3Property(modelled=True,
                 validator=V3Object(klass='ChemicalShiftList',
-                                   allow_none=False,
+                                   allow_none=True,  # False breaks the cross refercing machinery
                                    allowPid=True
                                    )
                 )
     def chemicalShiftList(self):
         """:return: the ChemicalShiftList instance for spectrum
         """
-        return self._project._data2Obj.get(self._wrappedData.experiment.shiftList)
+        _csl = self._project._data2Obj.get(self._wrappedData.experiment.shiftList)
+        return _csl
 
     @chemicalShiftList.setter
     @logCommand(get='self', isProperty=True)
     def chemicalShiftList(self, value):
         """Set the chemicalShiftList for the spectrum
         """
-        value.spectra = set(value.spectra) | {self}
+        _oldSpecs = value.spectra
+        _newSpecs = set(_oldSpecs) | {self}
+        value.spectra = _newSpecs
 
         # TODO:ED There was an error catching for Nef related problems;
         #  should fix in Nef importer, not here

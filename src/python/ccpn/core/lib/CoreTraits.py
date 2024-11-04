@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-30 14:15:09 +0000 (Wed, October 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-04 13:51:27 +0000 (Mon, November 04, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -145,8 +145,8 @@ class V3Object(TraitType, _CcpNmrTrait):
         # Local import to avoid cycles
         from ccpn.core._implementation.CoreModel import _isV3coreClass, _isV3coreClassInstance, _getV3coreClass
 
-        if value is None and not self.allow_none:
-            raise ValueError(f'Expected an instance of a V3 class; got None')
+        if value is None and self.allow_none:
+            return None
 
         if isinstance(value, (Pid, str)) and self.allowPid:
             _app = getApplication()

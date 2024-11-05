@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 11:52:37 +0000 (Sun, October 27, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-05 16:05:30 +0000 (Tue, November 05, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -62,6 +62,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.core.lib.Traities import HasTraities
 from ccpn.core.lib.Pid import Pid
 from ccpn.core.lib.ContextManagers import \
     logCommandManager, undoBlockWithSideBar, undoBlock, rebuildSidebar, inactivity
@@ -108,7 +109,7 @@ MAXITEMLOGGING = 4
 # Framework
 #=========================================================================================
 
-class Framework(NotifierBase):
+class Framework(HasTraities, NotifierBase):
     """
     The Framework class is the base class for all applications.
     """
@@ -123,6 +124,7 @@ class Framework(NotifierBase):
 
     def __init__(self, args=Arguments()):
 
+        HasTraities.__init__(self)
         NotifierBase.__init__(self)
         # GuiBase.__init__(self)
 
@@ -2582,6 +2584,9 @@ class Framework(NotifierBase):
         return '<%s version:%s>' % (self.applicationName, self.applicationVersion)
 
     __repr__ = __str__
+
+# register traities
+Framework._registerTraities()
 
 #-----------------------------------------------------------------------------------------
 #end class

@@ -1,0 +1,4 @@
+
+sh -x 2>&1 README.sh  && CCPN_H1GI_clean_new.nef fold_##.sa.stats
+/bin/sh validateCalc.sh &&
+

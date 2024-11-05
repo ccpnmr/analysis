@@ -1,0 +1,4 @@
+
+xplor initMatch.py CCPN_H1GI_clean.nef 3dNOESY-182 && 3dNOESY-182_pass1.pasd
+xplor jointFilter.py -dist '`20`hBond' CCPN_H1GI_clean.nef 3dNOESY-182_pass1.pasd && 3dNOESY-182_pass2.pasd
+./validate.sh dummyArg                     && contactMap.png

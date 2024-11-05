@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-05 16:05:00 +0000 (Tue, November 05, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -322,7 +322,7 @@ class Peak(AbstractWrapperObject):
         return self.spectrum.axisCodes
 
     @V3Property(validator=V3List(Float(allow_none=False))
-    )
+               )
     def position(self) -> list:
         """:return Peak position in ppm (or other relevant unit) in dimension order.
         """

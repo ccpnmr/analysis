@@ -338,8 +338,9 @@ class V3Property(property):
             _undoBunch.update(bunch)
             _undoBunch.new = bunch.old
             _undoBunch.old = bunch.new
+            _undoBunch.itemsChanged = []
             for indx,val in bunch.itemsChanged:
-                _undoBunch.itemsChanged[indx] = (indx, _previousValue[indx])
+                _undoBunch.itemsChanged.append( (indx, _previousValue[indx]) )
 
             addUndoItem(undo=partial(self._itemChangedCallback, _undoBunch),
                         redo=None

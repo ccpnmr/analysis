@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-05 16:05:00 +0000 (Tue, November 05, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -194,9 +194,32 @@ class V3Object(TraitType, _CcpNmrTrait):
 
 
 class _V3TypedList(_TypedList):
-    """A class that can be used as a typed-check list for V3Properties
+    """A class that can be used as a typed-check list for V3Properties;
+    Callback to the V3Properties to assure undo/notifier handling
+    Allows for axisCode item getting/setting if class has "axisCodes"
+    attribute (Spectrum, Peak, ??). Example: myPeak.position['N']
     """
     # def __init__(self, obj, trait, values=()):
+
+    def __getitem__(self, item):
+        # subclassed to decode any axisCode (type str) into item index
+        if isinstance(item, str) and hasattr(self._obj, 'axisCodes'):
+            _aCodes = getattr(self._obj, 'axisCodes')
+            _tmp = dict( (acode, _ii) for _ii, acode in enumerate(_aCodes) )
+            if (item := _tmp.get(item, None)) is None:
+                raise IndexError(f'item {item!r} not found in {self}')
+
+        return super().__getitem__(item)
+
+    def __setitem__(self, item, value):
+        # subclassed to decode any axisCode (type str) into item index
+        if isinstance(item, str) and hasattr(self._obj, 'axisCodes'):
+            _aCodes = getattr(self._obj, 'axisCodes')
+            _tmp = dict( (acode, _ii) for _ii, acode in enumerate(_aCodes) )
+            if (item := _tmp.get(item, None)) is None:
+                raise IndexError(f'item {item!r} not found in {self}')
+
+        return super().__setitem__(item, value)
 
     def _notifyChanged(self, bunch):
         """Notify self._obj of the changes

@@ -185,6 +185,7 @@ class Spectrum(AbstractWrapperObject):
     _INCLUDENEGATIVECONTOURS = 'includeNegativeContours'
     _PREFERREDAXISORDERING = '_preferredAxisOrdering'
     _SERIESITEMS = '_seriesItems'
+    _ADDITIONALSERIESITEMS = '_additionalSeriesItems'
     _DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
     _NEGATIVENOISELEVEL = 'negativeNoiseLevel'
 
@@ -1930,6 +1931,8 @@ class Spectrum(AbstractWrapperObject):
 
         self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
 
+    ## CCPN INTERNAL --- Series ---  ##
+
     @property
     def _seriesItems(self):
         """Return a tuple of the series items for the spectrumGroups
@@ -1990,6 +1993,116 @@ class Spectrum(AbstractWrapperObject):
     #     # which will check and create a new PeakList assuring that there
     #     # is at least one instance.
     #     self.project.deleteObjects(*self.peakLists)
+
+    ## Additional Series Items.
+    # _ADDITIONALSERIESITEMS
+
+    @property
+    def _additionalSeriesItems(self):
+        """Return a tuple of tuples of the additional series items for the spectrumGroups
+        """
+        items = self._getInternalParameter(self._ADDITIONALSERIESITEMS)
+        if items is not None:
+            series = ()
+            for sg in self.spectrumGroups:
+                series += (items[sg.pid],) if sg.pid in items else ((None,),)
+            return series
+
+    @_additionalSeriesItems.setter
+    @ccpNmrV3CoreSetter()
+    def _additionalSeriesItems(self, tupleItems):
+        """Set the _additional Series items for all spectrumGroups that spectrum is attached to.
+
+       tupleItems: tuple of tuple.
+
+        first  tuple: reflects the length of spectrumGroups that spectrum is attached to. (same as the standard _seriesItems).
+        second  tuple: reflects the length of additional Series Items, E.g.: one extra series for protein concentrations
+
+        Remember, for the standard _seriesItems use the setter as:
+        sp.spectrumGroups = ('SG:1', 'SG:2', 'SG:3')
+        sp._seriesItems = (
+                                            1,  # -> goes to SG:1'
+                                            2,  # -> goes to SG:2'
+                                            3,  # -> goes to SG:3'
+                                     )
+
+        additional setter, use a tuple instead of a single value:
+        if you have one extra additional series required:
+        sp.spectrumGroups = ('SG:1', 'SG:2', 'SG:3')
+        sp._seriesItems = (
+                                        (1), # -> goes to SG:1'
+                                        (2),# -> goes to SG:2'
+                                        (3) # -> goes to SG:3'
+                                        )
+
+        similarly, if 2 extra additional series required:
+        sp.spectrumGroups = ('SG:1', 'SG:2', 'SG:3')
+        sp._seriesItems = (
+                                (1, 10),
+                                (2, 20),
+                                (3, 30))
+
+        """
+
+        if not isinstance(tupleItems, (tuple, list, type(None))):
+            raise TypeError('items is not of type tuple/None')
+
+        if len(tupleItems) != len(self.spectrumGroups):
+            raise ValueError('Number of items does not match number of spectrumGroups. Use empty tuples for spectrumGroups that not require additional series')
+
+        if tupleItems is None:
+            self._setInternalParameter(self._ADDITIONALSERIESITEMS, None)
+            return
+
+        additionalSeriesItems = self._getInternalParameter(self._ADDITIONALSERIESITEMS) or {}
+        for sg, tupleItem in zip(self.spectrumGroups, tupleItems):
+            additionalSeriesItems[sg.pid] = tupleItem
+        self._setInternalParameter(self._ADDITIONALSERIESITEMS, additionalSeriesItems)
+
+    def getAdditionalSeriesItems(self, spectrumGroup):
+        """Return the additional Series Items for the current spectrum for the selected spectrumGroup
+        """
+        return self._getAdditionalSeriesItems(spectrumGroup)
+
+    def _getAdditionalSeriesItems(self, spectrumGroup):
+        """Return the additionalSeries items for the current spectrum for the selected spectrumGroup
+        """
+        from ccpn.core.SpectrumGroup import SpectrumGroup
+        spectrumGroup = self.project.getByPid(spectrumGroup) if isinstance(spectrumGroup, str) else spectrumGroup
+        if not isinstance(spectrumGroup, SpectrumGroup):
+            msg = f'{str(spectrumGroup)} is not a spectrumGroup'
+            getLogger().debug(msg)
+            return ()
+        if self not in spectrumGroup.spectra:
+            msg = f'Spectrum {str(self)} does not belong to spectrumGroup {str(spectrumGroup)}'
+            getLogger().debug(msg)
+            return ()
+        additionalSeriesItems = self._getInternalParameter(self._ADDITIONALSERIESITEMS)
+        if additionalSeriesItems and spectrumGroup.pid in additionalSeriesItems:
+            return additionalSeriesItems[spectrumGroup.pid]
+
+        return ()
+
+    def _setAdditionalSeriesItems(self, spectrumGroup, item):
+        """Set the AdditionalSeriesItems  for the current spectrum for the selected spectrumGroup
+        MUST be called from spectrumGroup - error checking for item types is handled there
+        """
+        from ccpn.core.SpectrumGroup import SpectrumGroup
+
+        # check that the spectrumGroup and spectrum are valid
+        spectrumGroup = self.project.getByPid(spectrumGroup) if isinstance(spectrumGroup, str) else spectrumGroup
+        if not isinstance(spectrumGroup, SpectrumGroup):
+            raise TypeError('%s is not a spectrumGroup', spectrumGroup)
+        if self not in spectrumGroup.spectra:
+            raise ValueError(f'Spectrum {str(self)} does not belong to spectrumGroup {str(spectrumGroup)}')
+
+        seriesItems = self._getInternalParameter(self._ADDITIONALSERIESITEMS)
+
+        if seriesItems:
+            seriesItems[spectrumGroup.pid] = item
+        else:
+            seriesItems = {spectrumGroup.pid: item}
+        self._setInternalParameter(self._ADDITIONALSERIESITEMS, seriesItems)
 
     def _getSeriesItem(self, spectrumGroup):
         """Return the series item for the current spectrum for the selected spectrumGroup
@@ -2066,6 +2179,8 @@ class Spectrum(AbstractWrapperObject):
         if pid in seriesItems:
             del seriesItems[pid]
             self._setInternalParameter(self._SERIESITEMS, seriesItems)
+
+    ## ------ end series items ------ ##
 
     @property
     def temperature(self):

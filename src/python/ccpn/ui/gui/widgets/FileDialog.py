@@ -5,8 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -148,9 +148,10 @@ class FileDialogABC(QtWidgets.QFileDialog):
             self._preferences = application.preferences
             _general = self._preferences.general
         except:
-            directory = aPath('~')
-            # raise RuntimeError('application is not defined')
-            getLogger().debug('application is not defined')
+            if directory is None:  # Directory can be set correctly in the Widget. Use default only if everything else fails.
+                directory = aPath('~')
+                # raise RuntimeError('application is not defined')
+                getLogger().debug('application is not defined')
 
         if directory is None:
             _path = aPath(_general.get(self._initialPath))

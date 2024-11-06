@@ -4,9 +4,10 @@ This module defines base classes for Series Analysis
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-23 09:19:35 +0100 (Mon, October 23, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-10-04 07:50:07 +0100 (Fri, October 04, 2024) $"
+__version__ = "$Revision: 3.2.9.alpha $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,11 +36,15 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.DataTable import DataTable
 from ccpn.util.traits.TraitBase import TraitBase
-from ccpn.util.traits.CcpNmrTraits import Any, List, Bool, Odict, CString, Set
+from ccpn.util.traits.CcpNmrTraits import List
 from ccpn.framework.Application import getApplication, getCurrent, getProject
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC, InputSeriesFrameBC
-import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
+from ccpn.framework.lib.experimentAnalysis.SeriesTables import SeriesFrameBC, InputSeriesFrameBC, _getNextGlobalFittingClusterId
+import ccpn.framework.lib.experimentAnalysis.calculationModels._libraryFunctions as lf
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.framework.PathsAndUrls import ccpnExperimentAnalysisPath
+from ccpn.util.Path import aPath, scandirs
+from ccpn.util.Common import fetchPythonModules
+
 
 
 class SeriesAnalysisABC(ABC):
@@ -49,6 +54,7 @@ class SeriesAnalysisABC(ABC):
     seriesAnalysisName = ''
     _allowedPeakProperties = [sv._HEIGHT, sv._VOLUME, sv._PPMPOSITION, sv._LINEWIDTH]
     _minimisedProperty = None  # the property currently used to perform the fitting routines. Default height, but can be anything.
+    _modelsAreLoaded = False
 
     @property
     def inputDataTables(self) -> list:
@@ -100,6 +106,40 @@ class SeriesAnalysisABC(ABC):
     def resultDataTable(self, dataTable):
         self._resultDataTable = dataTable
 
+
+    @property
+    def _resultDataFrameWithExclusions(self):
+        """ The dataFrame  which contains filtered out values based on user's exclusions.
+         This method is necessary to do not override the data on the output ResultData table"""
+        _resultDataTable = self._resultDataTable
+        df = _resultDataTable.data.copy()
+        if sv.NMRRESIDUEPID not in df:
+            return df
+
+        blankColumns = []
+        if sv.MODEL_NAME in df:
+            modelName = df.modelName.values[-1]
+            fittingModelClass = self.getFittingModelByName(modelName)
+            if fittingModelClass:
+                model = fittingModelClass()
+                blankColumns += model.modelStatsNames
+                blankColumns += model.modelArgumentNames
+                blankColumns += model.modelArgumentErrorNames
+
+        if sv.CALCULATION_MODEL in df:
+            calculationName = df.calculationModel.values[-1]
+            calculationModelClass = self.getCalculationModelByName(calculationName)
+            if calculationModelClass:
+                model = calculationModelClass()
+                blankColumns += model.modelArgumentNames
+
+        excludedNmrResiduesPids = self.exclusionHandler._getExcludedNmrResiduePids(dataTable=_resultDataTable)
+        excludedNmrResiduesDf = df[df[sv.NMRRESIDUEPID].isin(excludedNmrResiduesPids)]
+        excludedIndexes = excludedNmrResiduesDf.index
+        df.loc[excludedIndexes, blankColumns] = np.nan
+
+        return df
+
     def _fetchOutputDataTable(self, name=None):
         """
         Interanl. Called after 'fit()' to get a valid Datatable to attach the fitting output SeriesFrame
@@ -113,24 +153,26 @@ class SeriesAnalysisABC(ABC):
 
         if not dataTable:
             dataTable = self.project.newDataTable(name)
-        ## update the exclusionHandler
-        if not self._exclusionHandler._dataTable:
-            self._exclusionHandler._dataTable = dataTable
-        self._exclusionHandler.save()
         ## update the DATATABLETYPE
         dataTable.setMetadata(sv.DATATABLETYPE, sv.SERIESANALYSISOUTPUTDATA)
         dataTable.setMetadata(sv.SERIESFRAMETYPE,  sv.SERIESANALYSISOUTPUTDATA)
+        dataTable.setMetadata(sv._LAST_SAVED_APPLICATIONVERSION, str(self.project.application.applicationVersion))
         return dataTable
 
-    def getMergedResultDataFrame(self):
-        """Get the SelectedOutputDataTable  merged  by the collection pid
+    def getResultDataFrame(self, useFiltered=True) -> pd.DataFrame:
         """
+        Get the SelectedOutputDataTable and merge rows by the collection pid
+        """
+
         dataTable = self.resultDataTable
         if dataTable is None:
-            return
-        dataFrame = dataTable.data
+            return pd.DataFrame()
+        if useFiltered:
+            dataFrame = self._resultDataFrameWithExclusions
+        else:
+            dataFrame = dataTable.data
         if len(dataFrame)==0:
-            return
+            return pd.DataFrame()
         if not sv.COLLECTIONPID in dataFrame:
             return dataFrame
         ## group by id and keep only first row as all duplicated except the series steps, which are not needed here.
@@ -146,6 +188,7 @@ class SeriesAnalysisABC(ABC):
                     seriesStep += sv.SEP # this is the case when two series Steps are the same! Cannot create two identical columns or 1 will disappear
                 outDataFrame.loc[ix, seriesStep] = seriesValue
                 lastSeenSeriesStep = seriesStep
+        # additional Series values to be added here?
 
         # drop columns that should not be on the Gui. To remove: peak properties (dim, height, ppm etc)
         toDrop = sv.PeakPropertiesHeaders + [sv._SNR, sv.DIMENSION, sv.ISOTOPECODE, sv.NMRATOMNAME, sv.NMRATOMPID]
@@ -240,63 +283,141 @@ class SeriesAnalysisABC(ABC):
         self._setMinimisedPropertyFromModels()
         return outputDataTable
 
-    def refitCollection(self, collectionPid, resetInitialParams=False, customMinimiserParamsDict=None):
+    def refitSingularCollection(self, collectionPid,
+                                fittingModel=None,
+                                minimiserMethod=None,
+                                uncertaintiesMethod=None,
+                                uncertaintiesSampleSize=None):
         """
         Given a CollectionPid, refit the series using the options defined in the module.
         :param collectionPid: str: Ccpn collection pid for a collection which is contained in the inputDataTables and outputData.
-        :param resetInitialParams: bool. True   to re-guess the initial params. False to start the refit using the parameters from the last best fit.
-        :param customMinimiserParamsDict. A dict of dict containing the new parameters to be considered for the fitting. Use with caution, see the Minimiser "make_params" for proper usage.
-                    e.g.: usage for a OnePhaseDecayPlateauModel:
-                            minimiserParamsDict = {'amplitude': 10, 'rate': 3, 'plateau': 0}
-                            or to setup ranges:
-                            minimiserParamsDict = {'amplitude': dict(value=2.4),
-                                                                 'rate': dict(value=1.5),
-                                                                  'plateau': dict(value=0.5, min=0, max=None)}
+
 
         :return: a pandas dataFrame with the latest fitted data.
         """
         resultDataTable = self.resultDataTable
         resultData = resultDataTable.data
-
-        if len(self.inputDataTables) == 1:
-            inputDataTable = self.inputDataTables[0]
-        else:
-            getLogger().warn('Refit collection is only available with one InputDataTable.')
-            return
-        inputData = inputDataTable.data
-        fittingModel = self.currentFittingModel
-        dfForCollection = inputData[inputData[sv.COLLECTIONPID] == collectionPid].copy()
+        fittingModel = fittingModel or self.currentFittingModel
+        dfForCollection = resultData[resultData[sv.COLLECTIONPID] == collectionPid].copy()
         dfForCollection.sort_values([fittingModel.xSeriesStepHeader], inplace=True)
         seriesSteps = Xs = dfForCollection[fittingModel.xSeriesStepHeader].values
         seriesValues = Ys = dfForCollection[fittingModel.ySeriesStepHeader].values
         minimiser = fittingModel.Minimiser()
+        uncertaintiesMethod = uncertaintiesMethod or fittingModel._uncertaintiesMethod
+        uncertaintiesSampleSize = uncertaintiesSampleSize or fittingModel._uncertaintiesSampleSize
 
         ## Get the initial fitting Params from the ResultData
         resultDataForCollection = resultData[resultData[sv.COLLECTIONPID] == collectionPid].copy()
-        if resetInitialParams:
-            params = minimiser.guess(Ys, Xs)
-        else:
-            if customMinimiserParamsDict is None:
-                modelNames = fittingModel.modelArgumentNames
-                modelValues = resultDataForCollection[modelNames].values[0]
-                existingModelParamsDict = dict(zip(modelNames, modelValues))
-                params = minimiser.make_params(**existingModelParamsDict)
-            else:
-                try:
-                    params = minimiser.make_params(**customMinimiserParamsDict)
-                except Exception as err:
-                    getLogger().warn(f'Could not make parameters for the current fitting. Ensure the format is correct. {customMinimiserParamsDict}. {err}. Fallback enabled.')
-                    params = minimiser.guess(Ys, Xs)
 
-        minimiser.setMethod(fittingModel._minimiserMethod)
-        result = minimiser.fit(Ys, params, x=Xs)
+        params = minimiser.guess(Ys, Xs)
+        if minimiserMethod is not None:
+            minimiser.setMethod(minimiserMethod)
+        result = minimiser.fit(Ys, params, x=Xs, method=minimiserMethod)
+        finalParams = result.calculateStandardErrors(Xs, Ys, uncertaintiesMethod=uncertaintiesMethod,
+                                                     samples=uncertaintiesSampleSize)
 
         ## write to the output data (overriding the previously results)
         for ix, row in resultDataForCollection.iterrows():
-            for resultName, resulValue in result.getAllResultsAsDict().items():
+            for resultName, resulValue in result.getAllResultsAsDict(params=finalParams).items():
                 resultData.loc[ix, resultName] = resulValue
-            resultData.loc[ix, sv.MODEL_NAME] = fittingModel.ModelName
+            resultData.loc[ix, sv.MODEL_NAME] = fittingModel.modelName
             resultData.loc[ix, sv.MINIMISER_METHOD] = minimiser.method
+
+    @staticmethod
+    def _makeParamsForGlobalFitting(fittingModel, outputDataFrame, collectionPids, globalParamNames=[], localParamNames=[], fixedParamNames=[]):
+        """ Given a dataFrame with individual fit results, make the Params for a global fit.
+        Use the globalInitialValueMethod to calculate the initial value for the global minimisation. E.g.: mean . For example if a Global Kd fitting,  It will take the mean of all existing Kd results
+        and use it as initial value (starting point)  for the minimisation.
+        The Local initial values are the same as the individual fitting result
+        """
+        from lmfit import Parameter
+        minimiser = fittingModel.Minimiser()
+        params = minimiser._createParams(minimiser)
+        df = outputDataFrame[outputDataFrame[sv.COLLECTIONPID].isin(collectionPids)].copy()
+
+        ## do the globals params
+        for globName in globalParamNames:
+            value = 0  # could do the minimiser.guess() instead
+            if globName in df:
+                value = df[globName].mean()
+            else:
+                param = params.get(globName)
+                if param is not None:
+                    value = param.value  # take the default value from the minimiser
+            params[globName] = Parameter(name=globName, value=value, user_data={sv._PARAMTYPE: sv._GLOBAL, sv._PARAMNAME: globName})
+        ## do the fixed params
+        for fixedParamName in fixedParamNames:
+            value = 0
+            if fixedParamName in df:
+                value = df[fixedParamName].values[-1]
+            else:
+                param = params.get(fixedParamName)
+                if param is not None:
+                    value = param.value  # take the default value from the minimiser
+            params[fixedParamName] = Parameter(name=fixedParamName, value=value, vary=False,
+                                               user_data={sv._PARAMTYPE: sv._FIXED, sv._PARAMNAME: fixedParamName})
+        ## do the local params
+        for localName in localParamNames:
+            for i, collectionPid in enumerate(collectionPids):
+                dfFiltered = df[df[sv.COLLECTIONPID] == collectionPid]
+                value = 1
+                if localName in dfFiltered:
+                    value = dfFiltered[localName].values[-1]
+                name = f'{localName}_{i}'
+                params[name] = Parameter(name=name, value=value, vary=True,
+                                         user_data={sv.PID: collectionPid, sv._PARAMTYPE: sv._LOCAL, sv._PARAMNAME: localName, })
+        return params
+
+    def refitGlobalCollections(self, collectionPids,
+                               globalParamNames, localParamNames, fixedParamNames,
+                                fittingModel=None,
+                                minimiserMethod=None,
+                                ):
+        """
+        Given a list of CollectionPids, do a global refit of the specified params, while minimising others individually.
+        :param collectionPid: str: Ccpn collection pid for a collection which is contained in the inputDataTables and outputData.
+
+        :return: a pandas dataFrame with the latest fitted data.
+        """
+        from ccpn.framework.lib.experimentAnalysis.fittingModels.FittingModelABC import GlobalMinimiser
+
+        resultDataTable = self.resultDataTable
+        resultData = resultDataTable.data
+        fittingModel = fittingModel or self.currentFittingModel
+        func = fittingModel.getFittingFunc(fittingModel)
+
+        dfForCollections = resultData[resultData[sv.COLLECTIONPID].isin(collectionPids)].copy()
+        dfForCollections.sort_values([fittingModel.xSeriesStepHeader], inplace=True)
+        params = self._makeParamsForGlobalFitting(fittingModel, resultData, collectionPids,
+                                                                  globalParamNames=globalParamNames,
+                                                                  localParamNames=localParamNames,
+                                                                  fixedParamNames=fixedParamNames)
+        x = []
+        data = []
+        for collectionPid in collectionPids:
+            dfForCollection = resultData[resultData[sv.COLLECTIONPID] == collectionPid].copy()
+            dfForCollection.sort_values([fittingModel.xSeriesStepHeader], inplace=True)
+            seriesSteps = x = dfForCollection[fittingModel.xSeriesStepHeader].values
+            seriesValues = Ys = dfForCollection[fittingModel.ySeriesStepHeader].values
+            data.append(Ys)
+        data = np.array(data)
+        minimiser = GlobalMinimiser(func, x, data,
+                            globalParamNames=globalParamNames,
+                            localParamNames=localParamNames,
+                            fixedParamNames=fixedParamNames,
+                            params=params)
+        result = minimiser.minimize(method=minimiserMethod)
+        params4Pids = minimiser.getIndividualParamsForResult(result, collectionPids)
+        ## update the data
+        statsResultDict = minimiser.getGlobalStatisticalResult(result)
+        globalFittingClusterId = _getNextGlobalFittingClusterId(resultData)
+        for pid, paramDict in params4Pids.items():
+            match = resultData[resultData[sv.COLLECTIONPID] == pid]
+            resultData.loc[match.index, paramDict.keys()] = paramDict.values()
+            resultData.loc[match.index, statsResultDict.keys()] = statsResultDict.values()
+            resultData.loc[match.index, sv.MODEL_NAME] = fittingModel.modelName
+            resultData.loc[match.index, sv.MINIMISER_METHOD] = minimiserMethod
+            resultData.loc[match.index, sv.GLOBAL_FITTING_CLUSTER_ID] = globalFittingClusterId
 
     def _setMinimisedPropertyFromModels(self):
         """ Set the _minimisedProperty from the current models.
@@ -313,13 +434,15 @@ class SeriesAnalysisABC(ABC):
             for inputData in self.inputDataTables:
                 inputData.data.buildFromSpectrumGroup(spGroup, parentCollection=inputCollection)
 
+
+
     @property
     def currentFittingModel(self):
         """ The working fittingModel in the module.
          E.g.: the initiated ExponentialDecayModel. See models for docs. """
         if self._currentFittingModel is None:
-            getLogger().warn('Fitting Model not set.')
-            return
+            model = self._getFirstModel(self.fittingModels)
+            return model()
         return self._currentFittingModel
 
     @currentFittingModel.setter
@@ -329,35 +452,89 @@ class SeriesAnalysisABC(ABC):
     @property
     def currentCalculationModel(self):
         """ The working CalculationModel in the module.
-        E.g.: the initiated EuclidianModel for ChemicalshiftMapping. See models for docs. """
+        E.g.: the initiated EuclidianModel for  ChemicalShift Perturbation. See models for docs. """
         if self._currentCalculationModel is None:
-            getLogger().warn('CalculationModel not set.')
-            return
+            model = self._getFirstModel(self.calculationModels)
+            return model()
         return self._currentCalculationModel
 
     @currentCalculationModel.setter
     def currentCalculationModel(self, model):
         self._currentCalculationModel = model
 
+    def _loadModelsFromDisk(self):
+        """ Inspect the directory and search for importable modules """
+        import inspect as _inspect
+        from ccpn.framework.lib.experimentAnalysis.fittingModels.FittingModelABC import FittingModelABC
+        from ccpn.framework.lib.experimentAnalysis.calculationModels.CalculationModelABC import CalculationModel
+
+        if self._modelsAreLoaded:
+            return
+        fittingModelsPath = aPath(ccpnExperimentAnalysisPath) / 'fittingModels'
+        calculationModelsPath = aPath(ccpnExperimentAnalysisPath) / 'calculationModels'
+        # userModels = ''to be done'
+        fittingModelsSubDirPaths = scandirs(fittingModelsPath)
+        calculationModelsSubDirPaths = scandirs(calculationModelsPath)
+
+        allModelsFilePaths = fittingModelsSubDirPaths + calculationModelsSubDirPaths
+        pythonModules = fetchPythonModules(allModelsFilePaths) # this does the physical loading of the files to Python-Modules
+        for pythonModule in pythonModules:
+            try:
+                for i, obj in _inspect.getmembers(pythonModule): # this scans for the right classes within the Python-Module
+                    if _inspect.isclass(obj):
+                        if issubclass(obj,  (FittingModelABC, CalculationModel)):
+                            if self.seriesAnalysisName not in obj.targetSeriesAnalyses:
+                                continue # skip
+                            if not obj._autoRegisterModel:
+                                continue
+                            if not obj.modelName:
+                                continue
+                            self._loadedModels.add(obj)
+
+            except Exception as loadingError: # Not encountered any so far. but just in case
+                getLogger().warn(f'Error in registering the class from {pythonModule}. Skipping with: {loadingError} ')
+        self._modelsAreLoaded = True
+
+    @property
+    def fittingModels(self):
+        return dict(sorted(self._fittingModels.items()))
+
+    @property
+    def calculationModels(self):
+        return dict(sorted(self._calculationModels.items()))
+
+    def _registerModels(self):
+        """ Register all the available models"""
+        from ccpn.framework.lib.experimentAnalysis.fittingModels.BlankFittingModel import BlankFittingModel
+        from ccpn.framework.lib.experimentAnalysis.calculationModels.BlankCalculationModel import BlankCalculationModel
+        self.registerModel(BlankFittingModel)
+        self.registerModel(BlankCalculationModel)
+        for model in self._loadedModels:
+            self.registerModel(model)
+
     def registerModel(self, model):
         """
         A method to register a Model object, either FittingModel or CalculationModel.
         See the FittingModelABC for more information
         """
-        from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, CalculationModel
+        from ccpn.framework.lib.experimentAnalysis.fittingModels.FittingModelABC import FittingModelABC
+        from ccpn.framework.lib.experimentAnalysis.calculationModels.CalculationModelABC import CalculationModel
+
         if issubclass(model, CalculationModel):
-            self.calculationModels.update({model.ModelName: model})
+            self._calculationModels.update({model.modelName: model})
             return
-        if issubclass(model, FittingModelABC):
-            self.fittingModels.update({model.ModelName: model})
+        elif issubclass(model, FittingModelABC):
+            self._fittingModels.update({model.modelName: model})
+        else:
+            getLogger().warn(f'The given model type could not be identified. Skipping: {model} ')
         return
 
     def deRegisterModel(self, model):
         """
         A method to de-register a  Model
         """
-        self.calculationModels.pop(model.ModelName, None)
-        self.fittingModels.pop(model.ModelName, None)
+        self._calculationModels.pop(model.modelName, None)
+        self._fittingModels.pop(model.modelName, None)
 
     def getFittingModelByName(self, modelName):
         """
@@ -407,6 +584,7 @@ class SeriesAnalysisABC(ABC):
                                            )
         dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
         dataTable.setMetadata(sv.DATATABLETYPE, sv.SERIESANALYSISINPUTDATA)
+        dataTable.setMetadata(sv._LAST_SAVED_APPLICATIONVERSION, str(project.application.applicationVersion))
         self._setRestoringMetadata(dataTable, seriesFrame, spectrumGroup)
         return dataTable
 
@@ -508,14 +686,6 @@ class SeriesAnalysisABC(ABC):
         """
         pass
 
-    def _registerModels(self, models):
-        """Register multiple models in the main class """
-        dd = {}
-        for model in models:
-            self.registerModel(model)
-            dd[model.ModelName] = model
-        return dd
-
     def _getSeriesStepValues(self):
         """ Get the series values from the first input SpectrumGroups"""
 
@@ -556,22 +726,25 @@ class SeriesAnalysisABC(ABC):
         self.project = getProject()
         self.application = getApplication()
         self.current = getCurrent()
+        self. _loadedModels = set()
         self._inputDataTables = OrderedSet()
         self._inputSpectrumGroups = OrderedSet()
         self._inputCollection = None
         self._outputDataTableName = sv.SERIESANALYSISOUTPUTDATA
         self._resultDataTable = None
         self._untraceableValue = 1.0   # default value for replacing NaN values in untraceableValues.
-        self.fittingModels = dict()
-        self.calculationModels = dict()
+        self. _fittingModels =dict()
+        self._calculationModels = dict()
         self._currentFittingModel = None     ## e.g.: ExponentialDecay for relaxation
         self._currentCalculationModel = None ## e.g.: HetNoe for Relaxation
         self._needsRefitting = False
         self._needsRebuildingInputDataTables = False
         self._exclusionHandler = ExclusionHandler()
 
+        self._loadModelsFromDisk()
+        self._registerModels()
+
     def close(self):
-        # self.exclusionHandler.save()
         self.clearInputDataTables()
         self._currentCalculationModel = None
         self._currentFittingModel = None
@@ -595,45 +768,44 @@ class ExclusionHandler(TraitBase):
 
     _traitNames = [f'{tag}s' for tag in sv.EXCLUDED_OBJECTS]
 
-    def __init__(self, dataTable=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__()
-        self._dataTable = dataTable # used to store/restore exclusions as metadata
+        self.project = getProject()
         for name in self._traitNames:
             self.add_traits(**{name:List()})
             self.update({name:[]}) ## ensures all starts correctly and a list works as a list!
 
-    def clear(self):
-        """Reset all to empty """
-        for name in self._traitNames:
-            self.update({name:[]})
-
-    def updataDataTable(self):
-        """ Update the datatable data flags
-         to do, update the dataFrame with True/False if the pid is in Data
-            syntax DataFrame.loc[condition, (column_1, column_2)] = new_value
+    def getExcludedNmrResidues(self, dataTable):
         """
-        df = self._dataTable.data
-        ## eg: for peaks to be like:
-        # for pid in self.excluded_peakPids:
-        #     df.loc[df[sv.PEAKPID] == pid, 'excluded_peakPids'] = True
-        # self._dataTable.data = df
-        pass
+        Get the excluded NmrResidues from specified dataTables or globally for the backend  if  dataTables are not given.
+        :param dataTable:
+        :return:
+        """
+        excludedNmrResiduePids = self._getExcludedNmrResiduePids(dataTable)
+        nmrResidues = [self.project.getByPid(nr) for nr in excludedNmrResiduePids]
+        return nmrResidues
 
-    def save(self):
-        """Save metadata do the dataTable """
-        if not self._dataTable:
-            getLogger().warn('Impossible to save to DataTable. No DataTable available.')
-            return
-        self._dataTable.updateMetadata(self.asDict())
+    def _getExcludedNmrResiduePids(self, dataTable):
+        excludedNmrResiduePids = []
+        df = dataTable.data
+        if sv.NMRRESIDUEPID in df and sv.EXCLUDED_NMRRESIDUEPID in df:
+            excluded = df[df[sv.EXCLUDED_NMRRESIDUEPID] == True]
+            excludedNmrResiduePids = excluded[sv.NMRRESIDUEPID].unique()
+        return list(excludedNmrResiduePids)
 
-    def restore(self):
-        """Restore metadata from the dataTable """
-        if not self._dataTable:
-            getLogger().warn('Impossible restore from DataTable. No DataTable available.')
-            return
-        for name, value in self._dataTable.metadata.items():
-            if name in self._traitNames:
-                self.update({name: value})
+    def setExcludedNmrResidues(self, nmrResidues, dataTable):
+        """Add an exclusion tag to the dataTables containing the specified residues """
+        nmrResiduesPids = [nr.pid for nr in nmrResidues]
+        # amend table in place. Don't need to resave to dataTable
+        df = dataTable.data
+        if sv.NMRRESIDUEPID in df:
+            excludedNmrResiduesDf = df[df[sv.NMRRESIDUEPID].isin(nmrResiduesPids)]
+            excludedIndexes = excludedNmrResiduesDf.index
+            includedIndexes = [ix for ix in df.index if ix not in excludedIndexes]
+            df.loc[excludedIndexes, sv.EXCLUDED_NMRRESIDUEPID] = True
+            df.loc[includedIndexes, sv.EXCLUDED_NMRRESIDUEPID] = False
+
+
 
 
 ####
@@ -666,7 +838,7 @@ class GroupingBackboneNmrAtoms(GroupingNmrAtomABC):
 
     groupType = 'Backbone'
     groupInfo = 'Follow the backbone atoms in a series Analysis'
-    nmrAtomNames = ['H', 'N', 'CA', 'C', 'HA',]
+    nmrAtomNames = ['H', 'N', 'CA', 'C ', 'HA',]
     excludeResidueTypes = ['Proline']
     includedResidueTypes = None
 

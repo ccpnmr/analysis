@@ -4,9 +4,10 @@ This module defines base classes for Series Analysis
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:52:50 +0100 (Mon, May 22, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2024-10-03 09:42:40 +0100 (Thu, October 03, 2024) $"
+__version__ = "$Revision: 3.2.9.alpha $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -244,14 +245,20 @@ class InputSeriesFrameBC(SeriesFrameBC):
                         try:
                             ## set the unique UID
                             self.loc[i, sv._ROW_UID] = i
-                            ## build the spectrum Property Columns
-                            self.loc[i, sv.DIMENSION] = dimension
-                            self.loc[i, sv.ISOTOPECODE] = spectrum.getByDimensions(sv.ISOTOPECODES, [dimension])[0]
+                            ## build the spectrum Series Property Columns
                             self.loc[i, sv.SERIES_STEP_X] = spectrum.getSeriesItem(spectrumGroup)
                             self.loc[i, sv.SERIES_STEP_Y] = pk.height  # default
                             self.loc[i, sv.SERIESUNIT] = spectrumGroup.seriesUnits
+                            self.loc[i, sv.SERIESQUANTITY] = spectrumGroup.seriesQuantity
+                            ## additional series Items
+                            additionalSeriesItems = spectrum.getAdditionalSeriesItems(spectrumGroup)
+                            for itemCount, additionalSeriesItem in enumerate(additionalSeriesItems):
+                                self.loc[i, sv.ADDITIONAL_SERIES_STEP_X] = additionalSeriesItem
+                                break # for now, we support only one additionalSeriesItem. We could expand in future
                             self.loc[i, sv.SPECTRUMPID] = spectrum.pid
                             self.loc[i, sv.EXPERIMENT] = experimentName
+                            self.loc[i, sv.DIMENSION] = dimension
+                            self.loc[i, sv.ISOTOPECODE] = spectrum.getByDimensions(sv.ISOTOPECODES, [dimension])[0]
                             ## build the peak Property Columns
                             collections = collectionDict.get(pk, [])
                             for collection in collections:
@@ -259,7 +266,7 @@ class InputSeriesFrameBC(SeriesFrameBC):
                                 self.loc[i, sv.COLLECTIONPID] = collection.pid
                             for peakProperty in [sv._HEIGHT, sv._VOLUME, sv._SNR]:
                                 self.loc[i, peakProperty] = getattr(pk, peakProperty, None)
-                            self.loc[i, sv._PPMPOSITION] = pk.getByDimensions(sv._PPMPOSITIONS, [dimension])[0]
+                            self.loc[i, sv._PPMPOSITION] = pk.getByDimensions(sv.PPMPOSITIONS, [dimension])[0]
                             self.loc[i, sv._LINEWIDTH] = pk.getByDimensions(sv._LINEWIDTHS, [dimension])[0]
                             self.loc[i, sv.PEAKPID] = pk.pid
                             ## build the assignment Property Columns
@@ -271,15 +278,10 @@ class InputSeriesFrameBC(SeriesFrameBC):
                                 self.loc[i, sv.NMRATOMNAME] = nmrAtom.name
                                 self.loc[i, sv.NMRATOMPID] = nmrAtom.pid
                                 self.loc[i, sv.NMRRESIDUEPID] = nmrAtom.nmrResidue.pid
-                            # for excludedFlag in sv.EXCLUDED_OBJECTS:
-                            #     self.loc[i, excludedFlag] = False
                             i += 1
                         except Exception as e:
                             getLogger().warn(f'Cannot add row {i} for peak {pk.pid}. Skipping with error: {e}')
             break
-
-        # self.loc[self.index, sv._isSeriesAscending] = isSeriesAscending
-
 
 ########################################################################################################################
 ################################           Relaxation I/O  Series Output Table                 #########################
@@ -330,6 +332,26 @@ class ETAOutputFrame(SeriesFrameBC):
     SERIESFRAMENAME = sv.CROSSCORRELRATIO_OUTPUT_FRAME
     SERIESFRAMETYPE = sv.CROSSCORRELRATIO_OUTPUT_FRAME
 
+class RexETAOutputFrame(SeriesFrameBC):
+
+    """
+    A TableData used to store the Data(frame) valid for the Rex via Trosy Etas analysis.
+    Note. This is created using two inputDataTables. See the "ETACalculation" Model
+
+    Mandatory Column names are:
+        ## --------- Columns definitions --------- ##
+        # Group with calculation/calculated values
+        - seriesUnit        : str,
+        - seriesStep        : float,
+        - seriesStepValue   : float,
+        - value             : float,
+        - value_err         : float,
+
+    """
+
+    SERIESFRAMENAME = sv.REXVIATROSY_OUTPUT_FRAME
+    SERIESFRAMETYPE = sv.REXVIATROSY_OUTPUT_FRAME
+
 class R2R1OutputFrame(SeriesFrameBC):
 
     """
@@ -352,7 +374,7 @@ class RSDMOutputFrame(SeriesFrameBC):
     SERIESFRAMETYPE = sv.RSDM_OUTPUT_FRAME
 
 ########################################################################################################################
-################################   Chemical Shift Mapping  I/O Series Output Table      ################################
+################################   Chemical Shift Perturbation  I/O Series Output Table      ################################
 ########################################################################################################################
 
 class CSMOutputFrame(SeriesFrameBC):
@@ -412,11 +434,13 @@ class CSMOutputFrame(SeriesFrameBC):
                     sv.SERIESUNIT,
                     sv.SERIES_STEP_X,
                     sv.SERIES_STEP_Y,
+                    sv.ADDITIONAL_SERIES_STEP_X,
                     sv.DELTA_DELTA,
                     sv.KD,
                     sv.KD_ERR,
                     sv.BMAX,
                     sv.BMAX_ERR,
+                    sv.GLOBAL_FITTING_CLUSTER_ID
                   ]
         columns += sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS
         self.loc[-1, columns] = None # None value, because you must give a value when creating columns after init.
@@ -446,6 +470,27 @@ def _mergeRowsByHeaders(inputData, grouppingHeaders, dropColumnNames=[sv.NMRATOM
     if rebuildUID and len(inputData.index) == len(newIDs):
         inputData[sv._ROW_UID] = newIDs
     return inputData
+
+
+def _getNextGlobalFittingClusterId(df: pd.DataFrame) -> int:
+    """
+    Get the next available clusterId based on existing clusterIds in the DataFrame.
+    Used to group together collections which data is fitted together is some global fitting.
+
+    :param df: pandas DataFrame that contains the header column.
+    :return: The next available clusterId as an integer.
+    """
+    header = sv.GLOBAL_FITTING_CLUSTER_ID
+    if header not in df.columns:
+        return 1
+    dfCleaned = df[df[header].notna()].copy()
+    if dfCleaned.empty:
+        return 1
+    # Convert clusterId column to numeric (in case of mixed types) and drop NaN
+    dfCleaned[header] = pd.to_numeric(dfCleaned[header], errors='coerce')
+    max_cluster_id = dfCleaned[header].max()
+    return int(max_cluster_id) + 1
+
 
 
 INPUT_SERIESFRAME_DICT = {

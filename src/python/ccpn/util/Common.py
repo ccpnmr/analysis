@@ -613,6 +613,22 @@ def percentage(percent, whole):
     return (percent * whole) / 100.0
 
 
+def modifyByFraction(value, fraction):
+    """
+    Modify the given value by a specified fraction.
+
+    Parameters:
+    value (int, float): The original value to be modified.
+    fraction (float): The fraction representing the change (positive for increase, negative for decrease).
+
+    Returns:
+    float: The modified value after the operation.
+    """
+    # Calculate the modified value
+    new_value = value * (1 + fraction)  # Use fraction directly for both add and subtract
+
+    return new_value
+
 def _add(x, y):
     if y > 0:
         return _add(x, y - 1) + 1
@@ -979,10 +995,14 @@ def copyToClipboard(items):
     getLogger().info("Copied to clipboard: %s" % values)
 
 
-def loadModules(paths):
+def fetchPythonModules(paths):
     """
-    dynamic module importer.
+    A  dynamic module importer.
+    Load Python module if is not already loaded from disk, return the module if is already imported
+    :param paths: list. List of paths from where retrieve the Python files
+    :return: A list of  loaded Python modules.
     """
+
     import sys
     import pkgutil as _pkgutil
     import traceback
@@ -997,11 +1017,14 @@ def loadModules(paths):
             try:
                 found = loader.find_module(name)
                 if found:
-                    if sys.modules.get(name):  # already loaded.
+                    module = sys.modules.get(name)
+                    if module is not None:  # already loaded.
+                        modules.append(module)
                         continue
                     else:
                         module = found.load_module(name)
                         modules.append(module)
+
             except Exception as err:
                 traceback.print_tb(err.__traceback__)
                 getLogger().warning('Error Loading Module %s. %s' % (name, str(err)))

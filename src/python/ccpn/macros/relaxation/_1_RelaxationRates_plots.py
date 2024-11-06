@@ -144,7 +144,7 @@ globals().update(args.__dict__)
 
 ## get the data
 dataTable = macrosLib._getDataTableForMacro(dataTableName)
-data =  dataTable.data
+data =  macrosLib._getFilteredDataFrame(dataTable.data, [sv.R1, sv.R2, sv.HETNOE_VALUE])
 
 x = data[sv.NMRRESIDUECODE]
 x = x.astype(int)

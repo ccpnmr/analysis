@@ -57,7 +57,7 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipesTree
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, _stoppableProgressBar, progressManager
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo, _stoppableProgressBar, progressManager
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.pipes import loadedPipes as LP
 from ccpn.util.Path import aPath, joinPath
@@ -588,6 +588,7 @@ class GuiPipeline(CcpnModule, Pipeline,):
             self._setThreadStyle(False)
             self._pipelineProcess.run()
             self.pipelineProgressLabel.setText('Ready')
+            showInfo('Done', 'Pipeline completed')
 
     def _stopPipeline(self, thread=None):
         self.pipelineProgressLabel.setText('Stopped')

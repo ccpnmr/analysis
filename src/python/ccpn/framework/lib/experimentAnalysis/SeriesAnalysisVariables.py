@@ -5,9 +5,10 @@ This module contains all definitions used in the various SeriesAnalysis modules.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-23 09:19:35 +0100 (Mon, October 23, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-10-30 16:30:35 +0000 (Wed, October 30, 2024) $"
+__version__ = "$Revision: 3.2.9.alpha $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,10 +28,6 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-from collections import OrderedDict
-import ccpn.util.Constants as constants
-import ccpn.core.lib.peakUtils as pu
-from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED
 
 ############################################################################################
 ##  SeriesDataTable common definitions. Used in I/O tables columns and throughtout modules
@@ -41,6 +38,12 @@ NMRRESIDUECODE   = 'nmrResidueCode'         # -> str   | nmrResidue Sequence Cod
 NMRRESIDUETYPE   = 'nmrResidueType'         # -> str   | nmrResidue Type (e.g.: 'ALA')
 NMRATOMNAME      = 'nmrAtomName'            # -> str   | nmrAtom name (e.g.: 'Hn')
 NMRATOMNAMES     = f'{NMRATOMNAME}s'        # -> str   | nmrAtom names comma separated (e.g.: 'Hn, Nh'). Used in OutPut datarames instead of ATOMNAME
+
+CHAINNAME     = 'ChainName'
+RESIDUECODE   = 'ResidueCode'
+RESIDUENAME   = 'ResidueName'
+ATOMNAME      = 'AtomName'
+
 
 NMRRESIDUECODETYPE = f'{NMRRESIDUECODE}-{NMRRESIDUETYPE}'  # -> str   | nmrResidue Sequence Code + Type (e.g.: '1-ALA')
 EXPERIMENT = 'experiment' # -> str, e.g.: T1, T2, HetNoe, 'Cest', etc
@@ -62,6 +65,7 @@ VALUE_ERR        = f'{VALUE}{_ERR}'
 KD               = 'Kd'
 BMAX             = 'BMax'
 T                = 'T'
+Xs             = 'Xs'
 T_ERR            = f'{T}{_ERR}'
 KD_ERR           = f'{KD}{_ERR}'
 BMAX_ERR         = f'{BMAX}{_ERR}'
@@ -75,7 +79,10 @@ RELDISPLACEMENT  = 'Relative Displacement'
 SERIES_STEP_X    = 'series_Step_X'
 SERIES_STEP_X_label    = 'series_Step_X_label'
 SERIES_STEP_Y    = 'series_Step_Y'
+ADDITIONAL_SERIES_STEP_X    = 'additional_series_Step_X' # this is used for example for the Global protein Concentration
+
 SERIESUNIT       = 'seriesUnit'
+SERIESQUANTITY       = 'seriesQuantity'
 PEAKPID          = 'peakPid'
 SPECTRUMPID      = 'spectrumPid'
 NMRATOMPID       = 'nmrAtomPid'
@@ -84,12 +91,12 @@ COLLECTIONPID    = 'collectionPid'
 PID              = 'pid'
 ASSIGNEDNMRATOMS = 'assignedNmrAtoms'
 
-# NOT yet enbled.
+
 EXCLUDED_PEAKPID        = f'{EXCLUDED_}{PEAKPID}'
 EXCLUDED_SPECTRUMPID    = f'{EXCLUDED_}{SPECTRUMPID}'
 EXCLUDED_NMRATOMPID     = f'{EXCLUDED_}{NMRATOMPID}'
 EXCLUDED_COLLECTIONPID  = f'{EXCLUDED_}{COLLECTIONPID}'
-ALL_EXCLUDED            = [EXCLUDED_PEAKPID, EXCLUDED_SPECTRUMPID, EXCLUDED_NMRATOMPID, EXCLUDED_COLLECTIONPID]
+EXCLUDED_NMRRESIDUEPID  = f'{EXCLUDED_}{NMRRESIDUEPID}'
 
 # fitting output Stat variables
 MINIMISER        = 'minimiser'
@@ -98,24 +105,46 @@ CHISQR           = 'chisqr'
 REDCHI           = 'redchi'  # DO NOT CHANGE! Hardcoded in dependencies Model
 AIC              = 'aic' # DO NOT CHANGE! Hardcoded in dependencies Model
 BIC              = 'bic' # DO NOT CHANGE! Hardcoded in dependencies Model
+AICc              = 'aicc'
+BICc              = 'bicc'
+
+
+RESIDUAL = 'residual'
 MINIMISER_METHOD = 'Method'
 MINIMISER_MODEL  = 'Model'
-
+MINIMISER_OBJ  = '_minimiserObj'
+UNCERTAINTIESMETHOD = 'UncertaintiesMethod'
+MODEL_ID = 'model_id'
+MODEL_SCORE = 'model_score'
+MODEL_SELECTION_METHOD = 'model_selection_method'
+FAILED = 'Failed'
+DIFFERENTIAL_EVOLUTION = 'differential_evolution'
+MINIMISERPREFIX = 'minimiser_'
 ## Peak properties. Used to get nmrAtom assigned-peak by dimension and build tables.
-_POINTPOSITION  = pu._POSITION
-_PPMPOSITION    = pu._PPMPOSITION
-_PPMPOSITIONS   = pu.PPMPOSITIONS
-_LINEWIDTH      = pu._LINEWIDTH
-_LINEWIDTHS     = pu.LINEWIDTHS
-_HEIGHT         = pu.HEIGHT
-_VOLUME         = pu.VOLUME
+_POSITION = 'position'
+_POINTPOSITION = 'pointPosition'
+_PPMPOSITION = 'ppmPosition'
+_LINEWIDTH = 'lineWidth'
+HEIGHT = 'height'
+VOLUME = 'volume'
+POSITIONS = f'{_POSITION}s'
+LINEWIDTHS = f'{_LINEWIDTH}s'
+POINTPOSITIONS = f'{_POINTPOSITION}s'
+PPMPOSITIONS = f'{_PPMPOSITION}s'
+_LINEWIDTHS     = LINEWIDTHS
+_HEIGHT         =  HEIGHT
+_VOLUME         =  VOLUME
 _SNR            = 'signalToNoiseRatio'
 
 ## ATOM Names
-_H = pu.H
-_N = pu.N
-_C = pu.C
-_OTHER = pu.OTHER
+OTHER = 'Other'
+H = 'H'
+N = 'N'
+C = 'C'
+_H = H
+_N = N
+_C = C
+_OTHER = OTHER
 
 ## IsotopeCode Names
 
@@ -124,7 +153,14 @@ _1H  = '1H'
 _15N = '15N'
 _13C = '13C'
 
+## used in Global fitting user_data. a metadata attr of the LMFIT class Paramater
+_PARAMTYPE = '_paramType'
+_PARAMNAME = '_paramName'
+_GLOBAL = '_global'
+_LOCAL = '_local'
+_FIXED = '_fixed'
 
+GLOBAL_FITTING_CLUSTER_ID = 'globalFittingClusterId'
 
 ## Relaxation  Fitting Variables
 AMPLITUDE = 'amplitude'
@@ -140,9 +176,25 @@ PLATEAU_ERR = f'{PLATEAU}{_ERR}'
 HETNOE = 'HetNoe'
 SAT = 'sat'
 UNSAT = 'unSat'
-UNSAT_OPTIONS =  [UNSAT, 'unsaturated', 'nosat', 'noNOE'] # key options to set from a spectrumGroup
-SAT_OPTIONS = [SAT,  'saturated', 'NOE']
-
+_0 = 0
+_1 = 1
+UNSAT_OPTIONS = [  int(_0),      # key options to set from a spectrumGroup
+                                    float(_0),
+                                    str(_0),
+                                    UNSAT,
+                                    'unsaturated',
+                                    'nosat',
+                                    'noNOE',
+                                    f'no{HETNOE}'
+                                  ]
+SAT_OPTIONS = [  int(_1),      # key options to set from a spectrumGroup
+                                float(_1),
+                                str(_1),
+                                SAT,
+                                'saturated',
+                                 'NOE',
+                                 HETNOE,
+                                ]
 CROSSCORRELRATIO = 'Cross-CorrelationRatio'
 INPHASE = 'in-phase'
 ANTIPHASE = 'anti-phase'
@@ -154,7 +206,7 @@ R2R1 = 'R2/R1'
 R2R1_ERR = f'{R2R1}{_ERR}'
 R1R2 = 'R1*R2'
 R1R2_ERR = f'{R1R2}{_ERR}'
-
+REXVIATROSY = 'RexViaTrosy'
 RSDM = 'Reduced_Spectral_Density_Mapping'
 J0 = 'J0'
 JwX = 'JwX'
@@ -163,40 +215,63 @@ J0_ERR = f'{J0}{_ERR}'
 JwX_ERR = f'{JwX}{_ERR}'
 JwH_ERR = f'{JwH}{_ERR}'
 S2 = 'S2'
+S2s = 'S2s'
+S2f = 'S2f'
+Ts = 'Ts'
+Tf = 'Tf'
+Ti = 'Ti'
+Ci = 'Ci'
+W = 'w'
 TE = 'TE'
+Tprime = 'Tprime'
 REX = 'REX'
-TM = 'TM'
-SE_ERR = f'{S2}{_ERR}'
+TC = 'TC'
+Di = 'Di'
+S2_ERR = f'{S2}{_ERR}'
 TE_ERR = f'{TE}{_ERR}'
 REX_ERR = f'{REX}{_ERR}'
-
+TC_ERR = f'{TC}{_ERR}'
+ETAXY = 'ETAxy'
+ETAZ = 'ETAz'
+ETAXY_ERR = f'{ETAXY}{_ERR}'
+ETAZ_ERR = f'{ETAZ}{_ERR}'
 ISOTROPIC = 'Isotropic'
-ANISOTROPIC = 'Anisotropic '
+ANISOTROPIC = 'Anisotropic'
+AXIALLY_SYMMETRIC = 'Axially-Symmetric'
 DIFFUSION = 'Diffusion'
+LIPARISZABO = 'Lipari-Szabo'
+LIPARISZABO_Original = 'Lipari-Szabo Original'
+LIPARISZABO_Extended = 'Lipari-Szabo Extended'
+ALL_MODELS = 'All Models'
+PROLATE = 'Prolate'
+OBLATE = 'Oblate'
 
 FLAG = 'Flag'
 SERIAL = 'Serial'
-
+SF = 'SF' # spectrometer frequency in Mhz
 CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, MINIMISER_MODEL, RSQR, CHISQR, REDCHI, AIC, BIC]
-SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIES_STEP_X, SERIESUNIT, EXPERIMENT]
+SpectrumPropertiesHeaders = [DIMENSION, ISOTOPECODE, SERIES_STEP_X, ADDITIONAL_SERIES_STEP_X, SERIESUNIT, EXPERIMENT]
 PeakPropertiesHeaders = [_PPMPOSITION, _HEIGHT, _LINEWIDTH, _VOLUME]
 AssignmentPropertiesHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE, NMRATOMNAME]
 GROUPBYAssignmentHeaders = [NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
 PidHeaders = [COLLECTIONID, COLLECTIONPID, SPECTRUMPID, PEAKPID, NMRATOMPID, NMRRESIDUEPID]
 
 MERGINGHEADERS = [COLLECTIONID, COLLECTIONPID, NMRCHAINNAME, NMRRESIDUECODE, NMRRESIDUETYPE]
-EXCLUDED_OBJECTS = [EXCLUDED_COLLECTIONPID, EXCLUDED_COLLECTIONPID, EXCLUDED_NMRATOMPID, EXCLUDED_SPECTRUMPID]
+EXCLUDED_OBJECTS = [EXCLUDED_COLLECTIONPID, EXCLUDED_NMRRESIDUEPID, EXCLUDED_NMRATOMPID, EXCLUDED_SPECTRUMPID]
 
 ############################################################################################
 ### Used in SeriesFrame tables ABCs
 ############################################################################################
 DATATABLETYPE               = 'DATATABLETYPE'
+_LAST_SAVED_APPLICATIONVERSION = '_LAST_SAVED_APPLICATIONVERSION'
 SERIESANALYSISDATATABLE     = 'SERIESANALYSISDATATABLE'
 SERIESANALYSISOUTPUTDATA    = 'SeriesAnalysisResultsData'
 SERIESANALYSISINPUTDATA     = 'SeriesAnalysisInputData'
 RELAXATION_OUTPUT_FRAME     = 'RelaxationOutputFrame'
 HetNoe_OUTPUT_FRAME         = 'HetNoeOutputFrame'
 CROSSCORRELRATIO_OUTPUT_FRAME         = 'Cross-CorrelationRatesOutputFrame'
+REXVIATROSY_OUTPUT_FRAME         = 'RexViaTrosyOutputFrame'
+
 R2R1_OUTPUT_FRAME         = 'R2R1OutputFrame'
 RSDM_OUTPUT_FRAME         = 'RSDMOutputFrame'
 CSM_OUTPUT_FRAME            = 'CSMOutputFrame'
@@ -207,25 +282,22 @@ _peakPidHeaders             = '_peakPidHeaders'
 _isSeriesAscending = '_isSeriesAscending'
 _SpectrumPropertiesHeaders = 'spectrumPropertiesHeaders'
 
-
 OUTPUT_SERIESFRAME_TYPES = [
                     CSM_OUTPUT_FRAME,
                     RELAXATION_OUTPUT_FRAME,
                     ]
 
-
-
 ############################################################################################
 ### Used in SeriesAnalyisBC
 ############################################################################################
-ChemicalShiftMappingAnalysis = 'ChemicalShiftMappingAnalysis'  # used in SeriesName for the ChemicalShiftMappingAnalysis
-RelaxationAnalysis = 'RelaxationAnalysis'                      # used in SeriesName for the RelaxationAnalysisBC
-
+ChemicalShiftPerturbationAnalysis = 'ChemicalShiftPerturbationAnalysis'  # used in SeriesName for the ChemicalShiftPerturbationAnalysis
+RelaxationAnalysis = 'RelaxationAnalysis'                      # used in SeriesName for the RelaxationAnalysis
+JCouplingAnalysis = 'JCouplingAnalysis'
+RDCAnalysis = 'RDCAnalysis'
+PCSAnalysis = 'PseudoContactShiftAnalysis'
+PREAnalysis = 'ParamagneticRelaxationEnhancementAnalysis'
 
 ## Series Units
-SERIES_TIME_UNITS = constants.TIME_UNITS
-SERIES_CONCENTRATION_UNITS = constants.CONCENTRATION_UNITS
-SERIES_UNITS = constants.ALL_SERIES_UNITS
 
 STD = 'Std'
 MEAN = 'Mean'
@@ -250,7 +322,7 @@ DEFAULT_H_ALPHAFACTOR = 1
 DEFAULT_N_ALPHAFACTOR = 0.142
 DEFAULT_C_ALPHAFACTOR = 0.25
 DEFAULT_OTHER_ALPHAFACTOR = 1
-DEFAULT_ALPHA_FACTORS = OrderedDict((
+DEFAULT_ALPHA_FACTORS = dict((
                             (_1H, DEFAULT_H_ALPHAFACTOR),
                             (_15N, DEFAULT_N_ALPHAFACTOR),
                             (_13C, DEFAULT_C_ALPHAFACTOR),
@@ -270,6 +342,7 @@ ARGB_VALUE_ERR = f'{ARGB}{_ERR}'
 ### Relaxation Calculation Models
 HETNOE_VALUE = f'{HETNOE}'
 HETNOE_VALUE_ERR = f'{HETNOE_VALUE}{_ERR}'
+HETNOE_ERR = HETNOE_VALUE_ERR
 
 CROSSRELAXRATIO_VALUE = f'{CROSSCORRELRATIO}'
 CROSSRELAXRATIO_VALUE_ERR = f'{CROSSCORRELRATIO}{_ERR}'
@@ -294,14 +367,22 @@ ONE_SITE_TOTAL_BINDING_MODEL = 'One-Site (Total) Binding'
 TWO_BINDING_SITE_MODEL = 'Two Site Binding'
 ONE_SITE_BINDING_ALLOSTERIC_MODEL = 'One Site with Allosteric Binding'
 FRACTION_BINDING_MODEL = 'Fraction Binding'
-FRACTION_BINDING_WITHTARGETMODEL = 'Fraction Binding with [Target]'
+
+MONOMERDIMER_BINDING_MODEL = 'Monomer-Dimer  Binding'
+FRACTION_BINDING_WITH_FIXED_TARGET_MODEL =  'Fraction Binding with Fixed Target Concentration'
+FRACTION_BINDING_WITH_VARIABLE_TARGET_MODEL = 'Fraction Binding with Variable Target Concentration'
+
 COOPERATIVITY_BINDING_MODEL = 'Cooperativity Binding'
 FMNOYERROR = 'Fitting Model not implemented yet'
 #### residues names
-CCP_3LETTER_CODES = CCP_CODES_SORTED
 EXCLUDEDRESIDUETYPES = 'ExcludedResidueTypes'
 
 LEASTSQ = 'leastsq'
+
+COVMATRIX = 'Covariance'
+MONTECARLO = 'MonteCarlo'
+BOOTSTRAP = 'Bootstrap'
+JACKKNIFE = 'JackKnife'
 
 InversionRecovery = 'InversionRecovery'
 ExponentialDecay = 'ExponentialDecay'
@@ -312,19 +393,24 @@ NONE = 'None'
 T1 = 'T1'
 T2 = 'T2'
 CEST = 'CEST'
+TROSY_XYA = 'TROSY_ETAxyA'
+TROSY_XYB = 'TROSY_ETAxyB'
+TROSY_Z = 'TROSY_ETAz'
 
 EXPERIMENTS  = [USERDEFINEDEXPERIMENT, T1, T2, HETNOE]
-
+_custom = 'custom'
 ## Warnings
 UNDER_DEVELOPMENT_WARNING = f'''This functionality is currently under active development. Use it at your own risk.'''
 NIY_WARNING = f'''This functionality has not been implemented yet.'''
 # Errors
 OMIT_MODE = 'omit'
 RAISE_MODE = 'raise'
-
+PROPAGATE_MODE = 'propagate'
 
 MINIMISER_METHODS = {
     'leastsq': 'Levenberg-Marquardt (default)',
+    'powell': 'Powell',
+    'cg': 'Conjugate-Gradient',
     'least_squares': 'Least-Squares minimization, using Trust Region Reflective method',
     'emcee': 'Maximum likelihood via Monte-Carlo Markov Chain',
     'differential_evolution': 'differential evolution',
@@ -333,8 +419,6 @@ MINIMISER_METHODS = {
     'ampgo': 'Adaptive Memory Programming for Global Optimization',
     'nelder': 'Nelder-Mead',
     'lbfgsb': 'L-BFGS-B',
-    'powell': 'Powell',
-    'cg': 'Conjugate-Gradient',
     'newton': 'Newton-CG',
     'cobyla': 'Cobyla',
     'bfgs': 'BFGS',

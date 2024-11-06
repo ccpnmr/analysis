@@ -219,6 +219,8 @@ def main():
         for col in range(table.columnCount() // 2):
             table.setBorderVisible(row, col, True)
 
+    table.setForeground(0,0, QtCore.Qt.green)
+
     # set some background colours
     cells = ((0, 0, '#80c0ff', '#ffe055'),
              (1, 1, '#fe83cc', '#90efab'), (1, 2, '#fe83cc', '#90efab'),

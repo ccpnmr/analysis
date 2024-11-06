@@ -269,11 +269,11 @@ class Path(_Path_):
         return self.isValidFilePath(allowOther='\@\,') and \
             self.isValidBasename(allowSpace=False, suffixes=suffixes if suffixes is not None else ['.ccpn', ])
 
-    def addTimeStamp(self) -> Path:
+    def addTimeStamp(self, timeFormat='%Y-%m-%d-%H%M%S', sep='-' ) -> Path:
         """Return a Path instance with path.timeStamp-suffix profile
         """
-        now = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
-        return self.parent / (self.stem + '-' + str(now) + self.suffix)
+        now = datetime.datetime.now().strftime(timeFormat)
+        return self.parent / (self.stem + sep + str(now) + self.suffix)
 
     def incrementVersion(self) -> Path:
         """return: a Path instance with directory/basename(version).suffixes profile
@@ -678,6 +678,13 @@ class Path(_Path_):
 #=========================================================================================
 # Functions
 #=========================================================================================
+
+def scandirs(dirname):
+    """ Recursively find all subdirs"""
+    subfolders = [f.path for f in os.scandir(dirname) if f.is_dir()]
+    for dirname in list(subfolders):
+        subfolders.extend(scandirs(dirname))
+    return subfolders
 
 def _rmdirs(path):
     """Recursively delete path and contents; maybe not very fast

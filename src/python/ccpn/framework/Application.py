@@ -35,6 +35,7 @@ from ccpn.ui import interfaces, defaultInterface
 ANALYSIS_ASSIGN = 'AnalysisAssign'
 ANALYSIS_SCREEN = 'AnalysisScreen'
 ANALYSIS_METABOLOMICS = 'AnalysisMetabolomics'
+ANALYSIS_DYNAMICS = 'AnalysisDynamics'
 ANALYSIS_STRUCTURE = 'AnalysisStructure'
 applicationNames = (ANALYSIS_ASSIGN, ANALYSIS_SCREEN, ANALYSIS_METABOLOMICS, ANALYSIS_STRUCTURE)
 

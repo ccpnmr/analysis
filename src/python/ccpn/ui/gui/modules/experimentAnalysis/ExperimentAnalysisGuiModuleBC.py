@@ -2,8 +2,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-08 12:20:16 +0100 (Wed, May 08, 2024) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-08-30 12:01:53 +0100 (Fri, August 30, 2024) $"
 __version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
@@ -27,14 +28,13 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 from PyQt5.QtCore import pyqtSignal
 from ccpn.framework.Application import getApplication, getCurrent, getProject
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNotifierHandler import CoreNotifiersHandler
-from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
+from ccpn.framework.lib.experimentAnalysis.backends.SeriesAnalysisABC import SeriesAnalysisABC
 from ccpn.util.Logging import getLogger
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import numpy as np
 import pandas as pd
 
 ######## gui/ui imports ########
-from PyQt5 import QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import PanelHandler,\
     SettingsPanelHandler, IOHandler, PluginsHandler
@@ -107,6 +107,9 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
 
         ## link to user plugins - external programs. (NYI)
         self.pluginsHandler = PluginsHandler(guiModule=self)
+
+        ## fire any post init callback from panels
+        self._postInitPanels()
 
     ##########################################################
     #####################      Data       ###########################
@@ -192,6 +195,14 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
             getLogger().info(f'{self}. Nothing to refit. Skipping...')
             self.backendHandler.fitInputData()
             self.backendHandler._needsRefitting = False
+
+    def _postInitPanels(self):
+        for _, panel in self.settingsPanelHandler._panels.items():
+            panel.postInitWidgets()
+
+        for _, panel in self.panelHandler.panels.items():
+            panel.postInitWidgets()
+        self._setUpdateDone()
 
     def _updatePanels(self):
         """

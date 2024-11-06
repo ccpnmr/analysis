@@ -14,9 +14,10 @@ Macro created for Analysis Version 3.1.1
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -24,9 +25,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-07 14:23:30 +0000 (Tue, November 07, 2023) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-10-22 15:20:23 +0100 (Tue, October 22, 2024) $"
+__version__ = "$Revision: 3.2.9.alpha $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -106,7 +107,7 @@ import numpy as np
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
+import  ccpn.AnalysisDynamics.lib.modelAnalysis.macros.SpectralDensityContourLines as mfl
 import ccpn.macros.relaxation._macrosLib as macrosLib
 from ccpn.util.Common import percentage
 
@@ -212,8 +213,12 @@ def _plotClusters(pdf):
 
     macrosLib.labelLines(plt.gca().get_lines(), xvals=[xMaxLim + xPerc] * len(rctLines), color=rctLineColour,
                          align=False, clip_on=False, fontsize=4, zorder=None)
-    ax.set_xlim(xMinLim - xPerc, xMaxLim + xPerc)
-    ax.set_ylim(yMinLim, yMaxLim)
+    try:
+        ax.set_xlim(xMinLim - xPerc, xMaxLim + xPerc)
+        ax.set_ylim(yMinLim, yMaxLim)
+    except Exception as err:
+        warning(f'Cannot set limits for  {titlePdf}. {err}')
+
     ax.legend(prop={'size': 6})
 
     pdf.savefig()
@@ -225,7 +230,9 @@ globals().update(args.__dict__)
 
 #### Data #####
 dataTable = macrosLib._getDataTableForMacro(dataTableName)
-data =  dataTable.data
+nanColumns = [sv.R1, sv.R2, sv.HETNOE_VALUE,]
+data =  macrosLib._getFilteredDataFrame(dataTable.data, nanColumns)
+
 x = data[sv.NMRRESIDUECODE]
 x = x.astype(int)
 x = x.values
@@ -233,7 +240,7 @@ x = x.values
 R1 = data[sv.R1].values
 R2 = data[sv.R2].values
 
-rctLines, s2Lines = sdl.calculateSpectralDensityContourLines(
+rctLines, s2Lines = mfl.calculateSpectralDensityContourLines(
                                                             spectrometerFrequency=spectrometerFrequency,
                                                             lenNh=NH_bondLenght,
                                                             ict=InternalCorrelationTimeTe,

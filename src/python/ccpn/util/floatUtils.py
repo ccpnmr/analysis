@@ -67,3 +67,18 @@ def fRound(number) -> float:
 def numZeros(decimal):
     """ For floats less the 1, Count the number of zeros after the . """
     return 1 if decimal == 0 else -math.floor(math.log10(abs(decimal))) - 1
+
+def formatValue(value, precision=3):
+    """
+    Format a numerical value based on its magnitude.
+    If the value is within the range [1e-3, 1e3), it is formatted as a standard floating-point number with a specified precision.
+    If the value is outside this range, it is formatted in scientific notation with the same precision.
+    :param value:  float. The numerical value to format.
+    :param precision:   int, optional. The number of decimal places to use in the formatted output. The default is 3.
+    :return:  str. The formatted value as a string.
+    """
+    import numpy as np
+    if 1e-3 <= value < 1e3:
+        return f"{value:.{precision}f}"
+    else:
+        return np.format_float_scientific(value, precision=precision, trim='-')

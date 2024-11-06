@@ -1,27 +1,30 @@
 """
-This macro is used to calculate the RelaxationExchange via the ETAs and reduced Spectral density mapping and Sigma-NH.
-See Relaxation Tutorial.
-Reference: see below
+This macro is used to calculate the RelaxationExchange via the ETAs.
+There are several methodologies, to describe the Exchange Rate using ETAs experiments but in this macro we use the model discussed by Hass and Led in DOI: 10.1002/mrc.1845
+
+This model includes two variants for calculating the R20:
+1) when the system is rigid and tumble fast and nearly isotropically, we use the R1 and R2 values only and  eq.6 in the journal article
+2) when the system is flexible or highly non-spherical.  we use the R2 and ETAxy values only and  eq.5 in the journal article
+The Rex is:
+ Rex = R2 - R20
 
 This analysis requires 2 dataTables obtained from the RelaxationAnalysis tools:
     -  RSDM
     - ETAs
 
-Calculation model:
-- r20 =  (r1-7/4Jwh) *  (ETAxy / ETAz) + 13/8*Jwh
-- rex = r2 - r20
  """
 
-reference = """ Reference: DOI: https://doi.org/10.1002/mrc.1253. 
-Direct measurement of the transverse and longitudinal 15N chemical shift anisotropy–dipolar cross-correlation rate constants using 1H-coupled HSQC spectra.
-Hall and Fushman 2003. Magn Reson. Chem. 2003, 41:837-842 """
+reference = """ Reference: DOI: 10.1002/mrc.1845 
+Evaluation of two simplified 15N-NMR methods for determining µs–ms dynamics of proteins. Mathias A. S. Hass, Jens J. Led. 2006
+ """
 
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -29,9 +32,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:49 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-09-27 10:12:57 +0100 (Fri, September 27, 2024) $"
+__version__ = "$Revision: 3.2.9.alpha $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -50,10 +53,7 @@ __date__ = "$Date: 2023-02-03 10:04:03 +0000 (Fri, February 03, 2023) $"
 # pid for existing objects in the the project.
 
 ETAxyDataName = 'ETAxyResultData'
-ETAzDataName = 'ETAzResultData'
 RSDMdataTableName = 'RSDMResults'
-ETAzScalingFactor = 1.07
-ETAxyScalingFactor = 1.08
 
 ##  demo sequence for the GB1 protein . Replace with an empty str if not available, e.g.: sequence  = ''
 sequence  = '' #'KLILNGKTLKGETTTEAVDAATAEKVFKQYANDNGVDGEWTYDAATKTFTVTE'
@@ -65,9 +65,9 @@ spectrometerFrequency=600.13
 
 
 ## Some Graphics Settings
-titlePdf  = 'Relaxation Exchange determination via η$_{xy/z}$ analysis'
+titlePdf  = 'Relaxation Exchange determination via η$_{xy}$ and Rates analysis'
 figureTitleFontSize = 8
-showInteractivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
+interactivePlot = False # True if you want the plot to popup as a new windows, to allow the zooming and panning of the figure.
 scatterColor = 'navy'
 scatterColorError = 'darkred'
 scatterExcludedByNOEColor = 'orange'
@@ -92,10 +92,12 @@ outputPath = None
 ##################   End User Settings     ########################
 ############################################################
 
-import pandas as pd
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.experimentConstants import N15gyromagneticRatio, HgyromagneticRatio
-import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
+from ccpn.framework.lib.experimentAnalysis.ExperimentConstants import N15gyromagneticRatio, HgyromagneticRatio
+import ccpn.framework.lib.experimentAnalysis.calculationModels.relaxation.spectralDensityLib as sdl
+from ccpn.framework.lib.experimentAnalysis.calculationModels._libraryFunctions import calculateUncertaintiesError, peakErrorBySNRs
+from scipy import stats
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -103,16 +105,13 @@ from ccpn.ui.gui.widgets.DrawSS import plotSS
 import ccpn.macros.relaxation._macrosLib as macrosLib
 from ccpn.ui.gui.widgets.MessageDialog import  showMessage, showMulti
 from ccpn.framework.PathsAndUrls import CCPN_SUMMARIES_DIRECTORY
-from ccpn.util.Path import aPath, joinPath
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.util.Path import joinPath
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 import ccpn.ui.gui.widgets.PulldownListsForObjects as cw
-from ccpn.core.lib.Pid import Pid, createPid
+from ccpn.core.lib.Pid import createPid
 # create a very simple popup to get the dataTable names
 
 ETAxyDataPid = createPid('DT', ETAxyDataName)
-ETAzDataPid = createPid('DT', ETAzDataName)
 RSDMDataPid = createPid('DT', RSDMdataTableName)
 
 
@@ -136,18 +135,14 @@ class DataTableSelection(CcpnDialogMainWidget):
                                                 labelText='Select the ETAxy DataTable',
                                                 showSelectName=True,
                                                 grid=(0, 0), callback=None)
-        self.widgetETAz = cw.DataTablePulldown(self.mainWidget,
-                                               mainWindow=self.mainWindow,
-                                               labelText='Select the ETAz DataTable',
-                                               showSelectName=True,
-                                               grid=(1, 0), callback=None)
+
         self.widgetRSDM = cw.DataTablePulldown(self.mainWidget,
                                                mainWindow=self.mainWindow,
                                                labelText='Select the RSDM DataTable',
                                                showSelectName=True,
                                                grid=(2, 0), callback=None)
         self.widgetETAxy.pulldownList.select(f'DT:{ETAxyDataName}')
-        self.widgetETAz.pulldownList.select(f'DT:{ETAzDataName}')
+        # self.widgetETAz.pulldownList.select(f'DT:{ETAzDataName}')
 
         for i in self.widgetRSDM.pulldownList.texts:
             if 'RSDM' in i:
@@ -157,10 +152,10 @@ class DataTableSelection(CcpnDialogMainWidget):
 
     def _okClicked(self):
         global ETAxyDataPid
-        global ETAzDataPid
+        # global ETAzDataPid
         global RSDMDataPid
         ETAxyDataPid =self.widgetETAxy.getText()
-        ETAzDataPid = self.widgetETAz.getText()
+        # ETAzDataPid = self.widgetETAz.getText()
         RSDMDataPid = self.widgetRSDM.getText()
         self.accept()
 
@@ -174,47 +169,37 @@ popup = DataTableSelection(None, mainWindow=mainWindow)
 popup.exec_()
 ## get the objects
 ETAxyData = get(ETAxyDataPid)
-ETAzData =  get(ETAzDataPid)
 RSDMdata =  get(RSDMDataPid)
 
 ## check all data is in the project
-if not all([ETAxyData, ETAzData, RSDMdata]):
-    msg = f'Cannot run the macro. Ensure your dataTables are named: {ETAxyDataName, ETAzDataName, RSDMdataTableName}'
+if not all([ETAxyData, RSDMdata]):
+    msg = f'Cannot run the macro. Ensure your dataTables are named: {ETAxyDataName, RSDMdataTableName}'
     showMessage('Error with input data', msg)
     raise RuntimeError(msg)
 
-## calculate the model values.
+## get the data from the DataTables as dataframes
 
-RSDMdf = RSDMdata.data
-ETAzdf = ETAzData.data.groupby([sv.COLLECTIONID]).first()
+nanColumns = [sv.R1,
+              sv.R2,
+              sv.HETNOE_VALUE,
+              sv.J0,
+              sv.JwH,
+              sv.JwX,
+              sv.J0_ERR,
+              sv.JwH_ERR,
+              sv.JwX_ERR]
+
+RSDMdf =  macrosLib._getFilteredDataFrame(RSDMdata.data, nanColumns)
 ETAxydf = ETAxyData.data.groupby([sv.COLLECTIONID]).first()
 
 R1 = RSDMdf[sv.R1].values
 R2 = RSDMdf[sv.R2].values
-NOE = RSDMdf[sv.HETNOE_VALUE].values
 
 R1_ERR = RSDMdf[sv.R1_ERR].values
 R2_ERR  = RSDMdf[sv.R2_ERR].values
-NOE_ERR = RSDMdf[sv.HETNOE_VALUE_ERR].values
 
-scalingFactor = 1e9
-J0 = RSDMdf[sv.J0].values * scalingFactor
-J0_ERR = RSDMdf[sv.J0_ERR].values
-JWH = RSDMdf[sv.JwH].values * scalingFactor
-JWH_ERR = RSDMdf[sv.JwH_ERR].values
-JWH7over4 = 7/4*JWH
-JWH13over8 = 13/8*JWH
-JWN = RSDMdf[sv.JwX].values * scalingFactor
-JWN_ERR = RSDMdf[sv.JwX_ERR].values
-
-ETAz = ETAzdf[sv.CROSSRELAXRATIO_VALUE].values
-ETAz_err = ETAzdf[sv.CROSSRELAXRATIO_VALUE_ERR].values
-ETAxy = ETAxydf[sv.CROSSRELAXRATIO_VALUE].values
-ETAxy_err = ETAxydf[sv.CROSSRELAXRATIO_VALUE_ERR].values
-
-# apply scaling factor
-ETAz = ETAz * ETAzScalingFactor
-ETAxy = ETAxy * ETAxyScalingFactor
+ETAxy = ETAxydf[sv.RATE].values
+ETAxy_err = ETAxydf[sv.RATE_ERR].values
 
 
 x = RSDMdf[sv.NMRRESIDUECODE]
@@ -225,42 +210,86 @@ endSequenceCode = startSequenceCode + len(ss_sequence)
 xSequence = np.arange(startSequenceCode, endSequenceCode)
 
 
-r2o_from_RSDM = (R1-JWH7over4) * (ETAxy/ETAz) + JWH13over8
-rex_from_RSDM = R2 - r2o_from_RSDM
+## calculate the model values.
+r20FromR2ETAxy = sdl._calculateR20viaETAxy(R2, ETAxy)
+rexFromR2ETAxy = (R2 - r20FromR2ETAxy)   #(eq 5) when the system is flexible or highly non-spherical
 
-r20FromExpR2 = sdl._calculateR20viaETAxy(R2, ETAxy)
-rexFromExpR2 = (R2 - r20FromExpR2)
+r20FromR2R1 = sdl._calculateR20viaETAxy(R2, R1) #(eq 6) R2 when the system is rigid and tumble fast and nearly isotropically
+rexFromR2R1 = (R2 - r20FromR2R1)
 
-r20FromExpR1 = sdl._calculateR20viaETAxy(R2, R1)
-rexFromExpR1 = (R2 - r20FromExpR1)
 
-sigmaNH = sdl.calculateSigmaNOE(NOE, R1, N15gyromagneticRatio, HgyromagneticRatio)
-SigmaNHErr = ((R1_ERR/R1) + (NOE_ERR/NOE)) * sigmaNH
-r2oSigma = (R1-(1.249*sigmaNH)) * ((ETAxy/ETAz) + (1.097*sigmaNH))
-rexSigma = R2 - r2oSigma
+# calculate the minimum Rex (eq 7) for ETAxy
+# EtaXY
 
-r2o_error = (R1_ERR+(1.249*SigmaNHErr) + (1.079*SigmaNHErr) + (((ETAxy_err/ETAxy) + (ETAz_err/ETAz)) * (ETAxy/ETAz)))
-rexSigma_error = R2_ERR + r2o_error
+
+ratioR2ETAxy = R2/ETAxy
+kETAxy = stats.trim_mean(ratioR2ETAxy, proportiontocut=0.1)
+R = ETAxy
+DK = np.std(kETAxy)
+minRexR2ETAxy = sdl._calculateMinimumRex(kETAxy, R, DK, ETAxy_err)
+
+
+ratioR2R1 = R2/R1
+kR2R1 = stats.trim_mean(ratioR2R1, proportiontocut=0.1)
+R = R1
+DKR2R1 = np.std(kR2R1)
+minRexR2R1 = sdl._calculateMinimumRex(kR2R1, R, DKR2R1, R1_ERR)
+# minRexR2R1 = [min(sdl._calculateMinimumRex(kR2R1, R, DKR2R1, R1_ERR))]*len(ratioR2R1) this as a straight line
 
 
 ############################################################
 ##############                Plotting              #########################
 ############################################################
 
+def _setMargins(axis, y):
+    # Calculate standard deviation, max, and min Y values
+    std_dev = np.std(y)
+    max_y = np.max(y)
+    min_y = np.min(y)
+
+    # Calculate a margin based on standard deviation (adjust multiplier as needed)
+    margin_multiplier = 2
+    margin = std_dev * margin_multiplier
+    # Calculate plot limits
+    y_min_limit = min_y - margin
+    y_max_limit = max_y + margin
+    axis.set_ylim([y_min_limit, y_max_limit])
 
 def _ploteExchangeRates(pdf):
     """ Plot  Rel Exchange with the Sequence """
     fig, axes  = macrosLib._makeFigureLayoutWithOneColumn(3, height_ratios=[3, 3, 1])
     ax, ax2, axss = axes
+    rigidSystem = 'Rigid and Isotropic System' #use R1
 
-    ax.plot(x, [0]*len(x), '--', linewidth=0.5)
-    ax.errorbar(x, rexFromExpR2, yerr=rexSigma_error, color=scatterColor, ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize)
-    ax.set_title('R$_{ex}$ via Experimental R2 and η$_{xy}$', fontsize=fontTitleSize, color=titleColor, pad=1)
+
+    ax.axhline(y=0, color='grey', linestyle='--',  linewidth=0.5)
+    ax.errorbar(x, rexFromR2R1, label='R$_{ex}$ via R$_{1}$',
+                color='orange', ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize)
+    ax.plot(x, minRexR2R1, label='Minimum R$_{ex}$', linewidth=1)
+    eqTitle = 'R$_{ex}$ = R$_{2}$ - < R$_{2}/$R$_{1}$>'
+    title = rigidSystem
+    ax.set_title(f'{title}\n{eqTitle}', fontsize=fontTitleSize, color=titleColor, pad=1)
+
     ax.set_ylabel('R$_{ex}$', fontsize=fontYSize)
     macrosLib._setXTicks(ax, labelMajorSize, labelMinorSize)
-    # macrosLib._setCommonYLim(axRexSDM, rexSigma)
-    ax.legend(loc='lower right', prop={'size': 4})
+    ax.legend(loc='best', prop={'size': 4})
     ax.spines[['right', 'top']].set_visible(False)
+    _setMargins(ax, rexFromR2R1)
+
+
+    flexibleSystem = 'Flexible and Non-Spherical System' #use ETAxy
+    ax2.axhline(y=0, color='grey', linestyle='--',  linewidth=0.5)
+    ax2.errorbar(x, rexFromR2ETAxy, label='R$_{ex}$ via η$_{xy}$', color='green', ms=scatterSize, fmt='o', ecolor=scatterColorError, elinewidth=scatterErrorLinewidth, capsize=scatterErrorCapSize)
+    ax2.plot(x, minRexR2ETAxy,  label='Minimum R$_{ex}$',linewidth=1)
+    eqTitle = 'R$_{ex}$ = R$_{2}$ - < R$_{2}/$η$_{xy}$>'
+    title = flexibleSystem
+    ax2.set_title(f'{title}\n{eqTitle}', fontsize=fontTitleSize, color=titleColor, pad=1)
+
+    ax2.set_ylabel('R$_{ex}$', fontsize=fontYSize)
+    macrosLib._setXTicks(ax2, labelMajorSize, labelMinorSize)
+    ax2.legend(loc='best', prop={'size': 4})
+    ax2.spines[['right', 'top']].set_visible(False)
+    _setMargins(ax2, rexFromR2R1)
 
     ## plot Secondary structure
     if macrosLib._isSequenceValid(sequence, ss_sequence):
@@ -268,7 +297,10 @@ def _ploteExchangeRates(pdf):
            showSequenceNumber=False, )
     else:
            axss.remove()
-    ax2.remove()
+
+    # adjust limits
+
+
     plt.tight_layout()
     fig.suptitle(titlePdf, fontsize=figureTitleFontSize, )
     plt.subplots_adjust(top=0.85)
@@ -282,6 +314,7 @@ globals().update(args.__dict__)
 
 ####################     end data preparation     ##################
 
+
 ##  init the plot and save to pdf
 
 directory = joinPath(project.path, CCPN_SUMMARIES_DIRECTORY, 'Rex')
@@ -291,7 +324,7 @@ with PdfPages(filePath) as pdf:
     fig1 = _ploteExchangeRates(pdf)
     info(f'Report saved in {filePath}')
 
-if showInteractivePlot:
+if interactivePlot:
     plt.show()
 else:
     plt.close(fig1)
@@ -299,16 +332,18 @@ else:
 copy = 'Copy Path to Clipboard'
 open = 'Open File'
 close = 'Close'
-reply = showMulti('Report Ready',
-                  f'Report saved in {filePath}',
-                  texts=[copy, open, close],
-                  )
-if reply == open:
-    ui._systemOpen(filePath)
+if False:
+    reply = showMulti('Report Ready',
+                      f'Report saved in {filePath}',
+                      texts=[copy, open, close],
+                      )
+    if reply == open:
+        application._systemOpen(filePath)
 
-if reply == copy:
-    from ccpn.util.Common import copyToClipboard
-    copyToClipboard([filePath])
+    if reply == copy:
+        from ccpn.util.Common import copyToClipboard
+        copyToClipboard([filePath])
+
 
 ###################      end macro        #########################
 

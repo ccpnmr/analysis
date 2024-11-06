@@ -1,9 +1,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-18 16:07:32 +0100 (Wed, October 18, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-09-02 16:48:00 +0100 (Mon, September 02, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -121,8 +122,9 @@ Label_OutputDataTable = 'Results DataTable'
 TipText_OutputDataTableSeparator = 'Results DataTable Section. Select the results DataTable to display results'
 
 WidgetVarName_FitInputData = 'FitInputData'
-Label_FitInput = 'Fit and Fetch Results Data'
-TipText_createOutputdataTableWidget = 'Fit or refit input DataTable and store outputs in a results dataTable.'
+Label_FitInput = 'Results DataTable'
+TipText_createOutputdataTableWidget = '''Fetch a results DataTable and store the computed results.
+Fetching implies creating a new DataTable if none with the given name exists in the project, or retrieving an existing DataTable and overriding previous results'''
 
 WidgetVarName_OutputDataTablesSelection = 'ResultDataTablesSelection'
 Label_SelectOutputDataTable = 'Results DataTable'
@@ -233,7 +235,7 @@ Label_FittingSeparator = 'Fitting Options'
 TipText_FittingSeparator = 'General fitting options'
 
 WidgetVarName_FittingModel = 'FittingModel'
-Label_FittingModel = 'Fitting Model'
+Label_FittingModel = 'Model Name'
 TipText_FittingModel = 'Select the Fitting Model'
 
 WidgetVarName_OptimiserSeparator = 'OptimiserSeparator'
@@ -245,8 +247,28 @@ Label_OptimiserMethod = 'Optimiser Method'
 TipText_OptimiserMethod = 'Select the Optimiser Method'
 
 WidgetVarName_ErrorMethod = 'ErrorMethod'
-Label_ErrorMethod = 'Fitting Error Method'
-TipText_ErrorMethod = 'Select the Fitting Error calculation Method'
+Label_ErrorMethod = 'Uncertainty Estimation Method'
+TipText_ErrorMethod = 'Select the Fitting Uncertainty calculation Method'
+
+UncertaintyTipText = 'Statistical resampling methods used to estimate and measure the uncertainty and variability of model parameters through repeated sampling of the data.'
+UncertaintyDefs = {
+                        seriesVariables.COVMATRIX: '''Parameter uncertainties are represented by the covariance matrix,\nwhere the diagonal elements indicate parameter variances and their square roots provide the standard errors (stderr) ''',
+                        seriesVariables.MONTECARLO: '''A method that uses random sampling of synthetic data generated from the model\n to estimate the uncertainty of model parameters.''',
+                        seriesVariables.BOOTSTRAP: '''A resampling method that repeatedly samples with replacement from the original dataset\n to estimate the uncertainty of model parameters.''',
+                        seriesVariables.JACKKNIFE: '''A resampling method that systematically leaves out a percentage of data points at a time\n to estimate the uncertainty of model parameters.''',
+    }
+
+WidgetVarName_UncertaintySample = 'UncertaintySample'
+Label_UncertaintySample = 'Sample count'
+TipText_UncertaintySample = 'Number of iterations to perform when resampling data to estimate parameter uncertainties; higher counts generally improve accuracy but increase computational time.'
+
+WidgetVarName_ModelEq = 'ModelEquation'
+Label_ModelEq = 'Model Equation'
+TipText_ModelEq = 'The fitted model equation'
+
+WidgetVarName_ModelValues = 'ModelValues'
+Label_ModelValues = 'Initial Values'
+TipText_ModelValues = 'The initial values for the fitting model'
 
 ############################################################
 ##########  TAB: Appearance
@@ -399,6 +421,9 @@ ColumnAtoms = 'Atoms'
 ColumnCodeType = 'Code-Type'
 
 _COLUM_FLOAT_FORM = '%0.3f'
+
+EXCLUDE_NMRRESIDUES = 'Exclude NmrResidue(s)'
+INCLUDE_NMRRESIDUES = 'Include NmrResidue(s)'
 
 ############################################################
 ##########          Panel: ToolBar                ##########

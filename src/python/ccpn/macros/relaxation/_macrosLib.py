@@ -7,9 +7,9 @@ A set of private functions called for building custom macros.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
+               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-07 14:23:30 +0000 (Tue, November 07, 2023) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-03-07 09:24:56 +0000 (Thu, March 07, 2024) $"
 __version__ = "$Revision: 3.2.2 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from matplotlib.ticker import MultipleLocator
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.floatUtils import fExp, fMan
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.util.Logging import getLogger
 
 def _prettyFormat4Legend(value, rounding=3):
     """ Format mantissa to (rounding) round  and exponent for matplotlib """
@@ -70,6 +71,8 @@ def _setXTicks(ax, labelMajorSize, labelMinorSize):
     ax.tick_params(axis='both', which='minor', labelsize=labelMinorSize)
 
 def _setCommonYLim(ax, ys):
+    ys = np.array(ys)
+    ys = ys[~np.isnan(ys)]
     extraY = np.ceil(percentage(30, np.max(ys)))
     ylim = np.max(ys) + extraY
     ax.set_ylim([0, ylim])
@@ -127,6 +130,23 @@ def _getDataTableForMacro(dataTableName):
         raise RuntimeError(errorMess)
     return dataTable
 
+def _getFilteredDataFrame(dataFrame, nanColumns):
+    """
+    Filtered a dataFrame with replaced  excluded NmrResidues.
+    :param dataFrame:
+    :param nanColumns: list of rolumns whose values need to be replaced with nan
+    :return: copy of original dataFrame
+    """
+    data = dataFrame.copy()
+    if sv.EXCLUDED_NMRRESIDUEPID in data:
+        exc = data[data[sv.EXCLUDED_NMRRESIDUEPID] == True].index
+        for column in nanColumns:
+            if column in data:
+                data.loc[exc, column] = np.nan
+            else:
+                getLogger().warn(f'Cannot find {column} in the given dataFrame')
+    return data
+
 def getArgs():
     defaultOutputPath = aPath(__file__).filepath
     defaultDataTableName = 'RSDM_results'
@@ -141,6 +161,40 @@ def getArgs():
     parser.add_argument('-ip',  '--interactivePlot', help='Open a matplotLib plot', default=True, action=argparse.BooleanOptionalAction)
     return parser
 
+def clearCrosshairs(axes):
+    for ax in axes:
+        for line in ax.lines:
+            if isinstance(line, plt.Line2D) and line.get_linestyle() == '--':
+                line.set_data([], [])
+                # Clear previous labels
+        for label in ax.texts:
+            label.remove()
+
+def createFigCrosshairs(axes):
+    fig = axes[0].figure
+
+    # Initialize crosshair lines for each axis
+    crosshairs = [ax.axhline(0, color='black', lw=0.5, ls='--') for ax in axes] + \
+                 [ax.axvline(0, color='black', lw=0.5, ls='--') for ax in axes]
+
+
+
+    def update_crosshairs(event):
+        clearCrosshairs(axes)
+        x, y = event.xdata, event.ydata
+
+        for ax, line_x, line_y in zip(axes, crosshairs[:len(axes)], crosshairs[len(axes):]):
+            if event.inaxes == ax:
+                line_x.set_ydata(y)
+                line_y.set_xdata(x)
+                for ax in axes:
+                    ax.axhline(y, color='black', lw=0.5, ls='--')
+                    ax.axvline(x, color='black', lw=0.5, ls='--')
+
+                fig.canvas.draw_idle()
+
+
+    fig.canvas.mpl_connect('motion_notify_event', update_crosshairs)
 
 ##  Used for the Contouring lines
 

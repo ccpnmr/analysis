@@ -58,6 +58,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
                  acceptDrops=False,
                  sortOnDrop=False,
                  allowDuplicates=False,
+                 allowSelections =True,
                  copyDrop=True,
                  infiniteHeight=False,
                  minRowsVisible=4,
@@ -103,6 +104,16 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self._emptyText = str(emptyText)
         self._setStyle()
         self._setChangedConnections()
+        self.setAllowSelections(allowSelections)
+
+    def setAllowSelections(self, value):
+        if value:
+            if self.multiSelect:
+                self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+            else:
+                self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        else:
+            self.setSelectionMode(QtWidgets.QListWidget.NoSelection)
 
     def _setStyle(self):
         """Set the focus/noFocus colours for the widget

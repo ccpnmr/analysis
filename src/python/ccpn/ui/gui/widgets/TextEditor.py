@@ -319,8 +319,7 @@ class TextBrowser(QtWidgets.QTextBrowser, Base):
             self.setHtmlFilePath(self.htmlFilePath)
 
     def setHtmlFilePath(self, htmlFilePath):
-        from ccpn.ui.gui.widgets.MessageDialog import showMessage  # circular import
-
+        from ccpn.ui.gui.widgets.MessageDialog import showMessage
         path = aPath(htmlFilePath)
         if not path.exists():
             showMessage('Path not found', f'Could not load {path}')

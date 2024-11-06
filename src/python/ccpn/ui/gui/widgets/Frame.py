@@ -145,6 +145,37 @@ class Frame(QtWidgets.QFrame, Base):
             #self.setLineWidth(3)
             self.setMidLineWidth(3)
 
+    def _clear(self):
+        """
+        Recursively delete all widgets inside the Frame.
+        """
+        layout = self.getLayout()
+        if layout is not None:
+            while layout.count():
+                child = layout.takeAt(0)
+                widget = child.widget()
+                if widget is not None:
+                    widget.deleteLater()  # Mark the widget for deletion
+                elif child.layout() is not None:
+                    self._clearLayout(child.layout())  # Recursively clear nested layouts
+
+        # Recursively delete child widgets
+        for child in self.findChildren(QtWidgets.QWidget):
+            child.deleteLater()
+
+    def _clearLayout(self, layout):
+        """
+        Recursively clear a layout and delete its child widgets.
+        :param layout:
+            QLayout. The layout to be cleared.
+        """
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+            if child.layout():
+                self._clearLayout(child.layout())
+
     # # pyqt5.15 does not allow setting with a float
     # def setMinimumWidth(self, p_int):
     #     super().setMinimumWidth(int(p_int))

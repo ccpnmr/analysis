@@ -936,7 +936,7 @@ class _openItemChemicalShiftListTable(OpenItemABC):
             # Might think of merging multiple lists ?
             return
         if len(objs) > 0:
-            from ccpn.ui.gui.popups.ChemicalShiftList2PeakListPopup import ChemicalShiftList2SpectrumPopup
+            from ccpn.ui.gui.popups.SimulatePeakListPopup import ChemicalShiftList2SpectrumPopup
 
             popup = ChemicalShiftList2SpectrumPopup(chemicalShiftList=objs[0])
             popup.show()

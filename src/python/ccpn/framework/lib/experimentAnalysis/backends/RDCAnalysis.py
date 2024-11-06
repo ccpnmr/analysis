@@ -1,42 +1,42 @@
 """
-This module defines the data loading mechanism for loading a Exel file
+This module has not  been implemented yet
 """
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
-               )
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y"
-                )
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:07 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2023-11-10 15:58:40 +0000 (Fri, November 10, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: geertenv $"
-__date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
+__author__ = "$Author: Luca Mureddu $"
+__date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
-from ccpn.core.Project import Project
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.framework.lib.experimentAnalysis.backends.SeriesAnalysisABC import SeriesAnalysisABC
 
-class ExcelDataLoader(DataLoaderABC):
-    """The Excel data-loader.
+class RDCAnalysisBC(SeriesAnalysisABC):
     """
-    dataFormat = 'excelFile'
-    suffixes = ['.xlsx', '.xls']  # a list of suffixes that get matched to path
-    loadFunction = (Project._loadExcelFile, 'project')
+    RDC. Residual Dipolar Coupling Analysis  backend  module.
+    """
+    seriesAnalysisName = sv.RDCAnalysis
+    _allowedPeakProperties = [sv._HEIGHT, sv._VOLUME]
 
-ExcelDataLoader._registerFormat()
+    def __init__(self):
+        super().__init__()
+        raise RuntimeError('No Calculation Models have been implemented yet for this backend')
+

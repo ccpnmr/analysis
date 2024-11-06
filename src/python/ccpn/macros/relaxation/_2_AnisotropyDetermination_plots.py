@@ -22,9 +22,10 @@ Macro created for Analysis Version 3.1.1
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -32,9 +33,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-11-07 14:23:29 +0000 (Tue, November 07, 2023) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-10-25 12:18:15 +0100 (Fri, October 25, 2024) $"
+__version__ = "$Revision: 3.2.9.alpha $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -96,12 +97,11 @@ outputPath = None
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
-from ccpn.util.Path import aPath
 from matplotlib.backends.backend_pdf import PdfPages
 from ccpn.util.Common import percentage
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
-import ccpn.framework.lib.experimentAnalysis.spectralDensityLib as sdl
+import ccpn.framework.lib.experimentAnalysis.calculationModels._libraryFunctions as lf
+import ccpn.framework.lib.experimentAnalysis.calculationModels.relaxation.spectralDensityLib as sdl
 from ccpn.ui.gui.widgets.DrawSS import plotSS
 import ccpn.macros.relaxation._macrosLib as macrosLib
 
@@ -189,8 +189,11 @@ def _plotScatterRates(pdf):
     yminf =  percentage(20,  np.median(R1R2))
     xmaxf =  percentage(20,  np.median(R2R1))
     ymaxf =  percentage(20,  np.median(R1R2))
-    axRscatter.set_xlim(xmin=min(R2R1)- xminf, xmax=max(R2R1) + xmaxf,)
-    axRscatter.set_ylim(ymin=min(R1R2) - yminf, ymax=max(R1R2) + ymaxf,)
+    try:
+        axRscatter.set_xlim(xmin=min(R2R1)- xminf, xmax=max(R2R1) + xmaxf,)
+        axRscatter.set_ylim(ymin=min(R1R2) - yminf, ymax=max(R1R2) + ymaxf,)
+    except Exception as err:
+        print('cannot find a best fit')
     plt.tight_layout()
     plt.subplots_adjust(hspace=hspace) # space between plots
     plt.subplots_adjust(bottom=0.15,)# space title and plots
@@ -207,7 +210,8 @@ globals().update(args.__dict__)
 ## get the various values  and perform the needed calculations
 
 dataTable = macrosLib._getDataTableForMacro(dataTableName)
-data =  dataTable.data
+data =  macrosLib._getFilteredDataFrame(dataTable.data, [sv.R1, sv.R2, sv.HETNOE_VALUE])
+
 
 x = data[sv.NMRRESIDUECODE]
 x = x.astype(int)
@@ -227,10 +231,9 @@ R1R2 = R1*R2
 R1R2_ERR = lf.calculateUncertaintiesProductError(R1, R2, R1_ERR, R2_ERR)
 
 # calculate NOE-filtered data
-fR1, fR2 = sdl._filterLowNoeFromR1R2(R1, R2, NOE, NOE_limitExclusion)
+fR1, fR2, eind = sdl._filterLowNoeFromR1R2(R1, R2, NOE, NOE_limitExclusion)
 fR1R2 = fR1*fR2
 fR2R1 = fR2/fR1
-eind =np.argwhere(NOE < NOE_limitExclusion).flatten()
 
 
 # calculate R1*R2  10%  trimmed mean line

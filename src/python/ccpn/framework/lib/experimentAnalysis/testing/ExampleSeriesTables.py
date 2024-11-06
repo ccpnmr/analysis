@@ -4,9 +4,10 @@ This module contains dateFrames examples used in the Series Analysis tools
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-10-12 15:27:08 +0100 (Wed, October 12, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-10-03 09:42:40 +0100 (Thu, October 03, 2024) $"
+__version__ = "$Revision: 3.2.9.alpha $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,20 +27,11 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-import os
-import unittest
-import contextlib
-import pandas as pd
-import numpy as np
-from collections import OrderedDict as od
-from collections import defaultdict
-from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from scipy.spatial import distance
-from math import dist
+
 
 def getRelaxationInputFrameExample():
-    from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationInputFrame
+    from ccpn.framework.lib.experimentAnalysis.SeriesTables import RelaxationInputFrame
     SERIESSTEPS = [0, 5, 10, 15, 20, 25, 30]
     SERIESUNITS = 's'
     _assignmentValues = [['A', '1', 'ALA', 'H'], # row 1
@@ -57,7 +49,7 @@ def getRelaxationInputFrameExample():
     return df
 
 def getCSMInputFrameExample():
-    from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame
+    from ccpn.framework.lib.experimentAnalysis.SeriesTables import CSMInputFrame
     SERIESSTEPS = [0, 1]
     SERIESUNITS = 'eq'
     _assignmentValues = [
@@ -88,7 +80,7 @@ def getCSMInputFrameExample():
     return df
 
 def getCSMInputFrameExample2():
-    from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame
+    from ccpn.framework.lib.experimentAnalysis.SeriesTables import CSMInputFrame
     SERIESSTEPS = [0, 0.5, 1.0, 1.5, 2.0]
     SERIESUNITS = 'eq'
     _assignmentValues = [
@@ -111,15 +103,15 @@ def getCSMInputFrameExample2():
 
 def _testCreateCSInputDataFromSpectrumGroup(spectrumGroup):
     # macro level run from a suitable project. Eg. "TstarCompleted" in example Data
-    from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame
+    from ccpn.framework.lib.experimentAnalysis.SeriesTables import CSMInputFrame
     df = CSMInputFrame()
     df.buildFromSpectrumGroup(spectrumGroup, sv._PPMPOSITION)
     return df
 
 
 def _testCreateChemicalShiftMappingAnalysisObj():
-    from ccpn.framework.lib.experimentAnalysis.ChemicalShiftMappingAnalysisBC import ChemicalShiftMappingAnalysisBC
-    csm = ChemicalShiftMappingAnalysisBC(application)
+    from ccpn.framework.lib.experimentAnalysis.backends.ChemicalShiftPerturbationAnalysis import ChemicalShiftPerturbationAnalysisBC
+    csm = ChemicalShiftPerturbationAnalysisBC(application)
     da = csm.newDataTableFromSpectrumGroup(project.spectrumGroups[0],dataTableName='CSM')
     csm.setAlphaFactor(N=0.143)
     csm.addInputDataTable(da)
@@ -128,7 +120,7 @@ def _testCreateChemicalShiftMappingAnalysisObj():
 def _testCSMCalcData():
     """Test the DeltaDelta calculation in the CSM deltaDelta model """
     df = getCSMInputFrameExample()
-    from ccpn.framework.lib.experimentAnalysis.CSMappingModels import EuclideanCalculationModel
+    from ccpn.framework.lib.experimentAnalysis.fittingModels.binding.SaturationModels import EuclideanCalculationModel
     deltaDeltaModel = EuclideanCalculationModel(alphaFactors=(1, 0.102))
     outputFrame = deltaDeltaModel.fitSeries(df)
     print(outputFrame)

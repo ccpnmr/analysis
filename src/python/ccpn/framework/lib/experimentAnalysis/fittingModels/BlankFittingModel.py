@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-05-22 11:52:49 +0100 (Mon, May 22, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2023-11-13 10:25:55 +0000 (Mon, November 13, 2023) $"
+__version__ = "$Revision: 3.2.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,59 +26,38 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-import pandas as pd
 import numpy as np
 from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult,\
-    CalculationModel
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame, HetNoeOutputFrame
+from ccpn.framework.lib.experimentAnalysis.fittingModels.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult
 from ccpn.util.Logging import getLogger
-from lmfit.models import update_param_vals
-import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC
 
-class BlankCalculationModel(CalculationModel):
+def blank_func(x, argA, argB):
     """
-    Blank Calculation model for Series Analysis
+    A mock fitting function. Used for a Blank model.
+    :param x: example argument. Not in use.
+    :param argA: example argument. Not in use.
+    :param argB: example argument. Not in use.
+    :return: None
     """
+    return
 
-    ModelName = sv.BLANKMODELNAME
-    Info = 'Blank Model'
-    Description = 'A blank model containing no calculation. This will show only raw data.'
-    _minimisedProperty = None
-
-    def calculateValues(self, inputDataTables):
-        """Return a frame with Collection Pids and value/error as Nones"""
-        inputData = self._getFirstData(inputDataTables)
-        outputFrame = inputData[inputData[sv.ISOTOPECODE] == inputData[sv.ISOTOPECODE].iloc[0]]
-        outputFrame.loc[outputFrame.index, self.modelArgumentNames] = None
-        return outputFrame
-
-    @property
-    def modelArgumentNames(self):
-        """ The list of parameters as str used in the calculation model.
-          These names will appear as column headers in the output result frames. """
-        return [sv.VALUE, sv.VALUE_ERR]
-
-
-
-##### Fitting Model
-
-class BlankMinimiser(MinimiserModel):
+class _BlankMinimiser(MinimiserModel):
     """
     Blank Minimiser which fits a blank function!. Used as space-holder/example
     """
 
-    FITTING_FUNC = lf.blank_func
-    Astr = sv.ARGA  # They must be exactly as they are defined in the FITTING_FUNC arguments!
-    Bstr = sv.ARGB
+    FITTING_FUNC = blank_func
+    ARGA = sv.ARGA  # They must be exactly as they are defined in the FITTING_FUNC arguments!
+    ARGB = sv.ARGB
 
-    defaultParams = {Astr:np.nan,
-                     Bstr:np.nan}
+    defaultParams = {
+                                ARGA:np.nan,
+                                ARGB:np.nan
+                                }
 
     def __init__(self, **kwargs):
-        super().__init__(BlankMinimiser.FITTING_FUNC, **kwargs)
+        super().__init__(_BlankMinimiser.FITTING_FUNC, **kwargs)
         self.name = self.MODELNAME
         self.params = self.make_params(**self.defaultParams)
 
@@ -95,14 +74,21 @@ class BlankFittingModel(FittingModelABC):
     """
     Blank model which fits a blank function!. Used as space-holder/example
     """
-    ModelName = sv.BLANKMODELNAME
-    Info = 'Fit data to using the Blank model.'
-    Description = ' ... '
-    References = ''' None
+    modelName = sv.BLANKMODELNAME
+    targetSeriesAnalyses = [sv.RelaxationAnalysis,
+                            sv.JCouplingAnalysis,
+                            sv.RDCAnalysis,
+                            sv.PREAnalysis,
+                            sv.PCSAnalysis
+                            ]
+
+    modelInfo = 'Fit data to using the Blank model.'
+    description = ' An empty model used as a placeholder. Does not fit any data.'
+    references = ''' None
                 '''
-    MaTex = ''
-    Minimiser = BlankMinimiser
-    PeakProperty = None
+    maTex = ''
+    Minimiser = _BlankMinimiser
+    peakProperty = None
     _minimisedProperty = None
 
     def fitSeries(self, inputData: TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
@@ -125,7 +111,7 @@ class BlankFittingModel(FittingModelABC):
         result = MinimiserResult(minimiser, params) #Don't do the fitting. Just return a mock of results as np.nan
         for resultName, resulValue in result.getAllResultsAsDict().items():
             outputFrame.loc[outputFrame.index, resultName] = resulValue
-            outputFrame.loc[outputFrame.index, sv.MODEL_NAME] = self.ModelName
+            outputFrame.loc[outputFrame.index, sv.MODEL_NAME] = self.modelName
             outputFrame.loc[outputFrame.index, sv.MINIMISER_METHOD] = minimiser.method
 
         return outputFrame

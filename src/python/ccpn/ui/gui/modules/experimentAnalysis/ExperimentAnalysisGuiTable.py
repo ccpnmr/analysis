@@ -24,15 +24,20 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.util.DataEnum import DataEnum
-import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.util.Logging import getLogger
-from ccpn.core.lib.Notifiers import CurrentNotifier
+import numpy as np
+from functools import partial
 
+from ccpn.util.DataEnum import DataEnum
+from ccpn.util.Logging import getLogger
+from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv, seriesVariables
 ######## gui/ui imports ########
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 from ccpn.ui.gui.widgets.table.Table import Table
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+
+
 
 
 class _NavigateTrigger(DataEnum):
@@ -130,7 +135,7 @@ class _ExperimentalAnalysisTableABC(Table):
 
     @dataFrame.setter
     def dataFrame(self, dataFrame):
-        selectedRows = self.selectedRows()
+        selectedRows = self.getSelectedData()
         self._dataFrame = dataFrame
         self.build(dataFrame)
         if self._selectionHeader in self.headerColumnMenu.columnTexts and len(selectedRows) > 0:
@@ -143,6 +148,7 @@ class _ExperimentalAnalysisTableABC(Table):
             self.headerColumnMenu.setDefaultColumns(self._hiddenColumns)
             self._setBlankModelColumns()
             self._hideExcludedColumns()
+            self._setExclusionColours()
 
     #=========================================================================================
     # Selection/action callbacks
@@ -198,20 +204,49 @@ class _ExperimentalAnalysisTableABC(Table):
     # Table context menu
     #=========================================================================================
 
-    # add edit/add parameters to meta-data table
+    def _raiseTableContextMenu(self, pos):
+        """
+        Re-implementation to dynamically grey-out items before popping
+        """
+        outputData = self.guiModule.backendHandler.resultDataTable
+        if outputData is None:
+            super()._raiseTableContextMenu(pos)
 
+        if (menu := self._thisTableMenu):
+            excludeNmrResidueAction = menu.getActionByName(guiNameSpaces.EXCLUDE_NMRRESIDUES)
+            includeNmrResidueAction = menu.getActionByName(guiNameSpaces.INCLUDE_NMRRESIDUES)
+            selectedNmrResidues = self.getSelectedNmrResidues()
+            enable = len(selectedNmrResidues) > 0
+            includeNmrResidueAction.setEnabled(enable)
+            excludeNmrResidueAction.setEnabled(enable)
+        super()._raiseTableContextMenu(pos)
+
+    # add edit/add parameters to meta-data table
     def addTableMenuOptions(self, menu):
         super().addTableMenuOptions(menu)
         editCollection = menu.addAction('Edit Collection', self._editCollection)
-        # refitCollections = menu.addAction('Refit Selected', self._refitSeletected)
-        # menu.moveActionAboveName(refitCollections, 'Export Visible Table')
-        menu.moveActionAboveName(editCollection, 'Export Visible Table')
+        refitSingular = menu.addAction('Refit Collection(s) Individually...', partial(self._refitSeletected, False))
+        refitGroup = menu.addAction('Refit Collections Globally...', partial(self._refitSeletected, True))
+        _separator = menu.insertSeparator(editCollection)
+        excludeNmrResidue = menu.addAction(guiNameSpaces.EXCLUDE_NMRRESIDUES, self._excludeNmrResidues)
+        includeNmrResidue = menu.addAction(guiNameSpaces.INCLUDE_NMRRESIDUES, self._includeNmrResidues)
+        excludeNmrResidue.setEnabled(False)
+        includeNmrResidue.setEnabled(False)
+        _separator = menu.insertSeparator(excludeNmrResidue)
 
-    def _refitSeletected(self):
+    def _refitSeletected(self, globally=False):
+        from ccpn.ui.gui.popups._RefitSeriesPopup import RefitIndividualPopup, RefitGloballyPopup
+
         collections = self.getSelectedCollections()
-        for collection in collections:
-            self.guiModule.backendHandler.refitCollection(collection.pid)
-        self.guiModule.updateAll()
+        if len(collections)>0:
+            if globally:
+                popup = RefitGloballyPopup(self, seriesAnalysisModule=self.guiModule, globalFit=False, collectionsData=self.getSelectedData())
+            else:
+                popup = RefitIndividualPopup(self, seriesAnalysisModule=self.guiModule, globalFit=False, collectionsData=self.getSelectedData())
+            popup.show()
+            popup.raise_()
+        else:
+            showWarning('Cannot refit', 'Nothing selected')
 
     def _editCollection(self):
         from ccpn.ui.gui.popups.CollectionPopup import CollectionPopup
@@ -224,14 +259,51 @@ class _ExperimentalAnalysisTableABC(Table):
                 popup.exec()
                 popup.raise_()
 
+    def _excludeNmrResidues(self):
+        nmrResidues = self.getSelectedNmrResidues()
+        if len(nmrResidues) > 0:
+            exclusionHandler = self.guiModule.backendHandler.exclusionHandler
+            outputData = self.guiModule.backendHandler.resultDataTable
+            excludedNmrResidues = exclusionHandler.getExcludedNmrResidues(dataTable=outputData)
+            newExclusion = set(excludedNmrResidues+nmrResidues)
+            exclusionHandler.setExcludedNmrResidues(newExclusion, dataTable=outputData)
+            self.guiModule.updateAll()
+
+    def _includeNmrResidues(self):
+        nmrResidues = self.getSelectedNmrResidues()
+        if len(nmrResidues) > 0:
+            exclusionHandler = self.guiModule.backendHandler.exclusionHandler
+            outputData = self.guiModule.backendHandler.resultDataTable
+            excludedNmrResidues = exclusionHandler.getExcludedNmrResidues(dataTable=outputData)
+            newExclusion = [nr for nr in excludedNmrResidues if nr not in nmrResidues]
+            exclusionHandler.setExcludedNmrResidues(newExclusion, dataTable=outputData)
+            self.guiModule.updateAll()
+
+    def getSelectedData(self):
+        return self.selectedRows()
+
     def getSelectedCollections(self):
-        selectedRowsDf = self.selectedRows()
+        selectedRowsDf = self.getSelectedData()
         collections = set()
         for ix, selectedRow in selectedRowsDf.iterrows():
             coPid = selectedRow[sv.COLLECTIONPID]
             co = self.project.getByPid(coPid)
             collections.add(co)
         return list(collections)
+
+    def getSelectedNmrResidues(self):
+        selectedRowsDf = self.getSelectedData()
+        nmrResidues = set()
+        # if not sv.NMRRESIDUEPID in selectedRowsDf:
+        #     showWarning(f'This table does not contain the requeired field {sv.NMRRESIDUEPID}',
+        #                 'You might need to recreate this dataTable for some features to be available.' )
+
+        for ix, selectedRow in selectedRowsDf.iterrows():
+            if sv.NMRRESIDUEPID in selectedRowsDf:
+                nmrResiduePid = selectedRow[sv.NMRRESIDUEPID]
+                nmrResidue = self.project.getByPid(nmrResiduePid)
+                nmrResidues.add(nmrResidue)
+        return list(nmrResidues)
 
     def _currentCollectionCallback(self, *args):
         # select collection on table.
@@ -249,9 +321,43 @@ class _ExperimentalAnalysisTableABC(Table):
         headers = []
         columnTexts = self.headerColumnMenu.columnTexts
         for columnText in columnTexts:
+            columnText = str(columnText)
             if columnText.startswith(sv.EXCLUDED_):
                 headers.append(columnText)
         self._setVisibleColumns(headers, False)
+
+    def _setExclusionColours(self):
+
+        self.setRowsForegroundByValues(['True'], sv.EXCLUDED_NMRRESIDUEPID, '#8c0307')
+
+    def setRowsForegroundByValues(self, values, headerName, hexColour):
+        """
+        Select rows if the given values are present in the table.
+        :param values: list of value to select
+        :param headerName: the column name for the column where to search the values
+        :param scrollToSelection: navigate to the table to show the result
+        :return: None
+        """
+        if self._df is None or self._df.empty:
+            return
+        if headerName not in self._df.columns:
+            return
+
+        model = self.model()
+        columnTextIx = self.headerColumnMenu.columnTexts.index(headerName)
+        for i in model._sortIndex:
+            cell = model.index(i, columnTextIx)
+            if cell is None:
+                continue
+            tableValue = cell.data()
+            for valueToSelect in values:
+                if tableValue == valueToSelect:
+                    rowIndex = model.index(i, 0)
+                    if rowIndex is None:
+                        continue
+                    for columnIndex, value in enumerate(self.headerColumnMenu.columnTexts):
+                        self.setForeground(i, columnIndex, hexColour)
+
 
     def _setBlankModelColumns(self):
         # if a blank model: toggle the columns from table (no point in showing empty columns)
@@ -260,12 +366,12 @@ class _ExperimentalAnalysisTableABC(Table):
         apperanceTab = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
         tableHeaderWidget = apperanceTab.getWidget(guiNameSpaces.WidgetVarName_TableView)
         if tableHeaderWidget is not None:
-            if fitModel and fitModel.ModelName == sv.BLANKMODELNAME:
+            if fitModel and fitModel.modelName == sv.BLANKMODELNAME:
                 # tableHeaderWidget.untickTexts([guiNameSpaces._Fitting, guiNameSpaces._Stats])
                 self._toggleFittingHeaders(False)
                 self._toggleStatsHeaders(False)
                 self._toggleFittingErrorsHeaders(False)
-            if calModel and calModel.ModelName == sv.BLANKMODELNAME:
+            if calModel and calModel.modelName == sv.BLANKMODELNAME:
                 # tableHeaderWidget.untickTexts([guiNameSpaces._Calculation])
                 self._toggleCalculationHeaders(False)
                 self._toggleCalculationErrorsHeaders(False)
@@ -375,7 +481,7 @@ class TablePanel(GuiPanel):
         self.mainTable.dataFrame = dataFrame
 
     def updatePanel(self, *args, **kwargs):
-        dataFrame = self.guiModule.backendHandler.getMergedResultDataFrame()
+        dataFrame = self.guiModule.backendHandler.getResultDataFrame(useFiltered=True)
         self.setInputData(dataFrame)
         # update here the X-Y selectors on the settings. Has to be done here because the mainplot has to be in sync with the table.
         appearance = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)

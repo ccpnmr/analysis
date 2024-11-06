@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:21:18 +0100 (Fri, August 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-10-29 17:39:44 +0000 (Tue, October 29, 2024) $"
+__version__ = "$Revision: 3.2.9.alpha $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,7 +37,7 @@ from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -99,7 +99,7 @@ class ListCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', texts=None, callback=None, defaults=None,
-                 uniqueList=True, objectName='', compoundKwds=None,
+                 uniqueList=True, showPulldown=True, objectName='', compoundKwds=None,
                  **kwds):
         """
         :param parent: parent widget
@@ -152,6 +152,8 @@ class ListCompoundWidget(CompoundBaseWidget):
 
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
+
+        self.showPulldownList(showPulldown)
 
     def minimumSizeHint(self) -> QtCore.QSize:
         result = super().minimumSizeHint()
@@ -297,6 +299,139 @@ class ListCompoundWidget(CompoundBaseWidget):
         """
         return self.setTexts(value)
 
+
+class PlainListCompoundWidget(CompoundBaseWidget):
+    """
+    Compound class comprising a Label, and a ListWidget, combined in a
+    CompoundBaseWidget (i.e.a Frame)
+
+    """
+    layoutDict = dict(
+            # grid positions for label and ListWidget for the different orientations
+            left=[(0, 0), (0, 1)],
+            right=[(0, 1), (0, 0)],
+            top=[(0, 0), (1, 0)],
+            bottom=[(1, 0), (0, 0)],
+            )
+
+    LIST_BORDER_WIDTH = 1
+    LIST_BORDER_COLOR = '#a9a9a9'
+
+    def __init__(self, parent=None, showBorder=False, orientation='left',
+                 minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                 labelText='', texts=None, callback=None, uniqueList=True,  objectName='', compoundKwds=None,
+                 **kwds):
+        """
+        :param parent: parent widget
+        :param showBorder: flag to display the border of Frame (True, False)
+        :param orientation: flag to determine the orientation of the labelText relative to the ListWidget.
+                            Allowed values: 'left', 'right', 'top', 'bottom', 'centreLeft, centreRight, horizontal
+        :param minimumWidths: tuple of three values specifying the minimum width of the Label, and ListWidget,
+                              respectively
+        :param maximumWidths: tuple of three values specifying the maximum width of the Label and ListWidget,
+                              respectively
+        :param fixedWidths: tuple of three values specifying the maximum width of the Label  and ListWidget,
+                            respectively
+        :param labelText: Text for the Label
+        :param texts: (optional) iterable generating text values for the ListWidget
+
+        :param uniqueList: (True) only allow unique elements in the ListWidget
+        :param kwds: (optional) keyword, value pairs for the gridding of Frame
+        """
+
+        CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                    showBorder=showBorder, **kwds)
+        self.label = Label(parent=self, text=labelText, vAlign='center')
+        self._addWidget(self.label)
+        compoundKwds = compoundKwds or {}
+
+        # listWidget
+        self.listWidget = ListWidget(parent=self, callback=callback,
+                                     objectName=objectName,
+                                     **(compoundKwds or {}))
+        self.listWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self._uniqueList = uniqueList
+        self._addWidget(self.listWidget)
+
+        styleSheet = '.ListWidget {border: %ipx solid %s; border-radius: 3px}'
+        styleSheet %= (self.LIST_BORDER_WIDTH, self.LIST_BORDER_COLOR)
+        self.listWidget.setStyleSheet(styleSheet)
+
+        if minimumWidths is not None:
+            self.setMinimumWidths(minimumWidths)
+
+        if maximumWidths is not None:
+            self.setMinimumWidths(maximumWidths)
+
+        if fixedWidths is not None:
+            self.setFixedWidths(fixedWidths)
+
+        if texts:
+            self.setTexts(texts)
+
+    def minimumSizeHint(self) -> QtCore.QSize:
+        result = super().minimumSizeHint()
+
+        margins = self.listWidget.contentsMargins().top() + self.listWidget.contentsMargins().bottom()
+        spacing = self.layout().spacing()
+        minHeightHint = self.listWidget.minimumSizeHint().height() + margins + spacing
+        result.setHeight(minHeightHint)
+        return result
+
+    def clearList(self):
+        self.listWidget._deleteAll()
+
+    def setLabelText(self, label):
+        """Set the text for the list widget label
+        """
+        self.label.setText(label)
+
+    def setTexts(self, ll: list = []):
+        self.listWidget.clear()
+        for i in ll:
+            self.listWidget.addItem(str(i))
+
+    def modifyListWidgetTexts(self, texts):
+        """Modify the listWidget texts, with signal-blocking
+        """
+        with self.blockWidgetSignals():
+            self.setTexts(texts)
+
+    def getTexts(self):
+        """Convenience: Return list of texts in listWidget"""
+        return [self.listWidget.item(i).text() for i in range(self.listWidget.count())]
+
+    def addText(self, text):
+        """Convenience: Add text to listWidget"""
+        if text is None:
+            return
+        if self._uniqueList and text in self.getTexts():
+            return
+        self.listWidget.addItem(text)
+
+    def removeTexts(self, texts, blockSignals=False):
+        """Convenience: Remove texts to listWidget"""
+        if blockSignals:
+            with self.blockWidgetSignals(recursive=False, additionalWidgets=[self.pulldownList, self.listWidget]):
+                self.listWidget.removeTexts(texts)
+        else:
+            self.listWidget.removeTexts(texts)
+
+    def renameText(self, oldText, newText):
+        self.listWidget.renameItem(oldText, newText)
+
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getTexts()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setTexts(value)
 
 class EntryCompoundWidget(CompoundBaseWidget):
     """
@@ -459,6 +594,8 @@ class EntryPathCompoundWidget(CompoundBaseWidget):
             self.label.setToolTip(tipText)
 
         self.entry = LineEditButtonDialog(parent=self, textLineEdit=entryText, **compoundKwds)
+        if callback is not None:
+            self.entry.lineEdit.textChanged.connect(callback)
         self._addWidget(self.entry)
 
         if default is not None:
@@ -1024,6 +1161,67 @@ class CheckBoxesCompoundWidget(CompoundBaseWidget):
         return self.set(value)
 
 
+class FrameCompoundWidget(CompoundBaseWidget):
+    """
+    Compound class comprising a Label and a (scrollable) Frame, combined in a CompoundBaseWidget (i.e. a Frame)
+
+      orientation       widget layout
+      ------------      ------------------------
+      left:             Label       Frame
+
+
+      top:              Label
+                        Frame
+
+    """
+    layoutDict = dict(
+            # grid positions for label and Frame for the different orientations
+            left=[(0, 0), (0, 1)],
+            right=[(0, 1), (0, 0)],
+            top=[(0, 0), (1, 0)],
+            bottom=[(1, 0), (0, 0)],
+            )
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
+                 scrollable=False,
+                 minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                 labelText='',  compoundKwds=None,
+                 **kwds):
+
+        CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                    showBorder=showBorder, **kwds)
+
+        labelGrid = self.layoutDict[orientation][0]
+        self.label = Label(parent=self, text=labelText, vAlign='center', grid=labelGrid)
+        # self._addWidget(self.label)  ## Don't use _addWidget here. because doesn't seem to work for the scrollable Frame construction.
+        frameKwds = {}
+        frameKwds.update(compoundKwds or {})
+        frameGrid = self.layoutDict[orientation][1]
+        if scrollable:
+            self.widgetArea = ScrollableFrame(self, setLayout=True, grid=frameGrid, ) #the container where to add widgets
+            self._frame = Frame(self.widgetArea, setLayout=True, showBorder=False) #hAlign=orientation, **frameKwds)
+        else:
+            self.widgetArea = Frame(self, setLayout=True, grid=frameGrid,)
+            self._frame = self.widgetArea # just to have same class attr as when scrollable=True
+        self.widgetArea.setObjectName(labelText)
+        self.setObjectName(labelText)
+        self._widgets.append(self.label)
+        ## Don't use _addWidget and  _widgets because doesn't seem to work for the scrollable Frame construction.
+        # self._widgets.append(self.widgetArea)
+        # self._addWidget(self._frame)
+
+        if minimumWidths is not None:
+            self.setMinimumWidths(minimumWidths)
+
+        if maximumWidths is not None:
+            self.setMaximumWidths(maximumWidths)
+
+        if fixedWidths is not None:
+            self.setFixedWidths(fixedWidths)
+
+    def clear(self):
+        self.widgetArea._clear()
+
 class ButtonCompoundWidget(CompoundBaseWidget):
     """
     Compound class comprising a Label and a Button, combined in a CompoundBaseWidget (i.e. a Frame)
@@ -1112,6 +1310,97 @@ class ButtonCompoundWidget(CompoundBaseWidget):
         if fixedWidths is not None:
             self.setFixedWidths(fixedWidths)
 
+
+
+class ButtonListCompoundWidget(CompoundBaseWidget):
+    """
+    Compound class comprising a Label and a ButtonList, combined in a CompoundBaseWidget (i.e. a Frame)
+
+      orientation       widget layout
+      ------------      ------------------------
+      left:             Label       Button
+
+      right:            Button    Label
+
+      top:              Label
+                        Button
+
+      bottom:           Button
+                        Label
+
+    """
+    layoutDict = dict(
+            # grid positions for label and checkBox for the different orientations
+            left=[(0, 0), (0, 1)],
+            right=[(0, 1), (0, 0)],
+            top=[(0, 0), (1, 0)],
+            bottom=[(1, 0), (0, 0)],
+            )
+
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
+                 minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                 labelText='', texts='',
+                 callbacks=None, icons=None,
+                 tipTexts=None, direction='h',
+                 buttonAlignment='left',
+                 buttonMinimumWidth=None,
+                 compoundKwds=None,
+                 **kwds):
+
+        CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                    showBorder=showBorder, **kwds)
+
+        self.label = Label(parent=self, text=labelText, vAlign='center')
+        self._addWidget(self.label)
+
+        hAlign = orientation if orientation in ['left', 'right'] else 'center'
+        buttonKwds = {
+                      'texts'    : texts,
+                      'tipTexts':tipTexts,
+                      'hAlign'  : hAlign,
+                      'icons'    : icons,
+                      'callbacks': callbacks,
+                      'direction': direction,
+
+            }
+        buttonKwds.update(compoundKwds or {})
+        self.buttonList = ButtonList(parent=self, **buttonKwds)
+        self.buttonList.setObjectName(labelText)
+        self.setObjectName(labelText)
+        if buttonAlignment:
+            # create a temporary frame and move the buttonList inside
+            fr = Frame(self, setLayout=True)
+            self._addWidget(fr)
+            if buttonAlignment == 'left':
+                fr.layout().addWidget(self.buttonList, 0, 0)
+                Spacer(fr, 5, 5, hPolicy='expanding', vPolicy='minimum', grid=(0, 1), gridSpan=(1, 1))
+            elif buttonAlignment == 'right':
+                Spacer(fr, 5, 5, hPolicy='expanding', vPolicy='minimum', grid=(0, 0), gridSpan=(1, 1))
+                fr.layout().addWidget(self.buttonList, 0, 1)
+            else:  # centre
+                Spacer(fr, 5, 5, hPolicy='expanding', vPolicy='minimum', grid=(0, 0), gridSpan=(1, 1))
+                fr.layout().addWidget(self.buttonList, 0, 1)
+                Spacer(fr, 5, 5, hPolicy='expanding', vPolicy='minimum', grid=(0, 2), gridSpan=(1, 1))
+        else:
+            self._addWidget(self.buttonList)
+
+        if minimumWidths is not None:
+            self.setMinimumWidths(minimumWidths)
+
+        if maximumWidths is not None:
+            self.setMaximumWidths(maximumWidths)
+
+        if fixedWidths is not None:
+            self.setFixedWidths(fixedWidths)
+
+        if buttonMinimumWidth is not None:
+            buttons = self.getButtons()
+            for button in buttons:
+                button.setMinimumWidth(int(buttonMinimumWidth))
+
+    def getButtons(self):
+        return self.buttonList.buttons
 
 class LabelCompoundWidget(CompoundBaseWidget):
     """
@@ -1309,6 +1598,9 @@ class SpinBoxCompoundWidget(CompoundBaseWidget):
         """get the value from the SpinBox"""
         return self.spinBox.value()
 
+    def get(self):
+        return self.getValue()
+
     def setValue(self, value: float):
         """set the value in the SpinBox"""
         return self.spinBox.setValue(value if value is not None else 0)
@@ -1407,6 +1699,9 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
     def getValue(self) -> float:
         """get the value from the DoubleSpinBox"""
         return self.doubleSpinBox.value()
+
+    def get(self):
+        return self.getValue()
 
     def setValue(self, value: float):
         """set the value in the DoubleSpinBox"""
@@ -1544,6 +1839,9 @@ class ScientificSpinBoxCompoundWidget(CompoundBaseWidget):
         """get the value from the scientificSpinBox"""
         return self.scientificSpinBox.value()
 
+    def get(self):
+        return self.getValue()
+
     def setValue(self, value: float):
         """set the value in the scientificSpinBox"""
         return self.scientificSpinBox.setValue(value if value is not None else 0.0)
@@ -1574,6 +1872,9 @@ class SelectorWidget(Widget):
     def getText(self):
         """Convenience: Return selected text in Pulldown"""
         return self.pulldownList.currentText()
+
+    def get(self):
+        return self.getText()
 
     def select(self, item):
         """Convenience: Set item in Pulldown; works with text or item"""

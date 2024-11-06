@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-09-26 15:12:49 +0100 (Thu, September 26, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-10-22 16:58:15 +0100 (Tue, October 22, 2024) $"
+__version__ = "$Revision: 3.2.9.alpha $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,6 +32,7 @@ from ccpn.util import Path
 ccpnUrl                         = 'https://www.ccpn.ac.uk'
 ccpn2Url                        = 'https://www.ccpn.ac.uk'
 ccpnLicenceUrl                  = 'https://www.ccpn.ac.uk/software/licensing'
+ccpnAboutUrl                    = 'https://ccpn.ac.uk/about/'
 ccpnTutorials                   = 'https://www.ccpn.ac.uk/support/tutorials'
 ccpnForum                       = 'https://forum.ccpn.ac.uk'
 ccpnVideos                      = 'https://www.ccpn.ac.uk/manual/v3/'
@@ -48,11 +49,11 @@ CCPN_LOGS_DIRECTORY         = 'logs'
 CCPN_DATA_DIRECTORY         = 'data'
 CCPN_PLUGINS_DIRECTORY      = 'data/plugins'
 CCPN_SPECTRA_DIRECTORY      = 'data/spectra'
-CCPN_PLOTS_DIRECTORY      =    'data/plots'
+CCPN_PLOTS_DIRECTORY        = 'data/plots'
 CCPN_SCRIPTS_DIRECTORY      = 'scripts'
 CCPN_STATE_DIRECTORY        = 'state'
 CCPN_STATESPECTRA_DIRECTORY = 'state/spectra'
-CCPN_RESOURCES_DIRECTORY   = 'resources'
+CCPN_RESOURCES_DIRECTORY    = 'resources'
 
 # CCPN code
 ccpnCodePath                    = Path.aPath(Path.getTopDirectory())
@@ -61,6 +62,8 @@ ccpnResourcesPath               = ccpnCodePath / CCPN_RESOURCES_DIRECTORY
 ccpnBinPath                     = ccpnCodePath / 'bin'
 ccpnBatchPath                   = ccpnCodePath / 'bat'
 ccpnRunTerminal                 = ccpnBinPath / 'runTerminal.sh'
+ccpnRunModelAnalysis            = ccpnBinPath / 'modelAnalysis'
+
 defaultPreferencesPath          = ccpnConfigPath / 'defaultv3settings.json'
 
 _ccpnPythonPath                 = Path.aPath(Path.getPythonDirectory())
@@ -74,6 +77,7 @@ analysisAssignPath              = ccpnPythonPath / 'AnalysisAssign'
 analysisScreenPath              = ccpnPythonPath / 'AnalysisScreen'
 analysisStructurePath           = ccpnPythonPath / 'AnalysisStructure'
 analysisMetabolomicsPath        = ccpnPythonPath / 'AnalysisMetabolomics'
+analysisDynamicsPath            = ccpnPythonPath / 'AnalysisDynamics'
 ccpnApplicationPaths            = (analysisAssignPath, analysisScreenPath, analysisStructurePath, analysisMetabolomicsPath)
 
 macroPath                       = ccpnPythonPath / 'macros'
@@ -81,6 +85,8 @@ macroPaths                      = (macroPath, macroPath / 'relaxation')
 pluginPath                      = ccpnPythonPath / 'plugins'
 pipePath                        = ccpnPythonPath / 'pipes'
 pipeTemplates                   = ccpnPythonPath / 'framework' / 'lib' / 'pipeline' / 'templates'
+ccpnExperimentAnalysisPath      = ccpnPythonPath / 'framework' / 'lib' / 'experimentAnalysis'
+
 widgetsPath                     = ccpnGUIPath / 'widgets'
 fontsPath                       = widgetsPath    / 'fonts'
 iconsPath                       = widgetsPath    / 'icons'
@@ -109,6 +115,7 @@ definedTutorialPaths            = (beginnersTutorialPath, backboneAssignmentTuto
                                    macroWritingTutorialPath
                                    )
 howTosPath                      = tutorialsPath / 'How-Tos'
+testProjectsPath                = ccpnCodePath / 'data' / 'testProjects'
 
 documentationPath               = ccpnCodePath / 'doc' / 'build' / 'html' / 'index.html'
 licensePath                     = ccpnCodePath / 'LICENSE.txt'
@@ -126,6 +133,7 @@ userCcpnDataPath                = userCcpnPath / 'data'
 userCcpnMacroPath               = userCcpnPath / 'macro'
 userCcpnPipesPath               = userCcpnPath / 'pipes'
 userCcpnResourcesPath           = userCcpnPath / CCPN_RESOURCES_DIRECTORY
+USER_EXPERIMENTANALYSIS_MODELS  = 'experimentAnalysisModels'
 userCcpnPathSubDirectories      = ['data', 'macros', 'pipes']  # These get created by framework
 
 userDefaultProjectPath          = userCcpnDataPath / 'default.ccpn'
@@ -145,7 +153,7 @@ CCPN_SUB_DIRECTORIES = [
     CCPN_SUMMARIES_DIRECTORY, CCPN_LOGS_DIRECTORY, CCPN_DATA_DIRECTORY,
     CCPN_PLUGINS_DIRECTORY, CCPN_SPECTRA_DIRECTORY, CCPN_SCRIPTS_DIRECTORY,
     CCPN_STATE_DIRECTORY, CCPN_STATESPECTRA_DIRECTORY, CCPN_RESOURCES_DIRECTORY,
-    CCPN_PLOTS_DIRECTORY
+    CCPN_PLOTS_DIRECTORY,
 ]
 
 # The CcpNmr Project's top subdirectories (optionally) saved by saveAs

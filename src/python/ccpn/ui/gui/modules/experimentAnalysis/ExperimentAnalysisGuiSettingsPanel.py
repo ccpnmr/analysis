@@ -1,9 +1,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -12,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2023-10-18 16:07:32 +0100 (Wed, October 18, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2024-09-04 15:23:37 +0100 (Wed, September 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,32 +29,26 @@ This module contains the GUI Settings tabs.
 """
 
 from collections import OrderedDict as od
-from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import ALL_GROUPINGNMRATOMS
+from ccpn.framework.lib.experimentAnalysis.backends.SeriesAnalysisABC import ALL_GROUPINGNMRATOMS
 from ccpn.util.Logging import getLogger
-import numpy as np
-from ccpn.util.OrderedSet import OrderedSet
 from functools import partial
 ######## gui/ui imports ########
-from PyQt5 import QtCore, QtWidgets, QtGui
-from ccpn.ui.gui.widgets.Label import Label, DividerLabel
+from PyQt5 import QtCore, QtWidgets
 import ccpn.ui.gui.widgets.CompoundWidgets as compoundWidget
 import ccpn.ui.gui.widgets.PulldownListsForObjects as objectPulldowns
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, EditableRadioButtons
+from ccpn.ui.gui.widgets.Frame import Frame
 import ccpn.ui.gui.widgets.SettingsWidgets as settingWidgets
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.Label import maTex2Pixmap
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
-from ccpn.ui.gui.widgets.HLine import LabeledHLine, HLine
-from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
-from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
+from ccpn.ui.gui.widgets.HLine import LabeledHLine
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBars import PanelUpdateState
-from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, showYesNo
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.ui.gui.widgets.SettingsWidgets import ALL, UseCurrent
+from ccpn.ui.gui.widgets.SettingsWidgets import UseCurrent
 from ccpn.ui.gui.widgets.BarGraphWidget import TICKOPTIONS
-from ccpn.ui.gui.modules.experimentAnalysis.MainPlotWidgetBC import MainPlotWidget, PlotType
+from ccpn.ui.gui.modules.experimentAnalysis.MainPlotWidgetBC import PlotType
 
 SettingsWidgeMinimumWidths =  (180, 180, 180)
 SettingsWidgetFixedWidths = (200, 350, 350)
@@ -109,7 +104,6 @@ class GuiSettingPanel(Frame):
         self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
         Spacer(self, 0, 2, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                grid=(1, 0), gridSpan=(1, 1))
-        # self.postInitWidgets()
 
     def postInitWidgets(self):
         """ Override to apply preselection of widgets after creation"""
@@ -207,7 +201,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                        'compoundKwds': {'texts': expNames,
                                         'tipTexts': expTipTexts,
                                         'direction': 'v',
-                                        'selectedInd': 0,
+                                        'selectedInd': 1,
                                         }}}),
 
             (guiNameSpaces.WidgetVarName_GeneralSetupSeparator,
@@ -253,7 +247,7 @@ class GuiInputDataPanel(GuiSettingPanel):
               'type': compoundWidget.ButtonCompoundWidget,
               '_init': None,
               'kwds': {'labelText': guiNameSpaces.Label_SetupCollection,
-                       'text': 'Setup ...',  # this is the Button name
+                       'text': 'Create ...',  # this is the Button name
                        'hAlign': 'left',
                        'tipText': guiNameSpaces.TipText_SetupCollection,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
@@ -335,7 +329,7 @@ class GuiInputDataPanel(GuiSettingPanel):
               'type': compoundWidget.ButtonCompoundWidget,
               '_init': None,
               'kwds': {'labelText': guiNameSpaces.Label_FitInput,
-                       'text': 'Fit',  # this is the Button name
+                       'text': 'Fetch and Compute',  # this is the Button name
                        'hAlign': 'left',
                        'tipText': guiNameSpaces.TipText_createOutputdataTableWidget,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
@@ -362,6 +356,9 @@ class GuiInputDataPanel(GuiSettingPanel):
                        'fixedWidths': SettingsWidgetFixedWidths}}),
             ))
         return self.widgetDefinitions
+
+    def postInitWidgets(self):
+        self._experimentSelectorChanged()
 
     def _setFixedHeightPostInit(self, widget, *args):
         widget.listWidget.setFixedHeight(50)
@@ -473,7 +470,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                 getLogger().info(f'{self.guiModule.className}:{self.tabName}. {obj} added to InputSpectrumGroups')
 
     def _fitAndFetchOutputData(self, *args):
-        getLogger().info('Starting fit')
+        getLogger().info('Fitting started')
         backend = self.guiModule.backendHandler
         name = self.getSettingsAsDict().get(guiNameSpaces.WidgetVarName_OutPutDataTableName, sv.SERIESANALYSISOUTPUTDATA)
         backend.outputDataTableName = name
@@ -577,12 +574,11 @@ class GuiCalculationPanel(GuiSettingPanel):
 
         ))
         calculationModels = backendHandler.calculationModels
+        calculationModels = {m: n for (m,n) in calculationModels.items() if n.isGUIVisible}
         ## autogenerate labels/tiptexts from the calculationModes.
-        extraLabels_ddCalculationsModes = [model.MaTex for modelName, model in
-                                           calculationModels.items()]
-        tipTexts_ddCalculationsModes = [model.FullDescription for modelName, model in
+        extraLabels_ddCalculationsModes = [model.maTex for modelName, model in calculationModels.items()]
+        tipTexts_ddCalculationsModes = [model.fullDescription(model) for modelName, model in
                                         calculationModels.items()]
-        extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModes]
         calculationWidgetDefinitions = od((
             (guiNameSpaces.WidgetVarName_CalcModeSeparator,
              {'label': guiNameSpaces.Label_CalcModeSeparator,
@@ -602,10 +598,10 @@ class GuiCalculationPanel(GuiSettingPanel):
                        'tipText': '',
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'compoundKwds': {'texts': list(calculationModels.keys()),
-                                        'extraLabels': extraLabels_ddCalculationsModes,
+                                        # 'extraLabels': extraLabels_ddCalculationsModes,
                                         'tipTexts': tipTexts_ddCalculationsModes,
                                         'direction': 'v',
-                                        'extraLabelIcons': extraLabelPixmaps}}}),
+                                       }}}),
         ))
         ## add the new items to the main dict
         filteringWidgetDefinitions = od((
@@ -697,14 +693,14 @@ class GuiCalculationPanel(GuiSettingPanel):
         backend = self.guiModule.backendHandler
         currentCalculationModel = backend.currentCalculationModel
         if currentCalculationModel is not None:
-            if currentCalculationModel.ModelName != selectedCalcModelName:
+            if currentCalculationModel.modelName != selectedCalcModelName:
 
                 modelObj = backend.getCalculationModelByName(selectedCalcModelName)
                 if modelObj is not None:
                     currentCalculationModel = modelObj()
         backend.currentCalculationModel = currentCalculationModel
-        backend.currentFittingModel.PeakProperty = selectedCalcPeakProperty
-        backend.currentCalculationModel.PeakProperty = selectedCalcPeakProperty
+        backend.currentFittingModel.peakProperty = selectedCalcPeakProperty
+        backend.currentCalculationModel.peakProperty = selectedCalcPeakProperty
         backend._needsRefitting = True
         self._setUpdatedDetectedState()
         self.guiModule.settingsChanged.emit(self.getSettingsAsDict())
@@ -723,8 +719,9 @@ class GuiFittingPanel(GuiSettingPanel):
     def setWidgetDefinitions(self):
         """Common fitting Widgets"""
         models = list(self.guiModule.backendHandler.fittingModels.values())
+        models = [model for model in models if model.isGUIVisible]
         currentFittingModel = self.guiModule.backendHandler.currentFittingModel
-        currentFittingModelName = currentFittingModel.ModelName if currentFittingModel is not None else None
+        currentFittingModelName = currentFittingModel.modelName if currentFittingModel is not None else None
         self.widgetDefinitions = od((
             (guiNameSpaces.WidgetVarName_OptimiserSeparator,
              {'label': guiNameSpaces.Label_OptimiserSeparator,
@@ -747,20 +744,40 @@ class GuiFittingPanel(GuiSettingPanel):
                        'fixedWidths': SettingsWidgetFixedWidths}}),
             (guiNameSpaces.WidgetVarName_ErrorMethod,
              {'label': guiNameSpaces.Label_ErrorMethod,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
               'callBack': self._commonCallback,
               'tipText': guiNameSpaces.TipText_ErrorMethod,
-              'type': compoundWidget.PulldownListCompoundWidget,
-              'enabled': False,
+              'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_ErrorMethod,
-                       'tipText': guiNameSpaces.TipText_ErrorMethod,
-                       'texts': ['Default','parametric bootstrapping', 'non-parametric bootstrapping', 'Monte-Carlo', ],
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'selectedText': sv.COVMATRIX,
+                       'tipText': guiNameSpaces.UncertaintyTipText,
+                       'compoundKwds': {'texts'  : list(guiNameSpaces.UncertaintyDefs.keys()),
+                                        'tipTexts'    :  list(guiNameSpaces.UncertaintyDefs.values()),
+                                        'direction'   : 'v',
+                                        'tipText'     : guiNameSpaces.TipText_ErrorMethod,
+                                        'hAlign'      : 'l',
+                                        }}}),
+            (guiNameSpaces.WidgetVarName_UncertaintySample,
+             {'label'   : guiNameSpaces.Label_UncertaintySample,
+              'type'    : compoundWidget.SpinBoxCompoundWidget,
+              'postInit': None,
+              'callBack': self._commonCallback,
+              'tipText' : guiNameSpaces.TipText_UncertaintySample,
+              'enabled' : True,
+              'kwds': {'labelText': guiNameSpaces.Label_UncertaintySample,
+                       'tipText': guiNameSpaces.TipText_UncertaintySample,
+                       'value': 1000,
+                       'step': 10,
+                       'minimum':1,
+                       'maximum':10000,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
         ))
         ## Set the models definitions
-        extraLabels_ddFittingModels = [model.MaTex for model in models]
-        tipTexts_ddFittingModels = [model.FullDescription for model in models]
-        modelNames = [model.ModelName for model in models]
-        extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddFittingModels]
+        extraLabels_ddFittingModels = [model.maTex for model in models]
+        tipTexts_ddFittingModels = [model.fullDescription(model) for model in models]
+        modelNames = [model.modelName for model in models]
         enabledModels = [model.isEnabled for model in models]
         settingsDict = od((
             (guiNameSpaces.WidgetVarName_FittingSeparator,
@@ -775,24 +792,93 @@ class GuiFittingPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_FittingModel,
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': None,
-              'callBack': self._commonCallback,
+              'callBack': self._fittingModelChanged,
               'tipText': guiNameSpaces.TipText_FittingModel,
               'enabled': True,
               'kwds': {'labelText': guiNameSpaces.Label_FittingModel,
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'selectedText': currentFittingModelName,
                        'compoundKwds': {'texts': modelNames,
-                                        'extraLabels': extraLabels_ddFittingModels,
+                                        # 'extraLabels': extraLabels_ddFittingModels,
                                         'tipTexts': tipTexts_ddFittingModels,
                                         'enabledTexts': enabledModels,
                                         'direction': 'v',
                                         'tipText': '',
                                         'hAlign': 'l',
-                                        'extraLabelIcons': extraLabelPixmaps}}}),
-        ))
+                                       }}}),
+            (guiNameSpaces.WidgetVarName_ModelEq,
+             {'label'   : guiNameSpaces.Label_ModelEq,
+              'type'    : compoundWidget.FrameCompoundWidget,
+              'tipText' : guiNameSpaces.TipText_ModelEq,
+              'enabled' : True,
+              'kwds'    : {
+                  'labelText': guiNameSpaces.Label_ModelEq,
+                    'scrollable':True,
+                  'fixedWidths': SettingsWidgetFixedWidths},
+                  'compoundKwds': {'showBorder':True,}
+              }),
+            (guiNameSpaces.WidgetVarName_ModelValues,
+            {'label'       : guiNameSpaces.Label_ModelValues,
+             'type'        : compoundWidget.FrameCompoundWidget,
+             'tipText'     : guiNameSpaces.TipText_ModelValues,
+             'enabled'     : True,
+             'kwds'        : {
+             'labelText'  : guiNameSpaces.Label_ModelValues,
+             'scrollable': False,
+             'fixedWidths': SettingsWidgetFixedWidths},
+             'compoundKwds': {'showBorder': True, }
+             }),
+                ))
+
+
         self.widgetDefinitions.update(settingsDict)
 
         return self.widgetDefinitions
+
+    def _fittingModelChanged(self, *args, **kwargs):
+        """Callback tiggered by changing the fitting model selection.
+        Actions:
+            - Draw the Model Equation  (clear the previous first)
+            - Add a series of widgets depending on the params
+        """
+        from ccpn.ui.gui.widgets.Label import maTex2Pixmap
+        from ccpn.ui.gui.widgets.Label import Label
+        from ccpn.ui.gui.widgets.FittiningParamsWidget import FittingParamWidget
+        frameWidget = self.getWidget(guiNameSpaces.WidgetVarName_ModelEq)
+        mainFrame = frameWidget.widgetArea
+        frameWidget.clear()
+
+        fittingSettings = self.getSettingsAsDict()
+        selectedFittingModelName = fittingSettings.get(guiNameSpaces.WidgetVarName_FittingModel, None)
+        backend = self.guiModule.backendHandler
+        modelObj = backend.getFittingModelByName(selectedFittingModelName)
+        maTex = modelObj.maTex
+        pixmap = maTex2Pixmap(f'{maTex}',  fontSize=12)
+        label = Label(mainFrame, text='', icon=pixmap, grid=(0, 0), vAlign='c')
+        mainFrame.getLayout().setAlignment(QtCore.Qt.AlignCenter)
+        frameWidgetValues = self.getWidget(guiNameSpaces.WidgetVarName_ModelValues)
+        mainFrame = frameWidgetValues.widgetArea
+        frameWidgetValues.clear()
+        if modelObj.modelName != sv.BLANKMODELNAME:
+            t = FittingParamWidget(mainFrame, modelObj, callback=partial(self._userParamChanged, modelObj),  grid=(1,0))
+
+        self._commonCallback()
+
+    def _userParamChanged(self, modelObj, newParams):
+        getLogger().info(f'Updating User Params. {newParams}')
+        self._updateUserParams(modelObj, newParams)
+
+
+    @staticmethod
+    def _updateUserParams(fittingModelCls, params):
+
+        _minimiser = fittingModelCls.Minimiser
+        userParamNames = _minimiser.getUserParamNames(_minimiser)
+        for name, param in params.items():
+            if name in userParamNames:
+                _minimiser._userParams[name] = param
+        print('_minimiser._userParams::::',_minimiser._userParams)
+        return _minimiser._userParams
 
     def _commonCallback(self, *args):
         """ Update FittingModel Settings at Backend"""
@@ -805,6 +891,8 @@ class GuiFittingPanel(GuiSettingPanel):
         fittingSettings = self.getSettingsAsDict()
         selectedFittingModelName = fittingSettings.get(guiNameSpaces.WidgetVarName_FittingModel, None)
         minimiserMethod = fittingSettings.get(guiNameSpaces.WidgetVarName_OptimiserMethod, 'leastsq')
+        uncertaintiesMethod = fittingSettings.get(guiNameSpaces.WidgetVarName_ErrorMethod, sv.COVMATRIX)
+        uncertaintiesSample = fittingSettings.get(guiNameSpaces.WidgetVarName_UncertaintySample)
         ## update the backend
         backend = self.guiModule.backendHandler
         currentFittingModel = backend.currentFittingModel
@@ -812,6 +900,9 @@ class GuiFittingPanel(GuiSettingPanel):
         if modelObj is not None:
             currentFittingModel = modelObj()
             currentFittingModel.setMinimiserMethod(minimiserMethod)
+            currentFittingModel.setUncertaintiesMethod(uncertaintiesMethod)
+            currentFittingModel.setSampleSize(uncertaintiesSample)
+
         backend.currentFittingModel = currentFittingModel
         # set update detected.
         backend._needsRefitting = True
@@ -1152,7 +1243,6 @@ class AppearancePanel(GuiSettingPanel):
         if calculcationModeW:
             mode = calculcationModeW.getText()
         factorW = self.getWidget(guiNameSpaces.WidgetVarName_SDThreshValueFactor)
-
         if factorW:
             sdFactor = factorW.getValue()
         yColumnNameW = self.getWidget(guiNameSpaces.WidgetVarName_MainPlotYcolumnName)
@@ -1160,6 +1250,16 @@ class AppearancePanel(GuiSettingPanel):
             yColumnName = yColumnNameW.getText()
         else:
             return
+
+        if mode == sv.TRIMMED_MEAN and sdFactor < 1:
+            msg = 'Factor value not allowed. Usage: select 10 for a 10% trimmed mean.'
+            showWarning('Option not available.', msg)
+            return
+        elif mode == sv.TRIMMED_MEAN and sdFactor > 50:
+            msg = 'Factor value too large. Usage: select 10 for a 10% trimmed mean.'
+            showWarning('Option not available.', msg)
+            return
+
         if mode:
             try:
                 value = self._getThresholdValueFromBackend(columnName=yColumnName, calculationMode=mode, sdFactor=sdFactor)
@@ -1252,7 +1352,7 @@ class AppearancePanel(GuiSettingPanel):
         selected = yColumnNameW.getText()
 
         if calcModel is not None:  # the calculation model has priority
-            if calcModel.ModelName != sv.BLANKMODELNAME:
+            if calcModel.modelName != sv.BLANKMODELNAME:
                 moArgs = calcModel.modelArgumentNames
                 topSelection.extend(moArgs)
                 preferredSelection = calcModel._preferredYPlotArgName
@@ -1260,14 +1360,12 @@ class AppearancePanel(GuiSettingPanel):
                     preferred.append(preferredSelection)
 
         if fittingModel is not None:
-            if fittingModel.ModelName != sv.BLANKMODELNAME:
-                allArgs = fittingModel.getAllArgNames()
-                if calcModel is not None and not calcModel._disableFittingModels:
-                    topSelection.extend(allArgs)
-                    if preferred in availableColumns:
-                        preferred.append(fittingModel._preferredYPlotArgName)
-                elif calcModel is not None and calcModel._disableFittingModels:
-                    otherFromFittingDisabled.extend(allArgs)
+            if fittingModel.modelName != sv.BLANKMODELNAME:
+                _preferredYPlotArgName = fittingModel._preferredYPlotArgName
+                allArgs = fittingModel._getAllArgNames()
+                topSelection.extend(allArgs)
+                if _preferredYPlotArgName in availableColumns:
+                    preferred.append(_preferredYPlotArgName)
 
         # add all available
         otherFromFittingDisabled = list(set(otherFromFittingDisabled))

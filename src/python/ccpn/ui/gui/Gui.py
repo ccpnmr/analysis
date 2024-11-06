@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 11:14:30 +0000 (Sun, October 27, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-11-06 18:31:53 +0000 (Wed, November 06, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1727,8 +1727,8 @@ class Gui(Ui, _Gui_V3_V4):
         :param position: relative position where to place the module (e.g. 'top', bottom', 'left', 'right')
         :param relativeTo: module relative to which position is applied.
         """
-        from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftMappingGuiModule import ChemicalShiftMappingGuiModule
-        return self._showModule(ChemicalShiftMappingGuiModule, position=position, relativeTo=relativeTo)
+        from ccpn.ui.gui.modules.experimentAnalysis.ChemicalShiftPerturbationGuiModule import ChemicalShiftPerturbationGuiModule
+        return self._showModule(ChemicalShiftPerturbationGuiModule, position=position, relativeTo=relativeTo)
 
     @logCommand('ui.')
     def showRelaxationModule(self, position: str = 'top', relativeTo = None):

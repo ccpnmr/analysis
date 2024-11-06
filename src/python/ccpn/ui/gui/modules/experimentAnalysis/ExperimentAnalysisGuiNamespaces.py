@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-09-02 16:48:00 +0100 (Mon, September 02, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-11-06 18:31:53 +0000 (Wed, November 06, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -166,7 +166,7 @@ TipText_CalculateFitting = f'Perform the fitting based on current settings'
 #############################################################
 
 Label_Calculation = 'Calculation'
-TipText_CSMCalculationPanelPanel = 'Set the various calculation modes and options for the Chemical Shift Mapping Analysis'
+TipText_CSMCalculationPanelPanel = 'Set the various calculation modes and options for the Chemical Shift Perturbation Analysis'
 
 ## General
 Journal_WilliamsonSection = '\n4.2. Weighting of shifts from different nuclei'
@@ -177,7 +177,7 @@ JournalReference = 'JournalReference'
 
 ## widgets
 WidgetVarName_DeltaDeltasSeparator = 'DeltaDeltaSeparator'
-Label_DeltaDeltas = 'Chemical Shift Mapping Options'
+Label_DeltaDeltas = 'Chemical Shift Perturbation Options'
 TipText_DeltaDeltasSeparator = f'{TipText_CSMCalculationPanelPanel} \n For weighting factors, see reference: ' \
                                f'{Journal_WilliamsonReference}{Journal_WilliamsonSection}'
 

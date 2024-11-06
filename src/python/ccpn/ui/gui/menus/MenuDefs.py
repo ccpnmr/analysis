@@ -26,9 +26,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 08:23:53 +0000 (Mon, October 28, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-11-06 18:31:53 +0000 (Wed, November 06, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -64,7 +64,7 @@ from ccpn.ui.gui.menus._MenuItems import Menu, Action, Section, Separator, Dynam
 FILE_MENU = 'File'
 EDIT_MENU = 'Edit'
 VIEW_MENU = 'View'
-VIEW_CHEMICAL_SHIFT_MAPPING = 'Chemical Shift Mapping (Beta)'  # used in AnalysisAssign
+VIEW_CHEMICAL_SHIFT_PERTURBATION = 'Chemical Shift Perturbation (Beta)'  # used in AnalysisAssign
 SPECTRUM_MENU = 'Spectrum'
 MOLECULES_MENU = 'Molecules'
 MACRO_MENU = 'Macro'
@@ -183,7 +183,7 @@ class MenusDefs(Menu, FrameworkProperties):
          Action("Structure Ensemble Table", self._showStructureEnsembleTableCallback, shortcut='st', checkEnabled=_projectHasStructureEnsembles),
 
          Separator(),
-         Action(VIEW_CHEMICAL_SHIFT_MAPPING, self._showChemicalShiftMappingCallback, shortcut='cm'),
+         Action(VIEW_CHEMICAL_SHIFT_PERTURBATION, self._showChemicalShiftMappingCallback, shortcut='cm'),
          Action("Relaxation Analysis (Beta)", self._showRelaxationModuleCallback, shortcut='ra'),
          Action("Notes Editor", self._showNotesEditorCallback, shortcut='no'),
 
@@ -221,7 +221,7 @@ class MenusDefs(Menu, FrameworkProperties):
                                             checkEnabled=_updatePythonConsole
          ),
 
-    ), # end Menu View
+         ), # end Menu View
 
     Menu(SPECTRUM_MENU,
 
@@ -916,7 +916,7 @@ class MenusDefs(Menu, FrameworkProperties):
         self.mainWindow.toggleCrosshair()
 
     def _showChemicalShiftMappingCallback(self):
-        """Callback to show Chemical shift mapping module
+        """Callback to show Chemical Shift Perturbation module
         """
         self.ui.showChemicalShiftMapping()
 

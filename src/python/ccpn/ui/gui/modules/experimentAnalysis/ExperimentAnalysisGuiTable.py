@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-13 15:20:23 +0100 (Fri, September 13, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__dateModified__ = "$dateModified: 2024-11-06 18:31:53 +0000 (Wed, November 06, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,14 +30,12 @@ from functools import partial
 from ccpn.util.DataEnum import DataEnum
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
-import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv, seriesVariables
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 ######## gui/ui imports ########
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 from ccpn.ui.gui.widgets.table.Table import Table
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-
-
 
 
 class _NavigateTrigger(DataEnum):

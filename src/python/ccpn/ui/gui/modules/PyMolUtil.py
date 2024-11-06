@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-13 20:32:53 +0100 (Fri, September 13, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__dateModified__ = "$dateModified: 2024-11-06 18:31:53 +0000 (Wed, November 06, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -172,7 +172,7 @@ def _CSMSelection2PyMolFile(filePath, pdbPath, aboveThresholdResidues, belowThre
                             colourBelowThreshold, selection):
     """
     _CCPNnmr Internal. Used in ChemicalShift mapping Module
-    This creates a file with a PyMol script to mirror the chemical shift mapping module selections etc..."""
+    This creates a file with a PyMol script to mirror the chemical shift perturbation module selections etc..."""
 
     _mapDict = {
         'above'  : {
@@ -216,7 +216,7 @@ def _CSMSelection2PyMolFile(filePath, pdbPath, aboveThresholdResidues, belowThre
 def _CSMSelection2PyMolFileNew(filePath, pdbPath, coloursDict, selection):
     """
     _CCPNnmr Internal. Used in ChemicalShift mapping Module
-    This creates a file with a PyMol script to mirror the chemical shift mapping module selections etc..."""
+    This creates a file with a PyMol script to mirror the chemical shift perturbation module selections etc..."""
     from ccpn.util.Colour import spectrumColours, hexToRgb
 
     if os.path.exists(pdbPath):

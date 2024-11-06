@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-09-03 09:56:08 +0100 (Tue, September 03, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-11-06 18:31:53 +0000 (Wed, November 06, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,7 +37,6 @@ import numpy as np
 import random
 from ccpn.ui.gui.widgets.table._TableCommon import CHECKABLE, ENABLED, SELECTABLE
 from ccpn.ui.gui.widgets.Application import TestApplication
-from ccpn.ui.gui.Gui import _MyAppProxyStyle
 
 from ccpn.ui.gui.widgets.table.TableABC import TableABC
 from ccpn.ui.gui.widgets.table._TableAdditions import TableCopyCell, TableExport, TableSearchMenu, TableDelete

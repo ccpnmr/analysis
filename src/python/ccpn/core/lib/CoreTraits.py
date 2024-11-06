@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-05 16:05:00 +0000 (Tue, November 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-06 09:15:22 +0000 (Wed, November 06, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -95,13 +95,13 @@ class V3Object(TraitType, _CcpNmrTrait):
 
     _overrideClassCheck = False  # flag for ccpnv4 testing
 
-    def __init__(self, klass=None, default_value=Sentinel, allowPid=False, **kwargs):
+    def __init__(self, klass=None, default_value=Sentinel, allow_pid=False, **kwargs):
         """
         Initialise the trait
         :param klass: only allow objects of type klass (V3object or className str);
                       ignored when None
         :param default_value: value set by default (Sentinel)
-        :param allowPid: allow conversion from Pid/str to V3object
+        :param allow_pid: allow conversion from Pid/str to V3object
         :param kwargs: optional kwds to the TraitType invocation
         """
         from ccpn.core._implementation.CoreModel import _isV3coreClass, _isV3coreClassInstance, _getV3coreClass
@@ -136,7 +136,7 @@ class V3Object(TraitType, _CcpNmrTrait):
         if default_value is not None:
             self.default_value = default_value
 
-        self.allowPid = allowPid
+        self.allow_pid = allow_pid
 
     def validate(self, obj, value):
         """Assure a Core-class instance
@@ -148,7 +148,7 @@ class V3Object(TraitType, _CcpNmrTrait):
         if value is None and self.allow_none:
             return None
 
-        if isinstance(value, (Pid, str)) and self.allowPid:
+        if isinstance(value, (Pid, str)) and self.allow_pid:
             _app = getApplication()
             if (value := _app.get(value)) is None:
                 raise ValueError(f'Unable to get a V3object from {value}')
@@ -188,7 +188,7 @@ class V3Object(TraitType, _CcpNmrTrait):
             else:
                 _app = getApplication()
                 if (result := _app.get(value)) is None:
-                    getLogger().warning('Error decoding %r; set to None' % value)
+                    getLogger().warning(f'Error decoding {value!r}; set to None')
                 return result
 # end class
 

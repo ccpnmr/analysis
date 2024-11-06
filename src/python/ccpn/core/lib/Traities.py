@@ -212,7 +212,8 @@ class V3Property(property):
                 _value = self.validator.validate(instance, _value)
             except Exception as ex:
                 getLogger().debug(f'V3Property {self.klass.__name__}.{self.name}: validating {_value} failed; {ex}')
-                return Sentinel
+                # return Sentinel
+                raise ex
 
         self.value = _value
         return self.value
@@ -261,7 +262,7 @@ class V3Property(property):
             raise AttributeError(f'V3Property: undefined klass; cannot set value of {instance}')
 
         if self._fset is None:
-            raise AttributeError(f'V3Property: cannot set {type(instance).__name__}.{self.name}')
+            raise AttributeError(f'V3Property: cannot set {type(instance).__name__}.{self.name}; property is read-only')
 
         previousValue = self.previousValue = self.value if self.value is not Sentinel \
                                              else self._getter(instance)

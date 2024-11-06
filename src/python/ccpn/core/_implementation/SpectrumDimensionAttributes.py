@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 16:23:30 +0100 (Sat, October 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-06 09:15:22 +0000 (Wed, November 06, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -106,6 +106,7 @@ class SpectrumDimensionAttributes(object):
     @property
     def dimensionType(self) -> str:
         """Dimension type ('Time' / 'Frequency' / 'Sampled')"""
+        #TODO:EB move to model
         if not self._hasInternalParameter('dimensionType'):
             result = specLib.DIMENSION_FREQUENCY
             # self._setInternalParameter('dimensionType', result)

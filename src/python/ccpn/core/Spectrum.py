@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-05 16:05:00 +0000 (Tue, November 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-06 09:15:22 +0000 (Wed, November 06, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -170,7 +170,7 @@ class Spectrum(AbstractWrapperObject):
     MAXDIM = specLib.MAXDIM  # 8  # Maximum dimensionality
 
     #-----------------------------------------------------------------------------------------
-    # Internal NameSpace  and other definitions
+    # Internal NameSpace  and other definitions  TODO:EB move to model
     #-----------------------------------------------------------------------------------------
 
     # Key for storing the dataStore info in the Ccpn internal parameter store
@@ -189,11 +189,11 @@ class Spectrum(AbstractWrapperObject):
 
     #-----------------------------------------------------------------------------------------
     # A property for which the (graphics) machinery can set an OBSERVE notifier
-    _rebuildContoursSignal = NotifierSignal()
-    # Code below affecting graphics will do:
-    #    self._rebuildContoursSignal = True,
-    # which will advance the _rebuildContoursSignal counter by one, triggering any
-    # callbacks set for the signal.
+    _rebuildContoursSignal = NotifierSignal()   # Code (below) affecting graphics will do:
+                                                #    self._rebuildContoursSignal = True,
+                                                # which will advance the _rebuildContoursSignal
+                                                # counter by one, triggering any callbacks
+                                                # set for the signal.
 
     # Signal set by _openFile call
     _openFileSignal = NotifierSignal()
@@ -224,7 +224,7 @@ class Spectrum(AbstractWrapperObject):
     # --- chemicalShiftList property ---
     @V3Property(validator=V3Object(klass='ChemicalShiftList',
                                    allow_none=False,
-                                   allowPid=True
+                                   allow_pid=True
                                   ),
                 validateGetter=False, # True: breaks the cross referencing machinery
                 crossReference=('ChemicalShiftList', 'spectra')
@@ -240,8 +240,6 @@ class Spectrum(AbstractWrapperObject):
     def chemicalShiftList(self, value):
         """Set the chemicalShiftList for the spectrum
         """
-        # _oldSpecs = value.spectra
-        # _newSpecs = set(_oldSpecs) | {self}
         value.spectra = set(value.spectra) | {self}
 
         # TODO:ED There was an error catching for Nef related problems;
@@ -1185,30 +1183,35 @@ class Spectrum(AbstractWrapperObject):
             raise RuntimeError(
                     'Spectrum.acquisitionAxisCode: this should not happen; more than one dimension defined as acquisition dimension')
 
-    @property
+    # --- dimensionTypes property ---
+    @V3Property(validator=V3List(itemTrait=CEnum(specLib.DIMENSIONTYPES,
+                                                 allow_none=True
+                                                )
+                                )
+               ).tag(includeInDimensionalCopy=True)
     def dimensionTypes(self) -> List[Optional[str]]:
         """Dimension types ('Time' / 'Frequency' / 'Sampled') per dimension"""
         return self._getDimensionalAttributes('dimensionType')
 
     @dimensionTypes.setter
-    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,), enumerated=specLib.DIMENSIONTYPES)
     def dimensionTypes(self, value):
         self._setDimensionalAttributes('dimensionType', value)
 
     @property
     def isTimeDomains(self) -> list:
-        """Conveniance: A list of booleans per dimension indicating if dimension is
+        """Convenience: A list of booleans per dimension indicating if dimension is
           time domain
         """
         return [(dimType == specLib.DIMENSION_TIME) for dimType in self.dimensionTypes]
 
     @property
     def isSampledDomains(self) -> list:
-        """Conveniance: A list of booleans per dimension indicating if dimension is
+        """Convenience: A list of booleans per dimension indicating if dimension is
           sampled
         """
         return [(dimType == specLib.DIMENSION_SAMPLED) for dimType in self.dimensionTypes]
 
+    # --- spectralWidthsHz property ---
     @property
     @_includeInDimensionalCopy
     def spectralWidthsHz(self) -> List[float]:
@@ -1247,37 +1250,6 @@ class Spectrum(AbstractWrapperObject):
         CCPNINTERNAL: used by Peak.pointLineWidths
         """
         return self._getDimensionalAttributes('_valuePerPoint')
-
-    # @property
-    # def valuesPerPoint(self) -> List[Optional[float]]:
-    #     """valuePerPoint for each dimension:
-    #     in ppm for Frequency dimensions
-    #     in time units (seconds) for Time (Fid) dimensions
-    #     1.0 for sampled dimensions
-    #     """
-    #     result = []
-    #     _widths = self.spectralWidths
-    #     _widthsHz = self.spectralWidthsHz
-    #     _pCounts = self.pointCounts
-    #     _isComplex = self.isComplex
-    #     for axis, dimType in enumerate(self.dimensionTypes):
-    #
-    #         if dimType == specLib.DIMENSION_FREQUENCY:
-    #             valuePerPoint = _widths[axis] / _pCounts[axis]
-    #
-    #         elif dimType == specLib.DIMENSION_TIME:
-    #             # valuePerPoint is dwell time
-    #             valuePerPoint = 1.0 / _widthsHz[axis] if _isComplex[axis] \
-    #                 else 0.5 / _widthsHz[axis]
-    #
-    #         elif dimType == specLib.DIMENSION_SAMPLED:
-    #             valuePerPoint = 1.0
-    #         else:
-    #             valuePerPoint = None
-    #
-    #         result.append(valuePerPoint)
-    #
-    #     return result
 
     @property
     @_includeInDimensionalCopy

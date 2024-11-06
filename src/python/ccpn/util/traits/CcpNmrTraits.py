@@ -96,7 +96,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-30 14:15:09 +0000 (Wed, October 30, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-06 09:15:22 +0000 (Wed, November 06, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -226,6 +226,9 @@ class _CcpNmrTrait(object):
 #=========================================================================================
 
 class Any(_Any, _CcpNmrTrait):
+    """A trait for any object; implies no validations as all types/values are
+    accepted
+    """
     def __init__(self, default_value=None, **kwargs):
         _Any.__init__(self, default_value=default_value, **kwargs)
         _CcpNmrTrait.__init__(self)
@@ -248,6 +251,8 @@ class Instance(_Instance, _CcpNmrTrait):
 
 
 class Int(_Int, _CcpNmrTrait):
+    """A trait defining an int
+    """
     def __init__(self, **kwargs):
         _Int.__init__(self, **kwargs)
         _CcpNmrTrait.__init__(self)
@@ -272,7 +277,7 @@ class Int(_Int, _CcpNmrTrait):
 
 
 class CInt(Int):
-    """A casting version of the int trait.
+    """A casting version of the Int trait.
     """
     def validate(self, obj, value):
         if value is None and self.allow_none:
@@ -288,6 +293,8 @@ class CInt(Int):
 
 
 class Float(_Float, _CcpNmrTrait):
+    """A trait defining a float
+    """
     def __init__(self, default_value=Undefined, allow_none=False, **kwargs):
         _Float.__init__(self, default_value=default_value, allow_none=allow_none, **kwargs)
         _CcpNmrTrait.__init__(self)
@@ -450,24 +457,24 @@ class CEnum(Enum):
         if isinstance(value, DataEnum) or issubclass(value.__class__, DataEnum):
             value = value.value
 
-        if value in self._mapping.values():
+        _values = tuple(self._mapping.values())
+        _keys = tuple(self._mapping.keys())
+        if value in _values:
             # first check if value is already ok before attempting a mapping
             return value
 
-        elif value in self._mapping.keys():
+        elif value in _keys:
             # not in values, so check if it is a keys and do the mapping
             value = self._mapping[value]
             return value
 
         else:
-            _values1 = tuple(self._mapping.values())
-            _values2 = tuple(self._mapping.keys())
-            raise ValueError(f'setting {self.name} for {obj}: "{value}" is invalid; should be one of {_values1} or {_values2}')
+            raise ValueError(f'setting {self.name} for {obj}: {value!r} is invalid; should be one of {_values} or {_keys}')
 
     def info(self):
         """:return info string
         """
-        return f'an Enumeration with casting; one of {list(self._mapping.values())} or {list(self._mapping.keys())}'
+        return f'an Enumeration with casting; one of {tuple(self._mapping.values())!r} or {tuple(self._mapping.keys())!r}'
 
     class jsonHandler(TraitJsonHandlerBase):
         def encode(self, value):
@@ -526,7 +533,7 @@ class List(_List, _CcpNmrTrait):
 
 
 class CList(List):
-    """An List trait with casting from any iterable
+    """A List trait with casting from any iterable
     """
 
     def validate(self, obj, theList):
@@ -883,7 +890,8 @@ class RecursiveList(List):
 
 
 class Set(_Set, _CcpNmrTrait):
-    """Fixing default_value problem
+    """A trait defining a set
+    Fixing default_value problem
     """
 
     def __init__(self, trait=None, default_value=None, minlen=0, maxlen=sys.maxsize, **kwargs):
@@ -904,7 +912,8 @@ class RecursiveSet(Set):
 
 
 class Tuple(_Tuple, _CcpNmrTrait):
-    """Fixing default_value, minlen, maxlen problem
+    """A trait defining a tuple
+    Fixing default_value, minlen, maxlen problem
     """
     def __init__(self, *traits, **kwargs):
         default_value = kwargs.setdefault('default_value', None)
@@ -968,7 +977,8 @@ class RecursiveTuple(Tuple):
 
 
 class Dict(_Dict, _CcpNmrTrait):
-    """Fixing default_value problem
+    """A trait defining a dict.
+    Fixing default_value problem
     Use TDict for a dict with type checking
     """
 
@@ -1009,7 +1019,6 @@ class RecursiveDict(Dict):
 class Adict(TraitType, _CcpNmrTrait):
     """A trait that defines a json serialisable AttributeDict; 
     dicts or (key,value) iterables are automatically cast into AttributeDict
-    Recursion is not active by default, but can be set
     """
     default_value = AttributeDict()
     info_text = "'an AttributeDict'"
@@ -1056,7 +1065,6 @@ class RecursiveAdict(Adict):
 class Odict(TraitType, _CcpNmrTrait):
     """A trait that defines a json serialisable OrderedDict;
     dicts are automatically cast into OrderedDict
-    Recursion is not active
     """
     default_value = OrderedDict()
     info_text = "'an OrderedDict'"
@@ -1279,6 +1287,8 @@ class TDict(Dict):
 
 
 class Immutable(Any, _CcpNmrTrait):
+    """A trait that defines an object that is unmutable
+    """
     info_text = 'an immutable object, intended to be used as constant'
 
     def __init__(self, value):

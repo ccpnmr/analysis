@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-03-20 19:06:26 +0000 (Wed, March 20, 2024) $"
-__version__ = "$Revision: 3.2.2.1 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-06 09:15:22 +0000 (Wed, November 06, 2024) $"
+__version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +31,7 @@ from numpy import ones
 from ccpn.core.testing.WrapperTesting import WrapperTesting, fixCheckAllValid
 from ccpn.util import Path, Constants
 from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+from ccpn.util.Common import Sentinel
 
 
 class SimpleSpectrumTest(WrapperTesting):
@@ -83,6 +85,76 @@ class SpectrumTest(WrapperTesting):
         name_tester('NEWNAME')
         self.spectrum.rename(initial_name)
 
+
+class SpectrumV3PropertiesTest(WrapperTesting):
+    # Path of project to load (None for new project)
+    projectPath = 'V3ProjectForTests.ccpn'
+
+    def setUp(self):
+        with self.initialSetup():
+            self.spectrum = self.project.getSpectrum('hsqc_115')
+
+    def assertEqualForAttribute(self, attribute, value1, value2=Sentinel):
+        """Helper routine to test the value of attribute of self.spectrum:
+        - assert it is equal to value1
+        - set to value2
+        - assert it is equal to value2
+        - undo
+        - assert it is equal to value1
+        - redo
+        - assert it is equal to value2
+        """
+        _sp = self.spectrum
+        _val = getattr(_sp, attribute)
+        self.assertEqual(_val, value1)
+
+        if value2 != Sentinel:
+            setattr(_sp, attribute, value2)
+            _val = getattr(_sp, attribute)
+            self.assertEqual(_val, value2)
+
+            self.undo.undo()
+            _val = getattr(_sp, attribute)
+            self.assertEqual(_val, value1)
+
+            self.undo.redo()
+            _val = getattr(_sp, attribute)
+            self.assertEqual(_val, value2)
+
+            # revert back for the next test
+            self.undo.undo()
+
+    def test_isComplex(self):
+        self.assertEqualForAttribute('isComplex', [False, False],[True, False])
+
+    def test_chemicalShiftList(self):
+        _clDefault = self.project.chemicalShiftLists[0]
+        _cl = self.project.chemicalShiftLists[1]
+        self.assertEqualForAttribute('chemicalShiftList', _clDefault, _cl)
+        # check pid, str; can't use general routine as it compares to "value1/2" and the
+        # actual set value is converted from Pid/str to the object. Hence, the comparison will fail
+        self.spectrum.chemicalShiftList = _cl.pid
+        self.assertEqual(self.spectrum.chemicalShiftList, _cl)
+        self.spectrum.chemicalShiftList = str(_clDefault.pid)
+        self.assertEqual(self.spectrum.chemicalShiftList, _clDefault)
+
+    def test_sliceColour(self):
+        self.assertEqualForAttribute('sliceColour', '#008080', '#FFFFFF')
+
+    def test_spinningRate(self):
+        self.assertEqualForAttribute('spinningRate', None, 1001)
+
+    def test_isAcquisition(self):
+        self.assertEqualForAttribute('isAcquisition', [False, False], [False, True])
+
+    def test_axisCodes(self):
+        self.assertEqualForAttribute('axisCodes', ['H', 'N'], ['HN', 'N2'])
+
+    def test_acquisitionAxisCode(self):
+        self.assertEqualForAttribute('acquisitionAxisCode', None)
+
+    def test_dimensionTypes(self):
+        self.assertEqualForAttribute('dimensionTypes', ['Frequency', 'Frequency'], ['Frequency', 'Time'])
 
 
 class SpectrumIntensitiesTest(WrapperTesting):

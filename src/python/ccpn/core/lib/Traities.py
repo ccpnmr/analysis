@@ -503,3 +503,30 @@ class CcpNmrUnicodeProperty(CcpNmrProperty):
                     **kwds
                     )
         super().__init__(validator=_validator, validateGetter=validateGetter)
+
+
+class CcpNmrBoolProperty(CcpNmrProperty):
+    """A CcpNmrProperty for a Float"""
+    def __init__(self,
+                 defaultValue = Sentinel,
+                 allowNone: bool = False,
+                 validateGetter: bool = False,
+                 **kwds
+                 ):
+        """Init the CcpNmrUnicodeProperty
+        :param defaultValue: the default value
+        :param allowNone: allow value to be None (default: False)
+        :param validateGetter:bool: validate __get__; (default: True)
+        :param kwds: keyword arguments passed to Bool traitlet
+        """
+        # local import to avoid cycles
+        from ccpn.util.traits.CcpNmrTraits import Bool
+
+        _validator = Bool(
+                    default_value=defaultValue,
+                    allow_none=allowNone,
+                    **kwds
+                    )
+        super().__init__(validator=_validator, validateGetter=validateGetter)
+
+

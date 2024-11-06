@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-06 13:51:10 +0000 (Wed, November 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-06 17:17:15 +0000 (Wed, November 06, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -159,8 +159,35 @@ class SpectrumV3PropertiesTest(WrapperTesting):
     def test_positiveContourCount(self):
         self.assertEqualForAttribute('positiveContourCount', 10, 15)
 
+    def test_positiveContourBase(self):
+        self.assertEqualForAttribute('positiveContourBase', 1231687.956148175, 1e6)
+
+    def test_positiveContourFactor(self):
+        self.assertEqualForAttribute('positiveContourFactor', 1.414214, 1.2)
+
+    def test_positiveContourColour(self):
+        self.assertEqualForAttribute('positiveContourColour', '#008080', '#FF00FF')
+
+    def test_includePositiveContours(self):
+        self.assertEqualForAttribute('includePositiveContours', True, False)
+
     def test_negativeContourCount(self):
         self.assertEqualForAttribute('negativeContourCount', 10, 15)
+
+    def test_negativeContourBase(self):
+        self.assertEqualForAttribute('negativeContourBase', -1231687.956148175, -1e6)
+
+    def test_negativeContourFactor(self):
+        self.assertEqualForAttribute('negativeContourFactor', 1.414214, 1.2)
+
+    def test_negativeContourColour(self):
+        self.assertEqualForAttribute('negativeContourColour', '#DA70D6', '#FF00FF')
+
+    def test_includeNegativeContours(self):
+        self.assertEqualForAttribute('includeNegativeContours', True, False)
+
+    def test_experimentType(self):
+        self.assertEqualForAttribute('experimentType', None, 'H[N]')
 
 
 class SpectrumIntensitiesTest(WrapperTesting):

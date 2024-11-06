@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-06 13:51:10 +0000 (Wed, November 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-06 17:17:15 +0000 (Wed, November 06, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -115,7 +115,7 @@ from ccpn.util.Path import Path, aPath
 
 from ccpn.core.lib.Notifiers import NotifierSignal
 from ccpn.core.lib.Traities import CcpNmrProperty, CcpNmrCoreObjectProperty, \
-    CcpNmrIntProperty, CcpNmrFloatProperty, CcpNmrUnicodeProperty
+    CcpNmrIntProperty, CcpNmrFloatProperty, CcpNmrUnicodeProperty, CcpNmrBoolProperty
 from ccpn.core.lib.CoreTraits import V3Object, V3List
 from ccpn.util.traits.CcpNmrTraits import (
     Int, Float, CEnum, TDict, TList, CTuple, Unicode, Bool)
@@ -526,6 +526,7 @@ class Spectrum(AbstractWrapperObject):
 
     #-----------------------------------------------------------------------------------------
 
+    # --- psoitiveContourCount property ---
     @CcpNmrIntProperty(
             defaultValue=10,
             min=0
@@ -543,8 +544,14 @@ class Spectrum(AbstractWrapperObject):
     def positiveContourCount(self, value):
         self._wrappedData.positiveContourCount = value
 
-    @property
-    @_includeInCopy
+    # --- positiveContourBase property ---
+    @CcpNmrFloatProperty(
+            defaultValue=1e6,
+            min=0.001
+    ).tag(
+            includeInCopy=True,
+            isContourParameter=True
+    )
     def positiveContourBase(self) -> float:
         """The base level for the positive contours.
         """
@@ -555,8 +562,14 @@ class Spectrum(AbstractWrapperObject):
     def positiveContourBase(self, value):
         self._wrappedData.positiveContourBase = value
 
-    @property
-    @_includeInCopy
+    # --- positiveContourFactor property ---
+    @CcpNmrFloatProperty(
+            defaultValue=1.21,
+            min=1.001
+    ).tag(
+            includeInCopy=True,
+            isContourParameter=True
+    )
     def positiveContourFactor(self) -> float:
         """The level multiplier for positive contours.
         """
@@ -567,8 +580,13 @@ class Spectrum(AbstractWrapperObject):
     def positiveContourFactor(self, value):
         self._wrappedData.positiveContourFactor = value
 
-    @property
-    @_includeInCopy
+    # --- positiveContourColour property ---
+    @CcpNmrUnicodeProperty(
+            defaultValue=None
+    ).tag(
+            includeInCopy=True,
+            isContourParameter = True
+    )
     def positiveContourColour(self) -> str:
         """The colour of the positive contours.
         """
@@ -579,8 +597,13 @@ class Spectrum(AbstractWrapperObject):
     def positiveContourColour(self, value):
         self._wrappedData.positiveContourColour = value
 
-    @property
-    @_includeInCopy
+    # --- includePositiveContours property ---
+    @CcpNmrBoolProperty(
+            defaultValue=True
+    ).tag(
+            includeInCopy=True,
+            isContourParameter = True
+    )
     def includePositiveContours(self) -> bool:
         """The flag to include the positive contours.
         """
@@ -592,13 +615,10 @@ class Spectrum(AbstractWrapperObject):
 
     @includePositiveContours.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
     def includePositiveContours(self, value: bool):
-        if not isinstance(value, bool):
-            raise ValueError("Spectrum.includePositiveContours: must be True/False")
-
         self._setInternalParameter(self._INCLUDEPOSITIVECONTOURS, value)
 
+    # --- negativeContourCount property ---
     @CcpNmrIntProperty(
             defaultValue=10,
             min=0
@@ -616,10 +636,17 @@ class Spectrum(AbstractWrapperObject):
     def negativeContourCount(self, value):
         self._wrappedData.negativeContourCount = value
 
-    @property
-    @_includeInCopy
+    # --- negativeContourBase property ---
+    @CcpNmrFloatProperty(
+            defaultValue=-1e6,
+            max=-0.001
+    ).tag(
+            includeInCopy=True,
+            isContourParameter=True
+    )
     def negativeContourBase(self) -> float:
-        """return: The base level for the negative contours.
+        """return: The base level for the negative contours
+        NB value < 0.001.
         """
         return self._wrappedData.negativeContourBase
 
@@ -628,8 +655,13 @@ class Spectrum(AbstractWrapperObject):
     def negativeContourBase(self, value):
         self._wrappedData.negativeContourBase = value
 
-    @property
-    @_includeInCopy
+    # --- negativeContourFactor property ---
+    @CcpNmrFloatProperty(
+            defaultValue=1.21
+    ).tag(
+            includeInCopy=True,
+            isContourParameter=True
+    )
     def negativeContourFactor(self) -> float:
         """The level multiplier for negative contours.
         """
@@ -640,8 +672,13 @@ class Spectrum(AbstractWrapperObject):
     def negativeContourFactor(self, value):
         self._wrappedData.negativeContourFactor = value
 
-    @property
-    @_includeInCopy
+    # --- positiveContourColour property ---
+    @CcpNmrUnicodeProperty(
+            defaultValue=None
+    ).tag(
+            includeInCopy=True,
+            isContourParameter = True
+    )
     def negativeContourColour(self) -> str:
         """The colour of the negative contours.
         """
@@ -652,8 +689,13 @@ class Spectrum(AbstractWrapperObject):
     def negativeContourColour(self, value):
         self._wrappedData.negativeContourColour = value
 
-    @property
-    @_includeInCopy
+    # --- includeNegativeContours property ---
+    @CcpNmrBoolProperty(
+            defaultValue=True
+    ).tag(
+            includeInCopy=True,
+            isContourParameter = True
+    )
     def includeNegativeContours(self):
         """The flag to include the negative contours.
         """
@@ -665,7 +707,6 @@ class Spectrum(AbstractWrapperObject):
 
     @includeNegativeContours.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
     def includeNegativeContours(self, value: bool):
         if not isinstance(value, bool):
             raise ValueError("Spectrum.includeNegativeContours: must be True/False")
@@ -722,6 +763,7 @@ class Spectrum(AbstractWrapperObject):
             # some 1D data were read before; update the intensities as the scale has changed
             self.getSliceData()
 
+    # --- spinningRate property ---
     @CcpNmrFloatProperty(
             defaultValue=None,
             min=0.0,
@@ -798,7 +840,10 @@ class Spectrum(AbstractWrapperObject):
         else:
             return refExperiment.synonym
 
-    @property
+    # --- experimentType property ---
+    @CcpNmrUnicodeProperty(
+            allowNone=True
+    )
     @_includeInCopy
     def experimentType(self) -> Optional[str]:
         """Systematic experiment type descriptor (CCPN system)."""
@@ -810,7 +855,6 @@ class Spectrum(AbstractWrapperObject):
 
     @experimentType.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreUndoBlock(updateExperimentType=True)
     def experimentType(self, value: str):
         from ccpn.core.lib.SpectrumLib import _setApiExpTransfers, _setApiRefExperiment, _clearLinkToRefExp
 

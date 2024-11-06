@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-06 13:51:10 +0000 (Wed, November 06, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -761,12 +761,12 @@ class Undo(deque):
                 _func = str(_func)
 
                 # strip some non-useful text
-                for _text in ["functools.partial(<bound method V3Property._setter of <V3Property ",
+                for _text in ["functools.partial(<bound method CcpNmrProperty._setter of <CcpNmrProperty ",
                               "<ccpn.core.lib.ContextManager",
                               "functools.partial("
                               "<bound method ",
-                              # "V3Property._setter of "
-                              # "<V3Property",
+                              # "CcpNmrProperty._setter of "
+                              # "<CcpNmrProperty",
                              ]:
                     _func.strip()
                     if _func.startswith(_text):

@@ -5,7 +5,7 @@ Following Traitlets style
 
 e.g. in type MyClass:
 
-    @V3Property(modelled=True
+    @CcpNmrProperty(modelled=True
                 validator=Int(allow_none=False, min=0, default_value=0
                 ).tag(isImportant=True)
 
@@ -59,6 +59,7 @@ from functools import partial
 from ccpn.util.Common import Sentinel
 from ccpn.util.Logging import getLogger
 from ccpn.util.traits.CcpNmrTraits import TraitType, Bunch
+
 from ccpn.core.lib.ContextManagers import \
     apiNotificationBlanking, notificationBlanking, undoStack, undoBlock
 
@@ -74,19 +75,19 @@ class HasTraities(object):
         cls._traitiesDict = {}
 
         for name, val in vars(cls).items():
-            if isinstance(val, V3Property):
+            if isinstance(val, CcpNmrProperty):
                 val.klass = cls
                 # All name-related stuff handled by .setter decorator
                 cls._traitiesDict[name] = val
 
     @classmethod
     def _getTraities(cls, names: list | tuple = (), **filterFor) -> dict:
-        """Get dict of (name, V3Property) as defined by names,
+        """Get dict of (name, CcpNmrProperty) as defined by names,
         optionally filtered by metadata filterFor
         :param names: names of traities, defaults to all traities
         :param filterFor:dict: a metadata filter of (tag,value) pairs, defaults to None;
                               to be included: tag in metadata and metadata[tag] == filterFor[tag]
-        :return: dict of (name, V3Property) pairs
+        :return: dict of (name, CcpNmrProperty) pairs
         """
         _tDict = cls._traitiesDict
         if not names:
@@ -106,12 +107,12 @@ class HasTraities(object):
         return dict( (_name, cls._traitiesDict[_name]) for _name in _names )
 
     def _getTraitiesValues(self, names: list | tuple = (), **filterFor) -> dict:
-        """Get dict of (name, V3Property-value) as defined by names,
+        """Get dict of (name, CcpNmrProperty-value) as defined by names,
         optionally filtered by metadata filterFor.
         :param names: names of traities, defaults to all traities
         :param filterFor:dict: a metadata filter of (tag,value) pairs, defaults to None;
                               to be included: tag in metadata and metadata[tag] == filterFor[tag]
-        :return: dict of (name, V3Property) pairs
+        :return: dict of (name, CcpNmrProperty) pairs
         """
         return dict( (_name, getattr(self, _name))
                      for _name in self._getTraities(names, **filterFor).keys()
@@ -121,7 +122,7 @@ class HasTraities(object):
 
 
 
-class V3Property(property):
+class CcpNmrProperty(property):
     # Doc-string commented as otherwise it appears in addition to the description of the wrapped
     # attribute ==> too much info
 
@@ -130,8 +131,9 @@ class V3Property(property):
                  validateGetter: bool = True,
                  crossReference: tuple[str, str] | None = None,
                  ):
-        """V3Property decorator
+        """CcpNmrProperty decorator
         :param validator: TraitType: A trait instance used for validating
+        :param validateGetter:bool: validate __get__; default: True
         :param crossReference: tuple[str, str] | None: An optional (className, property-name) crossReference
         """
         super().__init__()
@@ -150,7 +152,7 @@ class V3Property(property):
 
         # optional validator
         if not isinstance(validator, TraitType):
-            raise ValueError(f'V3Property: Invalid {validator = }')
+            raise ValueError(f'CcpNmrProperty: Invalid {validator = }')
 
         self.validator: TraitType | None = validator
         if self.validator:
@@ -192,13 +194,13 @@ class V3Property(property):
         :raises AttributeError: if the attribute is not properly defined or cannot be retrieved
         """
         if self.name is None:
-            raise AttributeError(f'V3Property: undefined attribute name; cannot get value from {instance}')
+            raise AttributeError(f'CcpNmrProperty: undefined attribute name; cannot get value from {instance}')
 
         if self.klass is None:
-            raise AttributeError(f'V3Property: undefined klass; cannot get value from {instance}')
+            raise AttributeError(f'CcpNmrProperty: undefined klass; cannot get value from {instance}')
 
         if self._fget is None:
-            raise AttributeError(f'V3Property: cannot get {type(instance).__name__}.{self.name}')
+            raise AttributeError(f'CcpNmrProperty: cannot get {type(instance).__name__}.{self.name}')
 
         _value = Sentinel
         try:
@@ -211,7 +213,7 @@ class V3Property(property):
             try:
                 _value = self.validator.validate(instance, _value)
             except Exception as ex:
-                getLogger().debug(f'V3Property {self.klass.__name__}.{self.name}: validating {_value} failed; {ex}')
+                getLogger().debug(f'CcpNmrProperty {self.klass.__name__}.{self.name}: validating {_value} failed; {ex}')
                 # return Sentinel
                 raise ex
 
@@ -256,13 +258,13 @@ class V3Property(property):
         :raises AttributeError, TypeError
         """
         if self.name is None:
-            raise AttributeError(f'V3Property: undefined attribute name; cannot set value of {instance}')
+            raise AttributeError(f'CcpNmrProperty: undefined attribute name; cannot set value of {instance}')
 
         if self.klass is None:
-            raise AttributeError(f'V3Property: undefined klass; cannot set value of {instance}')
+            raise AttributeError(f'CcpNmrProperty: undefined klass; cannot set value of {instance}')
 
         if self._fset is None:
-            raise AttributeError(f'V3Property: cannot set {type(instance).__name__}.{self.name}; property is read-only')
+            raise AttributeError(f'CcpNmrProperty: cannot set {type(instance).__name__}.{self.name}; property is read-only')
 
         previousValue = self.previousValue = self.value if self.value is not Sentinel \
                                              else self._getter(instance)
@@ -356,7 +358,7 @@ class V3Property(property):
     #-----------------------------------------------------------------------------------------
 
     def tag(self, **metadata):
-        """Tag the V3Property with metadata
+        """Tag the CcpNmrProperty with metadata
         :param metadata: (key,value) pairs to store in the metadata dict
         :return: self
         """
@@ -366,8 +368,138 @@ class V3Property(property):
     #-----------------------------------------------------------------------------------------
 
     def __str__(self):
-        return (f'<V3Property {self.klass.__name__}.{self.name}>')
+        return (f'<CcpNmrProperty {self.klass.__name__}.{self.name}>')
 
     __repr__ = __str__
 
 #end class -----------------------------------------------------------------------------------------
+
+
+class CcpNmrCoreObjectProperty(CcpNmrProperty):
+    """A CcpNmrProperty for a CoreObject"""
+    def __init__(self,
+                 klass: str,
+                 defaultValue = Sentinel,
+                 allowNone: bool = True,
+                 allowPid: bool = False,
+                 validateGetter: bool = False,
+                 crossReference: tuple = None,
+                 ):
+        """Init the CcpNmrProperty
+        :param klass: the CoreObject class
+        :param defaultValue: the default value of the CoreObject
+        :param allowNone: allow None
+        :param allowPid: allow set from a pid or str
+        :param validateGetter:bool: validate __get__; default: True
+        :param crossReference: tuple[str, str] | None: An optional (className, property-name) crossReference
+        """
+        # local import to avoid cycles
+        from ccpn.core.lib.CoreTraits import V3Object
+
+        _validator = V3Object(
+                    klass=klass,
+                    default_value=defaultValue,
+                    allow_none=allowNone,
+                    allow_pid=allowPid
+                    )
+        super().__init__(validator=_validator, validateGetter=validateGetter, crossReference=crossReference)
+
+
+class CcpNmrIntProperty(CcpNmrProperty):
+    """A CcpNmrProperty for an Int"""
+    def __init__(self,
+                 defaultValue = Sentinel,
+                 allowNone: bool = False,
+                 validateGetter: bool = False,
+                 **kwds
+                 ):
+        """Init the CcpNmrProperty
+        :param defaultValue: the default value of the CoreObject
+        :param allowNone: allow None
+        :param validateGetter:bool: validate __get__; default: True
+        :param kwds: keyword arguments passed to Int traitlet; e.g. min, max, etc.
+        """
+        # local import to avoid cycles
+        from ccpn.util.traits.CcpNmrTraits import Int
+
+        _validator = Int(
+                    default_value=defaultValue,
+                    allow_none=allowNone,
+                    **kwds
+                    )
+        super().__init__(validator=_validator, validateGetter=validateGetter)
+
+
+class CcpNmrIntProperty(CcpNmrProperty):
+    """A CcpNmrProperty for an Int"""
+    def __init__(self,
+                 defaultValue = Sentinel,
+                 allowNone: bool = False,
+                 validateGetter: bool = False,
+                 **kwds
+                 ):
+        """Init the CcpNmrIntProperty
+        :param defaultValue: the default value
+        :param allowNone: allow value to be None (default: False)
+        :param validateGetter:bool: validate __get__; (default: True)
+        :param kwds: keyword arguments passed to Int traitlet; e.g. min, max, etc.
+        """
+        # local import to avoid cycles
+        from ccpn.util.traits.CcpNmrTraits import Int
+
+        _validator = Int(
+                    default_value=defaultValue,
+                    allow_none=allowNone,
+                    **kwds
+                    )
+        super().__init__(validator=_validator, validateGetter=validateGetter)
+
+
+class CcpNmrFloatProperty(CcpNmrProperty):
+    """A CcpNmrProperty for a Float"""
+    def __init__(self,
+                 defaultValue = Sentinel,
+                 allowNone: bool = False,
+                 validateGetter: bool = False,
+                 **kwds
+                 ):
+        """Init the CcpNmrFloatProperty
+        :param defaultValue: the default value
+        :param allowNone: allow value to be None (default: False)
+        :param validateGetter:bool: validate __get__; (default: True)
+        :param kwds: keyword arguments passed to Float traitlet; e.g. min, max, etc.
+        """
+        # local import to avoid cycles
+        from ccpn.util.traits.CcpNmrTraits import Float
+
+        _validator = Float(
+                    default_value=defaultValue,
+                    allow_none=allowNone,
+                    **kwds
+                    )
+        super().__init__(validator=_validator, validateGetter=validateGetter)
+
+
+class CcpNmrUnicodeProperty(CcpNmrProperty):
+    """A CcpNmrProperty for a Float"""
+    def __init__(self,
+                 defaultValue = Sentinel,
+                 allowNone: bool = False,
+                 validateGetter: bool = False,
+                 **kwds
+                 ):
+        """Init the CcpNmrUnicodeProperty
+        :param defaultValue: the default value
+        :param allowNone: allow value to be None (default: False)
+        :param validateGetter:bool: validate __get__; (default: True)
+        :param kwds: keyword arguments passed to Unicode traitlet
+        """
+        # local import to avoid cycles
+        from ccpn.util.traits.CcpNmrTraits import Unicode
+
+        _validator = Unicode(
+                    default_value=defaultValue,
+                    allow_none=allowNone,
+                    **kwds
+                    )
+        super().__init__(validator=_validator, validateGetter=validateGetter)

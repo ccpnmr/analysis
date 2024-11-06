@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-06 09:15:22 +0000 (Wed, November 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-06 13:51:10 +0000 (Wed, November 06, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -155,6 +155,12 @@ class SpectrumV3PropertiesTest(WrapperTesting):
 
     def test_dimensionTypes(self):
         self.assertEqualForAttribute('dimensionTypes', ['Frequency', 'Frequency'], ['Frequency', 'Time'])
+
+    def test_positiveContourCount(self):
+        self.assertEqualForAttribute('positiveContourCount', 10, 15)
+
+    def test_negativeContourCount(self):
+        self.assertEqualForAttribute('negativeContourCount', 10, 15)
 
 
 class SpectrumIntensitiesTest(WrapperTesting):

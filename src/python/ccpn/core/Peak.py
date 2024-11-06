@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-05 16:05:00 +0000 (Tue, November 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-06 13:51:10 +0000 (Wed, November 06, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -50,7 +50,7 @@ from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, \
     undoBlock, undoBlockWithoutSideBar, undoStackBlocking, ccpNmrV3CoreUndoBlock
 
 from ccpn.core.lib.Notifiers import NotifierSignal
-from ccpn.core.lib.Traities import V3Property
+from ccpn.core.lib.Traities import CcpNmrProperty
 from ccpn.core.lib.CoreTraits import V3Object, V3List
 from ccpn.util.traits.CcpNmrTraits import (
     Int, Float, CEnum, TDict, TList, CTuple, Unicode, Bool)
@@ -321,8 +321,8 @@ class Peak(AbstractWrapperObject):
         """Spectrum axis codes in dimension order matching position."""
         return self.spectrum.axisCodes
 
-    @V3Property(validator=V3List(Float(allow_none=False))
-               )
+    @CcpNmrProperty(validator=V3List(Float(allow_none=False))
+                    )
     def position(self) -> list:
         """:return Peak position in ppm (or other relevant unit) in dimension order.
         """

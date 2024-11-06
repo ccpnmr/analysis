@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-06 09:15:22 +0000 (Wed, November 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-06 13:51:10 +0000 (Wed, November 06, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -244,13 +244,13 @@ class _V3TypedList(_TypedList):
 
 
 class V3List(TList):
-    """Traitlet for a type-checked List for usage with V3Property decorator.
+    """Traitlet for a type-checked List for usage with CcpNmrProperty decorator.
     Note: the v3property attribute of the V3List instance is set by the
-          __init__ of the V3Property class; e.g.
+          __init__ of the CcpNmrProperty class; e.g.
 
           Example: a list of float's of minimal value 0.0, default 1.0 and no None's allowed:
 
-          @V3Property(validator=V3List(Float(min=0.0,
+          @CcpNmrProperty(validator=V3List(Float(min=0.0,
                                              allow_none=False,
                                              default_value=1.0
                                              )

@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-06 09:15:22 +0000 (Wed, November 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-06 13:51:10 +0000 (Wed, November 06, 2024) $"
 __version__ = "$Revision: 3.2.7.GWV $"
 #=========================================================================================
 # Created
@@ -114,7 +114,8 @@ from ccpn.util.decorators import logCommand
 from ccpn.util.Path import Path, aPath
 
 from ccpn.core.lib.Notifiers import NotifierSignal
-from ccpn.core.lib.Traities import V3Property
+from ccpn.core.lib.Traities import CcpNmrProperty, CcpNmrCoreObjectProperty, \
+    CcpNmrIntProperty, CcpNmrFloatProperty, CcpNmrUnicodeProperty
 from ccpn.core.lib.CoreTraits import V3Object, V3List
 from ccpn.util.traits.CcpNmrTraits import (
     Int, Float, CEnum, TDict, TList, CTuple, Unicode, Bool)
@@ -222,13 +223,13 @@ class Spectrum(AbstractWrapperObject):
         return tuple(specViews)
 
     # --- chemicalShiftList property ---
-    @V3Property(validator=V3Object(klass='ChemicalShiftList',
-                                   allow_none=False,
-                                   allow_pid=True
-                                  ),
-                validateGetter=False, # True: breaks the cross referencing machinery
-                crossReference=('ChemicalShiftList', 'spectra')
-               )
+    @CcpNmrCoreObjectProperty(
+            'ChemicalShiftList',
+            allowNone=False,
+            allowPid=True,
+            validateGetter=False,  # True: breaks the cross-referencing machinery
+            crossReference=('ChemicalShiftList', 'spectra')
+    )
     def chemicalShiftList(self):
         """:return: the ChemicalShiftList instance for spectrum
         """
@@ -525,8 +526,13 @@ class Spectrum(AbstractWrapperObject):
 
     #-----------------------------------------------------------------------------------------
 
-    @property
-    @_includeInCopy
+    @CcpNmrIntProperty(
+            defaultValue=10,
+            min=0
+    ).tag(
+            includeInCopy=True,
+            isContourParameter=True
+    )
     def positiveContourCount(self) -> int:
         """The number of positive contours to draw.
         """
@@ -593,8 +599,13 @@ class Spectrum(AbstractWrapperObject):
 
         self._setInternalParameter(self._INCLUDEPOSITIVECONTOURS, value)
 
-    @property
-    @_includeInCopy
+    @CcpNmrIntProperty(
+            defaultValue=10,
+            min=0
+    ).tag(
+            includeInCopy=True,
+            isContourParameter=True
+    )
     def negativeContourCount(self) -> int:
         """The number of negative contours to draw.
         """
@@ -662,8 +673,11 @@ class Spectrum(AbstractWrapperObject):
         self._setInternalParameter(self._INCLUDENEGATIVECONTOURS, value)
 
     # --- sliceColour property ---
-    @V3Property(validator=Unicode(default_value=None)
-                ).tag(includeInCopy=True)
+    @CcpNmrUnicodeProperty(
+            defaultValue=None
+    ).tag(
+            includeInCopy=True
+    )
     def sliceColour(self) -> str:
         """:return The colour of 1D slices.
         """
@@ -708,8 +722,12 @@ class Spectrum(AbstractWrapperObject):
             # some 1D data were read before; update the intensities as the scale has changed
             self.getSliceData()
 
-    @V3Property(validator=Float(min=0.0, default_value=None)
-                ).tag(includeInCopy=True)
+    @CcpNmrFloatProperty(
+            defaultValue=None,
+            min=0.0,
+    ).tag(
+            includeInCopy=True
+    )
     def spinningRate(self) -> float:
         """The NMR tube spinning rate (in Hz)
         """
@@ -1126,8 +1144,8 @@ class Spectrum(AbstractWrapperObject):
     #     return result
 
     # --- isComplex property ---
-    @V3Property(validator=V3List(itemTrait=Bool())
-                ).tag(includeInDimensionalCopy=True)
+    @CcpNmrProperty(validator=V3List(itemTrait=Bool())
+                    ).tag(includeInDimensionalCopy=True)
     def isComplex(self) -> List[bool]:
         """Boolean denoting Complex data per dimension"""
         return self._getDimensionalAttributes('isComplex')
@@ -1145,8 +1163,8 @@ class Spectrum(AbstractWrapperObject):
         return self.dataSource.dataTypes
 
     # --- isAquisition property ---
-    @V3Property(validator=V3List(itemTrait=Bool())
-               ).tag(includeInDimensionalCopy=True)
+    @CcpNmrProperty(validator=V3List(itemTrait=Bool())
+                    ).tag(includeInDimensionalCopy=True)
     def isAcquisition(self) -> List[bool]:
         """:return Boolean per dimension denoting if it is the acquisition dimension"""
         return self._getDimensionalAttributes('isAcquisition')
@@ -1159,8 +1177,8 @@ class Spectrum(AbstractWrapperObject):
         self._setDimensionalAttributes('isAcquisition', value)
 
     # --- axisCodes property ---
-    @V3Property(validator=V3List(itemTrait=Unicode(allow_none=True))
-                ).tag(includeInDimensionalCopy=True)
+    @CcpNmrProperty(validator=V3List(itemTrait=Unicode(allow_none=True))
+                    ).tag(includeInDimensionalCopy=True)
     def axisCodes(self) -> List[Optional[str]]:
         """:return List of an unique axisCode per dimension"""
         return self._getDimensionalAttributes('axisCode')
@@ -1170,8 +1188,9 @@ class Spectrum(AbstractWrapperObject):
         self._setDimensionalAttributes('axisCode', value)
 
     # --- AcquisitionAxisCodes property ---
-    @V3Property(validator=Unicode(allow_none=True)
-                )
+    @CcpNmrUnicodeProperty(
+            allowNone=True
+    )
     def acquisitionAxisCode(self) -> Optional[str]:
         """:return Axis code of acquisition axis - None if not known"""
         trues = [idx for idx, val in enumerate(self.isAcquisition) if val == True]
@@ -1184,11 +1203,11 @@ class Spectrum(AbstractWrapperObject):
                     'Spectrum.acquisitionAxisCode: this should not happen; more than one dimension defined as acquisition dimension')
 
     # --- dimensionTypes property ---
-    @V3Property(validator=V3List(itemTrait=CEnum(specLib.DIMENSIONTYPES,
-                                                 allow_none=True
-                                                )
-                                )
-               ).tag(includeInDimensionalCopy=True)
+    @CcpNmrProperty(validator=V3List(itemTrait=CEnum(specLib.DIMENSIONTYPES,
+                                                     allow_none=True
+                                                     )
+                                     )
+                    ).tag(includeInDimensionalCopy=True)
     def dimensionTypes(self) -> List[Optional[str]]:
         """Dimension types ('Time' / 'Frequency' / 'Sampled') per dimension"""
         return self._getDimensionalAttributes('dimensionType')

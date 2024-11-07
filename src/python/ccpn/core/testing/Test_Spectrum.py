@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-06 17:17:15 +0000 (Wed, November 06, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-07 12:24:58 +0000 (Thu, November 07, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -103,29 +103,14 @@ class SpectrumV3PropertiesTest(WrapperTesting):
         - assert it is equal to value1
         - redo
         - assert it is equal to value2
+        - undo
         """
-        _sp = self.spectrum
-        _val = getattr(_sp, attribute)
-        self.assertEqual(_val, value1)
-
-        if value2 != Sentinel:
-            setattr(_sp, attribute, value2)
-            _val = getattr(_sp, attribute)
-            self.assertEqual(_val, value2)
-
-            self.undo.undo()
-            _val = getattr(_sp, attribute)
-            self.assertEqual(_val, value1)
-
-            self.undo.redo()
-            _val = getattr(_sp, attribute)
-            self.assertEqual(_val, value2)
-
-            # revert back for the next test
-            self.undo.undo()
-
-    def test_isComplex(self):
-        self.assertEqualForAttribute('isComplex', [False, False],[True, False])
+        _obj = self.spectrum
+        super().assertEqualForAttribute(obj=_obj,
+                                        attribute=attribute,
+                                        value1=value1,
+                                        value2=value2
+                                        )
 
     def test_chemicalShiftList(self):
         _clDefault = self.project.chemicalShiftLists[0]
@@ -144,17 +129,8 @@ class SpectrumV3PropertiesTest(WrapperTesting):
     def test_spinningRate(self):
         self.assertEqualForAttribute('spinningRate', None, 1001)
 
-    def test_isAcquisition(self):
-        self.assertEqualForAttribute('isAcquisition', [False, False], [False, True])
-
-    def test_axisCodes(self):
-        self.assertEqualForAttribute('axisCodes', ['H', 'N'], ['HN', 'N2'])
-
     def test_acquisitionAxisCode(self):
         self.assertEqualForAttribute('acquisitionAxisCode', None)
-
-    def test_dimensionTypes(self):
-        self.assertEqualForAttribute('dimensionTypes', ['Frequency', 'Frequency'], ['Frequency', 'Time'])
 
     def test_positiveContourCount(self):
         self.assertEqualForAttribute('positiveContourCount', 10, 15)
@@ -188,6 +164,34 @@ class SpectrumV3PropertiesTest(WrapperTesting):
 
     def test_experimentType(self):
         self.assertEqualForAttribute('experimentType', None, 'H[N]')
+
+    def assertEqualForAttributeItem(self, attribute, value1, value2=Sentinel, itemIndex=0):
+        """Perform a test check for setting the item of attribute of self.spectrum:
+        """
+        _obj = self.spectrum
+        super().assertEqualForAttributeItem(obj=_obj,
+                                            attribute=attribute,
+                                            value1=value1,
+                                            value2=value2,
+                                            itemIndex=itemIndex
+                                            )
+
+    # dimensional ones depending on TypedList
+    def test_isComplex(self):
+        self.assertEqualForAttribute('isComplex', [False, False],[True, False])
+        self.assertEqualForAttributeItem('isComplex', [False, False],[True, False], 0)
+
+    # dimensional ones depending on TypedList
+    def test_isAcquisition(self):
+        self.assertEqualForAttribute('isAcquisition', [False, False],[True, False])
+        self.assertEqualForAttributeItem('isAcquisition', [False, False],[True, False], 0)
+
+    def test_axisCodes(self):
+        self.assertEqualForAttribute('axisCodes', ['H', 'N'], ['HN', 'N2'])
+        self.assertEqualForAttributeItem('axisCodes', ['H', 'N'], ['H', 'N2'], itemIndex=1)
+
+    def test_dimensionTypes(self):
+        self.assertEqualForAttribute('dimensionTypes', ['Frequency', 'Frequency'], ['Frequency', 'Time'])
 
 
 class SpectrumIntensitiesTest(WrapperTesting):

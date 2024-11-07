@@ -65,8 +65,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-06 17:17:15 +0000 (Wed, November 06, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-07 12:24:58 +0000 (Thu, November 07, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -115,7 +115,8 @@ from ccpn.util.Path import Path, aPath
 
 from ccpn.core.lib.Notifiers import NotifierSignal
 from ccpn.core.lib.Traities import CcpNmrProperty, CcpNmrCoreObjectProperty, \
-    CcpNmrIntProperty, CcpNmrFloatProperty, CcpNmrUnicodeProperty, CcpNmrBoolProperty
+    CcpNmrIntProperty, CcpNmrFloatProperty, CcpNmrUnicodeProperty, CcpNmrBoolProperty, \
+    CcpNmrTypedListProperty
 from ccpn.core.lib.CoreTraits import V3Object, V3List
 from ccpn.util.traits.CcpNmrTraits import (
     Int, Float, CEnum, TDict, TList, CTuple, Unicode, Bool)
@@ -1189,8 +1190,11 @@ class Spectrum(AbstractWrapperObject):
     #     return result
 
     # --- isComplex property ---
-    @CcpNmrProperty(validator=V3List(itemTrait=Bool())
-                    ).tag(includeInDimensionalCopy=True)
+    @CcpNmrTypedListProperty(
+            itemTrait=Bool()
+    ).tag(
+            includeInDimensionalCopy=True
+    )
     def isComplex(self) -> List[bool]:
         """Boolean denoting Complex data per dimension"""
         return self._getDimensionalAttributes('isComplex')
@@ -1207,9 +1211,12 @@ class Spectrum(AbstractWrapperObject):
         """
         return self.dataSource.dataTypes
 
-    # --- isAquisition property ---
-    @CcpNmrProperty(validator=V3List(itemTrait=Bool())
-                    ).tag(includeInDimensionalCopy=True)
+    # --- isAcquisition property ---
+    @CcpNmrTypedListProperty(
+            itemTrait=Bool()
+    ).tag(
+            includeInDimensionalCopy=True
+    )
     def isAcquisition(self) -> List[bool]:
         """:return Boolean per dimension denoting if it is the acquisition dimension"""
         return self._getDimensionalAttributes('isAcquisition')
@@ -1222,8 +1229,11 @@ class Spectrum(AbstractWrapperObject):
         self._setDimensionalAttributes('isAcquisition', value)
 
     # --- axisCodes property ---
-    @CcpNmrProperty(validator=V3List(itemTrait=Unicode(allow_none=True))
-                    ).tag(includeInDimensionalCopy=True)
+    @CcpNmrTypedListProperty(
+            itemTrait=Unicode(allow_none=True)
+    ).tag(
+            includeInDimensionalCopy=True
+    )
     def axisCodes(self) -> List[Optional[str]]:
         """:return List of an unique axisCode per dimension"""
         return self._getDimensionalAttributes('axisCode')
@@ -1248,11 +1258,14 @@ class Spectrum(AbstractWrapperObject):
                     'Spectrum.acquisitionAxisCode: this should not happen; more than one dimension defined as acquisition dimension')
 
     # --- dimensionTypes property ---
-    @CcpNmrProperty(validator=V3List(itemTrait=CEnum(specLib.DIMENSIONTYPES,
-                                                     allow_none=True
-                                                     )
-                                     )
-                    ).tag(includeInDimensionalCopy=True)
+    @CcpNmrTypedListProperty(
+            itemTrait=CEnum(
+                    mapping=specLib.DIMENSIONTYPES,
+                    allow_none=True
+            )
+    ).tag(
+            includeInDimensionalCopy=True
+    )
     def dimensionTypes(self) -> List[Optional[str]]:
         """Dimension types ('Time' / 'Frequency' / 'Sampled') per dimension"""
         return self._getDimensionalAttributes('dimensionType')

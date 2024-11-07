@@ -96,8 +96,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-06 09:15:22 +0000 (Wed, November 06, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-07 14:45:51 +0000 (Thu, November 07, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -169,8 +169,8 @@ class _CcpNmrTrait(object):
         self.valueTrait = valueTrait
         self.keyTrait = keyTrait
 
-        # initialisation; attributes used V3List subclasses
-        self.v3property = None
+        # initialisation; attributes used CcpNmrProperty subclasses
+        self.ccpNmrProperty = None
 
     def _fullName(self, obj) -> str:
         """:return a obj-class-name.trait-name string; eg.for error reporting

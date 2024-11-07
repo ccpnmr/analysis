@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-07 12:24:58 +0000 (Thu, November 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-07 14:45:51 +0000 (Thu, November 07, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -86,7 +86,7 @@ class SpectrumTest(WrapperTesting):
         self.spectrum.rename(initial_name)
 
 
-class SpectrumV3PropertiesTest(WrapperTesting):
+class SpectrumCcpNmrPropertiesTest(WrapperTesting):
     # Path of project to load (None for new project)
     projectPath = 'V3ProjectForTests.ccpn'
 
@@ -111,6 +111,17 @@ class SpectrumV3PropertiesTest(WrapperTesting):
                                         value1=value1,
                                         value2=value2
                                         )
+
+    def assertEqualForAttributeItem(self, attribute, value1, value2=Sentinel, itemIndex=0):
+        """Perform a test check for setting the item of attribute of self.spectrum:
+        """
+        _obj = self.spectrum
+        super().assertEqualForAttributeItem(obj=_obj,
+                                            attribute=attribute,
+                                            value1=value1,
+                                            value2=value2,
+                                            itemIndex=itemIndex
+                                            )
 
     def test_chemicalShiftList(self):
         _clDefault = self.project.chemicalShiftLists[0]
@@ -164,17 +175,6 @@ class SpectrumV3PropertiesTest(WrapperTesting):
 
     def test_experimentType(self):
         self.assertEqualForAttribute('experimentType', None, 'H[N]')
-
-    def assertEqualForAttributeItem(self, attribute, value1, value2=Sentinel, itemIndex=0):
-        """Perform a test check for setting the item of attribute of self.spectrum:
-        """
-        _obj = self.spectrum
-        super().assertEqualForAttributeItem(obj=_obj,
-                                            attribute=attribute,
-                                            value1=value1,
-                                            value2=value2,
-                                            itemIndex=itemIndex
-                                            )
 
     # dimensional ones depending on TypedList
     def test_isComplex(self):

@@ -162,7 +162,8 @@ from functools import partial
 
 from ccpn.util.Common import Sentinel
 from ccpn.util.Logging import getLogger
-from ccpn.util.traits.CcpNmrTraits import TraitType, Bunch
+from ccpn.util.traits.CcpNmrTraits import TraitType, Bunch, \
+    TList, _TypedList, Float, Int, Bool, CEnum, Unicode
 
 from ccpn.core.lib.ContextManagers import \
     apiNotificationBlanking, notificationBlanking, undoStack, undoBlock
@@ -225,6 +226,9 @@ class HasTraities(object):
 #end class -----------------------------------------------------------------------------------------
 
 
+#-----------------------------------------------------------------------------------------
+# Various CcpNmr property decorators
+#-----------------------------------------------------------------------------------------
 
 class CcpNmrProperty(property):
     # Doc-string commented as otherwise it appears in addition to the description of the wrapped
@@ -260,7 +264,7 @@ class CcpNmrProperty(property):
 
         self.validator: TraitType | None = validator
         if self.validator:
-            self.validator.v3property = self
+            self.validator.ccpNmrProperty = self
 
         self.metadata: dict = {}
 
@@ -525,7 +529,7 @@ class CcpNmrIntProperty(CcpNmrProperty):
         :param kwds: keyword arguments passed to Int traitlet; e.g. min, max, etc.
         """
         # local import to avoid cycles
-        from ccpn.util.traits.CcpNmrTraits import Int
+        # from ccpn.util.traits.CcpNmrTraits import Int
 
         _validator = Int(
                     default_value=defaultValue,
@@ -551,7 +555,7 @@ class CcpNmrFloatProperty(CcpNmrProperty):
         :param kwds: keyword arguments passed to Float traitlet; e.g. min, max, etc.
         """
         # local import to avoid cycles
-        from ccpn.util.traits.CcpNmrTraits import Float
+        # from ccpn.util.traits.CcpNmrTraits import Float
 
         _validator = Float(
                     default_value=defaultValue,
@@ -577,7 +581,7 @@ class CcpNmrUnicodeProperty(CcpNmrProperty):
         :param kwds: keyword arguments passed to Unicode traitlet
         """
         # local import to avoid cycles
-        from ccpn.util.traits.CcpNmrTraits import Unicode
+        # from ccpn.util.traits.CcpNmrTraits import Unicode
 
         _validator = Unicode(
                     default_value=defaultValue,
@@ -603,7 +607,7 @@ class CcpNmrBoolProperty(CcpNmrProperty):
         :param kwds: keyword arguments passed to Bool traitlet
         """
         # local import to avoid cycles
-        from ccpn.util.traits.CcpNmrTraits import Bool
+        # from ccpn.util.traits.CcpNmrTraits import Bool
 
         _validator = Bool(
                     default_value=defaultValue,
@@ -612,6 +616,37 @@ class CcpNmrBoolProperty(CcpNmrProperty):
                     )
         super().__init__(validator=_validator, validateGetter=validateGetter)
 
+
+#-----------------------------------------------------------------------------------------
+# CcpNmrProperty
+#   .validator  # Traitlet instance
+#
+# validator (:= Traitlet Instance)
+#   .ccpNmrProperty   # back-link to CcpNmrProperty;
+#                     # set by __init__ of CcpNmrProperty
+#
+# CcpNmrTypedListProperty(CcpNmrProperty)
+#   A CcpNmrProperty for a list with item type checking
+#
+# _CcpNmrTypedListTrait
+#   Traitlet used as the validator of the CcpNmrTypedListProperty decorator
+#
+# _CcpNmrTypedList
+#   A subclassed list with callback on item change, initiated by _CcpNmrTypedListTrait
+#
+#   ._obj   # The object instance
+#   ._trait  # A traitlet instance; i.e. the _CcpNmrTypedListTrait validator
+#   ._itemTrait  # A traitlet instance; i.e. the item validator
+#
+#
+# Example: a list of float's of minimal value 0.0, default 1.0 and no None's allowed:
+#
+# @CcpNmrTypedListProperty(
+#       itemTrait=Float(default_value=1.0, min=0.0, allow_none=False)
+# )
+# def myFunc(self):
+#             ....
+#-----------------------------------------------------------------------------------------
 
 class CcpNmrTypedListProperty(CcpNmrProperty):
     """A CcpNmrProperty for a list with item type checking"""
@@ -629,14 +664,83 @@ class CcpNmrTypedListProperty(CcpNmrProperty):
         :param validateGetter:bool: validate __get__; (default: True)
         """
         # local import to avoid cycles
-        from ccpn.core.lib.CoreTraits import V3List
+        # from ccpn.core.lib.CoreTraits import CcpNmrTypedList
 
         if defaultValue  == Sentinel:
             defaultValue = []
 
-        _validator = V3List(
-                    itemTrait=itemTrait,
-                    default_value=defaultValue,
-                    allow_none=allowNone,
+        _validator = _CcpNmrTypedListTrait(
+                            itemTrait=itemTrait,
+                            default_value=defaultValue,
+                            allow_none=allowNone,
                     )
+        # _validator.ccpNmrProperty = self  # set by the __init__
         super().__init__(validator=_validator, validateGetter=validateGetter)
+
+
+#-----------------------------------------------------------------------------------------
+# 2 Helper classes for CcpNmrTypedListProperty
+#-----------------------------------------------------------------------------------------
+
+class _CcpNmrTypedList(_TypedList):
+    """A class that can be used as a typed-checked list
+    initiated by the _CcpNmrTypedListTrait;
+
+    Callback to the CcpNmrProperties to assure undo/notifier handling
+
+    Allows for axisCode item getting/setting if class has "axisCodes"
+    attribute (Spectrum, Peak, ??). Example: myPeak.position['N']
+    """
+    # def __init__(self, obj, trait, values=()):
+
+    def __getitem__(self, item):
+        # subclassed to decode any axisCode (type str) into item index
+        if isinstance(item, str):
+            if not hasattr(self._obj, 'axisCodes'):
+                raise IndexError(f'item {item!r}: Cannot convert; no axisCodes defined for {self._obj}')
+            _aCodes = getattr(self._obj, 'axisCodes')
+            _tmp = dict( (acode, _ii) for _ii, acode in enumerate(_aCodes) )
+            if (item := _tmp.get(item, None)) is None:
+                raise IndexError(f'item {item!r} not found in {self}')
+
+        return super().__getitem__(item)
+
+    def __setitem__(self, item, value):
+        # subclassed to decode any axisCode (type str) into item index
+        if isinstance(item, str):
+            if not hasattr(self._obj, 'axisCodes'):
+                raise IndexError(f'item {item!r}: Cannot convert; no axisCodes defined for {self._obj}')
+            _aCodes = getattr(self._obj, 'axisCodes')
+            _tmp = dict( (acode, _ii) for _ii, acode in enumerate(_aCodes) )
+            if (item := _tmp.get(item, None)) is None:
+                raise IndexError(f'item {item!r} not found in {self}')
+
+        return super().__setitem__(item, value)
+
+    def _notifyChanged(self, bunch):
+        """Notify the CcpNmrProperty of self._obj of the changes
+        :param bunch: the change-bunch instance
+        """
+        # If  self is blanked (e.g. happens during init), bail out
+        if self._blanking:
+            return
+
+        # find the CcpNmrProperty
+        if not (_property := self._trait.ccpNmrProperty):
+            raise RuntimeError(f'_CcpNmrTypedList._notifyChanged: undefined ccpNmrProperty')
+
+        bunch.new = self
+        _property._itemChangedCallback(bunch=bunch)
+
+    def __str__(self):
+        return list.__str__(self)
+
+    def __repr__(self):
+        return list.__repr__(self)
+
+
+class _CcpNmrTypedListTrait(TList):
+    """Traitlet for the validator of the CcpNmrTypedListProperty decorator.
+    """
+    klass = _CcpNmrTypedList
+

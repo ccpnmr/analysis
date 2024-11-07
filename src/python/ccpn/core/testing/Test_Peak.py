@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-29 16:04:28 +0100 (Wed, May 29, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-07 14:45:51 +0000 (Thu, November 07, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,6 +34,8 @@ import pandas as pd
 from collections.abc import Iterable
 from ccpn.core.lib.AxisCodeLib import axisCodeMatch
 from ccpn.core.testing.WrapperTesting import WrapperTesting, fixCheckAllValid
+
+from ccpn.util.Common import Sentinel
 
 
 class PeakTest(WrapperTesting):
@@ -286,3 +288,46 @@ class PeakTest(WrapperTesting):
         self.assertIn('Deleted', repr(peak3))
         self.assertIn('Deleted', repr(peak2))
         self.assertIn('Deleted', repr(peak1))
+
+
+class PeakCcpnPropertiesTest(WrapperTesting):
+    # Path of project to load (None for new project)
+    projectPath = 'V3ProjectForTests.ccpn'
+
+    def setUp(self):
+        with self.initialSetup():
+            self.spectrum = self.project.getSpectrum('hsqc_115')
+
+    def assertEqualForAttribute(self, attribute, value1, value2=Sentinel):
+        """Helper routine to test the value of attribute of self.spectrum:
+        - assert it is equal to value1
+        - set to value2
+        - assert it is equal to value2
+        - undo
+        - assert it is equal to value1
+        - redo
+        - assert it is equal to value2
+        - undo
+        """
+        _obj = self.spectrum.peaks[0]
+        super().assertEqualForAttribute(obj=_obj,
+                                        attribute=attribute,
+                                        value1=value1,
+                                        value2=value2
+                                        )
+
+    def assertEqualForAttributeItem(self, attribute, value1, value2=Sentinel, itemIndex=0):
+        """Perform a test check for setting the item of attribute of self.spectrum:
+        """
+        _obj = self.spectrum.peaks[0]
+        super().assertEqualForAttributeItem(obj=_obj,
+                                            attribute=attribute,
+                                            value1=value1,
+                                            value2=value2,
+                                            itemIndex=itemIndex
+                                            )
+
+    # dimensional ones depending on TypedList
+    def test_position(self):
+        self.assertEqualForAttribute('position', [9.436816666465205, 121.03920969406117],[9.0, 120.0])
+        self.assertEqualForAttributeItem('position', [9.436816666465205, 121.03920969406117],[9.0, 120.0], 0)

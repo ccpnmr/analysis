@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-06 13:51:10 +0000 (Wed, November 06, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-08 13:56:55 +0000 (Fri, November 08, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -748,6 +748,28 @@ class Undo(deque):
         """
         from ccpn.util.Common import reduceText
 
+        def _stripText(text):
+            """Helper function to strip text
+            :return (stripped:bool, newText: str) tuple
+            """
+            text = text.strip()
+            for _string in [
+                "<ccpn.core.lib.ContextManager",
+                "functools.partial("
+                "<bound method",
+                "bound method",
+                "CcpNmrProperty._setter of",
+                "CcpNmrProperty._itemChangedCallback of",
+                "CcpNmrProperty",
+                "(",
+                "<",
+            ]:
+                if text.startswith(_string):
+                    text = text[len(_string):]
+                    return (True, text)
+
+            return (False, text)
+
         print(f'==== {self.__class__.__name__}; len={len(self)} ====\n')
 
         indx = -1
@@ -755,22 +777,12 @@ class Undo(deque):
 
             _funcs = []
             for _func in item:
-                # if isinstance(_func, partial):
-                #     _func = _func.func
-
                 _func = str(_func)
 
                 # strip some non-useful text
-                for _text in ["functools.partial(<bound method CcpNmrProperty._setter of <CcpNmrProperty ",
-                              "<ccpn.core.lib.ContextManager",
-                              "functools.partial("
-                              "<bound method ",
-                              # "CcpNmrProperty._setter of "
-                              # "<CcpNmrProperty",
-                             ]:
-                    _func.strip()
-                    if _func.startswith(_text):
-                        _func = _func[len(_text):]
+                _strip = True
+                while len(_func) > 0 and _strip:
+                    _strip, _func = _stripText(_func)
 
                 _funcs.append(_func)
 

@@ -31,8 +31,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-08 13:56:55 +0000 (Fri, November 08, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1279,8 +1279,7 @@ class NotifierBase(object):
             notifier.setBlanking(flag)
 
     @contextmanager
-    @staticmethod
-    def blankNotifications():
+    def blankNotifications(self):
         """Convenience method to blank notifications
         """
         NotifierBase._increaseNotificationBlanking()

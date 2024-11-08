@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 12:15:02 +0000 (Fri, November 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-08 13:56:55 +0000 (Fri, November 08, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -193,12 +193,15 @@ class Spectrum(AbstractWrapperObject):
     _NEGATIVENOISELEVEL = 'negativeNoiseLevel'
 
     #-----------------------------------------------------------------------------------------
-    # A property for which the (graphics) machinery can set an OBSERVE notifier
-    _rebuildContoursSignal = NotifierSignal()   # Code (below) affecting graphics will do:
-                                                #    self._rebuildContoursSignal = True,
-                                                # which will advance the _rebuildContoursSignal
+    # Signal for 2D contours
+    _buildContoursSignal = NotifierSignal()     # Code (below) affecting graphics will do:
+                                                #    self._buildContoursSignal = True,
+                                                # which will advance the _buildContoursSignal
                                                 # counter by one, triggering any callbacks
                                                 # set for the signal.
+
+    # Signal for 1D plots
+    _build1DPlotSignal = NotifierSignal()
 
     # Signal set by _openFile call
     _openFileSignal = NotifierSignal()
@@ -549,6 +552,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def positiveContourCount(self, value):
         self._wrappedData.positiveContourCount = value
+        self._buildContoursSignal = True
 
     # --- positiveContourBase property ---
     @CcpNmrFloatProperty(
@@ -567,6 +571,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def positiveContourBase(self, value):
         self._wrappedData.positiveContourBase = value
+        self._buildContoursSignal = True
 
     # --- positiveContourFactor property ---
     @CcpNmrFloatProperty(
@@ -580,6 +585,7 @@ class Spectrum(AbstractWrapperObject):
         """The level multiplier for positive contours.
         """
         return self._wrappedData.positiveContourFactor
+        self._buildContoursSignal = True
 
     @positiveContourFactor.setter
     @logCommand(get='self', isProperty=True)
@@ -602,6 +608,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def positiveContourColour(self, value):
         self._wrappedData.positiveContourColour = value
+        self._buildContoursSignal = True
 
     # --- includePositiveContours property ---
     @CcpNmrBoolProperty(
@@ -623,6 +630,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def includePositiveContours(self, value: bool):
         self._setInternalParameter(self._INCLUDEPOSITIVECONTOURS, value)
+        self._buildContoursSignal = True
 
     # --- negativeContourCount property ---
     @CcpNmrIntProperty(
@@ -641,6 +649,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def negativeContourCount(self, value):
         self._wrappedData.negativeContourCount = value
+        self._buildContoursSignal = True
 
     # --- negativeContourBase property ---
     @CcpNmrFloatProperty(
@@ -660,6 +669,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def negativeContourBase(self, value):
         self._wrappedData.negativeContourBase = value
+        self._buildContoursSignal = True
 
     # --- negativeContourFactor property ---
     @CcpNmrFloatProperty(
@@ -677,6 +687,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def negativeContourFactor(self, value):
         self._wrappedData.negativeContourFactor = value
+        self._buildContoursSignal = True
 
     # --- positiveContourColour property ---
     @CcpNmrUnicodeProperty(
@@ -694,6 +705,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def negativeContourColour(self, value):
         self._wrappedData.negativeContourColour = value
+        self._buildContoursSignal = True
 
     # --- includeNegativeContours property ---
     @CcpNmrBoolProperty(
@@ -714,10 +726,8 @@ class Spectrum(AbstractWrapperObject):
     @includeNegativeContours.setter
     @logCommand(get='self', isProperty=True)
     def includeNegativeContours(self, value: bool):
-        if not isinstance(value, bool):
-            raise ValueError("Spectrum.includeNegativeContours: must be True/False")
-
         self._setInternalParameter(self._INCLUDENEGATIVECONTOURS, value)
+        self._buildContoursSignal = True
 
     # --- displayFoldedContours property ---
     @CcpNmrBoolProperty(
@@ -736,6 +746,7 @@ class Spectrum(AbstractWrapperObject):
         """Set whether the folded spectrum contours are to be displayed
         """
         self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
+        self._buildContoursSignal = True
 
     ## === End Contour properties ===
 
@@ -754,6 +765,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def sliceColour(self, value):
         self._wrappedData.sliceColour = value
+        self._build1DPlotSignal = True
 
     @property
     @_includeInCopy

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:18 +0100 (Fri, October 25, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-08 13:56:55 +0000 (Fri, November 08, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,8 +32,9 @@ from ccpn.core.Project import Project
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay as _SpectrumDisplayCoreClass
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.guiSettings import _styleBlue
-from ccpn.util.Logging import getLogger
 
+from ccpn.util.Logging import getLogger
+from ccpn.util.decorators import logCommand
 
 # NB:
 # GWV any coreClass 'name' property creates conflicts as pyqtgraph descendants need name()
@@ -119,14 +120,44 @@ class SpectrumDisplayNd(_SpectrumDisplayCoreClass, GuiSpectrumDisplay):
     MAXMULTIPLETLABELTYPES = 7
     MAXMULTIPLETSYMBOLTYPES = 1
 
+    # Expose some methods for the nD case
+    @logCommand(get='self')
+    def raiseContourBase(self):
+        """
+        Increases contour base level for all nD spectra visible in the display.
+        """
+        self._raiseContourBase()
+
+    @logCommand(get='self')
+    def lowerContourBase(self):
+        """
+        Decreases contour base level for all nD spectra visible in the display.
+        """
+        self._lowerContourBase()
+
+    @logCommand(get='self')
+    def addContourLevel(self):
+        """
+        Increases number of contours by 1 for all nD spectra visible in the display.
+        """
+        self._addContourLevel()
+
+    @logCommand(get='self')
+    def removeContourLevel(self):
+        """
+        Decreases number of contours by 1 for all nD spectra visible in the display.
+        """
+        self._removeContourLevel()
+
+
     # NB: 'self' is added to the callback in _fillToolbar using partial
     _toolbarItems = [
         #  action name,         icon,                   tooltip,                                     active, callback
 
         ('raiseBase', 'icons/contour-base-up', 'Raise Contour Base Level (Shift + Mouse Wheel)', True,
-         GuiSpectrumDisplay._raiseContourBase),
+         raiseContourBase),
         ('lowerBase', 'icons/contour-base-down', 'Lower Contour Base Level (Shift + Mouse Wheel)', True,
-         GuiSpectrumDisplay._lowerContourBase),
+         lowerContourBase),
 
         # not needed now
         # ('increaseTraceScale', 'icons/tracescale-up', 'Increase scale of 1D traces in display (TU)', True, self.increaseTraceScale),
@@ -160,32 +191,4 @@ class SpectrumDisplayNd(_SpectrumDisplayCoreClass, GuiSpectrumDisplay):
         _SpectrumDisplayCoreClass.__init__(self, project, wrappedData)
         GuiSpectrumDisplay.__init__(self, mainWindow=_mainWindow, useScrollArea=True)
 
-    # Expose some methods for the nD case
 
-    # @logCommand(get='self')
-    def raiseContourBase(self):
-        """
-        Increases contour base level for all nD spectra visible in the display.
-        """
-        self._raiseContourBase()
-
-    # @logCommand(get='self')
-    def lowerContourBase(self):
-        """
-        Decreases contour base level for all nD spectra visible in the display.
-        """
-        self._lowerContourBase()
-
-    # @logCommand(get='self')
-    def addContourLevel(self):
-        """
-        Increases number of contours by 1 for all nD spectra visible in the display.
-        """
-        self._addContourLevel()
-
-    # @logCommand(get='self')
-    def removeContourLevel(self):
-        """
-        Decreases number of contours by 1 for all nD spectra visible in the display.
-        """
-        self._removeContourLevel()

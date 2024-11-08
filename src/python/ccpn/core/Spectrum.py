@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 11:02:22 +0000 (Fri, November 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-08 12:15:02 +0000 (Fri, November 08, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -718,6 +718,24 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError("Spectrum.includeNegativeContours: must be True/False")
 
         self._setInternalParameter(self._INCLUDENEGATIVECONTOURS, value)
+
+    # --- displayFoldedContours property ---
+    @CcpNmrBoolProperty(
+            defaultValue=True
+    ).tag(
+            includeInCopy=True,
+    )
+    def displayFoldedContours(self):
+        """Return whether the folded spectrum contours are to be displayed
+        """
+        result = self._getInternalParameter(self._DISPLAYFOLDEDCONTOURS)
+        return True if result is None else result
+
+    @displayFoldedContours.setter
+    def displayFoldedContours(self, value):
+        """Set whether the folded spectrum contours are to be displayed
+        """
+        self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
 
     ## === End Contour properties ===
 
@@ -1929,21 +1947,22 @@ class Spectrum(AbstractWrapperObject):
     def positions(self, value):
         self._positions = value
 
-    @property
-    @_includeInCopy
-    def displayFoldedContours(self):
-        """Return whether the folded spectrum contours are to be displayed
-        """
-        result = self._getInternalParameter(self._DISPLAYFOLDEDCONTOURS)
-        return True if result is None else result
-
-    @displayFoldedContours.setter
-    def displayFoldedContours(self, value):
-        """Set whether the folded spectrum contours are to be displayed
-        """
-        if not isinstance(value, bool):
-            raise ValueError("Spectrum.displayFoldedContours: must be True/False.")
-        self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
+    # GWV 8/11/2024: moved to "contour" section
+    # @property
+    # @_includeInCopy
+    # def displayFoldedContours(self):
+    #     """Return whether the folded spectrum contours are to be displayed
+    #     """
+    #     result = self._getInternalParameter(self._DISPLAYFOLDEDCONTOURS)
+    #     return True if result is None else result
+    #
+    # @displayFoldedContours.setter
+    # def displayFoldedContours(self, value):
+    #     """Set whether the folded spectrum contours are to be displayed
+    #     """
+    #     if not isinstance(value, bool):
+    #         raise ValueError("Spectrum.displayFoldedContours: must be True/False.")
+    #     self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
 
     ## CCPN INTERNAL --- Series ---  ##
 

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 22:10:24 +0000 (Sun, October 27, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-08 12:15:02 +0000 (Fri, November 08, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -876,7 +876,7 @@ class GuiSpectrumDisplay(CcpnModule):
             return
 
         if not isinstance(spectrum, Spectrum):
-            raise TypeError(f'_build1DPlotForSpectrumv(): expected Spectrum instance, got {type(spectrum)}')
+            raise TypeError(f'_build1DPlotForSpectrum(): expected Spectrum instance, got {type(spectrum)}')
 
         _specViews = self.getSpectrumViewFromSpectrum(spectrum)
         if not _specViews:

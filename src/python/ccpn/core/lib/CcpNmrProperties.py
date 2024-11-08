@@ -12,7 +12,7 @@ class CcpNmrCoreObjectProperty(CcpNmrProperty):
                  klass: str,
                  defaultValue = Sentinel,
                  allowNone: bool = True,
-                 allowPid: bool = False,
+                 allowPid: bool = True,
                  validateGetter: bool = True,
                  crossReference: tuple = None,
                  ):
@@ -171,24 +171,24 @@ from ccpn.core.lib.ContextManagers import \
     apiNotificationBlanking, notificationBlanking, undoStack, undoBlock
 
 
-class HasTraities(object):
+class HasCcpNmrProperties(object):
     """The class used for registering and functional behavior
     """
 
     @classmethod
-    def _registerTraities(cls):
-        """Find and collect all traities in the _traitiesDict
+    def _registerCcpNmrProperties(cls):
+        """Find and collect all traities in the _ccpNmrPropertiesDict
         """
-        cls._traitiesDict = {}
+        cls._ccpNmrPropertiesDict = {}
 
         for name, val in vars(cls).items():
             if isinstance(val, CcpNmrProperty):
                 val.klass = cls
                 # All name-related stuff handled by .setter decorator
-                cls._traitiesDict[name] = val
+                cls._ccpNmrPropertiesDict[name] = val
 
     @classmethod
-    def _getTraities(cls, names: list | tuple = (), **filterFor) -> dict:
+    def _getCcpNmrProperties(cls, names: list | tuple = (), **filterFor) -> dict:
         """Get dict of (name, CcpNmrProperty) as defined by names,
         optionally filtered by metadata filterFor
         :param names: names of traities, defaults to all traities
@@ -196,7 +196,7 @@ class HasTraities(object):
                               to be included: tag in metadata and metadata[tag] == filterFor[tag]
         :return: dict of (name, CcpNmrProperty) pairs
         """
-        _tDict = cls._traitiesDict
+        _tDict = cls._ccpNmrPropertiesDict
         if not names:
             names = _tDict.keys()
 
@@ -211,9 +211,9 @@ class HasTraities(object):
         else:
             _names = names
 
-        return dict( (_name, cls._traitiesDict[_name]) for _name in _names )
+        return dict((_name, cls._ccpNmrPropertiesDict[_name]) for _name in _names)
 
-    def _getTraitiesValues(self, names: list | tuple = (), **filterFor) -> dict:
+    def _getCcpNmrPropertiesValues(self, names: list | tuple = (), **filterFor) -> dict:
         """Get dict of (name, CcpNmrProperty-value) as defined by names,
         optionally filtered by metadata filterFor.
         :param names: names of traities, defaults to all traities
@@ -222,7 +222,7 @@ class HasTraities(object):
         :return: dict of (name, CcpNmrProperty) pairs
         """
         return dict( (_name, getattr(self, _name))
-                     for _name in self._getTraities(names, **filterFor).keys()
+                     for _name in self._getCcpNmrProperties(names, **filterFor).keys()
                    )
 
 #end class -----------------------------------------------------------------------------------------
@@ -396,7 +396,7 @@ class CcpNmrProperty(property):
             self._fireNotifiers(instance=instance, previousValue=previousValue, value=self.value)
         return (previousValue, value)
 
-    def _fireNotifiers(self, instance, previousValue, value, callbackDict={}):
+    def _fireNotifiers(self, instance, previousValue, value, callbackDict=None):
         """Fire the Notifiers
         :param instance: the instance of self.klass to set attribute value for
         :param previousValue: the previous value of the attribute
@@ -411,7 +411,8 @@ class CcpNmrProperty(property):
                          NotifierABC.PREVIOUSVALUE : previousValue,
                          NotifierABC.VALUE         : value
                          }
-        _callbackDict.update(callbackDict)
+        if callbackDict is not None:
+            _callbackDict.update(callbackDict)
 
         instance._fireRegisteredNotifiers(trigger=NotifierABC.OBSERVE,
                                           targetName=self.name,
@@ -492,7 +493,7 @@ class CcpNmrCoreObjectProperty(CcpNmrProperty):
                  klass: str,
                  defaultValue = Sentinel,
                  allowNone: bool = True,
-                 allowPid: bool = False,
+                 allowPid: bool = True,
                  validateGetter: bool = True,
                  crossReference: tuple = None,
                  ):
@@ -694,32 +695,36 @@ class _CcpNmrTypedList(_TypedList):
     Callback to the CcpNmrProperties to assure undo/notifier handling
 
     Allows for axisCode item getting/setting if class has "axisCodes"
-    attribute (Spectrum, Peak, ??). Example: myPeak.position['N']
+    attribute (Spectrum, Peak, ??).
+    Example: myPeak.position['N']
     """
+
     # def __init__(self, obj, trait, values=()):
 
-    def __getitem__(self, item):
-        # subclassed to decode any axisCode (type str) into item index
-        if isinstance(item, str):
-            if not hasattr(self._obj, 'axisCodes'):
-                raise IndexError(f'item {item!r}: Cannot convert; no axisCodes defined for {self._obj}')
-            _aCodes = getattr(self._obj, 'axisCodes')
-            _tmp = dict( (acode, _ii) for _ii, acode in enumerate(_aCodes) )
-            if (item := _tmp.get(item, None)) is None:
-                raise IndexError(f'item {item!r} not found in {self}')
+    def _axisCodeToItem(self, axisCode) -> int:
+        """Convert axisCode to item index for objects that have the attribute "axisCode"
+        :param axisCode: the axisCode
+        :return: the item index corresponding to axisCode
+        :raises: IndexError
+        """
+        if not hasattr(self._obj, 'axisCodes'):
+            raise IndexError(f'item {axisCode!r}: Cannot convert; no axisCodes defined for {self._obj}')
+        _aCodes = getattr(self._obj, 'axisCodes')
+        _tmp = dict((acode, _ii) for _ii, acode in enumerate(_aCodes))
+        if (item := _tmp.get(axisCode, None)) is None:
+            raise IndexError(f'item {axisCode!r} not found in {self}')
+        return item
 
+    def __getitem__(self, item):
+        """subclassed to decode any axisCode (type str) into item index"""
+        if isinstance(item, str):
+            item = self._axisCodeToItem(item)
         return super().__getitem__(item)
 
     def __setitem__(self, item, value):
-        # subclassed to decode any axisCode (type str) into item index
+        """subclassed to decode any axisCode (type str) into item index"""
         if isinstance(item, str):
-            if not hasattr(self._obj, 'axisCodes'):
-                raise IndexError(f'item {item!r}: Cannot convert; no axisCodes defined for {self._obj}')
-            _aCodes = getattr(self._obj, 'axisCodes')
-            _tmp = dict( (acode, _ii) for _ii, acode in enumerate(_aCodes) )
-            if (item := _tmp.get(item, None)) is None:
-                raise IndexError(f'item {item!r} not found in {self}')
-
+            item = self._axisCodeToItem(item)
         return super().__setitem__(item, value)
 
     def _notifyChanged(self, bunch):

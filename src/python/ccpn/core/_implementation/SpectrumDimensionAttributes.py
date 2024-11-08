@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-06 09:15:22 +0000 (Wed, November 06, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-08 18:41:43 +0000 (Fri, November 08, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -400,7 +400,38 @@ class SpectrumDimensionAttributes(object):
     def axisUnit(self, value: str):
         self._expDimRef.unit = value
 
+    _REF_EXP_DIMENSION = 'expDimToRefExpDim'
+
+    @property
+    def referenceExperimentDimension(self):
+        """dimensions of reference experiment - None if no code
+        """
+        # GWV 8/11/2024: adapted from Spectrum class
+        # TODO:EB Move to model
+        # Note that it is NOT set in the ccpnInternalDict of the SpectrumReference class,
+        # but rather in the ccpnInternalDict of the expDim object!!
+        # GWV Very, very odd
+        if (expDim := self._expDim) is None:
+            return None
+        if expDim.ccpnInternalData is None:
+            return None
+        result = expDim.ccpnInternalData.get(SpectrumDimensionAttributes._REF_EXP_DIMENSION)
+        return result
+
+    @referenceExperimentDimension.setter
+    def referenceExperimentDimension(self, value):
+        """Set the reference experiment dimension
+        """
+        if (expDim := self._expDim) is None and value is not None:
+            raise ValueError(f'Cannot set referenceExperimentDimension {value}')
+
+        _ccpnDict = expDim.ccpnInternalData or {}
+        _ccpnDict[SpectrumDimensionAttributes._REF_EXP_DIMENSION] = value
+        expDim.ccpnInternalData = _ccpnDict
+
+    #----------------------------------------------------------------------
     # Attributes belonging to DataDim/DataDimRef
+    #----------------------------------------------------------------------
 
     @property
     def referencePoint(self) -> float:

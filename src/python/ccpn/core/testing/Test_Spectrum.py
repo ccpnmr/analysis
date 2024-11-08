@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 12:15:02 +0000 (Fri, November 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-08 18:41:44 +0000 (Fri, November 08, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -202,6 +202,10 @@ class SpectrumCcpNmrPropertiesTest(WrapperTesting):
 
     def test_dimensionTypes(self):
         self.assertEqualForAttribute('dimensionTypes', ['Frequency', 'Frequency'], ['Frequency', 'Time'])
+
+    def test_referenceExperimentDimensions(self):
+        self.assertEqualForAttribute('referenceExperimentDimensions', [None, None], ['HN', 'N2'])
+        self.assertEqualForAttributeItem('referenceExperimentDimensions', [None, None], ['H', 'N2'], itemIndex=1)
 
 
 class SpectrumIntensitiesTest(WrapperTesting):

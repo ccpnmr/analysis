@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:45:37 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-08 18:41:44 +0000 (Fri, November 08, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,6 +27,7 @@ __date__ = "$Date: 2021-02-22 15:44:00 +0000 (Mon, February 22, 2021) $"
 ###### WARNING: Private routines
 ##     Many routines are directly imported from V2 (ccpnmr2.5/python/ccpnmr/analysis/core/ConstraintBasic.py)
 ##     and input/output API objects.
+#TODO:EB/LM/DT: Evaluate usage of all "api" using routines and recode and replace
 
 import re, operator
 import uuid

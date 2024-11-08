@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:22 +0100 (Thu, April 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-08 18:41:44 +0000 (Fri, November 08, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +27,7 @@ __date__ = "$Date: 2017-07-04 09:28:16 +0000 (Tue, July 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise, DEFAULTLEVELS, DEFAULTMULTIPLIER
+from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise, DEFAULT_CONTOUR_LEVELS, DEFAULT_CONTOUR_FACTOR
 from ccpn.core.lib.SpectrumLib import getNoiseEstimate, getNoiseEstimateFromRegion, getClippedRegion
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.widgets.Button import Button
@@ -201,7 +202,7 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
                                                   vAlign='top', stretch=(0, 0), hAlign='left',
                                                   orientation='right', margins=(15, 0, 0, 0),
                                                   labelText='Use default multiplier (%0.3f) and contour level count (%i)' % (
-                                                      DEFAULTMULTIPLIER, DEFAULTLEVELS),
+                                                      DEFAULT_CONTOUR_FACTOR, DEFAULT_CONTOUR_LEVELS),
                                                   checked=True
                                                   )
 

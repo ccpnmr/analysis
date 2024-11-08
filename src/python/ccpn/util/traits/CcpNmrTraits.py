@@ -97,7 +97,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 11:02:22 +0000 (Fri, November 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-08 18:41:44 +0000 (Fri, November 08, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -884,7 +884,7 @@ class TList(List):
             return self.klass(obj=obj, trait=self, values=_tmp)
 
         else:
-            raise ValueError(f'{_fullName(obj, self)}: expected list or iterable, got {theList}')
+            raise ValueError(f'{_fullName(obj, self)}: expected list, tuple or iterable, got "{theList}"')
 
     class jsonHandler(ListTraitJsonHandlerABC):
         klass = _TypedList

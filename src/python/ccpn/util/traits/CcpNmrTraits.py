@@ -96,7 +96,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-07 14:45:51 +0000 (Thu, November 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-08 07:51:30 +0000 (Fri, November 08, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -235,6 +235,11 @@ class Any(_Any, _CcpNmrTrait):
 
 
 class Instance(_Instance, _CcpNmrTrait):
+    """A trait whose value must be an instance of a specified class.
+     The value can also be an instance of a subclass of the specified class.
+     Subclasses can declare default classes by overriding the klass attribute
+     """
+
     def __init__(self, **kwargs):
         if not 'default_value' in kwargs:
             raise ValueError('%s Traitlet without explicit default_value' % self.__class__.__name__)

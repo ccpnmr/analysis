@@ -1,5 +1,5 @@
 """
-Implementing V3 property that allows for type checking,
+Implementing CcpNmr property that allows for type checking,
 notifications and tagging.
 Following Traitlets style
 
@@ -62,12 +62,14 @@ class CcpNmrUnicodeProperty(CcpNmrProperty):
     def __init__(self,
                  defaultValue = Sentinel,
                  allowNone: bool = False,
+                 cast: bool: = False
                  validateGetter: bool = True,
                  **kwds
                  ):
         Init the CcpNmrUnicodeProperty
         :param defaultValue: the default value
         :param allowNone: allow value to be None (default: False)
+        :param cast: bool: cast the value using str()
         :param validateGetter:bool: validate __get__; (default: True)
         :param kwds: keyword arguments passed to Unicode traitlet
 
@@ -163,7 +165,7 @@ from functools import partial
 from ccpn.util.Common import Sentinel
 from ccpn.util.Logging import getLogger
 from ccpn.util.traits.CcpNmrTraits import TraitType, Bunch, \
-    TList, _TypedList, Float, Int, Bool, CEnum, Unicode
+    TList, _TypedList, Float, Int, Bool, CEnum, Unicode, CUnicode
 
 from ccpn.core.lib.ContextManagers import \
     apiNotificationBlanking, notificationBlanking, undoStack, undoBlock
@@ -571,19 +573,22 @@ class CcpNmrUnicodeProperty(CcpNmrProperty):
     def __init__(self,
                  defaultValue = Sentinel,
                  allowNone: bool = False,
+                 cast: bool = False,
                  validateGetter: bool = True,
                  **kwds
                  ):
         """Init the CcpNmrUnicodeProperty
         :param defaultValue: the default value
         :param allowNone: allow value to be None (default: False)
+        :param cast: bool: cast the value using str()
         :param validateGetter:bool: validate __get__; (default: True)
         :param kwds: keyword arguments passed to Unicode traitlet
         """
         # local import to avoid cycles
         # from ccpn.util.traits.CcpNmrTraits import Unicode
 
-        _validator = Unicode(
+        _validatorClass = CUnicode if cast else Unicode
+        _validator = _validatorClass(
                     default_value=defaultValue,
                     allow_none=allowNone,
                     **kwds

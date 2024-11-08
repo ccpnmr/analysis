@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-07 14:45:51 +0000 (Thu, November 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-08 07:51:29 +0000 (Fri, November 08, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -119,7 +119,8 @@ from ccpn.core.lib.Traities import CcpNmrProperty, CcpNmrCoreObjectProperty, \
     CcpNmrTypedListProperty
 # from ccpn.core.lib.CoreTraits import V3Object
 from ccpn.util.traits.CcpNmrTraits import (
-    Int, Float, CEnum, TDict, TList, CTuple, Unicode, Bool)
+    Int, Float, CEnum, TDict, TList, CTuple, Unicode, Bool, CUnicode,
+)
 
 
 # defined here too as imported from Spectrum throughout the code base
@@ -247,7 +248,6 @@ class Spectrum(AbstractWrapperObject):
 
         # TODO:ED There was an error catching for Nef related problems;
         #  should fix in Nef importer, not here
-        #  Don't raise errors here or you crash-out a perfectly valid project/Nef from loading
         # getLogger().warning(f'Could not set chemicalShiftList for Spectrum {self}. Invalid type {_shiftList}.')
 
     # --- spectrumDimensions property ---
@@ -475,7 +475,9 @@ class Spectrum(AbstractWrapperObject):
     # Spectrum properties
     #-----------------------------------------------------------------------------------------
 
-    @property
+    @CcpNmrUnicodeProperty(
+            allowNone=False
+    )
     def name(self) -> str:
         """:return The name of the spectrum.
         """
@@ -528,7 +530,7 @@ class Spectrum(AbstractWrapperObject):
 
     #-----------------------------------------------------------------------------------------
 
-    # --- psoitiveContourCount property ---
+    # --- positiveContourCount property ---
     @CcpNmrIntProperty(
             defaultValue=10,
             min=0
@@ -890,8 +892,10 @@ class Spectrum(AbstractWrapperObject):
         """
         return self._wrappedData.experiment
 
-    @property
-    @_includeInCopy
+    @CcpNmrUnicodeProperty(
+            allowNone=False,
+            cast=True,
+    )
     def experimentName(self) -> str:
         """Common experiment type descriptor (May not be unique).
         """
@@ -916,7 +920,8 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def filePath(self) -> Optional[str]:
-        """Definition of the NMR (binary) dataSource file; can contain redirections (e.g. $DATA)
+        """Definition of the NMR (binary) dataSource file; can contain redirections (e.g. $DATA).
+        Setting to None will close access to the binary file.
         Use Spectrum.path attribute for an absolute, decoded path
         """
         if self._dataStore is None:
@@ -1051,6 +1056,13 @@ class Spectrum(AbstractWrapperObject):
             newDataStore.spectrum = self
             self._spectrumTraits.dataStore = newDataStore
             self._saveObject()
+            if self.dimensionCount == 1 and self._intensities is not None:
+                # data were read before; re-read and update the intensities attribute
+                self._intensities = self.getSliceData()
+            if self.dimensionCount == 1 and self._positions is not None:
+                # ppm-array was used before; re-set the positions attribute
+                self._positions = self.getPpmArray(dimension=1)
+
             addUndo(undo=partial(self._openFileHelper, oldDataStore, oldDataSource),
                     redo=partial(self._openFileHelper, newDataStore, newDataSource)
                     )
@@ -1092,20 +1104,6 @@ class Spectrum(AbstractWrapperObject):
 
         # we defined dataStore and dataSource defining a new file
         self._openFileHelper(newDataStore, newDataSource)
-        # self._close()
-        # self._spectrumTraits.dataSource = newDataSource
-        # self._saveSpectrumMetaData()
-        # self._spectrumTraits.dataStore = newDataStore
-        # self._dataStore._saveInternal()
-        # self._saveObject()
-
-        if self.dimensionCount == 1 and self._intensities is not None:
-            # data were read before; re-read and update the intensities attribute
-            self._intensities = self.getSliceData()
-
-        if self.dimensionCount == 1 and self._positions is not None:
-            # ppm-array was used before; re-set the positions attribute
-            self._positions = self.getPpmArray(dimension=1)
 
         if update:
             self._openFileSignal = True
@@ -4297,12 +4295,6 @@ class Spectrum(AbstractWrapperObject):
 #=========================================================================================
 # New and empty spectra
 #=========================================================================================
-
-# Hack; remove the api notifier on create
-# _notifiers = [nf for nf in Project._apiNotifiers if nf[3] == '__init__' and 'cls' in nf[1] and nf[1]['cls'] == Spectrum]
-# if len(_notifiers) == 1:
-#     Project._apiNotifiers.remove(_notifiers[0])
-
 
 @newObject(Spectrum)
 def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spectrum:

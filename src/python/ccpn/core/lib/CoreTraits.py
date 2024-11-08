@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-07 14:45:51 +0000 (Thu, November 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-08 11:02:22 +0000 (Fri, November 08, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -87,11 +87,11 @@ class PidTrait(Unicode):
             raise ValueError(f'{self._fullName(obj)}: expected pid or object with pid, got {value}')
 
 
-class V3Object(TraitType, _CcpNmrTrait):
-    """A trait that defines a V3-object, json serialisable through its Pid
+class CoreObjectTrait(TraitType, _CcpNmrTrait):
+    """A trait that defines a core-object, json serialisable through its Pid
     """
     default_value = Sentinel
-    info_text = "A V3-Object"
+    info_text = "A Core-Object"
 
     _overrideClassCheck = False  # flag for ccpnv4 testing
 
@@ -161,7 +161,7 @@ class V3Object(TraitType, _CcpNmrTrait):
 
         elif (self._klass is None and self._klassName is not None):
             if (_klass := _getV3coreClass(self._klassName)) is None:
-                raise RuntimeError(f'V3Object: invalid className {self._klassName!r}')
+                raise RuntimeError(f'CoreObjectTrait: invalid className {self._klassName!r}')
             if not isinstance(value, _klass):
                 raise TypeError(f'Expected an instance of {classType(_klass)}; got {value} {classType(value)}')
 

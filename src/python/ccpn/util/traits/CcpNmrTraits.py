@@ -14,8 +14,9 @@ CcpNmr version of the Traitlets; all subclassed for added functionalities:
 #=========================================================================================
 
 from ccpn.util.traits.CcpNmrTraits import List, Any, Int,  \
-    V3Object, CList, TList, CEnum, Dict, Float, CFloat, Instance, \
+    CList, TList, CEnum, Dict, Float, CFloat, Instance, \
     TDict, OWTraits
+from ccpn.core.lib.CoreTraits import CoreObjectTrait
 
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, Constants, register
 
@@ -47,8 +48,8 @@ class MyObj(CcpNmrJson):
     ints = TList(Int(max=10), default_value=[1,2,3], maxlen=4)
     types = TList(CEnum(specLib.DATA_TYPES), default_value=[specLib.DATA_TYPE_REAL]*8, maxlen=8)
     enum = CEnum(specLib.DATA_TYPES, default_value=specLib.DATA_TYPE_REAL)
-    project = V3Object(klass=_Project)
-    spectra = TList(V3Object(klass='Spectrum'))
+    project = CoreObjectTrait(klass=_Project)
+    spectra = TList(CoreObjectTrait(klass='Spectrum'))
     mi = Int(default_value=None)
     mydict = TDict(CFloat(), default_value={'aap':1.0})
     myfloat = CFloat(default_value=None, min=0.0)
@@ -96,7 +97,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 07:51:30 +0000 (Fri, November 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-08 11:02:22 +0000 (Fri, November 08, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -364,6 +365,7 @@ class CUnicode(Unicode):
 
 
 class Bool(_Bool, _CcpNmrTrait):
+    """ A bool True, False (or 1, 0) trait"""
     def __init__(self, *args, **kwargs):
         _Bool.__init__(self, *args, **kwargs)
         _CcpNmrTrait.__init__(self)
@@ -373,6 +375,7 @@ class Bool(_Bool, _CcpNmrTrait):
             return value
         else:
             return _Bool.validate(self, obj, value)
+
 
 class CBool(Bool):
     """A casting version of the Bool trait.
@@ -565,13 +568,13 @@ class CList(List):
             raise ValueError(f'{self._fullName(obj)}: expected list or iterable, got {theList}')
 
 
-class CArray(TraitType, _CcpNmrTrait):
-    """An numpy ndarray with casting from any suitable iterable object as defined by
-    numpy.array
+class NPArray(TraitType, _CcpNmrTrait):
+    """A numpy ndarray with casting from any suitable iterable object as defined by
+    numpy.ndarray
     """
 
     klass = np.ndarray
-    info_text = 'A numpy ndarray'
+    info_text = 'A numpy.ndarray'
 
     def __init__(self, *args, **kwargs):
         TraitType.__init__(self, *args, **kwargs)
@@ -594,7 +597,7 @@ class CArray(TraitType, _CcpNmrTrait):
         try:
             value = np.array(value)
         except Exception as es:
-            raise ValueError(f'{self._fullName(obj)}: casting into numpy array failed; {es}')
+            raise ValueError(f'{self._fullName(obj)}: casting into numpy.ndarray failed; {es}')
 
         return value
 
@@ -1400,7 +1403,7 @@ class CString(TraitType, _CcpNmrTrait):
         return value
 
 # GWV: moved to CoreTraits
-# class V3Object(TraitType, _CcpNmrTrait):
+# class CoreObjectTrait(TraitType, _CcpNmrTrait):
 #     """A trait that defines a V3-object, json serialisable through its Pid
 #     """
 #     default_value = None
@@ -1479,13 +1482,13 @@ class CString(TraitType, _CcpNmrTrait):
 #
 # class V3ObjectList(TList):
 #     """A trait that defines a list of V3-objects, json serialisable through their Pid's
-#     DEPRICATED: use TList(V3Object(), ....) instead
+#     DEPRICATED: use TList(CoreObjectTrait(), ....) instead
 #     """
 #     default_value = []
 #     info_text = "A V3-ObjectList"
 #
 #     def __init__(self, default_value = [], **kwargs):
-#         TList.__init__(self, itemTrait=V3Object(allow_none=True), default_value=default_value, **kwargs)
+#         TList.__init__(self, itemTrait=CoreObjectTrait(allow_none=True), default_value=default_value, **kwargs)
 #
 # # end class
 #

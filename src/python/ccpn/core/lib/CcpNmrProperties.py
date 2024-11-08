@@ -80,14 +80,34 @@ class CcpNmrBoolProperty(CcpNmrProperty):
     def __init__(self,
                  defaultValue = Sentinel,
                  allowNone: bool = False,
+                 cast: bool: = False
                  validateGetter: bool = True,
                  **kwds
                  ):
         Init the CcpNmrUnicodeProperty
         :param defaultValue: the default value
         :param allowNone: allow value to be None (default: False)
+        :param cast: bool: cast the value using bool()
         :param validateGetter:bool: validate __get__; (default: True)
         :param kwds: keyword arguments passed to Bool traitlet
+
+
+class CcpNmrEnumProperty(CcpNmrProperty):
+    A CcpNmrProperty for an Enum
+
+    def __init__(self,
+                 mapping: list | dict | DataEnum,
+                 defaultValue = Sentinel,
+                 allowNone: bool = False,
+                 validateGetter: bool = True,
+                 **kwds
+                 ):
+        Init the CcpNmrEnumProperty
+        :param mapping: mapping of the enumerated type; derived from list, or dict or dataEnum instance
+        :param defaultValue: the default value
+        :param allowNone: allow value to be None (default: False)
+        :param validateGetter:bool: validate __get__; (default: True)
+        :param kwds: keyword arguments passed to CEnum traitlet
 
 
 class CcpNmrTypedListProperty(CcpNmrProperty):
@@ -163,9 +183,10 @@ from typing import Tuple, Any
 from functools import partial
 
 from ccpn.util.Common import Sentinel
+from ccpn.util.DataEnum import DataEnum
 from ccpn.util.Logging import getLogger
 from ccpn.util.traits.CcpNmrTraits import TraitType, Bunch, \
-    TList, _TypedList, Float, Int, Bool, CEnum, Unicode, CUnicode
+    TList, _TypedList, Float, Int, Bool, CBool, CEnum, Unicode, CUnicode
 
 from ccpn.core.lib.ContextManagers import \
     apiNotificationBlanking, notificationBlanking, undoStack, undoBlock
@@ -229,7 +250,7 @@ class HasCcpNmrProperties(object):
 
 
 #-----------------------------------------------------------------------------------------
-# Various CcpNmr property decorators
+# CcpNmr property decorator base class
 #-----------------------------------------------------------------------------------------
 
 class CcpNmrProperty(property):
@@ -479,12 +500,15 @@ class CcpNmrProperty(property):
     #-----------------------------------------------------------------------------------------
 
     def __str__(self):
-        return (f'<CcpNmrProperty {self.klass.__name__}.{self.name}>')
+        return (f'<{self.__class__.__name__} {self.klass.__name__}.{self.name}>')
 
     __repr__ = __str__
 
 #end class -----------------------------------------------------------------------------------------
 
+#-----------------------------------------------------------------------------------------
+# Various CcpNmrProperty decorators
+#-----------------------------------------------------------------------------------------
 
 class CcpNmrCoreObjectProperty(CcpNmrProperty):
     """A CcpNmrProperty for a CoreObject"""
@@ -506,9 +530,9 @@ class CcpNmrCoreObjectProperty(CcpNmrProperty):
         :param crossReference: tuple[str, str] | None: An optional (className, property-name) crossReference
         """
         # local import to avoid cycles
-        from ccpn.core.lib.CoreTraits import V3Object
+        from ccpn.core.lib.CoreTraits import CoreObjectTrait
 
-        _validator = V3Object(
+        _validator = CoreObjectTrait(
                     klass=klass,
                     default_value=defaultValue,
                     allow_none=allowNone,
@@ -531,9 +555,6 @@ class CcpNmrIntProperty(CcpNmrProperty):
         :param validateGetter:bool: validate __get__; (default: True)
         :param kwds: keyword arguments passed to Int traitlet; e.g. min, max, etc.
         """
-        # local import to avoid cycles
-        # from ccpn.util.traits.CcpNmrTraits import Int
-
         _validator = Int(
                     default_value=defaultValue,
                     allow_none=allowNone,
@@ -557,9 +578,6 @@ class CcpNmrFloatProperty(CcpNmrProperty):
         :param validateGetter:bool: validate __get__; (default: True)
         :param kwds: keyword arguments passed to Float traitlet; e.g. min, max, etc.
         """
-        # local import to avoid cycles
-        # from ccpn.util.traits.CcpNmrTraits import Float
-
         _validator = Float(
                     default_value=defaultValue,
                     allow_none=allowNone,
@@ -585,9 +603,6 @@ class CcpNmrUnicodeProperty(CcpNmrProperty):
         :param validateGetter:bool: validate __get__; (default: True)
         :param kwds: keyword arguments passed to Unicode traitlet
         """
-        # local import to avoid cycles
-        # from ccpn.util.traits.CcpNmrTraits import Unicode
-
         _validatorClass = CUnicode if cast else Unicode
         _validator = _validatorClass(
                     default_value=defaultValue,
@@ -603,19 +618,44 @@ class CcpNmrBoolProperty(CcpNmrProperty):
     def __init__(self,
                  defaultValue = Sentinel,
                  allowNone: bool = False,
+                 cast: bool = False,
                  validateGetter: bool = True,
                  **kwds
                  ):
         """Init the CcpNmrBoolProperty
         :param defaultValue: the default value
         :param allowNone: allow value to be None (default: False)
+        :param cast: bool: cast the value using bool()
         :param validateGetter:bool: validate __get__; (default: True)
         :param kwds: keyword arguments passed to Bool traitlet
         """
-        # local import to avoid cycles
-        # from ccpn.util.traits.CcpNmrTraits import Bool
+        _validatorClass = CBool if cast else Bool
+        _validator = _validatorClass(
+                    default_value=defaultValue,
+                    allow_none=allowNone,
+                    **kwds
+                    )
+        super().__init__(validator=_validator, validateGetter=validateGetter)
 
-        _validator = Bool(
+class CcpNmrEnumProperty(CcpNmrProperty):
+    """A CcpNmrProperty for an Enum"""
+
+    def __init__(self,
+                 mapping: list | dict | DataEnum,
+                 defaultValue = Sentinel,
+                 allowNone: bool = False,
+                 validateGetter: bool = True,
+                 **kwds
+                 ):
+        """Init the CcpNmrEnumProperty
+        :param mapping: mapping of the enumerated type; derived from list, or dict or dataEnum instance
+        :param defaultValue: the default value
+        :param allowNone: allow value to be None (default: False)
+        :param validateGetter:bool: validate __get__; (default: True)
+        :param kwds: keyword arguments passed to CEnum traitlet
+        """
+        _validator = CEnum(
+                    mapping=mapping,
                     default_value=defaultValue,
                     allow_none=allowNone,
                     **kwds
@@ -669,9 +709,6 @@ class CcpNmrTypedListProperty(CcpNmrProperty):
         :param allowNone: allow value to be None (default: False)
         :param validateGetter:bool: validate __get__; (default: True)
         """
-        # local import to avoid cycles
-        # from ccpn.core.lib.CoreTraits import CcpNmrTypedList
-
         if defaultValue  == Sentinel:
             defaultValue = []
 

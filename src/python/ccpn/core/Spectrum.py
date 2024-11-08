@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 08:31:30 +0000 (Fri, November 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-08 11:02:22 +0000 (Fri, November 08, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -117,7 +117,7 @@ from ccpn.core.lib.Notifiers import NotifierSignal
 from ccpn.core.lib.CcpNmrProperties import CcpNmrProperty, CcpNmrCoreObjectProperty, \
     CcpNmrIntProperty, CcpNmrFloatProperty, CcpNmrUnicodeProperty, CcpNmrBoolProperty, \
     CcpNmrTypedListProperty
-# from ccpn.core.lib.CoreTraits import V3Object
+# from ccpn.core.lib.CoreTraits import CoreObjectTrait
 from ccpn.util.traits.CcpNmrTraits import (
     Int, Float, CEnum, TDict, TList, CTuple, Unicode, Bool, CUnicode,
 )
@@ -138,14 +138,15 @@ from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectrum_3_0_4
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_PROJECT_INITIALISATION
 
 
-@updateObject(fromVersion='3.0.4',
-              toVersion='3.1.0',
-              updateFunction=_updateSpectrum_3_0_4_to_3_1_0,
-              updateMethod=UPDATE_POST_PROJECT_INITIALISATION
-              )
+@updateObject(
+        fromVersion='3.0.4',
+        toVersion='3.1.0',
+        updateFunction=_updateSpectrum_3_0_4_to_3_1_0,
+        updateMethod=UPDATE_POST_PROJECT_INITIALISATION
+)
 class Spectrum(AbstractWrapperObject):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
-    path to the NMR (binary) data file. The Spectrum object has methods to get the binary data
+    path to the NMR (binary) data file. The Spectrum object has methods to access the binary data
     as SpectrumData (i.e. np.ndarray) objects.
     """
     #-----------------------------------------------------------------------------------------
@@ -529,6 +530,7 @@ class Spectrum(AbstractWrapperObject):
         return tuple(z for z in zip(self.dimensionIndices, self.axisCodes, self.dimensions))
 
     #-----------------------------------------------------------------------------------------
+    ## === Contour properties ===
 
     # --- positiveContourCount property ---
     @CcpNmrIntProperty(
@@ -716,6 +718,8 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError("Spectrum.includeNegativeContours: must be True/False")
 
         self._setInternalParameter(self._INCLUDENEGATIVECONTOURS, value)
+
+    ## === End Contour properties ===
 
     # --- sliceColour property ---
     @CcpNmrUnicodeProperty(
@@ -1912,7 +1916,7 @@ class Spectrum(AbstractWrapperObject):
         """
 
         if self.dimensionCount != 1:
-            getLogger().warning('Currently this method only works for 1D spectra')
+            getLogger().warning('This property is only defined for 1D spectra')
             return np.array([])
 
         if self._positions is None:
@@ -1939,7 +1943,6 @@ class Spectrum(AbstractWrapperObject):
         """
         if not isinstance(value, bool):
             raise ValueError("Spectrum.displayFoldedContours: must be True/False.")
-
         self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
 
     ## CCPN INTERNAL --- Series ---  ##

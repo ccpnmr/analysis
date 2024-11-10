@@ -261,11 +261,13 @@ class CcpNmrProperty(property):
                  validator: TraitType = None,
                  validateGetter: bool = True,
                  crossReference: tuple[str, str] | None = None,
+                 splitUndo: bool = False,
                  ):
         """CcpNmrProperty decorator
         :param validator: TraitType: A trait instance used for validating
         :param validateGetter:bool: validate __get__; default: True
         :param crossReference: tuple[str, str] | None: An optional (className, property-name) crossReference
+        :param splitUndo: bool: split the undo in two separate statements around the __get__; default: False
         """
         super().__init__()
 
@@ -280,6 +282,7 @@ class CcpNmrProperty(property):
 
         self.validateGetter = validateGetter
         self.crossReference = crossReference
+        self.splitUndo = splitUndo
 
         # optional validator
         if not isinstance(validator, TraitType):
@@ -365,19 +368,26 @@ class CcpNmrProperty(property):
 
         with undoStack() as addUndoItem:
 
-            # split the undo in before and after, as to allow the _setter / _fset
-            # to add items to the undo-stack
-            addUndoItem(undo=None,
-                        redo=partial(self._setter, __instance, __value)
-                        )
+            if self.splitUndo:
+                # split the undo in before and after, as to allow the _setter / _fset
+                # to add items to the undo-stack
+                addUndoItem(undo=None,
+                            redo=partial(self._setter, __instance, __value)
+                            )
 
             _previousValue, _tmp = self._setter(__instance, __value,
                                                   validate=True, fireNotifiers=True
                                                )
 
-            addUndoItem(undo=partial(self._setter, __instance, _previousValue),
-                        redo=None
-                        )
+            if self.splitUndo:
+                addUndoItem(undo=partial(self._setter, __instance, _previousValue),
+                            redo=None
+                            )
+            else:
+                addUndoItem(undo=partial(self._setter, __instance, _previousValue),
+                            redo=partial(self._setter, __instance, __value)
+                            )
+
 
     def _setter(self, instance, value, validate=True, fireNotifiers=True) -> Tuple[Any, Any]:
         """Set the value, run optional validator and fire the notifiers
@@ -456,11 +466,12 @@ class CcpNmrProperty(property):
         _instance = bunch.owner
         with (undoStack() as addUndoItem):
 
-            # split the undo in before and after, as to allow the _setter / _fset
-            # to add items to the undo-stack
-            addUndoItem(undo=None,
-                        redo=partial(self._itemChangedCallback, bunch)
-                       )
+            if self.splitUndo:
+                # split the undo in before and after, as to allow the _setter / _fset
+                # to add items to the undo-stack
+                addUndoItem(undo=None,
+                            redo=partial(self._itemChangedCallback, bunch)
+                           )
 
             # Set the value. No need for the validator, as this is a callback from a validated
             # _TypedList object; The notifiers also get fired later
@@ -477,9 +488,15 @@ class CcpNmrProperty(property):
             for indx,val in bunch.itemsChanged:
                 _undoBunch.itemsChanged.append( (indx, _previousValue[indx]) )
 
-            addUndoItem(undo=partial(self._itemChangedCallback, _undoBunch),
-                        redo=None
-                        )
+            if self.splitUndo:
+                addUndoItem(undo=partial(self._itemChangedCallback, _undoBunch),
+                            redo=None
+                            )
+            else:
+                addUndoItem(undo=partial(self._itemChangedCallback, _undoBunch),
+                            redo=partial(self._itemChangedCallback, bunch)
+                            )
+
 
         # Fire notifiers
         self._fireNotifiers(instance=_instance,

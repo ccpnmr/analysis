@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 13:56:55 +0000 (Fri, November 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-10 20:20:10 +0000 (Sun, November 10, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -753,19 +753,24 @@ class Undo(deque):
             :return (stripped:bool, newText: str) tuple
             """
             text = text.strip()
+            words = text.split(' ')
             for _string in [
                 "<ccpn.core.lib.ContextManager",
-                "functools.partial("
-                "<bound method",
-                "bound method",
+                "functools.partial(",
+                "<bound",
+                "bound",
+                "method",
+                "function",
                 "CcpNmrProperty._setter of",
                 "CcpNmrProperty._itemChangedCallback of",
                 "CcpNmrProperty",
+                "CcpNmr",
+                "of",
                 "(",
                 "<",
             ]:
-                if text.startswith(_string):
-                    text = text[len(_string):]
+                if words[0].startswith(_string):
+                    text = ' '.join(words[1:])
                     return (True, text)
 
             return (False, text)

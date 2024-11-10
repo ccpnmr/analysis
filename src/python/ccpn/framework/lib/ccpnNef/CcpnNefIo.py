@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-20 15:04:03 +0100 (Fri, September 20, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-10 09:18:02 +0000 (Sun, November 10, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -5837,7 +5837,7 @@ class CcpnNefReader(CcpnNefContent):
 
                 # will be set if the type is valid
                 if not spectrum.experimentType and transferData:
-                    spectrum._setMagnetisationTransfers(transferData)
+                    spectrum._magnetisationTransfers = transferData
             else:
                 raise ValueError("nef_spectrum_dimension_transfer is missing or empty")
 

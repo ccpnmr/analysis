@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 18:41:43 +0000 (Fri, November 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-10 09:18:02 +0000 (Sun, November 10, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1918,8 +1918,8 @@ class Spectrum(AbstractWrapperObject):
         #
         return result
 
-    @ccpNmrV3CoreUndoBlock()
-    def _setMagnetisationTransfers(self, value: Tuple[MagnetisationTransferTuple, ...]):
+    @_magnetisationTransfers.setter
+    def _magnetisationTransfers(self, value: Tuple[MagnetisationTransferTuple, ...]):
         """Setter for magnetisation transfers
 
         The magnetisationTransfers are deduced from the experimentType and axisCodes.
@@ -1930,29 +1930,33 @@ class Spectrum(AbstractWrapperObject):
         """
         apiExperiment = self._wrappedData.experiment
         apiRefExperiment = apiExperiment.refExperiment
-        if apiRefExperiment is None:
-            for et in apiExperiment.expTransfers:
-                et.delete()
-            mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]  # self._mainExpDimRefs()
-            for tt in value:
-                try:
-                    dim1, dim2, transferType, isIndirect = tt
-                    expDimRefs = (mainExpDimRefs[dim1 - 1], mainExpDimRefs[dim2 - 1])
-                except Exception:
-                    raise ValueError(
-                            f"Attempt to set incorrect magnetisationTransfer value {tt} in spectrum {self.pid}")
 
-                apiExperiment.newExpTransfer(expDimRefs=expDimRefs,
-                                             transferType=transferType,
-                                             isDirect=(not isIndirect)
-                                             )
-
-                self._experimentSignal = True
-        else:
+        if apiRefExperiment is not None:
             getLogger().warning(
                     """An attempt to set Spectrum.magnetisationTransfers directly was ignored
                   because the spectrum experimentType was defined.
                   Use axisCodes to set magnetisation transfers instead.""")
+            return
+
+        for et in apiExperiment.expTransfers:
+            et.delete()
+
+        mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]  # self._mainExpDimRefs()
+
+        for tt in value:
+            try:
+                dim1, dim2, transferType, isIndirect = tt
+                expDimRefs = (mainExpDimRefs[dim1 - 1], mainExpDimRefs[dim2 - 1])
+            except Exception as ex:
+                raise ValueError(
+                        f"Invalid magnetisationTransfer {tt} for spectrum {self.pid}; {ex}")
+
+            apiExperiment.newExpTransfer(expDimRefs=expDimRefs,
+                                         transferType=transferType,
+                                         isDirect=(not isIndirect)
+                                         )
+
+        self._experimentSignal = True
 
     @property
     def intensities(self) -> SliceData:

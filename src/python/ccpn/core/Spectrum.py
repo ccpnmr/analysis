@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-10 09:18:02 +0000 (Sun, November 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-10 11:33:33 +0000 (Sun, November 10, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -876,9 +876,12 @@ class Spectrum(AbstractWrapperObject):
 
         self._setInternalParameter(self._NEGATIVENOISELEVEL, value)
 
+    # (reference) experiment related
+
     @property
     def synonym(self) -> Optional[str]:
-        """Systematic experiment type descriptor (CCPN system)."""
+        """Systematic experiment type descriptor (CCPN system) or None if not set.
+        """
         refExperiment = self._wrappedData.experiment.refExperiment
         if refExperiment is None:
             return None
@@ -892,7 +895,10 @@ class Spectrum(AbstractWrapperObject):
             includeInCopy=True
     )
     def experimentType(self) -> Optional[str]:
-        """Systematic experiment type descriptor (CCPN system)."""
+        """Systematic experiment type descriptor (CCPN system) or None if not defined;
+        Setting to None will clear all related linkages such as experimentName and magnetizationTransfers
+        as well.
+        """
         refExperiment = self._wrappedData.experiment.refExperiment
         if refExperiment is None:
             return None
@@ -902,35 +908,43 @@ class Spectrum(AbstractWrapperObject):
     @experimentType.setter
     @logCommand(get='self', isProperty=True)
     def experimentType(self, value: str):
-        from ccpn.core.lib.SpectrumLib import _setApiExpTransfers, _setApiRefExperiment, _clearLinkToRefExp
-
+        """Setting the experiment type; None will clear all linkages as well
+        """
         if value is None:
             self._wrappedData.experiment.refExperiment = None
             self.experimentName = None
-            _clearLinkToRefExp(self._wrappedData.experiment)
+            specLib._clearLinkToRefExp(self._wrappedData.experiment)
 
-            self._experimentSignal = True
-            return
+        else:
+            if (refExperiment := specLib._findRefExp(value)) is None:
+                # No reason to raise an error when cannot find a CCPN experimentType definition!
+                getLogger().warning(f'Could not set ExperimentType. No reference experiment matches name "{value}".')
+                return
 
-        # nmrExpPrototype = self._wrappedData.root.findFirstNmrExpPrototype(name=value) # Why not findFirst instead of looping all sortedNmrExpPrototypes
-        for nmrExpPrototype in self._wrappedData.root.sortedNmrExpPrototypes():
-            for refExperiment in nmrExpPrototype.sortedRefExperiments():
-                # check if the given value is in the STD nomenclature rather than the CCPN! E.g.: standard=COSY; CCPN=HH
-                ccpnName = refExperiment.name
-                standardName = refExperiment.synonym
+            specLib._setApiRefExperiment(self._wrappedData.experiment, refExperiment)
+            specLib._setApiExpTransfers(self._wrappedData.experiment)
+            if (standardName := refExperiment.synonym) is not None:
+                self.experimentName = standardName
 
-                if value in [ccpnName, standardName]:
-                    # set API RefExperiment and ExpTransfer
-                    _setApiRefExperiment(self._wrappedData.experiment, refExperiment)
-                    _setApiExpTransfers(self._wrappedData.experiment)
-                    if standardName:
-                        self.experimentName = standardName
+        self._experimentSignal = True
 
-                    self._experimentSignal = True
-                    return
+        # # nmrExpPrototype = self._wrappedData.root.findFirstNmrExpPrototype(name=value) # Why not findFirst instead of looping all sortedNmrExpPrototypes
+        # for nmrExpPrototype in self._wrappedData.root.sortedNmrExpPrototypes():
+        #     for refExperiment in nmrExpPrototype.sortedRefExperiments():
+        #         # check if the given value is in the STD nomenclature rather than the CCPN! E.g.: standard=COSY; CCPN=HH
+        #         ccpnName = refExperiment.name
+        #         standardName = refExperiment.synonym
+        #
+        #         if value in [ccpnName, standardName]:
+        #             # set API RefExperiment and ExpTransfer
+        #             specLib._setApiRefExperiment(self._wrappedData.experiment, refExperiment)
+        #             specLib._setApiExpTransfers(self._wrappedData.experiment)
+        #             if standardName:
+        #                 self.experimentName = standardName
+        #
+        #             self._experimentSignal = True
+        #             return
 
-        # No reason to raise an error when cannot find a CCPN experimentType definition!
-        getLogger().warning('Could not set ExperimentType. No reference experiment matches name "%s."' % value)
 
     # GWV 8/11/2024: BIG NoNo: do not expose V2 objects!
     # @property
@@ -965,6 +979,114 @@ class Spectrum(AbstractWrapperObject):
             return self.dataSource.pulseProgram
         else:
             return None
+
+    @property
+    def magnetisationTransfers(self) -> Tuple[MagnetisationTransferTuple, ...]:
+        """tuple of MagnetisationTransferTuple describing magnetisation transfer between
+        the spectrum dimensions.
+
+        MagnetisationTransferTuple is a namedtuple with the fields
+        ['dimension1', 'dimension2', 'transferType', 'isIndirect'] of types [int, int, str, bool]
+        The dimensions are dimension numbers (one-origin]
+        transfertype is one of (in order of increasing priority):
+        'onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'relayed-alternate', 'through-space'
+        isIndirect is used where there is more than one successive transfer step;
+        it is combined with the highest-priority transferType in the transfer path.
+
+        The magnetisationTransfers are deduced from the experimentType and axisCodes.
+        Only when the experimentType is unset or does not match any known reference experiment
+        magnetisationTransfers are kept separately in the API layer.
+        """
+        return self._magnetisationTransfers
+
+    @CcpNmrTypedListProperty(
+            itemTrait=CTuple(
+                    allow_none=False,
+            ),
+            validateGetter=False,
+    )
+    def _magnetisationTransfers(self) -> List[MagnetisationTransferTuple, ...]:
+        """A MagnetisationTransferTuple describes the magnetisation transfer
+        between two spectrum dimensions.
+        :return A list of MagnetisationTransferTuple's.
+        """
+        result = []
+
+        if self.experimentType is not None:
+            # With an experimentType defined, we should use the refExperiment
+
+            if (apiRefExperiment := self._wrappedData.experiment.refExperiment) is None:
+                raise RuntimeError(f'Spectrum._magnetizationTransfers: definition of required reference experiment is missing')
+
+            magnetisationTransferDict = apiRefExperiment.magnetisationTransferDict()
+            _expDimRefs = [dim._expDimRef for dim in self.spectrumReferences]
+
+            refExpDimRefs = [x if x is None else x.refExpDimRef for x in _expDimRefs]
+            for ii, rxdr in enumerate(refExpDimRefs):
+                if rxdr is not None:
+                    dim1 = ii + 1
+                    for jj in range(dim1, len(refExpDimRefs)):
+                        rxdr2 = refExpDimRefs[jj]
+                        if rxdr2 is not None:
+                            if tt := magnetisationTransferDict.get(frozenset((rxdr, rxdr2))):
+                                result.append(MagnetisationTransferTuple(dim1, jj + 1, tt[0], tt[1]))
+
+        else:
+            # Without an experimentType defined, use parameters stored in the API (for reproducibility)
+            apiExperiment = self._wrappedData.experiment
+            ll = []
+            for apiExpTransfer in apiExperiment.expTransfers:
+                item = [x.expDim.dim for x in apiExpTransfer.expDimRefs]
+                item.sort()
+                item.extend((apiExpTransfer.transferType, not (apiExpTransfer.isDirect)))
+                ll.append(item)
+
+            result.extend(MagnetisationTransferTuple(*item) for item in sorted(ll))
+        #
+        return result
+
+    @_magnetisationTransfers.setter
+    def _magnetisationTransfers(self, value: List[MagnetisationTransferTuple, ...]):
+        """Setter for magnetisation transfers
+
+        The magnetisationTransfers are deduced from the experimentType and axisCodes.
+        When the experimentType is set this function is a No-op.
+        Only when the experimentType is unset or does not match any known reference experiment
+        does this function set the magnetisation transfers, and the corresponding values are
+        ignored if the experimentType is later set
+        :param value: A list of MagnetizationTransferTuples
+        """
+        if self.experimentType is not None:
+            getLogger().warning(
+                    f"""Setting Spectrum._magnetisationTransfers was ignored: 
+                experimentType = {self.experimentType} is defined.""")
+            return
+
+        apiExperiment = self._wrappedData.experiment
+        for et in apiExperiment.expTransfers:
+            et.delete()
+
+        mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]  # self._mainExpDimRefs()
+
+        for tt in value:
+            try:
+                dim1, dim2, transferType, isIndirect = tt
+                expDimRefs = (mainExpDimRefs[dim1 - 1], mainExpDimRefs[dim2 - 1])
+            except Exception as ex:
+                raise ValueError(
+                        f"Invalid magnetisationTransfer {tt!r}; {ex}")
+
+            if transferType not in specLib.MagnetisationTransferTypes:
+                raise ValueError(f"Invalid magnetisationTransferType {transferType!r}")
+
+            apiExperiment.newExpTransfer(expDimRefs=expDimRefs,
+                                         transferType=transferType,
+                                         isDirect=(not isIndirect)
+                                         )
+
+        self._experimentSignal = True
+
+    # === file and path section ===
 
     @property
     def filePath(self) -> Optional[str]:
@@ -1861,102 +1983,108 @@ class Spectrum(AbstractWrapperObject):
     def axesReversed(self, value):
         self._setDimensionalAttributes('isReversed', value)
 
-    @property
-    def magnetisationTransfers(self) -> Tuple[MagnetisationTransferTuple, ...]:
-        """tuple of MagnetisationTransferTuple describing magnetisation transfer between
-        the spectrum dimensions.
-
-        MagnetisationTransferTuple is a namedtuple with the fields
-        ['dimension1', 'dimension2', 'transferType', 'isIndirect'] of types [int, int, str, bool]
-        The dimensions are dimension numbers (one-origin]
-        transfertype is one of (in order of increasing priority):
-        'onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'relayed-alternate', 'through-space'
-        isIndirect is used where there is more than one successive transfer step;
-        it is combined with the highest-priority transferType in the transfer path.
-
-        The magnetisationTransfers are deduced from the experimentType and axisCodes.
-        Only when the experimentType is unset or does not match any known reference experiment
-        magnetisationTransfers are kept separately in the API layer.
-        """
-        return self._magnetisationTransfers
-
-    @CcpNmrTypedListProperty(
-            itemTrait=CTuple(
-                    allow_none=False,
-            ),
-            validateGetter=False,
-    )
-    def _magnetisationTransfers(self) -> List[MagnetisationTransferTuple, ...]:
-        """List of MagnetisationTransferTuple's describing magnetisation transfer
-        between the spectrum dimensions.
-        """
-        result = []
-        apiExperiment = self._wrappedData.experiment
-        if apiRefExperiment := apiExperiment.refExperiment:
-            # We should use the refExperiment - if present
-            magnetisationTransferDict = apiRefExperiment.magnetisationTransferDict()
-            mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]
-            refExpDimRefs = [x if x is None else x.refExpDimRef for x in mainExpDimRefs]
-            for ii, rxdr in enumerate(refExpDimRefs):
-                if rxdr is not None:
-                    dim1 = ii + 1
-                    for jj in range(dim1, len(refExpDimRefs)):
-                        rxdr2 = refExpDimRefs[jj]
-                        if rxdr2 is not None:
-                            if tt := magnetisationTransferDict.get(frozenset((rxdr, rxdr2))):
-                                result.append(MagnetisationTransferTuple(dim1, jj + 1, tt[0], tt[1]))
-
-        else:
-            # Without a refExperiment use parameters stored in the API (for reproducibility)
-            ll = []
-            for apiExpTransfer in apiExperiment.expTransfers:
-                item = [x.expDim.dim for x in apiExpTransfer.expDimRefs]
-                item.sort()
-                item.extend((apiExpTransfer.transferType, not (apiExpTransfer.isDirect)))
-                ll.append(item)
-            result.extend(MagnetisationTransferTuple(*item) for item in sorted(ll))
-        #
-        return result
-
-    @_magnetisationTransfers.setter
-    def _magnetisationTransfers(self, value: Tuple[MagnetisationTransferTuple, ...]):
-        """Setter for magnetisation transfers
-
-        The magnetisationTransfers are deduced from the experimentType and axisCodes.
-        When the experimentType is set this function is a No-op.
-        Only when the experimentType is unset or does not match any known reference experiment
-        does this function set the magnetisation transfers, and the corresponding values are
-        ignored if the experimentType is later set
-        """
-        apiExperiment = self._wrappedData.experiment
-        apiRefExperiment = apiExperiment.refExperiment
-
-        if apiRefExperiment is not None:
-            getLogger().warning(
-                    """An attempt to set Spectrum.magnetisationTransfers directly was ignored
-                  because the spectrum experimentType was defined.
-                  Use axisCodes to set magnetisation transfers instead.""")
-            return
-
-        for et in apiExperiment.expTransfers:
-            et.delete()
-
-        mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]  # self._mainExpDimRefs()
-
-        for tt in value:
-            try:
-                dim1, dim2, transferType, isIndirect = tt
-                expDimRefs = (mainExpDimRefs[dim1 - 1], mainExpDimRefs[dim2 - 1])
-            except Exception as ex:
-                raise ValueError(
-                        f"Invalid magnetisationTransfer {tt} for spectrum {self.pid}; {ex}")
-
-            apiExperiment.newExpTransfer(expDimRefs=expDimRefs,
-                                         transferType=transferType,
-                                         isDirect=(not isIndirect)
-                                         )
-
-        self._experimentSignal = True
+    # GWV refactored and moved to the "experiment section"
+    # @property
+    # def magnetisationTransfers(self) -> Tuple[MagnetisationTransferTuple, ...]:
+    #     """tuple of MagnetisationTransferTuple describing magnetisation transfer between
+    #     the spectrum dimensions.
+    #
+    #     MagnetisationTransferTuple is a namedtuple with the fields
+    #     ['dimension1', 'dimension2', 'transferType', 'isIndirect'] of types [int, int, str, bool]
+    #     The dimensions are dimension numbers (one-origin]
+    #     transfertype is one of (in order of increasing priority):
+    #     'onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'relayed-alternate', 'through-space'
+    #     isIndirect is used where there is more than one successive transfer step;
+    #     it is combined with the highest-priority transferType in the transfer path.
+    #
+    #     The magnetisationTransfers are deduced from the experimentType and axisCodes.
+    #     Only when the experimentType is unset or does not match any known reference experiment
+    #     magnetisationTransfers are kept separately in the API layer.
+    #     """
+    #     return self._magnetisationTransfers
+    #
+    # @CcpNmrTypedListProperty(
+    #         itemTrait=CTuple(
+    #                 allow_none=False,
+    #         ),
+    #         validateGetter=False,
+    # )
+    # def _magnetisationTransfers(self) -> List[MagnetisationTransferTuple, ...]:
+    #     """A MagnetisationTransferTuple describes the magnetisation transfer
+    #     between two spectrum dimensions.
+    #     :return A list of MagnetisationTransferTuple's.
+    #     """
+    #     result = []
+    #     apiExperiment = self._wrappedData.experiment
+    #     if apiRefExperiment := apiExperiment.refExperiment:
+    #         # We should use the refExperiment - if present
+    #         magnetisationTransferDict = apiRefExperiment.magnetisationTransferDict()
+    #         mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]
+    #         refExpDimRefs = [x if x is None else x.refExpDimRef for x in mainExpDimRefs]
+    #         for ii, rxdr in enumerate(refExpDimRefs):
+    #             if rxdr is not None:
+    #                 dim1 = ii + 1
+    #                 for jj in range(dim1, len(refExpDimRefs)):
+    #                     rxdr2 = refExpDimRefs[jj]
+    #                     if rxdr2 is not None:
+    #                         if tt := magnetisationTransferDict.get(frozenset((rxdr, rxdr2))):
+    #                             result.append(MagnetisationTransferTuple(dim1, jj + 1, tt[0], tt[1]))
+    #
+    #     else:
+    #         # Without a refExperiment use parameters stored in the API (for reproducibility)
+    #         ll = []
+    #         for apiExpTransfer in apiExperiment.expTransfers:
+    #             item = [x.expDim.dim for x in apiExpTransfer.expDimRefs]
+    #             item.sort()
+    #             item.extend((apiExpTransfer.transferType, not (apiExpTransfer.isDirect)))
+    #             ll.append(item)
+    #         result.extend(MagnetisationTransferTuple(*item) for item in sorted(ll))
+    #     #
+    #     return result
+    #
+    # @_magnetisationTransfers.setter
+    # def _magnetisationTransfers(self, value: List[MagnetisationTransferTuple, ...]):
+    #     """Setter for magnetisation transfers
+    #
+    #     The magnetisationTransfers are deduced from the experimentType and axisCodes.
+    #     When the experimentType is set this function is a No-op.
+    #     Only when the experimentType is unset or does not match any known reference experiment
+    #     does this function set the magnetisation transfers, and the corresponding values are
+    #     ignored if the experimentType is later set
+    #     :param value: A list of MagnetizationTransferTuples
+    #     """
+    #     apiExperiment = self._wrappedData.experiment
+    #     apiRefExperiment = apiExperiment.refExperiment
+    #
+    #     if apiRefExperiment is not None:
+    #         getLogger().warning(
+    #                 """An attempt to set Spectrum.magnetisationTransfers directly was ignored
+    #               because the spectrum experimentType was defined.
+    #               Use axisCodes to set magnetisation transfers instead.""")
+    #         return
+    #
+    #     for et in apiExperiment.expTransfers:
+    #         et.delete()
+    #
+    #     mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]  # self._mainExpDimRefs()
+    #
+    #     for tt in value:
+    #         try:
+    #             dim1, dim2, transferType, isIndirect = tt
+    #             expDimRefs = (mainExpDimRefs[dim1 - 1], mainExpDimRefs[dim2 - 1])
+    #         except Exception as ex:
+    #             raise ValueError(
+    #                     f"Invalid magnetisationTransfer {tt!r}; {ex}")
+    #
+    #         if transferType not in specLib.MagnetisationTransferTypes:
+    #             raise ValueError(f"Invalid magnetisationTransferType {transferType!r}")
+    #
+    #         apiExperiment.newExpTransfer(expDimRefs=expDimRefs,
+    #                                      transferType=transferType,
+    #                                      isDirect=(not isIndirect)
+    #                                      )
+    #
+    #     self._experimentSignal = True
 
     @property
     def intensities(self) -> SliceData:

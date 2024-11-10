@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 18:41:44 +0000 (Fri, November 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-10 11:33:33 +0000 (Sun, November 10, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -142,6 +142,7 @@ def isComplexDataType(dataType):
 MagnetisationTransferTypes = ('onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'through-space', 'relayed-alternate')
 MagnetisationTransferParameters = ('dimension1 dimension2 transferType isIndirect'.split())
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', MagnetisationTransferParameters)
+
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
 
 FOLDING_MODE_CIRCULAR = 'circular'
@@ -1582,6 +1583,28 @@ def _filtered1DArray(data, ignoredRegions):
     fullmask = [all(mask) for mask in zip(*masks)]
     newArray = (np.ma.MaskedArray(data, mask=np.logical_not((fullmask, fullmask))))
     return newArray
+
+
+
+#===========================================================================================================
+# API code; mostly for managing experiment-related actions
+#===========================================================================================================
+
+def _findRefExp(name):
+    """Find a reference experiment decribed by name
+    :param name: the systematic CCPN name or CCPN synonym of the experiment
+    :return the api refExperiment instance or None if not found
+    """
+    from ccpn.framework.Application import getProject
+    _proj = getProject()
+
+    # nmrExpPrototype = self._wrappedData.root.findFirstNmrExpPrototype(name=value) # Why not findFirst instead of looping all sortedNmrExpPrototypes
+    for nmrExpPrototype in _proj._wrappedData.root.sortedNmrExpPrototypes():
+        for refExperiment in nmrExpPrototype.sortedRefExperiments():
+            # check if the given value is in the STD nomenclature rather than the CCPN! E.g.: standard=COSY; CCPN=HH
+            if name in [refExperiment.name, refExperiment.synonym]:
+                return refExperiment
+    return None
 
 
 def _initExpBoundResonances(experiment):

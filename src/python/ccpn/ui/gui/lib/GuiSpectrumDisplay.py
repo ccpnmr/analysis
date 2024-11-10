@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 13:56:55 +0000 (Fri, November 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-10 18:15:47 +0000 (Sun, November 10, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -716,6 +716,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def _setSpectrumNotifiers(self, spectrum: Spectrum):
         """Set the OBSERVE notifiers on spectrum.
         Used by displaySpectrum() and _postRestore() to set notifiers for each spectrum
+        Works in conjunction with _deleteSpectrumNotifiers()
         """
         if spectrum.dimensionCount > 1:
             # nD: Contours
@@ -745,6 +746,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def _deleteSpectrumNotifiers(self, spectrum: Spectrum):
         """Delete notifiers set by self on spectrum
         Used by _closeModule and removeSpectrum() to remove notifiers set on spectrum
+        Works in conjunction with _setSpectrumNotifiers()
         """
         _notifiers = spectrum._getRegisteredNotifiersBySetter(setterObject=self)
         for _ntf in _notifiers:

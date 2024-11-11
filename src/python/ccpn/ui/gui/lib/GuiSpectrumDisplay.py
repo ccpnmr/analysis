@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 11:38:01 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 12:01:25 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1519,13 +1519,11 @@ class GuiSpectrumDisplay(CcpnModule):
                 pids = data.get(DropBase.PIDS, [])
                 objs = self.project.getObjectsByPids(pids)
 
-            if len(objs) > 0:
-
-                if len(objs) > MAXITEMLOGGING:
-                    with notificationEchoBlocking():
-                        self._handleObjs(objs, strip)
-                else:
+            if len(objs) > MAXITEMLOGGING:
+                with notificationEchoBlocking():
                     self._handleObjs(objs, strip)
+            elif len(objs) > 0:
+                self._handleObjs(objs, strip)
 
     def _handleObjs(self, objs: (list, tuple), strip=None) -> bool:
         """handle a list of objects;

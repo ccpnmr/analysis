@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-14 18:40:06 +0100 (Mon, October 14, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-11 18:28:14 +0000 (Mon, November 11, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -93,7 +93,8 @@ class ExperimentTypePopup(CcpnDialogMainWidget):
             itemFilter = _getExperimentTypes(spectrum.project, spectrum)
 
             # add the widgets
-            _spLabel = Label(self.mainWidget, text=spectrum.pid, grid=(spectrumIndex, 0))
+            _spLabel = Label(self.mainWidget, text=spectrum.pid, hAlign='right',
+                                              grid=(spectrumIndex, 0))
             spPulldown = FilteringPulldownList(self.mainWidget, grid=(spectrumIndex, 1),
                                                callback=partial(self._setExperimentType, spectrum, atomCodes), )
             if itemFilter:

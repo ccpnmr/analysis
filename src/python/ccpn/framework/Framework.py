@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 17:51:10 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 18:28:14 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -612,7 +612,10 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         if self.hasGui:
             self.ui._initialise(mainWindow=_mainWindow, project=newProject)
         else:
-            # The NoUi version has no mainWindow
+            # The No
+            #
+            #
+            # Ui version has no mainWindow
             self.ui._initialise(mainWindow=None, project=newProject)
 
         # GWV 24/2/24: moved to Project._initialise()
@@ -1162,7 +1165,6 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
             try:
                 self.project.save()
-                # Layout.saveLayoutToJson(self.ui.mainWindow)
                 self.ui.mainWindow._saveLayoutToFile(reportErrors=False)
                 self.current._dumpStateToFile(self.statePath)
                 self._getUndo().markSave()

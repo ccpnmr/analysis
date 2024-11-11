@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 17:51:11 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 18:28:14 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1936,6 +1936,25 @@ class Gui(Ui, _Gui_V3_V4):
             return
 
         popup = ValidateSpectraPopup(mainWindow=self.mainWindow, spectra=spectra)
+        popup.exec_()
+
+    def pick1DPeaks(self):
+        """Pick 1D peaks
+        """
+        from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
+
+        if not self.project.peakLists:
+            getLogger().warning('Peak Picking: Project has no peakLists.')
+            MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
+            return
+
+        spectra = [spec for spec in self.project.spectra if spec.dimensionCount == 1]
+        if len(spectra) == 0:
+            getLogger().warning('Peak Picking: Project has no 1D Spectra.')
+            MessageDialog.showWarning('Peak Picking', 'Project has no 1D Spectra.')
+            return
+
+        popup = PickPeak1DPopup(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
         popup.exec_()
 
     #-----------------------------------------------------------------------------------------

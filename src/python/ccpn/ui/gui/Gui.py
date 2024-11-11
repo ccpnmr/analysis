@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-06 18:31:53 +0000 (Wed, November 06, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-11 13:24:37 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ from functools import partial
 from ccpn.framework.Application import getApplication
 from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_SAVEAS_SUB_DIRECTORIES
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import _checkPathForDataLoader
+from ccpn.framework.Preferences import getPreferences, USER_WORKING_PATH
 
 from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import (
@@ -1561,9 +1562,47 @@ class Gui(Ui, _Gui_V3_V4):
 
         return result
 
+    def exportToNef(self):
+        """Export project to NEF; query for path.
+        Define objects to be exported in the popup
+        """
+        from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
+        from ccpn.framework.lib.ccpnNef.CcpnNefIo import NEFEXTENSION
+
+        _path = aPath(getPreferences().get(USER_WORKING_PATH) or '~') / self.project.name
+        _path = _path.withSuffix(NEFEXTENSION)
+
+        dialog = ExportNefPopup(parent=self.mainWindow._widget,
+                                mainWindow=self.mainWindow,
+                                selectFile=_path,
+                                fileFilter='*.nef',
+                                minimumSize=(400, 550))
+
+        # an exclusion dict comes out of the dialog as it
+        result = dialog.exec_()
+
+        if not result:
+            return
+
+        nefPath = result['filename']
+        flags = result['flags']
+        pidList = result['pidList']
+
+        # flags are skipPrefixes, expandSelection
+        skipPrefixes = flags['skipPrefixes']
+        expandSelection = flags['expandSelection']
+        includeOrphans = flags['includeOrphans']
+
+        self.project.exportNef(nefPath,
+                               overwriteExisting=True,
+                               skipPrefixes=skipPrefixes,
+                               expandSelection=expandSelection,
+                               includeOrphans=includeOrphans,
+                               pidList=pidList)
+
     @logCommand('ui.')
     def saveLayoutToFile(self, path: (str, Path, None) = None):
-        """Save the layout to file path
+        """Save the layout to file.
         :param path: path to valid layout file; queried if None
         """
         if path is None:
@@ -1574,7 +1613,7 @@ class Gui(Ui, _Gui_V3_V4):
 
     @logCommand('ui.')
     def restoreLayoutFromFile(self, path: (str, Path, None) = None):
-        """Restore the layout from file path
+        """Restore the layout from file.
         :param path: path to valid layout file; queried if None
         """
         if path is None:

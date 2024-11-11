@@ -26,8 +26,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-06 18:31:53 +0000 (Wed, November 06, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-11 13:24:37 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -120,12 +120,12 @@ class MenusDefs(Menu, FrameworkProperties):
          Action("Save As...", self._saveAsCallback, shortcut='sa'),
 
          Separator(),
-         Menu("Import",
+         Menu("Import from",
             Action("NEF File", self._importNefCallback, shortcut='in'),
             Action("NmrStar File", self._loadNMRStarFileCallback, shortcut='bi'),
          ),
-         Menu("Export",
-            Action("NEF File", self._exportNEFCallback, shortcut='ex'),
+         Menu("Export to",
+            Action("NEF File", self._exportToNEFCallback, shortcut='ex'),
          ),
 
          Separator(),
@@ -374,54 +374,17 @@ class MenusDefs(Menu, FrameworkProperties):
         """menu callback; use ui.loadData to do the lifting
         """
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
-
-        # self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
         self.ui._loadDataIgnoreExtension(NefDataLoader)
 
-    def _exportNEFCallback(self):
+    def _exportToNEFCallback(self):
+        """Export the current project as a Nef file
         """
-        Export the current project as a Nef file
-        Temporary routine because I don't know how else to do it yet
-        """
-        from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
-        from ccpn.framework.lib.ccpnNef.CcpnNefIo import NEFEXTENSION
-
-        _path = aPath(self.application.preferences.general.userWorkingPath or '~').filepath / (
-                    self.project.name + NEFEXTENSION)
-        dialog = ExportNefPopup(self.ui.mainWindow,
-                                mainWindow=self.ui.mainWindow,
-                                selectFile=_path,
-                                fileFilter='*.nef',
-                                minimumSize=(400, 550))
-
-        # an exclusion dict comes out of the dialog as it
-        result = dialog.exec_()
-
-        if not result:
-            return
-
-        nefPath = result['filename']
-        flags = result['flags']
-        pidList = result['pidList']
-
-        # flags are skipPrefixes, expandSelection
-        skipPrefixes = flags['skipPrefixes']
-        expandSelection = flags['expandSelection']
-        includeOrphans = flags['includeOrphans']
-
-        self.project.exportNef(nefPath,
-                               overwriteExisting=True,
-                               skipPrefixes=skipPrefixes,
-                               expandSelection=expandSelection,
-                               includeOrphans=includeOrphans,
-                               pidList=pidList)
+        self.ui.exportToNef()
 
     def _loadNMRStarFileCallback(self):
         """menu callback; use ui.loadData to do the lifting
         """
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
-
-        # self.ui.loadData(formatFilter=(StarDataLoader.dataFormat,))
         self.ui._loadDataIgnoreExtension(StarDataLoader)
 
     def _saveCallback(self):

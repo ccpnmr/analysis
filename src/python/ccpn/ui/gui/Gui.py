@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 16:00:02 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 17:51:11 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -443,13 +443,13 @@ class Gui(Ui, _Gui_V3_V4):
 
         self._tipOfTheDayManager = TipOfTheDayManager(gui=self, preferences=application.preferences)
 
-    def initialize(self, mainWindow, project):
+    def _initialise(self, mainWindow, project):
         """UI operations done after every project load/create
         """
         if mainWindow is None:
             raise ValueError('Gui.initialize(): Undefined mainWindow')
 
-        super().initialize(mainWindow=mainWindow, project=project)
+        super()._initialise(mainWindow=mainWindow, project=project)
 
         with notificationEchoBlocking():
             with undoStackBlocking(debugText='Gui.initialize'):

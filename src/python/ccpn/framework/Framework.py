@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 16:00:02 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 17:51:10 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -610,10 +610,10 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         self._project, _mainWindow = newProject._initialise(application=self, debugLevel=self._debugLevel)
 
         if self.hasGui:
-            self.ui.initialize(mainWindow=_mainWindow, project=newProject)
+            self.ui._initialise(mainWindow=_mainWindow, project=newProject)
         else:
             # The NoUi version has no mainWindow
-            self.ui.initialize(mainWindow=None, project=newProject)
+            self.ui._initialise(mainWindow=None, project=newProject)
 
         # GWV 24/2/24: moved to Project._initialise()
         # newProject._resetUndo(debug=self._debugLevel <= Logging.DEBUG2,
@@ -1544,8 +1544,11 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
         return project
 
-    # GWV 5/2/24: moved To GuiBase
-    # def _exportNEF(self):
+    @deprecated('ui.exportToNef')
+    def _exportNEF(self):
+        """Deprecated method: Use Gui.exportToNef instead"""
+        self.ui.exportToNef()
+    # GWV 5/2/24: moved To Gui
     #     """
     #     Export the current project as a Nef file
     #     Temporary routine because I don't know how else to do it yet
@@ -1672,10 +1675,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         from ccpn.core.lib.ProjectArchiver import ProjectArchiver
 
         archiver = ProjectArchiver(projectPath=self.project.path)
-
         if (_newProjectPath := archiver.restoreArchive(archivePath=archivePath)) is not None and \
                 (_newProject := self.loadProject(_newProjectPath)) is not None:
-
             getLogger().info('==> Restored archive %s as %s' % (archivePath, _newProject))
 
         else:
@@ -1807,9 +1808,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     # GWV 6/2/24: to gui.py
     @deprecated('ui.editSpectrumGroup')
     def showSpectrumGroupsPopup(self):
-        """Deprecated method:
-        Use ui.editSpectrumGroup instead
-        """
+        """Deprecated method: Use Gui.editSpectrumGroup instead"""
         editMode = len(self.project.spectrumGroups) > 0
         return self.ui.editSpectrumGroup(editMode=editMode)
 
@@ -2542,7 +2541,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     @logCommand('application.')
     def runMacro(self, path: str = None, extraCommands=None):
-        """Runs a macro if a macro defined by path
+        """Runs a macro file defined by path
         :param path: path to Python macro file
         :param extraCommands:
         """
@@ -2598,7 +2597,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     __repr__ = __str__
 
-# register traities
+# register CcpNmrProperties
 Framework._registerCcpNmrProperties()
 
 #-----------------------------------------------------------------------------------------

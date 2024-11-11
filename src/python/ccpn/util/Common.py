@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-11 11:20:22 +0000 (Mon, November 11, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,6 +45,9 @@ from collections.abc import Iterable
 from itertools import islice
 from string import whitespace
 from contextlib import suppress
+from functools import partial
+
+from reportlab.lib.validators import isCallable
 
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util import Constants
@@ -85,6 +88,34 @@ maxRandomInt = 2000000000
 
 WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 
+
+class Partial_(object):
+    """Pure implementation to have better/defined str/repr
+    output
+    """
+    def __init__(self, func, funcName=None, *args, **kwargs):
+        if not isCallable(func):
+            raise TypeError('func must be a callable')
+        self.func = func
+        self.funcName = funcName if funcName else func.__name__
+        self.args = args
+        self.kwargs = kwargs
+
+    def __call__(self, *args, **kwargs):
+        _args = [a for a in self.args]
+        _args.extend(args)
+
+        _kwargs = self.kwargs.copy()
+        _kwargs.update(kwargs)
+
+        self.func(*_args, **_kwargs)
+
+    def __str__(self):
+        _args = ', '.join(map(str, self.args))
+        _kwds = ', '.join(f'{key}={value}' for key,value in self.kwargs.items())
+        return f'{self.funcName}({_args},{_kwds})'
+
+    __repr__ = __str__
 
 # # valid characters for file names
 # # NB string.ascii_letters and string.digits are not compatible

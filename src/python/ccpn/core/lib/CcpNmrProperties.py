@@ -182,7 +182,7 @@ __date__ = "$Date: 2024-10-27 11:20:30 +0100 (Sun, October 27, 2024) $"
 from typing import Tuple, Any
 from functools import partial
 
-from ccpn.util.Common import Sentinel
+from ccpn.util.Common import Sentinel, Partial_
 from ccpn.util.DataEnum import DataEnum
 from ccpn.util.Logging import getLogger
 from ccpn.util.traits.CcpNmrTraits import TraitType, Bunch, \
@@ -372,7 +372,8 @@ class CcpNmrProperty(property):
                 # split the undo in before and after, as to allow the _setter / _fset
                 # to add items to the undo-stack
                 addUndoItem(undo=None,
-                            redo=partial(self._setter, __instance, __value)
+                            redo=Partial_(self._setter, f'{self._propertyFullName}',
+                                          __instance, __value)
                             )
 
             _previousValue, _tmp = self._setter(__instance, __value,
@@ -380,12 +381,15 @@ class CcpNmrProperty(property):
                                                )
 
             if self.splitUndo:
-                addUndoItem(undo=partial(self._setter, __instance, _previousValue),
+                addUndoItem(undo=Partial_(self._setter, f'{self._propertyFullName}',
+                                          __instance, _previousValue),
                             redo=None
                             )
             else:
-                addUndoItem(undo=partial(self._setter, __instance, _previousValue),
-                            redo=partial(self._setter, __instance, __value)
+                addUndoItem(undo=Partial_(self._setter, f'{self._propertyFullName}',
+                                          __instance, _previousValue),
+                            redo=Partial_(self._setter, f'{self._propertyFullName}',
+                                          __instance, __value)
                             )
 
 
@@ -470,7 +474,7 @@ class CcpNmrProperty(property):
                 # split the undo in before and after, as to allow the _setter / _fset
                 # to add items to the undo-stack
                 addUndoItem(undo=None,
-                            redo=partial(self._itemChangedCallback, bunch)
+                            redo=Partial_(self._itemChangedCallback, self._propertyFullName,bunch)
                            )
 
             # Set the value. No need for the validator, as this is a callback from a validated
@@ -489,12 +493,12 @@ class CcpNmrProperty(property):
                 _undoBunch.itemsChanged.append( (indx, _previousValue[indx]) )
 
             if self.splitUndo:
-                addUndoItem(undo=partial(self._itemChangedCallback, _undoBunch),
+                addUndoItem(undo=Partial_(self._itemChangedCallback, self._propertyFullName, _undoBunch),
                             redo=None
                             )
             else:
-                addUndoItem(undo=partial(self._itemChangedCallback, _undoBunch),
-                            redo=partial(self._itemChangedCallback, bunch)
+                addUndoItem(undo=Partial_(self._itemChangedCallback, self._propertyFullName, _undoBunch),
+                            redo=Partial_(self._itemChangedCallback, self._propertyFullName, bunch)
                             )
 
 
@@ -516,8 +520,14 @@ class CcpNmrProperty(property):
 
     #-----------------------------------------------------------------------------------------
 
+    @property
+    def _propertyFullName(self) -> str:
+        """:return the klass-name.property-name string
+        """
+        return f'{self.klass.__name__}.{self.name}'
+
     def __str__(self):
-        return (f'<{self.__class__.__name__} {self.klass.__name__}.{self.name}>')
+        return (f'<{self.__class__.__name__} {self._propertyFullName}>')
 
     __repr__ = __str__
 

@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-10 18:15:47 +0000 (Sun, November 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 12:40:33 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -753,6 +753,29 @@ class Spectrum(AbstractWrapperObject):
         """
         self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
         self._buildContoursSignal = True
+
+    def _setDefaultContourValues(self, base=None,
+                                       multiplier=specLib.DEFAULT_CONTOUR_FACTOR,
+                                       count=specLib.DEFAULT_CONTOUR_LEVELS):
+        """Set default contour values
+        """
+        if base is None:
+            base = self.dataSource._estimateInitialContourBase(multiplier)
+
+        base = max(base, 1.0)  # Contour bases have to be > 0.0
+
+        self.positiveContourBase = base
+        self.positiveContourFactor = multiplier
+        self.positiveContourCount = count
+        self.negativeContourBase = -1.0 * base
+        self.negativeContourFactor = multiplier
+        self.negativeContourCount = count
+
+    def _setDefaultContourColours(self):
+        """Set default contour colours
+        """
+        (self.positiveContourColour, self.negativeContourColour) = getDefaultSpectrumColours(self)
+        self.sliceColour = self.positiveContourColour
 
     ## === End Contour properties ===
 
@@ -2094,7 +2117,7 @@ class Spectrum(AbstractWrapperObject):
             return SliceData((self.pointCounts[0],))
 
         if self._intensities is None:
-            # Assignment is Redundant as getSliceData does that;
+            # Assignment is redundant as getSliceData also does that;
             # Nevertheless for clarity
             self._intensities = self.getSliceData()
 
@@ -2434,7 +2457,7 @@ class Spectrum(AbstractWrapperObject):
 
     def _setDefaultAxisOrdering(self):
         """Set the default axis ordering based on some hierarchy rules (defined in the
-        core/lib/SpectrumLib.oy file
+        core/lib/SpectrumLib.py file
         """
         _setDefaultAxisOrdering(self)
 
@@ -2460,7 +2483,7 @@ class Spectrum(AbstractWrapperObject):
         return self.spectrumDimensions[dimension - 1].valueToPoint(value)
 
     def point2ppm(self, value, axisCode=None, dimension=None):
-        """Convert point value to ppm for axis corresponding to to either axisCode or
+        """Convert point value to ppm for axis corresponding to either axisCode or
         dimension (1-based)
         """
         if dimension is None and axisCode is None:
@@ -2758,26 +2781,27 @@ class Spectrum(AbstractWrapperObject):
             newValues[isotopeCode] = values
         return newValues
 
-    def _setDefaultContourValues(self, base=None, multiplier=1.41, count=10):
-        """Set default contour values
-        """
-        if base is None:
-            base = self.dataSource._estimateInitialContourBase(multiplier)
-
-        base = max(base, 1.0)  # Contour bases have to be > 0.0
-
-        self.positiveContourBase = base
-        self.positiveContourFactor = multiplier
-        self.positiveContourCount = count
-        self.negativeContourBase = -1.0 * base
-        self.negativeContourFactor = multiplier
-        self.negativeContourCount = count
-
-    def _setDefaultContourColours(self):
-        """Set default contour colours
-        """
-        (self.positiveContourColour, self.negativeContourColour) = getDefaultSpectrumColours(self)
-        self.sliceColour = self.positiveContourColour
+    # GWV 11/11/2024; moved to contour section
+    # def _setDefaultContourValues(self, base=None, multiplier=1.41, count=10):
+    #     """Set default contour values
+    #     """
+    #     if base is None:
+    #         base = self.dataSource._estimateInitialContourBase(multiplier)
+    #
+    #     base = max(base, 1.0)  # Contour bases have to be > 0.0
+    #
+    #     self.positiveContourBase = base
+    #     self.positiveContourFactor = multiplier
+    #     self.positiveContourCount = count
+    #     self.negativeContourBase = -1.0 * base
+    #     self.negativeContourFactor = multiplier
+    #     self.negativeContourCount = count
+    #
+    # def _setDefaultContourColours(self):
+    #     """Set default contour colours
+    #     """
+    #     (self.positiveContourColour, self.negativeContourColour) = getDefaultSpectrumColours(self)
+    #     self.sliceColour = self.positiveContourColour
 
     def getPeakAliasingRanges(self):
         """Return the min/max aliasing Values for the peakLists in the spectrum, if there are no peakLists with peaks, return None

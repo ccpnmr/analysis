@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 13:38:02 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 13:52:32 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1599,6 +1599,16 @@ class Gui(Ui, _Gui_V3_V4):
                                expandSelection=expandSelection,
                                includeOrphans=includeOrphans,
                                pidList=pidList)
+
+    def saveToArchive(self):
+        """Make a time-stamped archive of project
+        """
+        if (path := self.application.saveToArchive()) is None:
+            MessageDialog.showInfo('Archive Project',
+                                   'Unable to archive Project')
+        else:
+            MessageDialog.showInfo('Archive Project',
+                                   f'Project archived to {path}')
 
     def restoreFromArchive(self):
         """Restore project from archive.

@@ -6,7 +6,7 @@ their definitions).
 Note for Actions:
       Use a callback function defined as a method of MenuDefs and pass on
       the action from there.
-      This avoid the (V3) situation in that the MainWindow has not yet been defined,
+      This avoids the (V3) situation in that the MainWindow has not yet been defined,
       when initialising the MenuDefs; i.e. ui.mainWindow is None on initialisation of
       the MenuDefs instance, but is defined the moment the callback is executed.
 
@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 13:38:02 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 13:52:32 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -140,7 +140,7 @@ class MenusDefs(Menu, FrameworkProperties):
          Action("Summary", self._showProjectSummaryPopup),
 
          Separator(),
-         Action('Archive', self._archiveProjectCallback, checkEnabled=_projectCanBeSaved),
+         Action('Archive', self._saveToArchiveCallback, checkEnabled=_projectCanBeSaved),
          Action('Restore From Archive...', self._restoreFromArchiveCallback, checkEnabled=_projectHasArchives),
 
          Separator(),
@@ -399,33 +399,15 @@ class MenusDefs(Menu, FrameworkProperties):
         """
         self.ui.saveProjectAs()
 
-    def _archiveProjectCallback(self):
+    def _saveToArchiveCallback(self):
         """Archive the project
         """
-        if (path := self.application.saveToArchive()) is None:
-            MessageDialog.showInfo('Archive Project',
-                                   'Unable to archive Project')
-        else:
-            MessageDialog.showInfo('Archive Project',
-                                   'Project archived to %s' % path)
+        self.ui.saveToArchive()
 
     def _restoreFromArchiveCallback(self):
         """Restore a project from archive
         """
         self.ui.restoreFromArchive()
-        # archivesDirectory = aPath(self.project.path) / CCPN_ARCHIVES_DIRECTORY
-        # _filter = '*.tgz'
-        # dialog = ArchivesFileDialog(parent=self.ui.mainWindow,
-        #                             acceptMode='select',
-        #                             directory=archivesDirectory,
-        #                             fileFilter=_filter)
-        # dialog._show()
-        # archivePath = dialog.selectedFile()
-        #
-        # if archivePath and \
-        #         (newProject := self.application.restoreFromArchive(archivePath)) is not None:
-        #     MessageDialog.showInfo('Restore from Archive',
-        #                            'Project restored as %s' % newProject.path)
 
     def _saveLayoutCallback(self):
         """Save layout without query for path

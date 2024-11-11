@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-03 12:47:18 +0100 (Thu, October 03, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-11 15:30:18 +0000 (Mon, November 11, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -177,7 +177,12 @@ class MacroEditor(CcpnModule):
             except (PermissionError, FileNotFoundError):
                 getLogger().debug2('folder may be read-only')
 
-        self._setupWidgets()
+        try:
+            self._setupWidgets()
+        except Exception as ex:
+            getLogger().debug('setupWidgets failed')
+            raise RuntimeError('setupWidgets failed') from ex
+
         self.openPath(self.filePath)
         self._setFileName()
         self._setToolBar()

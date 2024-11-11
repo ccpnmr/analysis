@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 14:07:40 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 15:30:18 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1899,6 +1899,17 @@ class Gui(Ui, _Gui_V3_V4):
                                includeSpectrumTable=False)
         popup.exec_()
 
+    def makeProjection(self):
+        """Make a projection from a spectrum
+        """
+        from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
+        if not self.project.spectra:
+            getLogger().warning('Project has no Spectra. No Projection can be made')
+            MessageDialog.showWarning('Project contains no spectra.', 'No Projection can be made')
+            return
+
+        popup = SpectrumProjectionPopup(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
+        popup.exec_()
 
     #-----------------------------------------------------------------------------------------
     # Molecules

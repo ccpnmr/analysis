@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 08:31:30 +0000 (Fri, November 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 15:30:18 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1857,7 +1857,11 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
     #         popup.exec_()
     #
-    # def showProjectionPopup(self):
+
+    @deprecated('ui.makeProjection')
+    def showProjectionPopup(self):
+        self.ui.makeProjection()
+
     #     if not self.project.spectra:
     #         getLogger().warning('Project has no Spectra. Make Projection Popup cannot be displayed')
     #         MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')

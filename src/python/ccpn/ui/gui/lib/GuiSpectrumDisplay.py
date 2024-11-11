@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-10 18:15:47 +0000 (Sun, November 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 11:38:01 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1499,32 +1499,33 @@ class GuiSpectrumDisplay(CcpnModule):
         from ccpn.framework.Framework import MAXITEMLOGGING
         from ccpn.core.Project import Project
 
-        theObject = data.get('theObject')
+        strip = data.get(Notifier.THEOBJECT)
         objs = []
 
-        if DropBase.URLS in data:
-            # process dropped items but don't open any spectra
-            objs = self.mainWindow._processDroppedItems(data)
+        with undoBlock():
+            if DropBase.URLS in data:
+                # process dropped items but don't open any spectra
+                objs = self.mainWindow._processDroppedItems(data)
 
-            # discard any further loads if project loaded (may be inconsistent)
-            if list(filter(lambda obj: isinstance(obj, Project), objs)):
-                return
+                # discard any further loads if project loaded (may be inconsistent)
+                if list(filter(lambda obj: isinstance(obj, Project), objs)):
+                    return
 
-            # filter out internal objs that have already been processed
-            objs = list(filter(lambda obj: isinstance(obj, Spectrum), objs))
+                # filter out internal objs that have already been processed
+                objs = list(filter(lambda obj: isinstance(obj, Spectrum), objs))
 
-        elif DropBase.PIDS in data:
-            # handle Pids
-            pids = data.get(DropBase.PIDS, [])
-            objs = self.project.getObjectsByPids(pids)
+            elif DropBase.PIDS in data:
+                # handle Pids
+                pids = data.get(DropBase.PIDS, [])
+                objs = self.project.getObjectsByPids(pids)
 
-        if len(objs) > 0:
+            if len(objs) > 0:
 
-            if len(objs) > MAXITEMLOGGING:
-                with notificationEchoBlocking():
-                    self._handleObjs(objs, theObject)
-            else:
-                self._handleObjs(objs, theObject)
+                if len(objs) > MAXITEMLOGGING:
+                    with notificationEchoBlocking():
+                        self._handleObjs(objs, strip)
+                else:
+                    self._handleObjs(objs, strip)
 
     def _handleObjs(self, objs: (list, tuple), strip=None) -> bool:
         """handle a list of objects;

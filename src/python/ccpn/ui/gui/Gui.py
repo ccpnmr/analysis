@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 15:30:18 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 15:44:40 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1899,6 +1899,7 @@ class Gui(Ui, _Gui_V3_V4):
                                includeSpectrumTable=False)
         popup.exec_()
 
+    @logCommand('ui.')
     def makeProjection(self):
         """Make a projection from a spectrum
         """
@@ -1909,6 +1910,19 @@ class Gui(Ui, _Gui_V3_V4):
             return
 
         popup = SpectrumProjectionPopup(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
+        popup.exec_()
+
+    @logCommand('ui.')
+    def setExperimentTypes(self):
+        """Set the experiment types of the spectra in the project.
+        """
+        from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
+        if not self.project.spectra:
+            getLogger().warning('Experiment Type Selection: Project has no Spectra.')
+            MessageDialog.showWarning('Experiment Type Selection', 'Project has no Spectra.')
+            return
+
+        popup = ExperimentTypePopup(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
         popup.exec_()
 
     #-----------------------------------------------------------------------------------------

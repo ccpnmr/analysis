@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 15:30:18 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 15:44:40 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1860,6 +1860,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     @deprecated('ui.makeProjection')
     def showProjectionPopup(self):
+        """This method is deprecated; use Gui.makeProjection instead"""
         self.ui.makeProjection()
 
     #     if not self.project.spectra:
@@ -1871,8 +1872,11 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         popup = SpectrumProjectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
     #         popup.exec_()
 
-    # GWV 6/2/24: moved to GuiBase
-    # def showExperimentTypePopup(self):
+    # GWV 6/2/24: moved to Gui
+    @deprecated('ui.setExperimentTypes')
+    def showExperimentTypePopup(self):
+        """This method is deprecated; use Gui.setExperimentTypes instead"""
+        self.ui.setExperimentTypes()
     #     """
     #     Displays experiment type popup.
     #     """
@@ -2472,8 +2476,10 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #     """
     #     self.ui.mainWindow.toggleConsole()
 
-    @deprecated('Use ui.showChemicalShiftMapping to access the latest implementation')
+    @deprecated('ui.showChemicalShiftMapping to access the latest implementation')
     def showChemicalShiftMapping(self, position: str = 'top', relativeTo = None):
+        """This method is deprecated; use Gui.showChemicalShiftMapping to access the
+        latest implementation"""
         return self.ui.showChemicalShiftMapping(position=position)
 
     # GWV 02/04/24: to ui

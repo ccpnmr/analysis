@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 13:24:37 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 13:38:02 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1599,6 +1599,26 @@ class Gui(Ui, _Gui_V3_V4):
                                expandSelection=expandSelection,
                                includeOrphans=includeOrphans,
                                pidList=pidList)
+
+    def restoreFromArchive(self):
+        """Restore project from archive.
+        """
+        from ccpn.ui.gui.widgets.FileDialog import ArchivesFileDialog
+        from ccpn.framework.PathsAndUrls import CCPN_ARCHIVES_DIRECTORY
+
+        archivesDirectory = aPath(self.project.path) / CCPN_ARCHIVES_DIRECTORY
+        _filter = '*.tgz'
+        dialog = ArchivesFileDialog(parent=self.mainWindow._widget,
+                                    acceptMode='select',
+                                    directory=archivesDirectory,
+                                    fileFilter=_filter)
+        dialog._show()
+        archivePath = dialog.selectedFile()
+
+        if archivePath and \
+           (newProject := self.application.restoreFromArchive(archivePath)) is not None:
+            MessageDialog.showInfo('Restore from Archive',
+                                   f'Project restored as {newProject.path}')
 
     @logCommand('ui.')
     def saveLayoutToFile(self, path: (str, Path, None) = None):

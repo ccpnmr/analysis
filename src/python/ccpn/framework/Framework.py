@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 15:44:40 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 16:00:02 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1889,7 +1889,10 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
     #         popup.exec_()
     #
-    # def showValidateSpectraPopup(self, spectra=None, defaultSelected=None):
+    @deprecated('ui.validateSpectra')
+    def showValidateSpectraPopup(self, spectra=None, defaultSelected=None):
+        """This method is deprecated; use Gui.validateSpectra instead"""
+        self.ui.validatePaths(spectra=spectra)
     #     """
     #     Displays validate spectra popup.
     #     """

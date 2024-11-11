@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 15:44:40 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 16:00:02 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -480,18 +480,18 @@ class MenusDefs(Menu, FrameworkProperties):
         self.ui.setExperimentTypes()
 
     def _validatePathsCallback(self, spectra=None, defaultSelected=None):
+        """validate the spectrum paths.
         """
-        Displays validate spectra popup.
-        """
-        if not self.project.spectra:
-            getLogger().warning('Validate Spectrum Paths Selection: Project has no Spectra.')
-            MessageDialog.showWarning('Validate Spectrum Paths Selection', 'Project has no Spectra.')
-        else:
-            from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
-
-            popup = ValidateSpectraPopup(mainWindow=self.ui.mainWindow, spectra=spectra,
-                                         defaultSelected=defaultSelected)
-            popup.exec_()
+        self.ui.validatePaths()
+        # if not self.project.spectra:
+        #     getLogger().warning('Validate Spectrum Paths Selection: Project has no Spectra.')
+        #     MessageDialog.showWarning('Validate Spectrum Paths Selection', 'Project has no Spectra.')
+        # else:
+        #     from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraPopup
+        #
+        #     popup = ValidateSpectraPopup(mainWindow=self.ui.mainWindow, spectra=spectra,
+        #                                  defaultSelected=defaultSelected)
+        #     popup.exec_()
 
     def _convertSpectrumCallback(self):
         """Show the convertToHdf5 popup

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 13:52:32 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 14:07:40 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1652,6 +1652,16 @@ class Gui(Ui, _Gui_V3_V4):
             return
         self.mainWindow._loadLayoutFromFile(path=path)
         self.mainWindow._restoreLayout()
+
+    @logCommand('ui.')
+    def showPreferences(self):
+        """Show and edit the preferences.
+        """
+        from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
+        popup = PreferencesPopup(parent=self.mainWindow._widget,
+                                 mainWindow=self.mainWindow
+                                 )
+        popup.exec_()
 
     #-----------------------------------------------------------------------------------------
     # View

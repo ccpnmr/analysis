@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 13:52:32 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-11 14:07:40 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -137,14 +137,14 @@ class MenusDefs(Menu, FrameworkProperties):
               Separator(),
               DynamicMenu('Open pre-defined', callback=_fillFilePredefinedLayoutsCallback),
          ),
-         Action("Summary", self._showProjectSummaryPopup),
+         Action("Summary", self._showSummaryCallback),
 
          Separator(),
          Action('Archive', self._saveToArchiveCallback, checkEnabled=_projectCanBeSaved),
          Action('Restore From Archive...', self._restoreFromArchiveCallback, checkEnabled=_projectHasArchives),
 
          Separator(),
-         Action("Preferences...", self._showApplicationPreferences, shortcut='⌃,'),
+         Action("Preferences...", self._showPreferencesCallback, shortcut='⌃,'),
 
          Separator(),
          Action("Quit", self._quitCallback, shortcut='⌃q'),  # Unicode U+2303,
@@ -430,22 +430,18 @@ class MenusDefs(Menu, FrameworkProperties):
         """
         self.ui.restoreLayoutFromFile()
 
-    def _showProjectSummaryPopup(self):
+    def _showSummaryCallback(self):
         """Show the Project summary popup.
         """
         from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
         popup = ProjectSummaryPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, modal=True)
         popup.exec_()
 
-    def _showApplicationPreferences(self):
+    def _showPreferencesCallback(self):
         """
         Displays Application Preferences Popup.
         """
-        from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
-
-        popup = PreferencesPopup(parent=self.ui.mainWindow._widget, mainWindow=self.ui.mainWindow,
-                                 preferences=self.application.preferences)
-        popup.exec_()
+        self.ui.showPreferences()
 
     def _quitCallback(self, event=None):
         """

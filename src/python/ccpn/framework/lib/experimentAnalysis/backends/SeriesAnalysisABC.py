@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-10-04 07:50:07 +0100 (Fri, October 04, 2024) $"
-__version__ = "$Revision: 3.2.9.alpha $"
+__dateModified__ = "$dateModified: 2024-11-11 21:43:35 +0000 (Mon, November 11, 2024) $"
+__version__ = "$Revision: 3.2.10 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -310,9 +310,11 @@ class SeriesAnalysisABC(ABC):
         resultDataForCollection = resultData[resultData[sv.COLLECTIONPID] == collectionPid].copy()
 
         params = minimiser.guess(Ys, Xs)
+        params = fittingModel._preFittingAdditionalParamsSettings(dfForCollection, params)
+
         if minimiserMethod is not None:
             minimiser.setMethod(minimiserMethod)
-        result = minimiser.fit(Ys, params, x=Xs, method=minimiserMethod)
+        result = minimiser.fit(Ys, params, x=Xs, method=minimiserMethod, nan_policy='propagate',)
         finalParams = result.calculateStandardErrors(Xs, Ys, uncertaintiesMethod=uncertaintiesMethod,
                                                      samples=uncertaintiesSampleSize)
 
@@ -385,22 +387,13 @@ class SeriesAnalysisABC(ABC):
         resultData = resultDataTable.data
         fittingModel = fittingModel or self.currentFittingModel
         func = fittingModel.getFittingFunc(fittingModel)
-
         dfForCollections = resultData[resultData[sv.COLLECTIONPID].isin(collectionPids)].copy()
         dfForCollections.sort_values([fittingModel.xSeriesStepHeader], inplace=True)
         params = self._makeParamsForGlobalFitting(fittingModel, resultData, collectionPids,
                                                                   globalParamNames=globalParamNames,
                                                                   localParamNames=localParamNames,
                                                                   fixedParamNames=fixedParamNames)
-        x = []
-        data = []
-        for collectionPid in collectionPids:
-            dfForCollection = resultData[resultData[sv.COLLECTIONPID] == collectionPid].copy()
-            dfForCollection.sort_values([fittingModel.xSeriesStepHeader], inplace=True)
-            seriesSteps = x = dfForCollection[fittingModel.xSeriesStepHeader].values
-            seriesValues = Ys = dfForCollection[fittingModel.ySeriesStepHeader].values
-            data.append(Ys)
-        data = np.array(data)
+        x, data = self._prepareDataForGlobalFit(collectionPids, fittingModel, resultData)
         minimiser = GlobalMinimiser(func, x, data,
                             globalParamNames=globalParamNames,
                             localParamNames=localParamNames,
@@ -419,6 +412,43 @@ class SeriesAnalysisABC(ABC):
             resultData.loc[match.index, sv.MINIMISER_METHOD] = minimiserMethod
             resultData.loc[match.index, sv.GLOBAL_FITTING_CLUSTER_ID] = globalFittingClusterId
 
+    def _prepareDataForGlobalFit(self, collectionPids, fittingModel, resultData):
+        """
+        Prepares data for global fitting by aligning multiple Y series to a common X-axis,  with np.nan padding applied to ensure all Y series have the same length.
+        :param collectionPids: list of  needed pids
+        :param fittingModel:     Model object containing the headers `xSeriesStepHeader` and `ySeriesStepHeader`, which specify  the column names for the X and Y data series in `resultData`
+        :param resultData:         DataFrame containing the experimental results, with at least `COLLECTIONPID`, `xSeriesStepHeader`,   and `ySeriesStepHeader` columns. `COLLECTIONPID` is used to select each dataset, while the headers
+        in `fittingModel` specify the X and Y data series.
+        :return: tuple of (numpy.ndarray, numpy.ndarray)   - x : numpy.ndarray  A sorted 1D array representing the unified X-axis (`commonX`) formed by taking the union  of all unique X values from each series in `resultData`.
+        - data : numpy.ndarray A 2D array with each row corresponding to a Y series aligned with `x`. Gaps in individual Y series,  caused by missing X values, are filled with `np.nan` to ensure consistent length.
+        """
+        x = []
+        data = []
+        # Populate x and data lists with series
+        for collectionPid in collectionPids:
+            dfForCollection = resultData[resultData[sv.COLLECTIONPID] == collectionPid].copy()
+            dfForCollection.sort_values([fittingModel.xSeriesStepHeader], inplace=True)
+            seriesSteps = dfForCollection[fittingModel.xSeriesStepHeader].values
+            seriesValues = dfForCollection[fittingModel.ySeriesStepHeader].values
+            x.append(seriesSteps)
+            data.append(seriesValues)
+        # Create a common x-axis by taking the union of all x-values
+        commonX = np.unique(np.concatenate(x))
+        # Align each Y series to the common x-axis with np.nan padding where needed
+        alignedData = []
+        for i in range(len(data)):
+            # Create an array filled with np.nan of the same length as commonX
+            alignedSeries = np.full(len(commonX), np.nan)
+            # Find indices in commonX where current x aligns
+            indices = np.searchsorted(commonX, x[i])
+            # Place values from data[i] at the correct positions in alignedSeries
+            alignedSeries[indices] = data[i]
+            alignedData.append(alignedSeries)
+        # Convert lists to NumPy arrays for consistent length and shape
+        x = commonX  # The common x-axis with all unique values across series
+        data = np.array(alignedData)
+        return x, data
+
     def _setMinimisedPropertyFromModels(self):
         """ Set the _minimisedProperty from the current models.
          Calculation model has priority, otherwise use the fitting model unless disabled."""
@@ -433,8 +463,6 @@ class SeriesAnalysisABC(ABC):
         for spGroup in self.inputSpectrumGroups:
             for inputData in self.inputDataTables:
                 inputData.data.buildFromSpectrumGroup(spGroup, parentCollection=inputCollection)
-
-
 
     @property
     def currentFittingModel(self):
@@ -497,7 +525,8 @@ class SeriesAnalysisABC(ABC):
 
     @property
     def fittingModels(self):
-        return dict(sorted(self._fittingModels.items()))
+        # Use the private method to handle sorting and return the sorted dictionary
+        return self._sortFittingModels(self._fittingModels)
 
     @property
     def calculationModels(self):
@@ -678,6 +707,34 @@ class SeriesAnalysisABC(ABC):
         nmrChains = [self.project.getNmrChain(c) for c in nmrChainCodesFromDf]
         chains = [nmrChain.chain for nmrChain in nmrChains]
         return chains
+
+    def _sortFittingModels(self, fitting_models):
+        # Extract ENTRYNUM for all classes
+        entry_numbers = [item[1].ENTRYNUM for item in fitting_models.items()]
+
+        # Create a dictionary to track duplicates
+        duplicate_entry_numbers = {num: [] for num in entry_numbers if entry_numbers.count(num) > 1}
+
+        # Group items by ENTRYNUM
+        grouped_by_entrynum = {}
+        for key, cls in fitting_models.items():
+            entrynum = cls.ENTRYNUM
+            if entrynum not in grouped_by_entrynum:
+                grouped_by_entrynum[entrynum] = []
+            grouped_by_entrynum[entrynum].append((key, cls))
+
+        # Sort only the duplicates alphabetically by model name (key)
+        for entrynum, items in grouped_by_entrynum.items():
+            if len(items) > 1:  # Duplicates found
+                grouped_by_entrynum[entrynum] = sorted(items, key=lambda item: item[0])  # Sort by model name
+
+        # Flatten the grouped dictionary into a sorted list
+        sorted_items = []
+        for entrynum in sorted(grouped_by_entrynum.keys()):  # Sort by ENTRYNUM first
+            sorted_items.extend(grouped_by_entrynum[entrynum])
+
+        # Return the sorted dictionary
+        return dict(sorted_items)
 
     @classmethod
     def exportToFile(cls, path, fileType, *args, **kwargs):

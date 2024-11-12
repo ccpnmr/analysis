@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-09-04 15:23:37 +0100 (Wed, September 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-11-11 13:59:17 +0000 (Mon, November 11, 2024) $"
+__version__ = "$Revision: 3.2.10 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -49,6 +49,7 @@ import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.ui.gui.widgets.SettingsWidgets import UseCurrent
 from ccpn.ui.gui.widgets.BarGraphWidget import TICKOPTIONS
 from ccpn.ui.gui.modules.experimentAnalysis.MainPlotWidgetBC import PlotType
+from ccpn.ui.gui.widgets.Label import maTex2Pixmap, Label
 
 SettingsWidgeMinimumWidths =  (180, 180, 180)
 SettingsWidgetFixedWidths = (200, 350, 350)
@@ -592,7 +593,7 @@ class GuiCalculationPanel(GuiSettingPanel):
              {'label': guiNameSpaces.Label_CalculationOptions,
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': None,
-              'callBack': self._commonCallback,
+              'callBack': self._calculationModelChanged,
               'kwds': {'labelText': guiNameSpaces.Label_CalculationOptions,
                        'hAlign': 'l',
                        'tipText': '',
@@ -602,6 +603,17 @@ class GuiCalculationPanel(GuiSettingPanel):
                                         'tipTexts': tipTexts_ddCalculationsModes,
                                         'direction': 'v',
                                        }}}),
+            (guiNameSpaces.WidgetVarName_CalcModelEq,
+             {'label'       : guiNameSpaces.Label_CalcModelEq,
+              'type'        : compoundWidget.FrameCompoundWidget,
+              'tipText'     : guiNameSpaces.TipText_CalcModelEq,
+              'enabled'     : True,
+              'kwds'        : {
+                  'labelText'  : guiNameSpaces.Label_CalcModelEq,
+                  'scrollable' : True,
+                  'fixedWidths': SettingsWidgetFixedWidths},
+              'compoundKwds': {'showBorder': True, }
+              }),
         ))
         ## add the new items to the main dict
         filteringWidgetDefinitions = od((
@@ -705,6 +717,24 @@ class GuiCalculationPanel(GuiSettingPanel):
         self._setUpdatedDetectedState()
         self.guiModule.settingsChanged.emit(self.getSettingsAsDict())
 
+    def _calculationModelChanged(self, *args, **kwargs):
+        """Callback tiggered by changing the calculation model selection.
+        Actions:
+            - Draw the Model Equation  (clear the previous first)
+        """
+        frameWidget = self.getWidget(guiNameSpaces.WidgetVarName_CalcModelEq)
+        mainFrame = frameWidget.widgetArea
+        frameWidget.clear()
+        calcSettings = self.getSettingsAsDict()
+        selectedCalcModelName = calcSettings.get(guiNameSpaces.WidgetVarName_CalcMode, None)
+        backend = self.guiModule.backendHandler
+        modelObj = backend.getCalculationModelByName(selectedCalcModelName)
+        maTex = modelObj.maTex
+        pixmap = maTex2Pixmap(f'{maTex}', fontSize=12)
+        label = Label(mainFrame, text='', icon=pixmap, grid=(0, 0), vAlign='c')
+        mainFrame.getLayout().setAlignment(QtCore.Qt.AlignLeft)
+
+        self._commonCallback()
 TABPOS += 1
 
 #####################################################################
@@ -722,58 +752,7 @@ class GuiFittingPanel(GuiSettingPanel):
         models = [model for model in models if model.isGUIVisible]
         currentFittingModel = self.guiModule.backendHandler.currentFittingModel
         currentFittingModelName = currentFittingModel.modelName if currentFittingModel is not None else None
-        self.widgetDefinitions = od((
-            (guiNameSpaces.WidgetVarName_OptimiserSeparator,
-             {'label': guiNameSpaces.Label_OptimiserSeparator,
-              'type': LabeledHLine,
-              'kwds': {'text': guiNameSpaces.Label_OptimiserSeparator,
-                       'height': 30,
-                       'gridSpan': (1, 2),
-                       'colour': DividerColour,
-                       'tipText': guiNameSpaces.TipText_OptimiserSeparator}}),
-            (guiNameSpaces.WidgetVarName_OptimiserMethod,
-             {'label': guiNameSpaces.Label_OptimiserMethod,
-              'callBack': self._commonCallback,
-              'tipText': '',
-              'type': compoundWidget.PulldownListCompoundWidget,
-              'enabled': True,
-              'kwds': {'labelText': guiNameSpaces.Label_OptimiserMethod,
-                       'tipText': guiNameSpaces.TipText_OptimiserMethod,
-                       'texts': list(sv.MINIMISER_METHODS.keys()),
-                       'tipTexts': list(sv.MINIMISER_METHODS.values()),
-                       'fixedWidths': SettingsWidgetFixedWidths}}),
-            (guiNameSpaces.WidgetVarName_ErrorMethod,
-             {'label': guiNameSpaces.Label_ErrorMethod,
-              'type': compoundWidget.RadioButtonsCompoundWidget,
-              'postInit': None,
-              'callBack': self._commonCallback,
-              'tipText': guiNameSpaces.TipText_ErrorMethod,
-              'enabled': True,
-              'kwds': {'labelText': guiNameSpaces.Label_ErrorMethod,
-                       'fixedWidths': SettingsWidgetFixedWidths,
-                       'selectedText': sv.COVMATRIX,
-                       'tipText': guiNameSpaces.UncertaintyTipText,
-                       'compoundKwds': {'texts'  : list(guiNameSpaces.UncertaintyDefs.keys()),
-                                        'tipTexts'    :  list(guiNameSpaces.UncertaintyDefs.values()),
-                                        'direction'   : 'v',
-                                        'tipText'     : guiNameSpaces.TipText_ErrorMethod,
-                                        'hAlign'      : 'l',
-                                        }}}),
-            (guiNameSpaces.WidgetVarName_UncertaintySample,
-             {'label'   : guiNameSpaces.Label_UncertaintySample,
-              'type'    : compoundWidget.SpinBoxCompoundWidget,
-              'postInit': None,
-              'callBack': self._commonCallback,
-              'tipText' : guiNameSpaces.TipText_UncertaintySample,
-              'enabled' : True,
-              'kwds': {'labelText': guiNameSpaces.Label_UncertaintySample,
-                       'tipText': guiNameSpaces.TipText_UncertaintySample,
-                       'value': 1000,
-                       'step': 10,
-                       'minimum':1,
-                       'maximum':10000,
-                       'fixedWidths': SettingsWidgetFixedWidths}}),
-        ))
+        self.widgetDefinitions = od(())
         ## Set the models definitions
         extraLabels_ddFittingModels = [model.maTex for model in models]
         tipTexts_ddFittingModels = [model.fullDescription(model) for model in models]
@@ -829,9 +808,60 @@ class GuiFittingPanel(GuiSettingPanel):
              'compoundKwds': {'showBorder': True, }
              }),
                 ))
-
-
+        optimiserDict = od((
+            (guiNameSpaces.WidgetVarName_OptimiserSeparator,
+             {'label': guiNameSpaces.Label_OptimiserSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': guiNameSpaces.Label_OptimiserSeparator,
+                       'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': guiNameSpaces.TipText_OptimiserSeparator}}),
+            (guiNameSpaces.WidgetVarName_OptimiserMethod,
+             {'label': guiNameSpaces.Label_OptimiserMethod,
+              'callBack': self._commonCallback,
+              'tipText': '',
+              'type': compoundWidget.PulldownListCompoundWidget,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_OptimiserMethod,
+                       'tipText': guiNameSpaces.TipText_OptimiserMethod,
+                       'texts': list(sv.MINIMISER_METHODS.keys()),
+                       'tipTexts': list(sv.MINIMISER_METHODS.values()),
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+            (guiNameSpaces.WidgetVarName_ErrorMethod,
+             {'label': guiNameSpaces.Label_ErrorMethod,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'callBack': self._uncertaintyChangedCallback,
+              'tipText': guiNameSpaces.TipText_ErrorMethod,
+              'enabled': True,
+              'kwds': {'labelText': guiNameSpaces.Label_ErrorMethod,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'selectedText': sv.COVMATRIX,
+                       'tipText': guiNameSpaces.UncertaintyTipText,
+                       'compoundKwds': {'texts'  : list(guiNameSpaces.UncertaintyDefs.keys()),
+                                        'tipTexts'    :  list(guiNameSpaces.UncertaintyDefs.values()),
+                                        'direction'   : 'v',
+                                        'tipText'     : guiNameSpaces.TipText_ErrorMethod,
+                                        'hAlign'      : 'l',
+                                        }}}),
+            (guiNameSpaces.WidgetVarName_UncertaintySample,
+             {'label'   : guiNameSpaces.Label_UncertaintySample,
+              'type'    : compoundWidget.SpinBoxCompoundWidget,
+              'postInit': None,
+              'callBack': self._commonCallback,
+              'tipText' : guiNameSpaces.TipText_UncertaintySample,
+              'enabled' : False,
+              'kwds': {'labelText': guiNameSpaces.Label_UncertaintySample,
+                       'tipText': guiNameSpaces.TipText_UncertaintySample,
+                       'value': 1000,
+                       'step': 10,
+                       'minimum':1,
+                       'maximum':10000,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+        ))
         self.widgetDefinitions.update(settingsDict)
+        self.widgetDefinitions.update(optimiserDict)
 
         return self.widgetDefinitions
 
@@ -841,8 +871,6 @@ class GuiFittingPanel(GuiSettingPanel):
             - Draw the Model Equation  (clear the previous first)
             - Add a series of widgets depending on the params
         """
-        from ccpn.ui.gui.widgets.Label import maTex2Pixmap
-        from ccpn.ui.gui.widgets.Label import Label
         from ccpn.ui.gui.widgets.FittiningParamsWidget import FittingParamWidget
         frameWidget = self.getWidget(guiNameSpaces.WidgetVarName_ModelEq)
         mainFrame = frameWidget.widgetArea
@@ -855,7 +883,7 @@ class GuiFittingPanel(GuiSettingPanel):
         maTex = modelObj.maTex
         pixmap = maTex2Pixmap(f'{maTex}',  fontSize=12)
         label = Label(mainFrame, text='', icon=pixmap, grid=(0, 0), vAlign='c')
-        mainFrame.getLayout().setAlignment(QtCore.Qt.AlignCenter)
+        mainFrame.getLayout().setAlignment(QtCore.Qt.AlignLeft)
         frameWidgetValues = self.getWidget(guiNameSpaces.WidgetVarName_ModelValues)
         mainFrame = frameWidgetValues.widgetArea
         frameWidgetValues.clear()
@@ -864,20 +892,24 @@ class GuiFittingPanel(GuiSettingPanel):
 
         self._commonCallback()
 
+    def _uncertaintyChangedCallback(self, *args, **kwargs):
+        """called only to enable/disable other widgets """
+        w = self.getWidget(guiNameSpaces.WidgetVarName_ErrorMethod)
+        sampleCountW = self.getWidget(guiNameSpaces.WidgetVarName_UncertaintySample)
+        sampleCountW.setEnabled(w.getByText() != sv.COVMATRIX)
+        self._commonCallback()
+
     def _userParamChanged(self, modelObj, newParams):
         getLogger().info(f'Updating User Params. {newParams}')
         self._updateUserParams(modelObj, newParams)
 
-
     @staticmethod
     def _updateUserParams(fittingModelCls, params):
-
         _minimiser = fittingModelCls.Minimiser
         userParamNames = _minimiser.getUserParamNames(_minimiser)
         for name, param in params.items():
             if name in userParamNames:
                 _minimiser._userParams[name] = param
-        print('_minimiser._userParams::::',_minimiser._userParams)
         return _minimiser._userParams
 
     def _commonCallback(self, *args):
@@ -1113,17 +1145,17 @@ class AppearancePanel(GuiSettingPanel):
                        'selectItem': guiNameSpaces.BAR_belowBrush,
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'compoundKwds': {'includeGradients': False}}}),
-            (guiNameSpaces.WidgetVarName_UntraceableColour,
-             {'label': guiNameSpaces.Label_UntraceableColour,
-              'callBack':  partial(self._updateMainPlotPanel, True),
-              'enabled': True,
-              'tipText': guiNameSpaces.TipText_UntraceableColour,
-              'type': compoundWidget.ColourSelectionCompoundWidget,
-              'kwds': {'labelText': guiNameSpaces.Label_UntraceableColour,
-                       'tipText': guiNameSpaces.TipText_UntraceableColour,
-                       'fixedWidths': SettingsWidgetFixedWidths,
-                       'selectItem': guiNameSpaces.BAR_untracBrush,
-                       'compoundKwds': {'includeGradients': False}}}),
+            # (guiNameSpaces.WidgetVarName_UntraceableColour,
+            #  {'label': guiNameSpaces.Label_UntraceableColour,
+            #   'callBack':  partial(self._updateMainPlotPanel, True),
+            #   'enabled': True,
+            #   'tipText': guiNameSpaces.TipText_UntraceableColour,
+            #   'type': compoundWidget.ColourSelectionCompoundWidget,
+            #   'kwds': {'labelText': guiNameSpaces.Label_UntraceableColour,
+            #            'tipText': guiNameSpaces.TipText_UntraceableColour,
+            #            'fixedWidths': SettingsWidgetFixedWidths,
+            #            'selectItem': guiNameSpaces.BAR_untracBrush,
+            #            'compoundKwds': {'includeGradients': False}}}),
             (guiNameSpaces.WidgetVarName_ThrColour,
              {'label': guiNameSpaces.Label_ThrColour,
               'enabled': True,

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-09-18 17:27:42 +0100 (Wed, September 18, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-11-11 15:37:16 +0000 (Mon, November 11, 2024) $"
+__version__ = "$Revision: 3.2.10 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,23 +37,17 @@ import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.framework.lib.experimentAnalysis.calculationModels._libraryFunctions as lf
 
 
-def euclideanDistance_func(array1, array2, alphaFactors):
+def _meanEuclideanDistance_func(array1, array2, alphaFactors):
     """
-    Calculate the  Euclidean Distance of two set of coordinates using scaling factors. Used in CSM DeltaDeltas
+    Calculate the mean Euclidean Distance of two set of coordinates using scaling factors. Used in CSM DeltaDeltas
     :param array1: (1d array), coordinate 1
     :param array2: (1d array), coordinate 2 of same shape of array1
     :param alphaFactors: the scaling factors.  same shape of array1 and 2.
     :return: float
     Ref.: Eq.(9) from: M.P. Williamson Progress in Nuclear Magnetic Resonance Spectroscopy 73 (2013) 1–16
-
     """
-    deltas = []
-    for a, b, factor in zip(array1, array2, alphaFactors):
-        delta = a - b
-        delta *= factor
-        delta **= 2
-        deltas.append(delta)
-    return np.sqrt(np.mean(np.array(deltas)))
+    deltas = (array1 - array2) * alphaFactors
+    return np.sqrt(np.mean(deltas ** 2))
 
 class EuclideanCalculationModel(CalculationModel):
     """
@@ -64,7 +58,7 @@ class EuclideanCalculationModel(CalculationModel):
                                             sv.ChemicalShiftPerturbationAnalysis
                                             ]
     modelInfo        = 'Calculate The DeltaDelta shifts for a series using the average Euclidean Distance.'
-    # maTex       = r'$\sqrt{\frac{1}{N}\sum_{i=0}^N (\alpha_i*\delta_i)^2}$'
+    maTex       = r'$\sqrt{\frac{1}{N}\sum_{i=0}^N (\alpha_i*\delta_i)^2}$'
     description = f'''Model:
                     d = √ 1/N * ∑(𝝰_i * δ_i)^2
                     {sv.uALPHA}: the alpha factor for each atom of interest
@@ -125,7 +119,7 @@ class EuclideanCalculationModel(CalculationModel):
                         alphaFactors.append(self._alphaFactors.get(ic, 1))
                     values = np.array(list(dataPerDimensionDict.values()))
                     seriesValues4residue = values.T  ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
-                    deltaDeltas = EuclideanCalculationModel._calculateDeltaDeltas(seriesValues4residue, alphaFactors)
+                    deltaDeltas = EuclideanCalculationModel._calculateEuclideanDistances(seriesValues4residue, alphaFactors)
                     csmValue = np.mean(deltaDeltas[1:])  ## first item is excluded from as it is always 0 by definition.
                     nmrAtomNames = inputData._getAtomNamesFromGroupedByHeaders(groupDf)
                     # seriesSteps = groupDf[self.xSeriesStepHeader].unique() #cannot use unique! Could be series with same value!!
@@ -166,15 +160,15 @@ class EuclideanCalculationModel(CalculationModel):
         return outputFrame
 
     @staticmethod
-    def _calculateDeltaDeltas(data, alphaFactors):
+    def _calculateEuclideanDistances(data, alphaFactors):
         """
         :param data: 2D array containing A and B coordinates to measure.
         e.g.: for two HN peaks data will be a 2D array, e.g.: [[  8.15842 123.49895][  8.17385 123.98413]]
         :return: float
         """
-        deltaDeltas = []
+        dds = []
         origin = data[0] # first set of positions (any dimensionality)
         for coord in data:# the other set of positions (same dim as origin)
-            dd = euclideanDistance_func(origin, coord, alphaFactors)
-            deltaDeltas.append(dd)
-        return deltaDeltas
+            dd = _meanEuclideanDistance_func(origin, coord, alphaFactors)
+            dds.append(dd)
+        return dds

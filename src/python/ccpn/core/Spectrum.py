@@ -65,8 +65,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-06 17:17:15 +0000 (Wed, November 06, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-11 12:40:33 +0000 (Mon, November 11, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -91,8 +91,10 @@ from ccpn.core.Project import Project
 
 from ccpn.core.lib import Pid
 import ccpn.core.lib.SpectrumLib as specLib
-from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection, getDefaultSpectrumColours
-from ccpn.core.lib.SpectrumLib import _includeInDimensionalCopy, _includeInCopy, _includeInCopyList, \
+from ccpn.core.lib.SpectrumLib import \
+    MagnetisationTransferTuple, _getProjection, \
+    getDefaultSpectrumColours, \
+    _includeInDimensionalCopy, _includeInCopy, _includeInCopyList, \
     checkSpectrumPropertyValue, _setDefaultAxisOrdering, MAXALIASINGRANGE
 
 from ccpn.core.lib.ContextManagers import \
@@ -114,11 +116,13 @@ from ccpn.util.decorators import logCommand
 from ccpn.util.Path import Path, aPath
 
 from ccpn.core.lib.Notifiers import NotifierSignal
-from ccpn.core.lib.Traities import CcpNmrProperty, CcpNmrCoreObjectProperty, \
-    CcpNmrIntProperty, CcpNmrFloatProperty, CcpNmrUnicodeProperty, CcpNmrBoolProperty
-from ccpn.core.lib.CoreTraits import V3Object, V3List
+from ccpn.core.lib.CcpNmrProperties import CcpNmrProperty, CcpNmrCoreObjectProperty, \
+    CcpNmrIntProperty, CcpNmrFloatProperty, CcpNmrUnicodeProperty, CcpNmrBoolProperty, \
+    CcpNmrTypedListProperty
+# from ccpn.core.lib.CoreTraits import CoreObjectTrait
 from ccpn.util.traits.CcpNmrTraits import (
-    Int, Float, CEnum, TDict, TList, CTuple, Unicode, Bool)
+    Int, Float, CEnum, TDict, TList, CTuple, Unicode, Bool, CUnicode,
+)
 
 
 # defined here too as imported from Spectrum throughout the code base
@@ -136,14 +140,15 @@ from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectrum_3_0_4
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_PROJECT_INITIALISATION
 
 
-@updateObject(fromVersion='3.0.4',
-              toVersion='3.1.0',
-              updateFunction=_updateSpectrum_3_0_4_to_3_1_0,
-              updateMethod=UPDATE_POST_PROJECT_INITIALISATION
-              )
+@updateObject(
+        fromVersion='3.0.4',
+        toVersion='3.1.0',
+        updateFunction=_updateSpectrum_3_0_4_to_3_1_0,
+        updateMethod=UPDATE_POST_PROJECT_INITIALISATION
+)
 class Spectrum(AbstractWrapperObject):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
-    path to the NMR (binary) data file. The Spectrum object has methods to get the binary data
+    path to the NMR (binary) data file. The Spectrum object has methods to access the binary data
     as SpectrumData (i.e. np.ndarray) objects.
     """
     #-----------------------------------------------------------------------------------------
@@ -190,15 +195,21 @@ class Spectrum(AbstractWrapperObject):
     _NEGATIVENOISELEVEL = 'negativeNoiseLevel'
 
     #-----------------------------------------------------------------------------------------
-    # A property for which the (graphics) machinery can set an OBSERVE notifier
-    _rebuildContoursSignal = NotifierSignal()   # Code (below) affecting graphics will do:
-                                                #    self._rebuildContoursSignal = True,
-                                                # which will advance the _rebuildContoursSignal
+    # Signal for 2D contours
+    _buildContoursSignal = NotifierSignal()     # Code (below) affecting graphics will do:
+                                                #    self._buildContoursSignal = True,
+                                                # which will advance the _buildContoursSignal
                                                 # counter by one, triggering any callbacks
                                                 # set for the signal.
 
+    # Signal for 1D plots
+    _build1DPlotSignal = NotifierSignal()
+
     # Signal set by _openFile call
     _openFileSignal = NotifierSignal()
+
+    # Signal set by experimentName, experimentType, magnetisationTransfers
+    _experimentSignal = NotifierSignal()
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure
@@ -246,7 +257,6 @@ class Spectrum(AbstractWrapperObject):
 
         # TODO:ED There was an error catching for Nef related problems;
         #  should fix in Nef importer, not here
-        #  Don't raise errors here or you crash-out a perfectly valid project/Nef from loading
         # getLogger().warning(f'Could not set chemicalShiftList for Spectrum {self}. Invalid type {_shiftList}.')
 
     # --- spectrumDimensions property ---
@@ -474,7 +484,9 @@ class Spectrum(AbstractWrapperObject):
     # Spectrum properties
     #-----------------------------------------------------------------------------------------
 
-    @property
+    @CcpNmrUnicodeProperty(
+            allowNone=False
+    )
     def name(self) -> str:
         """:return The name of the spectrum.
         """
@@ -526,10 +538,11 @@ class Spectrum(AbstractWrapperObject):
         return tuple(z for z in zip(self.dimensionIndices, self.axisCodes, self.dimensions))
 
     #-----------------------------------------------------------------------------------------
+    ## === Contour properties ===
 
-    # --- psoitiveContourCount property ---
+    # --- positiveContourCount property ---
     @CcpNmrIntProperty(
-            defaultValue=10,
+            defaultValue=specLib.DEFAULT_CONTOUR_LEVELS,
             min=0
     ).tag(
             includeInCopy=True,
@@ -544,10 +557,11 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def positiveContourCount(self, value):
         self._wrappedData.positiveContourCount = value
+        self._buildContoursSignal = True
 
     # --- positiveContourBase property ---
     @CcpNmrFloatProperty(
-            defaultValue=1e6,
+            defaultValue=specLib.DEFAULT_CONTOUR_BASE,
             min=0.001
     ).tag(
             includeInCopy=True,
@@ -562,10 +576,11 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def positiveContourBase(self, value):
         self._wrappedData.positiveContourBase = value
+        self._buildContoursSignal = True
 
     # --- positiveContourFactor property ---
     @CcpNmrFloatProperty(
-            defaultValue=1.21,
+            defaultValue=specLib.DEFAULT_CONTOUR_FACTOR,
             min=1.001
     ).tag(
             includeInCopy=True,
@@ -575,6 +590,7 @@ class Spectrum(AbstractWrapperObject):
         """The level multiplier for positive contours.
         """
         return self._wrappedData.positiveContourFactor
+        self._buildContoursSignal = True
 
     @positiveContourFactor.setter
     @logCommand(get='self', isProperty=True)
@@ -597,6 +613,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def positiveContourColour(self, value):
         self._wrappedData.positiveContourColour = value
+        self._buildContoursSignal = True
 
     # --- includePositiveContours property ---
     @CcpNmrBoolProperty(
@@ -618,10 +635,11 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def includePositiveContours(self, value: bool):
         self._setInternalParameter(self._INCLUDEPOSITIVECONTOURS, value)
+        self._buildContoursSignal = True
 
     # --- negativeContourCount property ---
     @CcpNmrIntProperty(
-            defaultValue=10,
+            defaultValue=specLib.DEFAULT_CONTOUR_LEVELS,
             min=0
     ).tag(
             includeInCopy=True,
@@ -636,10 +654,11 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def negativeContourCount(self, value):
         self._wrappedData.negativeContourCount = value
+        self._buildContoursSignal = True
 
     # --- negativeContourBase property ---
     @CcpNmrFloatProperty(
-            defaultValue=-1e6,
+            defaultValue=-1.0*specLib.DEFAULT_CONTOUR_BASE,
             max=-0.001
     ).tag(
             includeInCopy=True,
@@ -655,10 +674,11 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def negativeContourBase(self, value):
         self._wrappedData.negativeContourBase = value
+        self._buildContoursSignal = True
 
     # --- negativeContourFactor property ---
     @CcpNmrFloatProperty(
-            defaultValue=1.21
+            defaultValue=specLib.DEFAULT_CONTOUR_FACTOR,
     ).tag(
             includeInCopy=True,
             isContourParameter=True
@@ -672,6 +692,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def negativeContourFactor(self, value):
         self._wrappedData.negativeContourFactor = value
+        self._buildContoursSignal = True
 
     # --- positiveContourColour property ---
     @CcpNmrUnicodeProperty(
@@ -689,6 +710,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def negativeContourColour(self, value):
         self._wrappedData.negativeContourColour = value
+        self._buildContoursSignal = True
 
     # --- includeNegativeContours property ---
     @CcpNmrBoolProperty(
@@ -709,10 +731,53 @@ class Spectrum(AbstractWrapperObject):
     @includeNegativeContours.setter
     @logCommand(get='self', isProperty=True)
     def includeNegativeContours(self, value: bool):
-        if not isinstance(value, bool):
-            raise ValueError("Spectrum.includeNegativeContours: must be True/False")
-
         self._setInternalParameter(self._INCLUDENEGATIVECONTOURS, value)
+        self._buildContoursSignal = True
+
+    # --- displayFoldedContours property ---
+    @CcpNmrBoolProperty(
+            defaultValue=True
+    ).tag(
+            includeInCopy=True,
+            isContourParameter=True
+    )
+    def displayFoldedContours(self):
+        """Return whether the folded spectrum contours are to be displayed
+        """
+        result = self._getInternalParameter(self._DISPLAYFOLDEDCONTOURS)
+        return True if result is None else result
+
+    @displayFoldedContours.setter
+    def displayFoldedContours(self, value):
+        """Set whether the folded spectrum contours are to be displayed
+        """
+        self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
+        self._buildContoursSignal = True
+
+    def _setDefaultContourValues(self, base=None,
+                                       multiplier=specLib.DEFAULT_CONTOUR_FACTOR,
+                                       count=specLib.DEFAULT_CONTOUR_LEVELS):
+        """Set default contour values
+        """
+        if base is None:
+            base = self.dataSource._estimateInitialContourBase(multiplier)
+
+        base = max(base, 1.0)  # Contour bases have to be > 0.0
+
+        self.positiveContourBase = base
+        self.positiveContourFactor = multiplier
+        self.positiveContourCount = count
+        self.negativeContourBase = -1.0 * base
+        self.negativeContourFactor = multiplier
+        self.negativeContourCount = count
+
+    def _setDefaultContourColours(self):
+        """Set default contour colours
+        """
+        (self.positiveContourColour, self.negativeContourColour) = getDefaultSpectrumColours(self)
+        self.sliceColour = self.positiveContourColour
+
+    ## === End Contour properties ===
 
     # --- sliceColour property ---
     @CcpNmrUnicodeProperty(
@@ -729,6 +794,7 @@ class Spectrum(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     def sliceColour(self, value):
         self._wrappedData.sliceColour = value
+        self._build1DPlotSignal = True
 
     @property
     @_includeInCopy
@@ -832,9 +898,12 @@ class Spectrum(AbstractWrapperObject):
 
         self._setInternalParameter(self._NEGATIVENOISELEVEL, value)
 
+    # (reference) experiment related
+
     @property
     def synonym(self) -> Optional[str]:
-        """Systematic experiment type descriptor (CCPN system)."""
+        """Systematic experiment type descriptor (CCPN system) or None if not set.
+        """
         refExperiment = self._wrappedData.experiment.refExperiment
         if refExperiment is None:
             return None
@@ -844,10 +913,14 @@ class Spectrum(AbstractWrapperObject):
     # --- experimentType property ---
     @CcpNmrUnicodeProperty(
             allowNone=True
+    ).tag(
+            includeInCopy=True
     )
-    @_includeInCopy
     def experimentType(self) -> Optional[str]:
-        """Systematic experiment type descriptor (CCPN system)."""
+        """Systematic experiment type descriptor (CCPN system) or None if not defined;
+        Setting to None will clear all related linkages such as experimentName and magnetizationTransfers
+        as well.
+        """
         refExperiment = self._wrappedData.experiment.refExperiment
         if refExperiment is None:
             return None
@@ -857,40 +930,55 @@ class Spectrum(AbstractWrapperObject):
     @experimentType.setter
     @logCommand(get='self', isProperty=True)
     def experimentType(self, value: str):
-        from ccpn.core.lib.SpectrumLib import _setApiExpTransfers, _setApiRefExperiment, _clearLinkToRefExp
-
+        """Setting the experiment type; None will clear all linkages as well
+        """
         if value is None:
             self._wrappedData.experiment.refExperiment = None
             self.experimentName = None
-            _clearLinkToRefExp(self._wrappedData.experiment)
-            return
+            specLib._clearLinkToRefExp(self._wrappedData.experiment)
 
-        # nmrExpPrototype = self._wrappedData.root.findFirstNmrExpPrototype(name=value) # Why not findFirst instead of looping all sortedNmrExpPrototypes
-        for nmrExpPrototype in self._wrappedData.root.sortedNmrExpPrototypes():
-            for refExperiment in nmrExpPrototype.sortedRefExperiments():
-                # check if the given value is in the STD nomenclature rather than the CCPN! E.g.: standard=COSY; CCPN=HH
-                ccpnName = refExperiment.name
-                standardName = refExperiment.synonym
+        else:
+            if (refExperiment := specLib._findRefExp(value)) is None:
+                # No reason to raise an error when cannot find a CCPN experimentType definition!
+                getLogger().warning(f'Could not set ExperimentType. No reference experiment matches name "{value}".')
+                return
 
-                if value in [ccpnName, standardName]:
-                    # set API RefExperiment and ExpTransfer
-                    _setApiRefExperiment(self._wrappedData.experiment, refExperiment)
-                    _setApiExpTransfers(self._wrappedData.experiment)
-                    if standardName:
-                        self.experimentName = standardName
-                    return
+            specLib._setApiRefExperiment(self._wrappedData.experiment, refExperiment)
+            specLib._setApiExpTransfers(self._wrappedData.experiment)
+            if (standardName := refExperiment.synonym) is not None:
+                self.experimentName = standardName
 
-        # No reason to raise an error if cannot find a CCPN experimentType definition!
-        getLogger().warning('Could not set ExperimentType. No reference experiment matches name "%s."' % value)
+        self._experimentSignal = True
 
-    @property
-    def experiment(self):
-        """Return the experiment assigned to the spectrum
-        """
-        return self._wrappedData.experiment
+        # # nmrExpPrototype = self._wrappedData.root.findFirstNmrExpPrototype(name=value) # Why not findFirst instead of looping all sortedNmrExpPrototypes
+        # for nmrExpPrototype in self._wrappedData.root.sortedNmrExpPrototypes():
+        #     for refExperiment in nmrExpPrototype.sortedRefExperiments():
+        #         # check if the given value is in the STD nomenclature rather than the CCPN! E.g.: standard=COSY; CCPN=HH
+        #         ccpnName = refExperiment.name
+        #         standardName = refExperiment.synonym
+        #
+        #         if value in [ccpnName, standardName]:
+        #             # set API RefExperiment and ExpTransfer
+        #             specLib._setApiRefExperiment(self._wrappedData.experiment, refExperiment)
+        #             specLib._setApiExpTransfers(self._wrappedData.experiment)
+        #             if standardName:
+        #                 self.experimentName = standardName
+        #
+        #             self._experimentSignal = True
+        #             return
 
-    @property
-    @_includeInCopy
+
+    # GWV 8/11/2024: BIG NoNo: do not expose V2 objects!
+    # @property
+    # def experiment(self):
+    #     """Return the experiment assigned to the spectrum
+    #     """
+    #     return self._wrappedData.experiment
+
+    @CcpNmrUnicodeProperty(
+            allowNone=False,
+            cast=True,
+    )
     def experimentName(self) -> str:
         """Common experiment type descriptor (May not be unique).
         """
@@ -903,6 +991,7 @@ class Spectrum(AbstractWrapperObject):
         # because: reading from .nef files extracts the name from the end of the experiment_type in nef reader
         #           which is not wrapped with quotes, so defaults to an int if it can?
         self._wrappedData.experiment.name = str(value)
+        self._experimentSignal = True
 
     @property
     def pulseProgram(self):
@@ -914,8 +1003,117 @@ class Spectrum(AbstractWrapperObject):
             return None
 
     @property
+    def magnetisationTransfers(self) -> Tuple[MagnetisationTransferTuple, ...]:
+        """tuple of MagnetisationTransferTuple describing magnetisation transfer between
+        the spectrum dimensions.
+
+        MagnetisationTransferTuple is a namedtuple with the fields
+        ['dimension1', 'dimension2', 'transferType', 'isIndirect'] of types [int, int, str, bool]
+        The dimensions are dimension numbers (one-origin]
+        transfertype is one of (in order of increasing priority):
+        'onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'relayed-alternate', 'through-space'
+        isIndirect is used where there is more than one successive transfer step;
+        it is combined with the highest-priority transferType in the transfer path.
+
+        The magnetisationTransfers are deduced from the experimentType and axisCodes.
+        Only when the experimentType is unset or does not match any known reference experiment
+        magnetisationTransfers are kept separately in the API layer.
+        """
+        return self._magnetisationTransfers
+
+    @CcpNmrTypedListProperty(
+            itemTrait=CTuple(
+                    allow_none=False,
+            ),
+            validateGetter=False,
+    )
+    def _magnetisationTransfers(self) -> List[MagnetisationTransferTuple, ...]:
+        """A MagnetisationTransferTuple describes the magnetisation transfer
+        between two spectrum dimensions.
+        :return A list of MagnetisationTransferTuple's.
+        """
+        result = []
+
+        if self.experimentType is not None:
+            # With an experimentType defined, we should use the refExperiment
+
+            if (apiRefExperiment := self._wrappedData.experiment.refExperiment) is None:
+                raise RuntimeError(f'Spectrum._magnetizationTransfers: definition of required reference experiment is missing')
+
+            magnetisationTransferDict = apiRefExperiment.magnetisationTransferDict()
+            _expDimRefs = [dim._expDimRef for dim in self.spectrumReferences]
+
+            refExpDimRefs = [x if x is None else x.refExpDimRef for x in _expDimRefs]
+            for ii, rxdr in enumerate(refExpDimRefs):
+                if rxdr is not None:
+                    dim1 = ii + 1
+                    for jj in range(dim1, len(refExpDimRefs)):
+                        rxdr2 = refExpDimRefs[jj]
+                        if rxdr2 is not None:
+                            if tt := magnetisationTransferDict.get(frozenset((rxdr, rxdr2))):
+                                result.append(MagnetisationTransferTuple(dim1, jj + 1, tt[0], tt[1]))
+
+        else:
+            # Without an experimentType defined, use parameters stored in the API (for reproducibility)
+            apiExperiment = self._wrappedData.experiment
+            ll = []
+            for apiExpTransfer in apiExperiment.expTransfers:
+                item = [x.expDim.dim for x in apiExpTransfer.expDimRefs]
+                item.sort()
+                item.extend((apiExpTransfer.transferType, not (apiExpTransfer.isDirect)))
+                ll.append(item)
+
+            result.extend(MagnetisationTransferTuple(*item) for item in sorted(ll))
+        #
+        return result
+
+    @_magnetisationTransfers.setter
+    def _magnetisationTransfers(self, value: List[MagnetisationTransferTuple, ...]):
+        """Setter for magnetisation transfers
+
+        The magnetisationTransfers are deduced from the experimentType and axisCodes.
+        When the experimentType is set this function is a No-op.
+        Only when the experimentType is unset or does not match any known reference experiment
+        does this function set the magnetisation transfers, and the corresponding values are
+        ignored if the experimentType is later set
+        :param value: A list of MagnetizationTransferTuples
+        """
+        if self.experimentType is not None:
+            getLogger().warning(
+                    f"""Setting Spectrum._magnetisationTransfers was ignored: 
+                experimentType = {self.experimentType} is defined.""")
+            return
+
+        apiExperiment = self._wrappedData.experiment
+        for et in apiExperiment.expTransfers:
+            et.delete()
+
+        mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]  # self._mainExpDimRefs()
+
+        for tt in value:
+            try:
+                dim1, dim2, transferType, isIndirect = tt
+                expDimRefs = (mainExpDimRefs[dim1 - 1], mainExpDimRefs[dim2 - 1])
+            except Exception as ex:
+                raise ValueError(
+                        f"Invalid magnetisationTransfer {tt!r}; {ex}")
+
+            if transferType not in specLib.MagnetisationTransferTypes:
+                raise ValueError(f"Invalid magnetisationTransferType {transferType!r}")
+
+            apiExperiment.newExpTransfer(expDimRefs=expDimRefs,
+                                         transferType=transferType,
+                                         isDirect=(not isIndirect)
+                                         )
+
+        self._experimentSignal = True
+
+    # === file and path section ===
+
+    @property
     def filePath(self) -> Optional[str]:
-        """Definition of the NMR (binary) dataSource file; can contain redirections (e.g. $DATA)
+        """Definition of the NMR (binary) dataSource file; can contain redirections (e.g. $DATA).
+        Setting to None will close access to the binary file.
         Use Spectrum.path attribute for an absolute, decoded path
         """
         if self._dataStore is None:
@@ -1050,6 +1248,13 @@ class Spectrum(AbstractWrapperObject):
             newDataStore.spectrum = self
             self._spectrumTraits.dataStore = newDataStore
             self._saveObject()
+            if self.dimensionCount == 1 and self._intensities is not None:
+                # data were read before; re-read and update the intensities attribute
+                self._intensities = self.getSliceData()
+            if self.dimensionCount == 1 and self._positions is not None:
+                # ppm-array was used before; re-set the positions attribute
+                self._positions = self.getPpmArray(dimension=1)
+
             addUndo(undo=partial(self._openFileHelper, oldDataStore, oldDataSource),
                     redo=partial(self._openFileHelper, newDataStore, newDataSource)
                     )
@@ -1091,20 +1296,6 @@ class Spectrum(AbstractWrapperObject):
 
         # we defined dataStore and dataSource defining a new file
         self._openFileHelper(newDataStore, newDataSource)
-        # self._close()
-        # self._spectrumTraits.dataSource = newDataSource
-        # self._saveSpectrumMetaData()
-        # self._spectrumTraits.dataStore = newDataStore
-        # self._dataStore._saveInternal()
-        # self._saveObject()
-
-        if self.dimensionCount == 1 and self._intensities is not None:
-            # data were read before; re-read and update the intensities attribute
-            self._intensities = self.getSliceData()
-
-        if self.dimensionCount == 1 and self._positions is not None:
-            # ppm-array was used before; re-set the positions attribute
-            self._positions = self.getPpmArray(dimension=1)
 
         if update:
             self._openFileSignal = True
@@ -1189,8 +1380,11 @@ class Spectrum(AbstractWrapperObject):
     #     return result
 
     # --- isComplex property ---
-    @CcpNmrProperty(validator=V3List(itemTrait=Bool())
-                    ).tag(includeInDimensionalCopy=True)
+    @CcpNmrTypedListProperty(
+            itemTrait=Bool()
+    ).tag(
+            includeInDimensionalCopy=True
+    )
     def isComplex(self) -> List[bool]:
         """Boolean denoting Complex data per dimension"""
         return self._getDimensionalAttributes('isComplex')
@@ -1207,9 +1401,12 @@ class Spectrum(AbstractWrapperObject):
         """
         return self.dataSource.dataTypes
 
-    # --- isAquisition property ---
-    @CcpNmrProperty(validator=V3List(itemTrait=Bool())
-                    ).tag(includeInDimensionalCopy=True)
+    # --- isAcquisition property ---
+    @CcpNmrTypedListProperty(
+            itemTrait=Bool()
+    ).tag(
+            includeInDimensionalCopy=True
+    )
     def isAcquisition(self) -> List[bool]:
         """:return Boolean per dimension denoting if it is the acquisition dimension"""
         return self._getDimensionalAttributes('isAcquisition')
@@ -1222,8 +1419,11 @@ class Spectrum(AbstractWrapperObject):
         self._setDimensionalAttributes('isAcquisition', value)
 
     # --- axisCodes property ---
-    @CcpNmrProperty(validator=V3List(itemTrait=Unicode(allow_none=True))
-                    ).tag(includeInDimensionalCopy=True)
+    @CcpNmrTypedListProperty(
+            itemTrait=Unicode(allow_none=True)
+    ).tag(
+            includeInDimensionalCopy=True
+    )
     def axisCodes(self) -> List[Optional[str]]:
         """:return List of an unique axisCode per dimension"""
         return self._getDimensionalAttributes('axisCode')
@@ -1248,11 +1448,14 @@ class Spectrum(AbstractWrapperObject):
                     'Spectrum.acquisitionAxisCode: this should not happen; more than one dimension defined as acquisition dimension')
 
     # --- dimensionTypes property ---
-    @CcpNmrProperty(validator=V3List(itemTrait=CEnum(specLib.DIMENSIONTYPES,
-                                                     allow_none=True
-                                                     )
-                                     )
-                    ).tag(includeInDimensionalCopy=True)
+    @CcpNmrTypedListProperty(
+            itemTrait=CEnum(
+                    mapping=specLib.DIMENSIONTYPES,
+                    allow_none=True
+            )
+    ).tag(
+            includeInDimensionalCopy=True
+    )
     def dimensionTypes(self) -> List[Optional[str]]:
         """Dimension types ('Time' / 'Frequency' / 'Sampled') per dimension"""
         return self._getDimensionalAttributes('dimensionType')
@@ -1446,28 +1649,38 @@ class Spectrum(AbstractWrapperObject):
     def coherenceOrders(self, value: Sequence):
         self._setDimensionalAttributes('coherenceOrder', value)
 
-    @property
-    @_includeInDimensionalCopy
-    def referenceExperimentDimensions(self) -> Tuple[Optional[str], ...]:
-        """dimensions of reference experiment - None if no code"""
-        result = []
-        for dataDim in self._wrappedData.sortedDataDims():
-            expDim = dataDim.expDim
-            if expDim is None:
-                result.append(None)
-            else:
-                referenceExperimentDimension = (expDim.ccpnInternalData and expDim.ccpnInternalData.get(
-                        'expDimToRefExpDim')) or None
-                result.append(referenceExperimentDimension)
+    @CcpNmrTypedListProperty(
+            itemTrait=Unicode(
+                    allow_none=True,
+            )
+    ).tag(
+            includeInDimensionalCopy=True,
+    )
+    def referenceExperimentDimensions(self) -> List[Optional[str], ...]:
+        """dimensions of reference experiment - None if no code
+        """
+        return self._getDimensionalAttributes('referenceExperimentDimension')
 
-        return tuple(result)
+        # GWV 8/11/2024: To SpectrumDimensionAttributes (SpectrumReference)
+        # result = []
+        # for dataDim in self._wrappedData.sortedDataDims():
+        #     expDim = dataDim.expDim
+        #     if expDim is None:
+        #         result.append(None)
+        #     else:
+        #         referenceExperimentDimension = (expDim.ccpnInternalData and expDim.ccpnInternalData.get(
+        #                 'expDimToRefExpDim')) or None
+        #         result.append(referenceExperimentDimension)
+        #
+        # return tuple(result)
 
     @referenceExperimentDimensions.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter(updateReferenceExperimentDimensions=True)
-    @checkSpectrumPropertyValue(iterable=True, unique=True, allowNone=True, types=(str,))
     def referenceExperimentDimensions(self, values: Sequence):
-        apiDataSource = self._wrappedData
+        self._setDimensionalAttributes('referenceExperimentDimension', values)
+
+        # GWV 8/11/2024: To SpectrumDimensionAttributes (SpectrumReference)
+        # apiDataSource = self._wrappedData
 
         # if not isinstance(values, (tuple, list)):
         #     raise ValueError('referenceExperimentDimensions must be a list or tuple')
@@ -1480,20 +1693,19 @@ class Spectrum(AbstractWrapperObject):
         # if len(_vals) != len(set(_vals)):
         #     raise ValueError('referenceExperimentDimensions must be unique')
 
-        #TODO: use self.spectrumDimensions and its attributes/methods (if needed add method)
-        for ii, (dataDim, val) in enumerate(zip(apiDataSource.sortedDataDims(), values)):
-            expDim = dataDim.expDim
-            if expDim is None and val is not None:
-                raise ValueError(f'Cannot set referenceExperimentDimension {val} in dimension {ii + 1}')
-
-            _update = {'expDimToRefExpDim': val}
-            _ccpnInt = expDim.ccpnInternalData
-            if _ccpnInt is None:
-                expDim.ccpnInternalData = _update
-            else:
-                _expDimCID = expDim.ccpnInternalData.copy()
-                _ccpnInt.update(_update)
-                expDim.ccpnInternalData = _ccpnInt
+        # for ii, (dataDim, val) in enumerate(zip(apiDataSource.sortedDataDims(), values)):
+        #     expDim = dataDim.expDim
+        #     if expDim is None and val is not None:
+        #         raise ValueError(f'Cannot set referenceExperimentDimension {val} in dimension {ii + 1}')
+        #
+        #     _update = {'expDimToRefExpDim': val}
+        #     _ccpnInt = expDim.ccpnInternalData
+        #     if _ccpnInt is None:
+        #         expDim.ccpnInternalData = _update
+        #     else:
+        #         _expDimCID = expDim.ccpnInternalData.copy()
+        #         _ccpnInt.update(_update)
+        #         expDim.ccpnInternalData = _ccpnInt
 
     def getAvailableReferenceExperimentDimensions(self, _experimentType=None) -> tuple:
         """Return list of available reference experiment dimensions based on spectrum isotopeCodes
@@ -1793,83 +2005,108 @@ class Spectrum(AbstractWrapperObject):
     def axesReversed(self, value):
         self._setDimensionalAttributes('isReversed', value)
 
-    @property
-    def magnetisationTransfers(self) -> Tuple[MagnetisationTransferTuple, ...]:
-        """tuple of MagnetisationTransferTuple describing magnetisation transfer between
-        the spectrum dimensions.
-
-        MagnetisationTransferTuple is a namedtuple with the fields
-        ['dimension1', 'dimension2', 'transferType', 'isIndirect'] of types [int, int, str, bool]
-        The dimensions are dimension numbers (one-origin]
-        transfertype is one of (in order of increasing priority):
-        'onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'relayed-alternate', 'through-space'
-        isIndirect is used where there is more than one successive transfer step;
-        it is combined with the highest-priority transferType in the transfer path.
-
-        The magnetisationTransfers are deduced from the experimentType and axisCodes.
-        Only when the experimentType is unset or does not match any known reference experiment
-        magnetisationTransfers are kept separately in the API layer.
-        """
-
-        result = []
-        apiExperiment = self._wrappedData.experiment
-        if apiRefExperiment := apiExperiment.refExperiment:
-            # We should use the refExperiment - if present
-            magnetisationTransferDict = apiRefExperiment.magnetisationTransferDict()
-            mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]
-            refExpDimRefs = [x if x is None else x.refExpDimRef for x in mainExpDimRefs]
-            for ii, rxdr in enumerate(refExpDimRefs):
-                if rxdr is not None:
-                    dim1 = ii + 1
-                    for jj in range(dim1, len(refExpDimRefs)):
-                        rxdr2 = refExpDimRefs[jj]
-                        if rxdr2 is not None:
-                            if tt := magnetisationTransferDict.get(frozenset((rxdr, rxdr2))):
-                                result.append(MagnetisationTransferTuple(dim1, jj + 1, tt[0], tt[1]))
-
-        else:
-            # Without a refExperiment use parameters stored in the API (for reproducibility)
-            ll = []
-            for apiExpTransfer in apiExperiment.expTransfers:
-                item = [x.expDim.dim for x in apiExpTransfer.expDimRefs]
-                item.sort()
-                item.extend((apiExpTransfer.transferType, not (apiExpTransfer.isDirect)))
-                ll.append(item)
-            result.extend(MagnetisationTransferTuple(*item) for item in sorted(ll))
-        #
-        return tuple(result)
-
-    @ccpNmrV3CoreUndoBlock(updateMagnetisationTransfers=True)
-    def _setMagnetisationTransfers(self, value: Tuple[MagnetisationTransferTuple, ...]):
-        """Setter for magnetisation transfers
-
-        The magnetisationTransfers are deduced from the experimentType and axisCodes.
-        When the experimentType is set this function is a No-op.
-        Only when the experimentType is unset or does not match any known reference experiment
-        does this function set the magnetisation transfers, and the corresponding values are
-        ignored if the experimentType is later set
-        """
-        apiExperiment = self._wrappedData.experiment
-        apiRefExperiment = apiExperiment.refExperiment
-        if apiRefExperiment is None:
-            for et in apiExperiment.expTransfers:
-                et.delete()
-            mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]  # self._mainExpDimRefs()
-            for tt in value:
-                try:
-                    dim1, dim2, transferType, isIndirect = tt
-                    expDimRefs = (mainExpDimRefs[dim1 - 1], mainExpDimRefs[dim2 - 1])
-                except Exception:
-                    raise ValueError(
-                            f"Attempt to set incorrect magnetisationTransfer value {tt} in spectrum {self.pid}")
-
-                apiExperiment.newExpTransfer(expDimRefs=expDimRefs, transferType=transferType,
-                                             isDirect=(not isIndirect))
-        else:
-            getLogger().warning(
-                    """An attempt to set Spectrum.magnetisationTransfers directly was ignored
-                  because the spectrum experimentType was defined.
-                  Use axisCodes to set magnetisation transfers instead.""")
+    # GWV refactored and moved to the "experiment section"
+    # @property
+    # def magnetisationTransfers(self) -> Tuple[MagnetisationTransferTuple, ...]:
+    #     """tuple of MagnetisationTransferTuple describing magnetisation transfer between
+    #     the spectrum dimensions.
+    #
+    #     MagnetisationTransferTuple is a namedtuple with the fields
+    #     ['dimension1', 'dimension2', 'transferType', 'isIndirect'] of types [int, int, str, bool]
+    #     The dimensions are dimension numbers (one-origin]
+    #     transfertype is one of (in order of increasing priority):
+    #     'onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'relayed-alternate', 'through-space'
+    #     isIndirect is used where there is more than one successive transfer step;
+    #     it is combined with the highest-priority transferType in the transfer path.
+    #
+    #     The magnetisationTransfers are deduced from the experimentType and axisCodes.
+    #     Only when the experimentType is unset or does not match any known reference experiment
+    #     magnetisationTransfers are kept separately in the API layer.
+    #     """
+    #     return self._magnetisationTransfers
+    #
+    # @CcpNmrTypedListProperty(
+    #         itemTrait=CTuple(
+    #                 allow_none=False,
+    #         ),
+    #         validateGetter=False,
+    # )
+    # def _magnetisationTransfers(self) -> List[MagnetisationTransferTuple, ...]:
+    #     """A MagnetisationTransferTuple describes the magnetisation transfer
+    #     between two spectrum dimensions.
+    #     :return A list of MagnetisationTransferTuple's.
+    #     """
+    #     result = []
+    #     apiExperiment = self._wrappedData.experiment
+    #     if apiRefExperiment := apiExperiment.refExperiment:
+    #         # We should use the refExperiment - if present
+    #         magnetisationTransferDict = apiRefExperiment.magnetisationTransferDict()
+    #         mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]
+    #         refExpDimRefs = [x if x is None else x.refExpDimRef for x in mainExpDimRefs]
+    #         for ii, rxdr in enumerate(refExpDimRefs):
+    #             if rxdr is not None:
+    #                 dim1 = ii + 1
+    #                 for jj in range(dim1, len(refExpDimRefs)):
+    #                     rxdr2 = refExpDimRefs[jj]
+    #                     if rxdr2 is not None:
+    #                         if tt := magnetisationTransferDict.get(frozenset((rxdr, rxdr2))):
+    #                             result.append(MagnetisationTransferTuple(dim1, jj + 1, tt[0], tt[1]))
+    #
+    #     else:
+    #         # Without a refExperiment use parameters stored in the API (for reproducibility)
+    #         ll = []
+    #         for apiExpTransfer in apiExperiment.expTransfers:
+    #             item = [x.expDim.dim for x in apiExpTransfer.expDimRefs]
+    #             item.sort()
+    #             item.extend((apiExpTransfer.transferType, not (apiExpTransfer.isDirect)))
+    #             ll.append(item)
+    #         result.extend(MagnetisationTransferTuple(*item) for item in sorted(ll))
+    #     #
+    #     return result
+    #
+    # @_magnetisationTransfers.setter
+    # def _magnetisationTransfers(self, value: List[MagnetisationTransferTuple, ...]):
+    #     """Setter for magnetisation transfers
+    #
+    #     The magnetisationTransfers are deduced from the experimentType and axisCodes.
+    #     When the experimentType is set this function is a No-op.
+    #     Only when the experimentType is unset or does not match any known reference experiment
+    #     does this function set the magnetisation transfers, and the corresponding values are
+    #     ignored if the experimentType is later set
+    #     :param value: A list of MagnetizationTransferTuples
+    #     """
+    #     apiExperiment = self._wrappedData.experiment
+    #     apiRefExperiment = apiExperiment.refExperiment
+    #
+    #     if apiRefExperiment is not None:
+    #         getLogger().warning(
+    #                 """An attempt to set Spectrum.magnetisationTransfers directly was ignored
+    #               because the spectrum experimentType was defined.
+    #               Use axisCodes to set magnetisation transfers instead.""")
+    #         return
+    #
+    #     for et in apiExperiment.expTransfers:
+    #         et.delete()
+    #
+    #     mainExpDimRefs = [dim._expDimRef for dim in self.spectrumReferences]  # self._mainExpDimRefs()
+    #
+    #     for tt in value:
+    #         try:
+    #             dim1, dim2, transferType, isIndirect = tt
+    #             expDimRefs = (mainExpDimRefs[dim1 - 1], mainExpDimRefs[dim2 - 1])
+    #         except Exception as ex:
+    #             raise ValueError(
+    #                     f"Invalid magnetisationTransfer {tt!r}; {ex}")
+    #
+    #         if transferType not in specLib.MagnetisationTransferTypes:
+    #             raise ValueError(f"Invalid magnetisationTransferType {transferType!r}")
+    #
+    #         apiExperiment.newExpTransfer(expDimRefs=expDimRefs,
+    #                                      transferType=transferType,
+    #                                      isDirect=(not isIndirect)
+    #                                      )
+    #
+    #     self._experimentSignal = True
 
     @property
     def intensities(self) -> SliceData:
@@ -1880,7 +2117,7 @@ class Spectrum(AbstractWrapperObject):
             return SliceData((self.pointCounts[0],))
 
         if self._intensities is None:
-            # Assignment is Redundant as getSliceData does that;
+            # Assignment is redundant as getSliceData also does that;
             # Nevertheless for clarity
             self._intensities = self.getSliceData()
 
@@ -1901,7 +2138,7 @@ class Spectrum(AbstractWrapperObject):
         """
 
         if self.dimensionCount != 1:
-            getLogger().warning('Currently this method only works for 1D spectra')
+            getLogger().warning('This property is only defined for 1D spectra')
             return np.array([])
 
         if self._positions is None:
@@ -1914,22 +2151,22 @@ class Spectrum(AbstractWrapperObject):
     def positions(self, value):
         self._positions = value
 
-    @property
-    @_includeInCopy
-    def displayFoldedContours(self):
-        """Return whether the folded spectrum contours are to be displayed
-        """
-        result = self._getInternalParameter(self._DISPLAYFOLDEDCONTOURS)
-        return True if result is None else result
-
-    @displayFoldedContours.setter
-    def displayFoldedContours(self, value):
-        """Set whether the folded spectrum contours are to be displayed
-        """
-        if not isinstance(value, bool):
-            raise ValueError("Spectrum.displayFoldedContours: must be True/False.")
-
-        self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
+    # GWV 8/11/2024: moved to "contour" section
+    # @property
+    # @_includeInCopy
+    # def displayFoldedContours(self):
+    #     """Return whether the folded spectrum contours are to be displayed
+    #     """
+    #     result = self._getInternalParameter(self._DISPLAYFOLDEDCONTOURS)
+    #     return True if result is None else result
+    #
+    # @displayFoldedContours.setter
+    # def displayFoldedContours(self, value):
+    #     """Set whether the folded spectrum contours are to be displayed
+    #     """
+    #     if not isinstance(value, bool):
+    #         raise ValueError("Spectrum.displayFoldedContours: must be True/False.")
+    #     self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
 
     ## CCPN INTERNAL --- Series ---  ##
 
@@ -2220,7 +2457,7 @@ class Spectrum(AbstractWrapperObject):
 
     def _setDefaultAxisOrdering(self):
         """Set the default axis ordering based on some hierarchy rules (defined in the
-        core/lib/SpectrumLib.oy file
+        core/lib/SpectrumLib.py file
         """
         _setDefaultAxisOrdering(self)
 
@@ -2246,7 +2483,7 @@ class Spectrum(AbstractWrapperObject):
         return self.spectrumDimensions[dimension - 1].valueToPoint(value)
 
     def point2ppm(self, value, axisCode=None, dimension=None):
-        """Convert point value to ppm for axis corresponding to to either axisCode or
+        """Convert point value to ppm for axis corresponding to either axisCode or
         dimension (1-based)
         """
         if dimension is None and axisCode is None:
@@ -2544,26 +2781,27 @@ class Spectrum(AbstractWrapperObject):
             newValues[isotopeCode] = values
         return newValues
 
-    def _setDefaultContourValues(self, base=None, multiplier=1.41, count=10):
-        """Set default contour values
-        """
-        if base is None:
-            base = self.dataSource._estimateInitialContourBase(multiplier)
-
-        base = max(base, 1.0)  # Contour bases have to be > 0.0
-
-        self.positiveContourBase = base
-        self.positiveContourFactor = multiplier
-        self.positiveContourCount = count
-        self.negativeContourBase = -1.0 * base
-        self.negativeContourFactor = multiplier
-        self.negativeContourCount = count
-
-    def _setDefaultContourColours(self):
-        """Set default contour colours
-        """
-        (self.positiveContourColour, self.negativeContourColour) = getDefaultSpectrumColours(self)
-        self.sliceColour = self.positiveContourColour
+    # GWV 11/11/2024; moved to contour section
+    # def _setDefaultContourValues(self, base=None, multiplier=1.41, count=10):
+    #     """Set default contour values
+    #     """
+    #     if base is None:
+    #         base = self.dataSource._estimateInitialContourBase(multiplier)
+    #
+    #     base = max(base, 1.0)  # Contour bases have to be > 0.0
+    #
+    #     self.positiveContourBase = base
+    #     self.positiveContourFactor = multiplier
+    #     self.positiveContourCount = count
+    #     self.negativeContourBase = -1.0 * base
+    #     self.negativeContourFactor = multiplier
+    #     self.negativeContourCount = count
+    #
+    # def _setDefaultContourColours(self):
+    #     """Set default contour colours
+    #     """
+    #     (self.positiveContourColour, self.negativeContourColour) = getDefaultSpectrumColours(self)
+    #     self.sliceColour = self.positiveContourColour
 
     def getPeakAliasingRanges(self):
         """Return the min/max aliasing Values for the peakLists in the spectrum, if there are no peakLists with peaks, return None
@@ -4284,12 +4522,6 @@ class Spectrum(AbstractWrapperObject):
 #=========================================================================================
 # New and empty spectra
 #=========================================================================================
-
-# Hack; remove the api notifier on create
-# _notifiers = [nf for nf in Project._apiNotifiers if nf[3] == '__init__' and 'cls' in nf[1] and nf[1]['cls'] == Spectrum]
-# if len(_notifiers) == 1:
-#     Project._apiNotifiers.remove(_notifiers[0])
-
 
 @newObject(Spectrum)
 def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spectrum:

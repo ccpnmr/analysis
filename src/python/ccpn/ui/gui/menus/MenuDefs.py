@@ -6,7 +6,7 @@ their definitions).
 Note for Actions:
       Use a callback function defined as a method of MenuDefs and pass on
       the action from there.
-      This avoid the (V3) situation in that the MainWindow has not yet been defined,
+      This avoids the (V3) situation in that the MainWindow has not yet been defined,
       when initialising the MenuDefs; i.e. ui.mainWindow is None on initialisation of
       the MenuDefs instance, but is defined the moment the callback is executed.
 
@@ -26,8 +26,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-06 18:31:53 +0000 (Wed, November 06, 2024) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-11 14:07:40 +0000 (Mon, November 11, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -44,9 +44,7 @@ from typing import Optional, Callable
 
 CallableOrNone = Optional[Callable]
 
-from ccpn.framework.PathsAndUrls import \
-    macroPath, \
-    CCPN_ARCHIVES_DIRECTORY
+from ccpn.framework.PathsAndUrls import macroPath
 from ccpn.framework.Application import getApplication, getProject, getCurrent
 from ccpn.framework.lib.FrameWorkProperties import FrameworkProperties
 
@@ -55,8 +53,7 @@ from ccpn.util.Path import aPath
 from ccpn.util.decorators import singleton
 
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FileDialog import \
-    ArchivesFileDialog
+
 
 from ccpn.ui.gui.menus._MenuItems import Menu, Action, Section, Separator, DynamicMenu
 
@@ -120,12 +117,12 @@ class MenusDefs(Menu, FrameworkProperties):
          Action("Save As...", self._saveAsCallback, shortcut='sa'),
 
          Separator(),
-         Menu("Import",
+         Menu("Import from",
             Action("NEF File", self._importNefCallback, shortcut='in'),
             Action("NmrStar File", self._loadNMRStarFileCallback, shortcut='bi'),
          ),
-         Menu("Export",
-            Action("NEF File", self._exportNEFCallback, shortcut='ex'),
+         Menu("Export to",
+            Action("NEF File", self._exportToNEFCallback, shortcut='ex'),
          ),
 
          Separator(),
@@ -140,14 +137,14 @@ class MenusDefs(Menu, FrameworkProperties):
               Separator(),
               DynamicMenu('Open pre-defined', callback=_fillFilePredefinedLayoutsCallback),
          ),
-         Action("Summary", self._showProjectSummaryPopup),
+         Action("Summary", self._showSummaryCallback),
 
          Separator(),
-         Action('Archive', self._archiveProjectCallback, checkEnabled=_projectCanBeSaved),
+         Action('Archive', self._saveToArchiveCallback, checkEnabled=_projectCanBeSaved),
          Action('Restore From Archive...', self._restoreFromArchiveCallback, checkEnabled=_projectHasArchives),
 
          Separator(),
-         Action("Preferences...", self._showApplicationPreferences, shortcut='⌃,'),
+         Action("Preferences...", self._showPreferencesCallback, shortcut='⌃,'),
 
          Separator(),
          Action("Quit", self._quitCallback, shortcut='⌃q'),  # Unicode U+2303,
@@ -374,54 +371,17 @@ class MenusDefs(Menu, FrameworkProperties):
         """menu callback; use ui.loadData to do the lifting
         """
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
-
-        # self.ui.loadData(formatFilter=(NefDataLoader.dataFormat,))
         self.ui._loadDataIgnoreExtension(NefDataLoader)
 
-    def _exportNEFCallback(self):
+    def _exportToNEFCallback(self):
+        """Export the current project as a Nef file
         """
-        Export the current project as a Nef file
-        Temporary routine because I don't know how else to do it yet
-        """
-        from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
-        from ccpn.framework.lib.ccpnNef.CcpnNefIo import NEFEXTENSION
-
-        _path = aPath(self.application.preferences.general.userWorkingPath or '~').filepath / (
-                    self.project.name + NEFEXTENSION)
-        dialog = ExportNefPopup(self.ui.mainWindow,
-                                mainWindow=self.ui.mainWindow,
-                                selectFile=_path,
-                                fileFilter='*.nef',
-                                minimumSize=(400, 550))
-
-        # an exclusion dict comes out of the dialog as it
-        result = dialog.exec_()
-
-        if not result:
-            return
-
-        nefPath = result['filename']
-        flags = result['flags']
-        pidList = result['pidList']
-
-        # flags are skipPrefixes, expandSelection
-        skipPrefixes = flags['skipPrefixes']
-        expandSelection = flags['expandSelection']
-        includeOrphans = flags['includeOrphans']
-
-        self.project.exportNef(nefPath,
-                               overwriteExisting=True,
-                               skipPrefixes=skipPrefixes,
-                               expandSelection=expandSelection,
-                               includeOrphans=includeOrphans,
-                               pidList=pidList)
+        self.ui.exportToNef()
 
     def _loadNMRStarFileCallback(self):
         """menu callback; use ui.loadData to do the lifting
         """
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
-
-        # self.ui.loadData(formatFilter=(StarDataLoader.dataFormat,))
         self.ui._loadDataIgnoreExtension(StarDataLoader)
 
     def _saveCallback(self):
@@ -439,32 +399,15 @@ class MenusDefs(Menu, FrameworkProperties):
         """
         self.ui.saveProjectAs()
 
-    def _archiveProjectCallback(self):
+    def _saveToArchiveCallback(self):
         """Archive the project
         """
-        if (path := self.application.saveToArchive()) is None:
-            MessageDialog.showInfo('Archive Project',
-                                   'Unable to archive Project')
-        else:
-            MessageDialog.showInfo('Archive Project',
-                                   'Project archived to %s' % path)
+        self.ui.saveToArchive()
 
     def _restoreFromArchiveCallback(self):
         """Restore a project from archive
         """
-        archivesDirectory = aPath(self.project.path) / CCPN_ARCHIVES_DIRECTORY
-        _filter = '*.tgz'
-        dialog = ArchivesFileDialog(parent=self.ui.mainWindow,
-                                    acceptMode='select',
-                                    directory=archivesDirectory,
-                                    fileFilter=_filter)
-        dialog._show()
-        archivePath = dialog.selectedFile()
-
-        if archivePath and \
-                (newProject := self.application.restoreFromArchive(archivePath)) is not None:
-            MessageDialog.showInfo('Restore from Archive',
-                                   'Project restored as %s' % newProject.path)
+        self.ui.restoreFromArchive()
 
     def _saveLayoutCallback(self):
         """Save layout without query for path
@@ -487,22 +430,18 @@ class MenusDefs(Menu, FrameworkProperties):
         """
         self.ui.restoreLayoutFromFile()
 
-    def _showProjectSummaryPopup(self):
+    def _showSummaryCallback(self):
         """Show the Project summary popup.
         """
         from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
         popup = ProjectSummaryPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, modal=True)
         popup.exec_()
 
-    def _showApplicationPreferences(self):
+    def _showPreferencesCallback(self):
         """
         Displays Application Preferences Popup.
         """
-        from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
-
-        popup = PreferencesPopup(parent=self.ui.mainWindow._widget, mainWindow=self.ui.mainWindow,
-                                 preferences=self.application.preferences)
-        popup.exec_()
+        self.ui.showPreferences()
 
     def _quitCallback(self, event=None):
         """

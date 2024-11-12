@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-06 13:51:10 +0000 (Wed, November 06, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-08 11:02:22 +0000 (Fri, November 08, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -87,11 +87,11 @@ class PidTrait(Unicode):
             raise ValueError(f'{self._fullName(obj)}: expected pid or object with pid, got {value}')
 
 
-class V3Object(TraitType, _CcpNmrTrait):
-    """A trait that defines a V3-object, json serialisable through its Pid
+class CoreObjectTrait(TraitType, _CcpNmrTrait):
+    """A trait that defines a core-object, json serialisable through its Pid
     """
     default_value = Sentinel
-    info_text = "A V3-Object"
+    info_text = "A Core-Object"
 
     _overrideClassCheck = False  # flag for ccpnv4 testing
 
@@ -161,7 +161,7 @@ class V3Object(TraitType, _CcpNmrTrait):
 
         elif (self._klass is None and self._klassName is not None):
             if (_klass := _getV3coreClass(self._klassName)) is None:
-                raise RuntimeError(f'V3Object: invalid className {self._klassName!r}')
+                raise RuntimeError(f'CoreObjectTrait: invalid className {self._klassName!r}')
             if not isinstance(value, _klass):
                 raise TypeError(f'Expected an instance of {classType(_klass)}; got {value} {classType(value)}')
 
@@ -191,73 +191,4 @@ class V3Object(TraitType, _CcpNmrTrait):
                     getLogger().warning(f'Error decoding {value!r}; set to None')
                 return result
 # end class
-
-
-class _V3TypedList(_TypedList):
-    """A class that can be used as a typed-check list for V3Properties;
-    Callback to the V3Properties to assure undo/notifier handling
-    Allows for axisCode item getting/setting if class has "axisCodes"
-    attribute (Spectrum, Peak, ??). Example: myPeak.position['N']
-    """
-    # def __init__(self, obj, trait, values=()):
-
-    def __getitem__(self, item):
-        # subclassed to decode any axisCode (type str) into item index
-        if isinstance(item, str) and hasattr(self._obj, 'axisCodes'):
-            _aCodes = getattr(self._obj, 'axisCodes')
-            _tmp = dict( (acode, _ii) for _ii, acode in enumerate(_aCodes) )
-            if (item := _tmp.get(item, None)) is None:
-                raise IndexError(f'item {item!r} not found in {self}')
-
-        return super().__getitem__(item)
-
-    def __setitem__(self, item, value):
-        # subclassed to decode any axisCode (type str) into item index
-        if isinstance(item, str) and hasattr(self._obj, 'axisCodes'):
-            _aCodes = getattr(self._obj, 'axisCodes')
-            _tmp = dict( (acode, _ii) for _ii, acode in enumerate(_aCodes) )
-            if (item := _tmp.get(item, None)) is None:
-                raise IndexError(f'item {item!r} not found in {self}')
-
-        return super().__setitem__(item, value)
-
-    def _notifyChanged(self, bunch):
-        """Notify self._obj of the changes
-        :param bunch: the change-bunch instance
-        """
-        # If  self is blanked (e.g. happens during init), fire notifiers
-        if self._blanking:
-            return
-
-        # update the property value
-        if not (_property := self._trait.v3property):
-            raise RuntimeError(f'_V3TypedList._notifyChanged: undefined v3property')
-
-        bunch.new = self
-        _property._itemChangedCallback(bunch=bunch)
-
-    def __str__(self):
-        return list.__str__(self)
-
-    def __repr__(self):
-        return list.__repr__(self)
-
-
-class V3List(TList):
-    """Traitlet for a type-checked List for usage with CcpNmrProperty decorator.
-    Note: the v3property attribute of the V3List instance is set by the
-          __init__ of the CcpNmrProperty class; e.g.
-
-          Example: a list of float's of minimal value 0.0, default 1.0 and no None's allowed:
-
-          @CcpNmrProperty(validator=V3List(Float(min=0.0,
-                                             allow_none=False,
-                                             default_value=1.0
-                                             )
-                                      )
-                     )
-          def myFuc(self):
-            ....
-    """
-    klass = _V3TypedList
 

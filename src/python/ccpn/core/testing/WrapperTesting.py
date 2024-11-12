@@ -5,8 +5,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-03 14:09:46 +0100 (Fri, May 03, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-07 12:24:58 +0000 (Thu, November 07, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,6 +37,7 @@ from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 from ccpnmodel.ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
 
+from ccpn.util.Common import Sentinel
 
 #=========================================================================================
 # fix checkAlValid
@@ -176,3 +178,74 @@ class WrapperTesting(unittest.TestCase):
             self.delayedError -= 1
         else:
             raise RuntimeError('Deliberate delayed error!!')
+
+    def assertEqualForAttribute(self, obj, attribute, value1, value2=Sentinel):
+        """Helper routine to test the value of attribute of obj:
+        - do val:= getattr(obj, attribute) and
+             assert val is equal to value1
+
+        if value2 is not Sentinel:
+        - do setattr(obj, attribute, value)
+        - do val:= getattr(obj, attribute) and
+             assert val is equal to value2
+
+        - undo
+        - getattr and assert val is equal to value1
+        - redo
+        - getattr and assert val is equal to value2
+
+        - undo
+        """
+        _val = getattr(obj, attribute)
+        self.assertEqual(_val, value1, f'>>> Asserting {attribute} of {obj} <<<')
+
+        if value2 != Sentinel:
+            setattr(obj, attribute, value2)
+            _val = getattr(obj, attribute)
+            self.assertEqual(_val, value2, f'>>> After assignment: Asserting {attribute} of {obj} <<<')
+
+            self.undo.undo()
+            _val = getattr(obj, attribute)
+            self.assertEqual(_val, value1, f'>>> After undo: Asserting {attribute} of {obj} <<<')
+
+            self.undo.redo()
+            _val = getattr(obj, attribute)
+            self.assertEqual(_val, value2, f'>>> After redo: Asserting {attribute} of {obj} <<<')
+
+            # revert back for the next test
+            self.undo.undo()
+
+    def assertEqualForAttributeItem(self, obj, attribute, value1, value2=Sentinel, itemIndex=0):
+        """Helper routine to test the item value of attribute of obj:
+        - do val:= getattr(obj, attribute) and
+             and assert val[itemIndex] is equal to value1[itemIndex]
+
+        if value2 is not Sentinel:
+        - do setattr(obj, attribute, value2)
+        - do val:= getattr(obj, attribute) and
+             assert val[itemIndex] is equal to value2[itemIndex]
+
+        - undo
+        - getattr and assert val[itemIndex] is equal to value1[itemIndex]
+        - redo
+        - getattr and assert val[itemIndex] is equal to value2[itemIndex]
+
+        - undo
+        """
+        _val = getattr(obj, attribute)
+        self.assertEqual(_val[itemIndex], value1[itemIndex], f'>>> Asserting {attribute}[{itemIndex}] of {obj} <<<')
+
+        if value2 != Sentinel:
+            setattr(obj, attribute, value2)
+            _val = getattr(obj, attribute)
+            self.assertEqual(_val[itemIndex], value2[itemIndex], f'>>> After assignment: Asserting {attribute}[{itemIndex}] of {obj} <<<')
+
+            self.undo.undo()
+            _val = getattr(obj, attribute)
+            self.assertEqual(_val[itemIndex], value1[itemIndex], f'>>> After undo: Asserting {attribute}[{itemIndex}] of {obj} <<<')
+
+            self.undo.redo()
+            _val = getattr(obj, attribute)
+            self.assertEqual(_val[itemIndex], value2[itemIndex], f'>>> After redo: Asserting {attribute}[{itemIndex}] of {obj} <<<')
+
+            self.undo.undo()

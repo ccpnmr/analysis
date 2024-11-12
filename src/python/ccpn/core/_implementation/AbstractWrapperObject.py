@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-30 14:15:09 +0000 (Wed, October 30, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-08 12:15:02 +0000 (Fri, November 08, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1665,22 +1665,23 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject
 
 
-def updateObject(fromVersion, toVersion, updateFunction):
-    """Class decorator to register updateFunction for a core-class in the _updateFunctions list.
-    updateFunction updates fromVersion to the next higher version toVersion
-    fromVersion can be None, in which case no initial check on objectVersion is done
-
-    def updateFunction(obj)
-        obj: object that is being updated
-    """
-
-    def theDecorator(cls):
-        """This function will decorate cls with _update, _updateHandler list and registers the updateHandler
-        """
-        if not hasattr(cls, '_updateFunctions'):
-            raise RuntimeError('class %s does not have the attribute _updateFunctions')
-
-        cls._updateFunctions[cls.className].append((fromVersion, toVersion, updateFunction))
-        return cls
-
-    return theDecorator
+# GWV 8/11/2024 Not used; actual decorator is in core._implementation.Updater
+# def updateObject(fromVersion, toVersion, updateFunction):
+#     """Class decorator to register updateFunction for a core-class in the _updateFunctions list.
+#     updateFunction updates fromVersion to the next higher version toVersion
+#     fromVersion can be None, in which case no initial check on objectVersion is done
+#
+#     def updateFunction(obj)
+#         obj: object that is being updated
+#     """
+#
+#     def theDecorator(cls):
+#         """This function will decorate cls with _update, _updateHandler list and registers the updateHandler
+#         """
+#         if not hasattr(cls, '_updateFunctions'):
+#             raise RuntimeError('class %s does not have the attribute _updateFunctions')
+#
+#         cls._updateFunctions[cls.className].append((fromVersion, toVersion, updateFunction))
+#         return cls
+#
+#     return theDecorator

@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 18:40:02 +0000 (Mon, October 28, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-08 08:31:30 +0000 (Fri, November 08, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,10 +32,10 @@ __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
 #=========================================================================================
 
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.Traities import HasTraities
+from ccpn.core.lib.CcpNmrProperties import HasCcpNmrProperties
 
 
-class CoreModel(HasTraities):
+class CoreModel(HasCcpNmrProperties):
     """Model-related methods; Only to be used for core objects via
     AbstractWrapperObject or V3CoreModelABC
     """
@@ -93,7 +93,7 @@ class CoreModel(HasTraities):
         if factoryFunction is not None:
             cls._factoryFunction = factoryFunction
 
-        cls._registerTraities()
+        cls._registerCcpNmrProperties()
 
         cls._isRegistered = True
 

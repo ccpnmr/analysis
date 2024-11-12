@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-05 16:05:30 +0000 (Tue, November 05, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-08 08:31:30 +0000 (Fri, November 08, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -62,7 +62,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase
-from ccpn.core.lib.Traities import HasTraities
+from ccpn.core.lib.CcpNmrProperties import HasCcpNmrProperties
 from ccpn.core.lib.Pid import Pid
 from ccpn.core.lib.ContextManagers import \
     logCommandManager, undoBlockWithSideBar, undoBlock, rebuildSidebar, inactivity
@@ -109,7 +109,7 @@ MAXITEMLOGGING = 4
 # Framework
 #=========================================================================================
 
-class Framework(HasTraities, NotifierBase):
+class Framework(HasCcpNmrProperties, NotifierBase):
     """
     The Framework class is the base class for all applications.
     """
@@ -124,7 +124,7 @@ class Framework(HasTraities, NotifierBase):
 
     def __init__(self, args=Arguments()):
 
-        HasTraities.__init__(self)
+        HasCcpNmrProperties.__init__(self)
         NotifierBase.__init__(self)
         # GuiBase.__init__(self)
 
@@ -2586,7 +2586,7 @@ class Framework(HasTraities, NotifierBase):
     __repr__ = __str__
 
 # register traities
-Framework._registerTraities()
+Framework._registerCcpNmrProperties()
 
 #-----------------------------------------------------------------------------------------
 #end class

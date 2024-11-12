@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 15:29:17 +0100 (Sat, October 26, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-11 11:20:22 +0000 (Mon, November 11, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,6 +42,7 @@ from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeT
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import singleton
 from ccpn.util.DataEnum import DataEnum
+#TODO:EB/LM/DT: Evaluate usage of all "api" using routines and recode and replace
 
 
 #=========================================================================================
@@ -141,6 +142,7 @@ def isComplexDataType(dataType):
 MagnetisationTransferTypes = ('onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'through-space', 'relayed-alternate')
 MagnetisationTransferParameters = ('dimension1 dimension2 transferType isIndirect'.split())
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', MagnetisationTransferParameters)
+
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
 
 FOLDING_MODE_CIRCULAR = 'circular'
@@ -841,13 +843,15 @@ def nmrGlueBaselineCorrector(data, wd=20):
 def _getDefaultApiSpectrumColours(spectrum) -> Tuple[str, str]:
     """Get the default colours from the core spectrum class
     """
+    #TODO:ED implement in V3-terms;
+
     # from ccpn.util.Colour import spectrumHexColours
     from ccpn.ui.gui.guiSettings import getColours, SPECTRUM_HEXCOLOURS, SPECTRUM_HEXDEFAULTCOLOURS
     from ccpn.util.Colour import hexToRgb, findNearestHex, invertRGBHue, rgbToHex
 
     dimensionCount = spectrum.dimensionCount
     serial = spectrum._serial
-    expSerial = spectrum.experiment.serial
+    expSerial = spectrum._wrappedData.experiment.serial
 
     spectrumHexColours = getColours().get(SPECTRUM_HEXCOLOURS)
     spectrumHexDefaultColours = getColours().get(SPECTRUM_HEXDEFAULTCOLOURS)
@@ -967,16 +971,16 @@ def _recurseData(ii, dataList, startCondition, endCondition):
 #------------------------------------------------------------------------------------------------------
 
 
-DEFAULTMULTIPLIER = 1.414214
-DEFAULTLEVELS = 10
-DEFAULTCONTOURBASE = 10000.0
+DEFAULT_CONTOUR_FACTOR = 1.414214
+DEFAULT_CONTOUR_LEVELS = 10
+DEFAULT_CONTOUR_BASE = 1e5
 
 
 def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                               setPositiveContours=True, setNegativeContours=True,
                               useDefaultMultiplier=True, useDefaultLevels=True, useDefaultContourBase=False,
                               useSameMultiplier=True,
-                              defaultMultiplier=DEFAULTMULTIPLIER, defaultLevels=DEFAULTLEVELS, defaultContourBase=DEFAULTCONTOURBASE):
+                              defaultMultiplier=DEFAULT_CONTOUR_FACTOR, defaultLevels=DEFAULT_CONTOUR_LEVELS, defaultContourBase=DEFAULT_CONTOUR_BASE):
     """Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum
     """
 
@@ -1080,7 +1084,7 @@ def getContourLevelsFromNoise(spectrum,
                               setPositiveContours=False, setNegativeContours=False,
                               useDefaultMultiplier=True, useDefaultLevels=True, useDefaultContourBase=False,
                               useSameMultiplier=True,
-                              defaultMultiplier=DEFAULTMULTIPLIER, defaultLevels=DEFAULTLEVELS, defaultContourBase=DEFAULTCONTOURBASE):
+                              defaultMultiplier=DEFAULT_CONTOUR_FACTOR, defaultLevels=DEFAULT_CONTOUR_LEVELS, defaultContourBase=DEFAULT_CONTOUR_BASE):
     """Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum
     """
 
@@ -1579,6 +1583,28 @@ def _filtered1DArray(data, ignoredRegions):
     fullmask = [all(mask) for mask in zip(*masks)]
     newArray = (np.ma.MaskedArray(data, mask=np.logical_not((fullmask, fullmask))))
     return newArray
+
+
+
+#===========================================================================================================
+# API code; mostly for managing experiment-related actions
+#===========================================================================================================
+
+def _findRefExp(name):
+    """Find a reference experiment described by name
+    :param name: the systematic CCPN name or CCPN synonym of the experiment
+    :return the api refExperiment instance or None if not found
+    """
+    from ccpn.framework.Application import getProject
+    _proj = getProject()
+
+    # nmrExpPrototype = self._wrappedData.root.findFirstNmrExpPrototype(name=value) # Why not findFirst instead of looping all sortedNmrExpPrototypes
+    for nmrExpPrototype in _proj._wrappedData.root.sortedNmrExpPrototypes():
+        for refExperiment in nmrExpPrototype.sortedRefExperiments():
+            # check if the given value is in the STD nomenclature rather than the CCPN! E.g.: standard=COSY; CCPN=HH
+            if name in [refExperiment.name, refExperiment.synonym]:
+                return refExperiment
+    return None
 
 
 def _initExpBoundResonances(experiment):

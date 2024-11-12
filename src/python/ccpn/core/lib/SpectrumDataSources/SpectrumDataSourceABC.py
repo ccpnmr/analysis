@@ -94,8 +94,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 11:14:30 +0000 (Sun, October 27, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-08 11:02:22 +0000 (Fri, November 08, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -128,7 +128,7 @@ from ccpn.util.decorators import singleton
 
 from ccpn.util.isotopes import findNucleiFromSpectrometerFrequencies, Nucleus
 from ccpn.util.traits.CcpNmrTraits import CFloat, Int, CInt, CBool, Bool, List, TList, CList, \
-    CString, CPath, Any, CEnum, Enum, observe, All, CArray, Unicode
+    CString, CPath, Any, CEnum, Enum, observe, All, NPArray, Unicode
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
 from ccpn.framework.constants import CCPNMR_PREFIX, NO_SUFFIX, ANY_SUFFIX
@@ -327,7 +327,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                     # hasSetterInSpectrumClass=False,
                                     doPrint=False
                                     )
-    nuslist = CArray(               default_value=None).tag(
+    nuslist = NPArray(default_value=None).tag(
 
                                     doCopy=True,
                                     # spectrumAttribute=None,

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 22:10:24 +0000 (Sun, October 27, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-11 12:01:25 +0000 (Mon, November 11, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -87,7 +87,7 @@ from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, \
     BlankedPartial, ccpNmrV3CoreSetter, notificationEchoBlocking, undoBlockWithoutSideBar, \
-    waypointBlocking, undoBlock
+    waypointBlocking, undoBlock, undoStack
 from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
@@ -716,14 +716,13 @@ class GuiSpectrumDisplay(CcpnModule):
     def _setSpectrumNotifiers(self, spectrum: Spectrum):
         """Set the OBSERVE notifiers on spectrum.
         Used by displaySpectrum() and _postRestore() to set notifiers for each spectrum
+        Works in conjunction with _deleteSpectrumNotifiers()
         """
         if spectrum.dimensionCount > 1:
             # nD: Contours
             targets = """
-            _rebuildContoursSignal
+            _buildContoursSignal
             _openFileSignal
-            positiveContourBase positiveContourFactor positiveContourCount includePositiveContours
-            negativeContourBase negativeContourFactor negativeContourCount includeNegativeContours
             scale
             """.split()
             self.setNotifier(spectrum, [Notifier.OBSERVE],
@@ -733,6 +732,7 @@ class GuiSpectrumDisplay(CcpnModule):
         elif spectrum.dimensionCount == 1:
             # 1D: plot
             targets = """
+            _build1DPlotSignal
             _openFileSignal 
             scale
             """.split()
@@ -746,6 +746,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def _deleteSpectrumNotifiers(self, spectrum: Spectrum):
         """Delete notifiers set by self on spectrum
         Used by _closeModule and removeSpectrum() to remove notifiers set on spectrum
+        Works in conjunction with _setSpectrumNotifiers()
         """
         _notifiers = spectrum._getRegisteredNotifiersBySetter(setterObject=self)
         for _ntf in _notifiers:
@@ -876,7 +877,7 @@ class GuiSpectrumDisplay(CcpnModule):
             return
 
         if not isinstance(spectrum, Spectrum):
-            raise TypeError(f'_build1DPlotForSpectrumv(): expected Spectrum instance, got {type(spectrum)}')
+            raise TypeError(f'_build1DPlotForSpectrum(): expected Spectrum instance, got {type(spectrum)}')
 
         _specViews = self.getSpectrumViewFromSpectrum(spectrum)
         if not _specViews:
@@ -1498,32 +1499,31 @@ class GuiSpectrumDisplay(CcpnModule):
         from ccpn.framework.Framework import MAXITEMLOGGING
         from ccpn.core.Project import Project
 
-        theObject = data.get('theObject')
+        strip = data.get(Notifier.THEOBJECT)
         objs = []
 
-        if DropBase.URLS in data:
-            # process dropped items but don't open any spectra
-            objs = self.mainWindow._processDroppedItems(data)
+        with undoBlock():
+            if DropBase.URLS in data:
+                # process dropped items but don't open any spectra
+                objs = self.mainWindow._processDroppedItems(data)
 
-            # discard any further loads if project loaded (may be inconsistent)
-            if list(filter(lambda obj: isinstance(obj, Project), objs)):
-                return
+                # discard any further loads if project loaded (may be inconsistent)
+                if list(filter(lambda obj: isinstance(obj, Project), objs)):
+                    return
 
-            # filter out internal objs that have already been processed
-            objs = list(filter(lambda obj: isinstance(obj, Spectrum), objs))
+                # filter out internal objs that have already been processed
+                objs = list(filter(lambda obj: isinstance(obj, Spectrum), objs))
 
-        elif DropBase.PIDS in data:
-            # handle Pids
-            pids = data.get(DropBase.PIDS, [])
-            objs = self.project.getObjectsByPids(pids)
-
-        if len(objs) > 0:
+            elif DropBase.PIDS in data:
+                # handle Pids
+                pids = data.get(DropBase.PIDS, [])
+                objs = self.project.getObjectsByPids(pids)
 
             if len(objs) > MAXITEMLOGGING:
                 with notificationEchoBlocking():
-                    self._handleObjs(objs, theObject)
-            else:
-                self._handleObjs(objs, theObject)
+                    self._handleObjs(objs, strip)
+            elif len(objs) > 0:
+                self._handleObjs(objs, strip)
 
     def _handleObjs(self, objs: (list, tuple), strip=None) -> bool:
         """handle a list of objects;
@@ -3168,26 +3168,31 @@ class GuiSpectrumDisplay(CcpnModule):
             spectrum = spectrumView.spectrum
 
             with spectrum.blankNotifications():
-                if spectrum.positiveContourBase == spectrumView.positiveContourBase:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    # setting to None forces the spectrumVIew to access the spectrum attributes
-                    spectrumView.positiveContourBase = None
-                    spectrumView.positiveContourFactor = None
-                    spectrum.positiveContourBase *= spectrum.positiveContourFactor
-                else:
-                    # Display has custom contour base - change that one only
-                    spectrumView.positiveContourBase *= spectrumView.positiveContourFactor
+                with undoStack() as addUndo:
+                    if spectrum.positiveContourBase == spectrumView.positiveContourBase:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        # setting to None forces the spectrumVIew to access the spectrum attributes
+                        spectrumView.positiveContourBase = None
+                        spectrumView.positiveContourFactor = None
+                        spectrum.positiveContourBase *= spectrum.positiveContourFactor
+                    else:
+                        # Display has custom contour base - change that one only
+                        spectrumView.positiveContourBase *= spectrumView.positiveContourFactor
 
-                if spectrum.negativeContourBase == spectrumView.negativeContourBase:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.negativeContourBase = None
-                    spectrumView.negativeContourFactor = None
-                    spectrum.negativeContourBase *= spectrum.negativeContourFactor
-                else:
-                    # Display has custom contour base - change that one only
-                    spectrumView.negativeContourBase *= spectrumView.negativeContourFactor
+                    if spectrum.negativeContourBase == spectrumView.negativeContourBase:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.negativeContourBase = None
+                        spectrumView.negativeContourFactor = None
+                        spectrum.negativeContourBase *= spectrum.negativeContourFactor
+                    else:
+                        # Display has custom contour base - change that one only
+                        spectrumView.negativeContourBase *= spectrumView.negativeContourFactor
+
+                    addUndo(undo=self._lowerContourBase,
+                            redo=self._raiseContourBase
+                            )
 
             spectrum._updateContoursSignal=True
 
@@ -3203,26 +3208,31 @@ class GuiSpectrumDisplay(CcpnModule):
             spectrum = spectrumView.spectrum
 
             with spectrum.blankNotifications():
+                with undoStack() as addUndo:
 
-                if spectrum.positiveContourBase == spectrumView.positiveContourBase:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.positiveContourBase = None
-                    spectrumView.positiveContourFactor = None
-                    spectrum.positiveContourBase /= spectrum.positiveContourFactor
-                else:
-                    # Display has custom contour base - change that one only
-                    spectrumView.positiveContourBase /= spectrumView.positiveContourFactor
+                    if spectrum.positiveContourBase == spectrumView.positiveContourBase:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.positiveContourBase = None
+                        spectrumView.positiveContourFactor = None
+                        spectrum.positiveContourBase /= spectrum.positiveContourFactor
+                    else:
+                        # Display has custom contour base - change that one only
+                        spectrumView.positiveContourBase /= spectrumView.positiveContourFactor
 
-                if spectrum.negativeContourBase == spectrumView.negativeContourBase:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.negativeContourBase = None
-                    spectrumView.negativeContourFactor = None
-                    spectrum.negativeContourBase /= spectrum.negativeContourFactor
-                else:
-                    # Display has custom contour base - change that one only
-                    spectrumView.negativeContourBase /= spectrumView.negativeContourFactor
+                    if spectrum.negativeContourBase == spectrumView.negativeContourBase:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.negativeContourBase = None
+                        spectrumView.negativeContourFactor = None
+                        spectrum.negativeContourBase /= spectrum.negativeContourFactor
+                    else:
+                        # Display has custom contour base - change that one only
+                        spectrumView.negativeContourBase /= spectrumView.negativeContourFactor
+
+                    addUndo(undo=self._raiseContourBase,
+                            redo=self._lowerContourBase
+                            )
 
             spectrum._updateContoursSignal = True
 
@@ -3238,24 +3248,25 @@ class GuiSpectrumDisplay(CcpnModule):
             spectrum = spectrumView.spectrum
 
             with spectrum.blankNotifications():
+                with undoBlock():
 
-                if spectrum.positiveContourCount == spectrumView.positiveContourCount:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.positiveContourCount = None
-                    spectrum.positiveContourCount += 1
-                else:
-                    # Display has custom contour count - change that one only
-                    spectrumView.positiveContourCount += 1
+                    if spectrum.positiveContourCount == spectrumView.positiveContourCount:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.positiveContourCount = None
+                        spectrum.positiveContourCount += 1
+                    else:
+                        # Display has custom contour count - change that one only
+                        spectrumView.positiveContourCount += 1
 
-                if spectrum.negativeContourCount == spectrumView.negativeContourCount:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.negativeContourCount = None
-                    spectrum.negativeContourCount += 1
-                else:
-                    # Display has custom contour count - change that one only
-                    spectrumView.negativeContourCount += 1
+                    if spectrum.negativeContourCount == spectrumView.negativeContourCount:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.negativeContourCount = None
+                        spectrum.negativeContourCount += 1
+                    else:
+                        # Display has custom contour count - change that one only
+                        spectrumView.negativeContourCount += 1
 
             spectrum._updateContoursSignal = True
 
@@ -3271,28 +3282,29 @@ class GuiSpectrumDisplay(CcpnModule):
             spectrum = spectrumView.spectrum
 
             with spectrum.blankNotifications():
+                with undoBlock():
 
-                if spectrum.positiveContourCount == spectrumView.positiveContourCount:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.positiveContourCount = None
-                    if spectrum.positiveContourCount:
-                        spectrum.positiveContourCount -= 1
-                else:
-                    # Display has custom contour count - change that one only
-                    if spectrumView.positiveContourCount:
-                        spectrumView.positiveContourCount -= 1
+                    if spectrum.positiveContourCount == spectrumView.positiveContourCount:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.positiveContourCount = None
+                        if spectrum.positiveContourCount:
+                            spectrum.positiveContourCount -= 1
+                    else:
+                        # Display has custom contour count - change that one only
+                        if spectrumView.positiveContourCount:
+                            spectrumView.positiveContourCount -= 1
 
-                if spectrum.negativeContourCount == spectrumView.negativeContourCount:
-                    # We want to set the base for ALL spectra
-                    # and to ensure that any private settings are overridden for this display
-                    spectrumView.negativeContourCount = None
-                    if spectrum.negativeContourCount:
-                        spectrum.negativeContourCount -= 1
-                else:
-                    # Display has custom contour count - change that one only
-                    if spectrumView.negativeContourCount:
-                        spectrumView.negativeContourCount -= 1
+                    if spectrum.negativeContourCount == spectrumView.negativeContourCount:
+                        # We want to set the base for ALL spectra
+                        # and to ensure that any private settings are overridden for this display
+                        spectrumView.negativeContourCount = None
+                        if spectrum.negativeContourCount:
+                            spectrum.negativeContourCount -= 1
+                    else:
+                        # Display has custom contour count - change that one only
+                        if spectrumView.negativeContourCount:
+                            spectrumView.negativeContourCount -= 1
 
             spectrum._updateContoursSignal = True
 

@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-11 11:33:02 +0100 (Fri, October 11, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-10 09:18:02 +0000 (Sun, November 10, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1851,7 +1851,7 @@ class DimensionsTab(Widget):
         """Set the magnetisationTransfers for the spectrum
         """
         try:
-            spectrum._setMagnetisationTransfers(value)
+            spectrum._magnetisationTransfers = value
         except Exception:
             raise ValueError('Magnetisation Transfer Table contains bad values')
 

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 18:28:14 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-12 16:36:04 +0000 (Tue, November 12, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1955,6 +1955,25 @@ class Gui(Ui, _Gui_V3_V4):
             return
 
         popup = PickPeak1DPopup(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
+        popup.exec_()
+
+    def pickNDPeaks(self):
+        """Pick nD peaks
+        """
+        from ccpn.ui.gui.popups.PickNDPeaksPopup import PickNDPeaksPopup
+
+        if not self.project.peakLists:
+            getLogger().warning('Peak Picking: Project has no peakLists.')
+            MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
+            return
+
+        spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
+        if len(spectra) == 0:
+            getLogger().warning('Peak Picking: Project has no nD Spectra.')
+            MessageDialog.showWarning('Peak Picking', 'Project has no nD Spectra.')
+            return
+
+        popup = PickNDPeaksPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
         popup.exec_()
 
     #-----------------------------------------------------------------------------------------

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 18:28:14 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-12 16:36:04 +0000 (Tue, November 12, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1873,11 +1873,12 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         popup = SpectrumProjectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
     #         popup.exec_()
 
-    # GWV 6/2/24: moved to Gui
     @deprecated('ui.setExperimentTypes')
     def showExperimentTypePopup(self):
         """This method is deprecated; use Gui.setExperimentTypes instead"""
         self.ui.setExperimentTypes()
+
+    # GWV 6/2/24: moved to Gui
     #     """
     #     Displays experiment type popup.
     #     """
@@ -1890,10 +1891,12 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
     #         popup.exec_()
     #
+
     @deprecated('ui.validateSpectra')
     def showValidateSpectraPopup(self, spectra=None, defaultSelected=None):
         """This method is deprecated; use Gui.validateSpectra instead"""
         self.ui.validatePaths(spectra=spectra)
+
     #     """
     #     Displays validate spectra popup.
     #     """
@@ -1906,7 +1909,12 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
     #         popup.exec_()
     #
-    # def showPeakPick1DPopup(self):
+
+    deprecated('ui.pick1DPeaks')
+    def showPeakPick1DPopup(self):
+        """This method is deprecated; use Gui.pick1DPeaks instead"""
+        self.ui.pick1DPeaks()
+
     #     """
     #     Displays Peak Picking 1D Popup.
     #     """
@@ -1934,9 +1942,9 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #     else:
     #         spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
     #         if spectra:
-    #             from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+    #             from ccpn.ui.gui.popups.PeakFind import PickNDPeaksPopup
     #
-    #             popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #             popup = PickNDPeaksPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
     #             popup.exec_()
     #         else:
     #             getLogger().warning('Peak Picking: Project has no Nd Spectra.')

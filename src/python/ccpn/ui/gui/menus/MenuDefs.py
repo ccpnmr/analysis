@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 18:28:14 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-12 16:36:04 +0000 (Tue, November 12, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -241,7 +241,7 @@ class MenusDefs(Menu, FrameworkProperties):
         Separator(),
         Menu("Pick Peaks",
              Action("Pick 1D Peaks...", self._pick1DPeaksCallback, shortcut='p1', checkEnabled=_projectHas1DSpectra),
-             Action("Pick nD Peaks...", self._peakPickNDCallback, shortcut='pp', checkEnabled=_projectHasNDSpectra),
+             Action("Pick nD Peaks...", self._pickNDPeaksCallback, shortcut='pp', checkEnabled=_projectHasNDSpectra),
              checkEnabled=_projectHasSpectra
              ),
         Action("Copy PeakList...", self._copyPeakListCallback, shortcut='cl', checkEnabled=_projectHasSpectra),
@@ -552,41 +552,10 @@ class MenusDefs(Menu, FrameworkProperties):
         """
         self.ui.pick1DPeaks()
 
-        # from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
-        #
-        # if not self.project.peakLists:
-        #     getLogger().warning('Peak Picking: Project has no peakLists.')
-        #     MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
-        #     return
-        #
-        # spectra = [spec for spec in self.project.spectra if spec.dimensionCount == 1]
-        # if len(spectra) == 0:
-        #     getLogger().warning('Peak Picking: Project has no 1D Spectra.')
-        #     MessageDialog.showWarning('Peak Picking', 'Project has no 1D Spectra.')
-        #     return
-        #
-        # popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-        # popup.exec_()
-
-    def _peakPickNDCallback(self):
+    def _pickNDPeaksCallback(self):
+        """ Callback to display Peak Picking nD Popup.
         """
-        Callback to display Peak Picking nD Popup.
-        """
-        from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
-
-        if not self.project.peakLists:
-            getLogger().warning('Peak Picking: Project has no peakLists.')
-            MessageDialog.showWarning('Peak Picking', 'Project has no peakLists.')
-            return
-
-        spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
-        if len(spectra) == 0:
-            getLogger().warning('Peak Picking: Project has no nD Spectra.')
-            MessageDialog.showWarning('Peak Picking', 'Project has no nD Spectra.')
-            return
-
-        popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-        popup.exec_()
+        self.ui.pickNDPeaks()
 
     def _copyPeakListCallback(self):
         """Callback to display CopyPeakList popup

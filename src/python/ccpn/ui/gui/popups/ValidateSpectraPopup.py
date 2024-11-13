@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-23 10:32:07 +0100 (Wed, October 23, 2024) $"
-__version__ = "$Revision: 3.2.5.GWV $"
+__dateModified__ = "$dateModified: 2024-11-11 16:00:02 +0000 (Mon, November 11, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -725,7 +725,7 @@ class ValidateSpectraPopup(CcpnDialog):
         self.current = mainWindow.application.current
         self.preferences = self.application.preferences
 
-        if spectra is None:
+        if not spectra:
             self.spectra = self.project.spectra
         else:
             self.spectra = spectra
@@ -864,7 +864,7 @@ class ValidateSpectraPopup(CcpnDialog):
         #       grid=(scrollRow, SpectrumPathRow.DATA_COLLUMN), hAlign='centre')
         # scrollRow += 1
 
-        for sp in self.project.spectra:
+        for sp in self.spectra:
             # enabled = (not sp.isEmptySpectrum())
             _axisCodes = ','.join(sp.axisCodes)
             _row = SpectrumPathRow(parentWidget=self.scrollFrame,

@@ -5,18 +5,20 @@ A widget to select spectra or spectrum group as input data for modules or popup
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2019-12-05 09:40:40 +0000 (Thu, December 05, 2019) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-11 18:28:15 +0000 (Mon, November 11, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -59,6 +61,8 @@ class SpectraSelectionWidget(Widget):
         self.application = mainWindow.application
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
+        self.spectra = [spec for spec in self.project.spectra
+                             if spec.dimensionCount == 1]
         self.allSGCheckBoxes = []
         self.allSpectraCheckBoxes = []
         self._setWidgets()
@@ -97,8 +101,9 @@ class SpectraSelectionWidget(Widget):
     def _addSpectrumCheckBoxes(self):
         self.allSpectraCheckBoxes = []
         if self.project is not None:
-            for i, spectrum in enumerate(self.project.spectra, start=2):
-                self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(spectrum.pid), grid=(i, 0),
+            for i, spectrum in enumerate(self.spectra, start=2):
+                self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents,
+                                                 text=str(spectrum.pid), grid=(i, 0),
                                                  hAlign='l', vAlign='t')
                 self.allSpectraCheckBoxes.append(self.spectrumCheckBox)
 

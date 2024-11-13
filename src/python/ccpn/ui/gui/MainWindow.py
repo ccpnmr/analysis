@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-27 12:19:12 +0000 (Sun, October 27, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-11 15:30:18 +0000 (Mon, November 11, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -199,7 +199,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # blank display opened later by the _initLayout if there is nothing to show otherwise
         self.writeStatusBar('Ready')
 
-        #TODO:ED This looks very suspecious; must be a better way with a Notifier
+        #TODO:ED This looks very suspicious; must be a better way with a Notifier
         self._project._undo.undoChanged.add(self._undoChangeCallback)
 
         self._initKeyTimer()

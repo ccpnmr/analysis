@@ -818,9 +818,9 @@
 #         else:
 #             spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
 #             if spectra:
-#                 from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+#                 from ccpn.ui.gui.popups.PeakFind import PickNDPeaksPopup
 #
-#                 popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+#                 popup = PickNDPeaksPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
 #                 popup.exec_()
 #             else:
 #                 getLogger().warning('Peak Picking: Project has no Nd Spectra.')

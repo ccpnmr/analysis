@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 14:34:52 +0100 (Wed, September 11, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-11-11 15:30:18 +0000 (Mon, November 11, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,14 +33,14 @@ from PyQt5.QtCore import QTimer
 from ccpn.util.Logging import getLogger
 
 
-logger = getLogger()
-
 ##QT_MAC_WANTS_LAYER: Patch for MacOS >= 11. Without this flag, Testing widgets/windows from PyQt5 don't show at all.
 # Edit: 26-06-2023 With this flag set the QtWebEngine doesn't show/load the html page.
 os.environ['QT_MAC_WANTS_LAYER'] = '1'
 
 
 class Application(QtWidgets.QApplication):
+
+    #TODO:GT/EB Please annotate the role of these signals
     progressAboutToChangeSignal = QtCore.pyqtSignal(int)
     progressChangedSignal = QtCore.pyqtSignal(int)
     # application light/dark/auto, colour-name, spectrumDisplay theme
@@ -59,12 +59,12 @@ class Application(QtWidgets.QApplication):
 
     @QtCore.pyqtSlot(object)
     def runFunctionOnThread(self, func):
-        logger.debug3(f'run function on main thread {func}')
+        getLogger().debug3(f'run function on main thread {func}')
         func()
 
     @QtCore.pyqtSlot(object)
     def runFunctionOnThreadAtIdle(self, func):
-        logger.debug3(f'run function on main thread at idle {func}')
+        getLogger().debug3(f'run function on main thread at idle {func}')
         timer = QTimer(self)
         timer.timeout.connect(func)
         timer.setSingleShot(True)

@@ -41,10 +41,9 @@ from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 COLWIDTH = 140
 
 
-class PeakFindPopup(CcpnDialogMainWidget):
+class PickNDPeaksPopup(CcpnDialogMainWidget):
     """
-    PeakFind for nD spectra
-    This popup works only for nDs. (Should be renamed?)
+    Peak-picker settings for nD spectra
     """
     FIXEDWIDTH = True
     FIXEDHEIGHT = True
@@ -80,7 +79,8 @@ class PeakFindPopup(CcpnDialogMainWidget):
         self.checkBoxWidget = Frame(widget, setLayout=True, grid=(1, 0), gridSpan=(1, 6))
 
         Label(self.checkBoxWidget, 'Pick', grid=(0, 0))
-        self.spectrumContourSelect = RadioButtons(self.checkBoxWidget, grid=(0, 1), texts=['Positive only', 'Negative only', 'Both'],
+        self.spectrumContourSelect = RadioButtons(self.checkBoxWidget, grid=(0, 1),
+                                                  texts=['Positive only', 'Negative only', 'Both'],
                                                   selectedInd=2, callback=None, direction='h',
                                                   hAlign='l',
                                                   tipTexts=['Only pick positive peaks', 'Only pick negative peaks', 'Pick all peaks'],

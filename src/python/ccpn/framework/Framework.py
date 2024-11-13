@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 08:31:30 +0000 (Fri, November 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-12 16:36:04 +0000 (Tue, November 12, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -610,10 +610,13 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         self._project, _mainWindow = newProject._initialise(application=self, debugLevel=self._debugLevel)
 
         if self.hasGui:
-            self.ui.initialize(mainWindow=_mainWindow, project=newProject)
+            self.ui._initialise(mainWindow=_mainWindow, project=newProject)
         else:
-            # The NoUi version has no mainWindow
-            self.ui.initialize(mainWindow=None, project=newProject)
+            # The No
+            #
+            #
+            # Ui version has no mainWindow
+            self.ui._initialise(mainWindow=None, project=newProject)
 
         # GWV 24/2/24: moved to Project._initialise()
         # newProject._resetUndo(debug=self._debugLevel <= Logging.DEBUG2,
@@ -1162,7 +1165,6 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
             try:
                 self.project.save()
-                # Layout.saveLayoutToJson(self.ui.mainWindow)
                 self.ui.mainWindow._saveLayoutToFile(reportErrors=False)
                 self.current._dumpStateToFile(self.statePath)
                 self._getUndo().markSave()
@@ -1544,8 +1546,11 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
         return project
 
-    # GWV 5/2/24: moved To GuiBase
-    # def _exportNEF(self):
+    @deprecated('ui.exportToNef')
+    def _exportNEF(self):
+        """Deprecated method: Use Gui.exportToNef instead"""
+        self.ui.exportToNef()
+    # GWV 5/2/24: moved To Gui
     #     """
     #     Export the current project as a Nef file
     #     Temporary routine because I don't know how else to do it yet
@@ -1672,10 +1677,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         from ccpn.core.lib.ProjectArchiver import ProjectArchiver
 
         archiver = ProjectArchiver(projectPath=self.project.path)
-
         if (_newProjectPath := archiver.restoreArchive(archivePath=archivePath)) is not None and \
                 (_newProject := self.loadProject(_newProjectPath)) is not None:
-
             getLogger().info('==> Restored archive %s as %s' % (archivePath, _newProject))
 
         else:
@@ -1807,9 +1810,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     # GWV 6/2/24: to gui.py
     @deprecated('ui.editSpectrumGroup')
     def showSpectrumGroupsPopup(self):
-        """Deprecated method:
-        Use ui.editSpectrumGroup instead
-        """
+        """Deprecated method: Use Gui.editSpectrumGroup instead"""
         editMode = len(self.project.spectrumGroups) > 0
         return self.ui.editSpectrumGroup(editMode=editMode)
 
@@ -1857,7 +1858,12 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         popup = PseudoToSpectrumGroupPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
     #         popup.exec_()
     #
-    # def showProjectionPopup(self):
+
+    @deprecated('ui.makeProjection')
+    def showProjectionPopup(self):
+        """This method is deprecated; use Gui.makeProjection instead"""
+        self.ui.makeProjection()
+
     #     if not self.project.spectra:
     #         getLogger().warning('Project has no Spectra. Make Projection Popup cannot be displayed')
     #         MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
@@ -1867,8 +1873,12 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         popup = SpectrumProjectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
     #         popup.exec_()
 
-    # GWV 6/2/24: moved to GuiBase
-    # def showExperimentTypePopup(self):
+    @deprecated('ui.setExperimentTypes')
+    def showExperimentTypePopup(self):
+        """This method is deprecated; use Gui.setExperimentTypes instead"""
+        self.ui.setExperimentTypes()
+
+    # GWV 6/2/24: moved to Gui
     #     """
     #     Displays experiment type popup.
     #     """
@@ -1881,7 +1891,12 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
     #         popup.exec_()
     #
-    # def showValidateSpectraPopup(self, spectra=None, defaultSelected=None):
+
+    @deprecated('ui.validateSpectra')
+    def showValidateSpectraPopup(self, spectra=None, defaultSelected=None):
+        """This method is deprecated; use Gui.validateSpectra instead"""
+        self.ui.validatePaths(spectra=spectra)
+
     #     """
     #     Displays validate spectra popup.
     #     """
@@ -1894,7 +1909,12 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         popup = ValidateSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra, defaultSelected=defaultSelected)
     #         popup.exec_()
     #
-    # def showPeakPick1DPopup(self):
+
+    deprecated('ui.pick1DPeaks')
+    def showPeakPick1DPopup(self):
+        """This method is deprecated; use Gui.pick1DPeaks instead"""
+        self.ui.pick1DPeaks()
+
     #     """
     #     Displays Peak Picking 1D Popup.
     #     """
@@ -1922,9 +1942,9 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #     else:
     #         spectra = [spec for spec in self.project.spectra if spec.dimensionCount > 1]
     #         if spectra:
-    #             from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+    #             from ccpn.ui.gui.popups.PeakFind import PickNDPeaksPopup
     #
-    #             popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #             popup = PickNDPeaksPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
     #             popup.exec_()
     #         else:
     #             getLogger().warning('Peak Picking: Project has no Nd Spectra.')
@@ -2468,8 +2488,10 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #     """
     #     self.ui.mainWindow.toggleConsole()
 
-    @deprecated('Use ui.showChemicalShiftMapping to access the latest implementation')
+    @deprecated('ui.showChemicalShiftMapping to access the latest implementation')
     def showChemicalShiftMapping(self, position: str = 'top', relativeTo = None):
+        """This method is deprecated; use Gui.showChemicalShiftMapping to access the
+        latest implementation"""
         return self.ui.showChemicalShiftMapping(position=position)
 
     # GWV 02/04/24: to ui
@@ -2529,7 +2551,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     @logCommand('application.')
     def runMacro(self, path: str = None, extraCommands=None):
-        """Runs a macro if a macro defined by path
+        """Runs a macro file defined by path
         :param path: path to Python macro file
         :param extraCommands:
         """
@@ -2585,7 +2607,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     __repr__ = __str__
 
-# register traities
+# register CcpNmrProperties
 Framework._registerCcpNmrProperties()
 
 #-----------------------------------------------------------------------------------------

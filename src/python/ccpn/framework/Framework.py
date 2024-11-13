@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-13 10:41:29 +0000 (Wed, November 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-13 11:03:53 +0000 (Wed, November 13, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1955,7 +1955,12 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #             getLogger().warning('Peak Picking: Project has no Nd Spectra.')
     #             MessageDialog.showWarning('Peak Picking', 'Project has no Nd Spectra.')
     #
-    # def showCopyPeakListPopup(self):
+
+    @deprecated('ui.copyPeakList')
+    def showCopyPeakListPopup(self):
+        """This method is deprecated; use Gui.copyPeakList instead"""
+        self.ui.copyPeakList()
+
     #     if not self.project.peakLists:
     #         txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
     #         getLogger().warning(txt)

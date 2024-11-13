@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-13 11:03:53 +0000 (Wed, November 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-13 11:48:04 +0000 (Wed, November 13, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1992,6 +1992,24 @@ class Gui(Ui, _Gui_V3_V4):
             return
 
         popup = CopyPeakListPopup(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
+        popup.exec_()
+
+    @logCommand('ui.')
+    def copyPeaks(self, useCurrent: bool = False):
+        """Select peaks to copy between spectra.
+        :param useCurrent: If True, use currently selected peaks.
+        """
+        from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
+
+        if not self.project.peaks:
+            getLogger().warning('Project has no Peaks: Peaks cannot be copied')
+            MessageDialog.showWarning('Project has no Peaks', 'Peaks cannot be copied')
+            return
+
+        popup = CopyPeaks(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
+        if useCurrent:
+            peaks = self.current.peaks
+            popup._selectPeaks(peaks)
         popup.exec_()
 
     #-----------------------------------------------------------------------------------------

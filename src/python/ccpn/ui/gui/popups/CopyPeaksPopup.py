@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-23 18:24:03 +0100 (Tue, July 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-13 11:48:04 +0000 (Wed, November 13, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -76,38 +76,63 @@ class CopyPeaks(CcpnDialog):
         tipText = ' Select peaks and peakLists to be copied over then click copy'
 
         self.getLayout().setContentsMargins(10, 10, 10, 10)
+
         row = 0
-        self.spectraLabel1 = Label(self, 'Filter Source Peaks ', grid=(row, 0), hAlign='l')
-        self.spectraLabel2 = Label(self, 'Filter Destination PeakLists', grid=(row, 1), hAlign='l')
+        Label(self, 'Source Peaks ', grid=(row, 0), gridSpan=(1,2), bold=True)
+        Label(self, 'Destination PeakList', grid=(row, 2), gridSpan=(1,2), bold=True)
+
         row += 1
+        self.spectraLabel1 = Label(self, 'Filter', grid=(row, 0), hAlign='left', fixedHeight=40)
+        self.spectraLabel2 = Label(self, 'Filter', grid=(row, 2), hAlign='left', fixedHeight=40)
+
+        # row += 1
         self.selectFromPullDownInitialText = [SELECTED, ALLPEAKS, FROMSPECTRUM]
         self.selectToPullDownInitialText = [VISIBLESPECTRA, ALLPEAKLISTS, FROMSPECTRUM]
 
-        self.selectFromPullDown = PulldownList(self, texts=self.selectFromPullDownInitialText,
+        self.selectFromPullDown = PulldownList(self,
+                                               texts=self.selectFromPullDownInitialText,
                                                callback=self._populatePeakWidget,
                                                clickToShowCallback=self._setPullDownData, headerText=SELECTANOPTION,
-                                               grid=(row, 0))
-        self.selectToPullDown = PulldownList(self, texts=self.selectToPullDownInitialText, headerText=SELECTANOPTION,
+                                               grid=(row, 1), gridSpan=(1,1)
+                                               )
+        self.selectToPullDown = PulldownList(self,
+                                             texts=self.selectToPullDownInitialText, headerText=SELECTANOPTION,
                                              callback=self._populatePeakListsWidget,
                                              clickToShowCallback=self._setPullDownData,
-                                             grid=(row, 1))
+                                             grid=(row, 3), gridSpan=(1,1)
+                                             )
+
+        # row += 1
+        # self.addSpacer(width=10, height=10, grid=(row,0), expandY=False)
+
         row += 1
-        self.inputPeaksWidgetLabel = Label(self, 'Select Peaks To Copy', grid=(row, 0), hAlign='l')
-        self.outputPeakListsWidgetLabel = Label(self, 'Select Destination PeakLists', grid=(row, 1), hAlign='l')
+        self.inputPeaksWidgetLabel = Label(self, 'Select to copy:', grid=(row, 0), gridSpan=(1,2), hAlign='l')
+        self.outputPeakListsWidgetLabel = Label(self, 'Select destination:', grid=(row, 2), gridSpan=(1,2), hAlign='l')
+
         row += 1
         self.inputPeaksWidget = ListWidget(self, multiSelect=True, callback=self._activateCopy, tipText=tipText,
-                                           grid=(row, 0))
+                                           grid=(row, 0), gridSpan=(1,2)
+                                           )
         self.inputPeaksListWidget = ListWidget(self, multiSelect=True, callback=self._activateCopy, tipText=tipText,
-                                               grid=(row, 1))
+                                               grid=(row, 2), gridSpan=(1,2)
+                                               )
+
+        # row += 1
+        # self.addSpacer(width=10, height=10, grid=(row,0))
+
         row += 1
         self.selectButtons = ButtonList(self, texts=['Select Current Peaks', 'Clear All'],
                                         callbacks=[self._selectCurrentPeaks, self.clearSelections],
                                         tipTexts=['Select on the list all the current Peaks',
-                                                  'Clear All Selections'], grid=(row, 0))
+                                                  'Clear All Selections'],
+                                        grid=(row, 0),  gridSpan=(1,2)
+                                        )
 
         self.copyButtons = ButtonList(self, texts=['Close', ' Copy '],
                                       callbacks=[self._closePopup, self._copyButton],
-                                      tipTexts=['Close popup', tipText], grid=(row, 1))
+                                      tipTexts=['Close popup', tipText],
+                                      grid=(row, 2), gridSpan=(1,2)
+                                      )
 
         self.copyButtons.buttons[1].setDisabled(True)
         self._initiateSelectionPullDowns()

@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 15:30:18 +0000 (Mon, November 11, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-11-13 13:22:52 +0000 (Wed, November 13, 2024) $"
+__version__ = "$Revision: 3.2.10 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,7 +28,6 @@ import sys
 import os
 import datetime
 import tempfile
-# from collections import OrderedDict as od
 from collections import OrderedDict
 
 from pyqode.python.widgets import PyInteractiveConsole
@@ -209,7 +208,6 @@ class MacroEditor(CcpnModule):
         hGrid += 1
         # macro editing area
         self.textEditor = PyCodeEditor(self.mainWidget, application=self.application, grid=(hGrid, 0), acceptDrops=True, gridSpan=(1, 2))
-        self.searchReplacePanel = self.textEditor.panels.get('SearchAndReplacePanel')
         self.fileWatcher = self.textEditor.modes.get('FileWatcherMode')
         if self.fileWatcher:
             self.fileWatcher.on_state_changed(False)
@@ -487,21 +485,6 @@ class MacroEditor(CcpnModule):
                 ('enabled', True)
                 ))),
             (),
-            ('Find', OrderedDict((
-                ('text', 'Find'),
-                ('toolTip', ''),
-                ('icon', Icon('icons/find')),
-                ('callback', self._showFindWidgets),
-                ('enabled', True)
-                ))),
-            ('Replace', OrderedDict((
-                ('text', 'Find and Replace'),
-                ('toolTip', 'Find and Replace'),
-                ('icon', Icon('icons/find-replace')),
-                ('callback', self._showFindReplaceWidgets),
-                ('enabled', True)
-                ))),
-            (),
             ('Undo', OrderedDict((
                 ('text', 'Undo'),
                 ('toolTip', ''),
@@ -542,14 +525,6 @@ class MacroEditor(CcpnModule):
                 ))),
             )
         return toolBarDefs
-
-    def _showFindWidgets(self):
-        if self.searchReplacePanel:
-            self.searchReplacePanel.on_search()
-
-    def _showFindReplaceWidgets(self):
-        if self.searchReplacePanel:
-            self.searchReplacePanel.on_search_and_replace()
 
     def _setToolBar(self):
         for v in self._getToolBarDefs():

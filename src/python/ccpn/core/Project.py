@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 13:00:54 +0000 (Mon, October 28, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -53,7 +53,7 @@ from ccpn.core.lib import Undo
 from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
 from ccpn.core.lib.ProjectLib import createLogger
 from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
-    inactivity, logCommandManager, ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSimple, notificationEchoBlocking
+    inactivity, logCommandManager, ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSimple, notificationEchoBlocking, undoStack
 from ccpn.core.lib.XmlLoader import XmlLoader
 
 from ccpn.util import Logging
@@ -1253,10 +1253,11 @@ class Project(AbstractWrapperObject):
                 self._postRestore()
             # end restoring objects
 
-            # we always have the default chemicalShift list
+            # we always have the default chemicalShift list, so nothing on undo stack
             if not self.chemicalShiftLists:
-                getLogger().debug(f'Project.initialise: creating ChemicalShiftList {DEFAULT_CHEMICALSHIFTLIST!r}')
-                self.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
+                with undoStack():
+                    getLogger().debug(f'Project.initialise: creating ChemicalShiftList {DEFAULT_CHEMICALSHIFTLIST!r}')
+                    self.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
 
             # check directories for possible read-only
             _projectPath = aPath(self.path)
@@ -3453,6 +3454,8 @@ def _newProject(application, name: str, path: Path, isTemporary: bool = False) -
     :return Project instance
     """
     from ccpn.core.lib.ProjectSaveHistory import newProjectSaveHistory
+    # local import to avoid cycles
+    from ccpn.core.ChemicalShiftList import DEFAULT_CHEMICALSHIFTLIST
 
     # creates the project folder
     _path = aPath(path).absolute()
@@ -3470,6 +3473,11 @@ def _newProject(application, name: str, path: Path, isTemporary: bool = False) -
     project._objectVersion = application.applicationVersion
     # writes the project version-history
     project._saveHistory = newProjectSaveHistory(project.path)
+
+    # GWV: Create ChemicalShiftList; Cannot do this here, as the undo machineryis not
+    # yet inplace, as currently (14/11/2024) no way to bypass
+    # getLogger().debug(f'Project.initialise: creating ChemicalShiftList {DEFAULT_CHEMICALSHIFTLIST!r}')
+    # project.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
 
     # project._updateReadOnlyState()
     # project._updateLoggerState()  # these should always be together

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,7 +42,7 @@ from ccpn.ui._implementation.Window import Window
 
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib import Pid
-from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject, notificationBlanking
+from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject, notificationBlanking, undoBlock
 
 from ccpn.util import Common as commonUtil
 from ccpn.util.Logging import getLogger

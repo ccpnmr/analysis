@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -343,14 +343,14 @@ def notificationBlanking(application=None):
     """
     Block all notifiers, re-enable at the end of the function block.
     """
+    from ccpn.core.lib.Notifiers import NotifierBase
+    # # get the application
+    # if not application:
+    #     application = getApplication()
+    # if application is None:
+    #     raise RuntimeError('Error getting application')
 
-    # get the application
-    if not application:
-        application = getApplication()
-    if application is None:
-        raise RuntimeError('Error getting application')
-
-    application.project._increaseNotificationBlanking()
+    NotifierBase._increaseNotificationBlanking()
     try:
         # transfer control to the calling function
         yield
@@ -360,7 +360,7 @@ def notificationBlanking(application=None):
 
     finally:
         # clean up after blocking notifications
-        application.project._decreaseNotificationBlanking()
+        NotifierBase._decreaseNotificationBlanking()
 
 
 @contextmanager
@@ -385,7 +385,7 @@ def apiNotificationBlanking(application=None):
 
 @contextmanager
 def _apiBlocking(application=None):
-    """Block all api feedback to the current project, spoecifically for v2-upgrades.
+    """Block all api feedback to the current project, specifically for v2-upgrades.
     Re-enable at the end of the function block.
     CCPN Internal - use with care.
     """
@@ -481,20 +481,24 @@ def inactivity(application=None, project=None, debugText='Inactivity'):
     if project is None:
         raise RuntimeError('Error getting project')
 
-    application._increaseEchoBlocking()
-    project._increaseNotificationBlanking()
-    project._increaseApiNotificationBlanking()
+    if (_undo := project._undo) is None:
+        raise RuntimeError('Error getting undo')
+
 
     try:
-        with undoStackBlocking(project=project, debugText=debugText):
-            # transfer control to the calling function
-            yield
+        application._increaseEchoBlocking()
+        project._increaseNotificationBlanking()
+        project._increaseApiNotificationBlanking()
+        _undo.increaseBlocking()
+        # transfer control to the calling function
+        yield
 
     except AttributeError as es:
         raise es
 
     finally:
         # clean up after blocking notifications
+        _undo.decreaseBlocking()
         project._decreaseNotificationBlanking()
         project._decreaseApiNotificationBlanking()
         application._decreaseEchoBlocking()
@@ -811,7 +815,7 @@ def newObject(klass):
 
         application = getApplication()  # pass it in to reduce overhead
 
-        with notificationBlanking(application=application):
+        with notificationBlanking():
             with undoStackBlocking(application=application, debugText=f'newObject: {func}') as addUndoItem:
                 result = func(*args, **kwds)
                 if result is None:
@@ -860,7 +864,7 @@ def newObjectList(klasses):
 
         application = getApplication()  # pass it in to reduce overhead
 
-        with notificationBlanking(application=application):
+        with notificationBlanking():
             with undoStackBlocking(application=application) as addUndoItem:
                 results = func(*args, **kwds)
                 if not results or results[0].__class__.__name__ != klasses[0]:
@@ -922,7 +926,7 @@ def deleteObject():
 
                 self._finaliseAction('delete')
 
-                with notificationBlanking(application=application):
+                with notificationBlanking():
                     # retrieve list of created items from the api
                     apiObjectsCreated = self._getApiObjectTree()
                     addUndoItem(undo=BlankedPartial(self._wrappedData.root._unDelete,
@@ -957,7 +961,7 @@ def deleteWrapperWithoutSideBar():
 
         self._finaliseAction('delete')
 
-        with notificationBlanking(application=application):
+        with notificationBlanking():
             with undoBlockWithoutSideBar():
                 # must be done like this as the undo functions are not known
                 with undoStackBlocking(application=application) as addUndoItem:
@@ -993,7 +997,7 @@ def newV3Object():
         # self = args[0]
         application = getApplication()  # pass it in to reduce overhead
 
-        with notificationBlanking(application=application):
+        with notificationBlanking():
             with undoBlockWithoutSideBar():
                 # must be done like this as the undo functions are not known
                 with undoStackBlocking(application=application) as addUndoItem:
@@ -1038,7 +1042,7 @@ def deleteV3Object():
 
         self._finaliseAction('delete')
 
-        with notificationBlanking(application=application):
+        with notificationBlanking():
             with undoBlockWithoutSideBar():
                 # must be done like this as the undo functions are not known
                 with undoStackBlocking(application=application) as addUndoItem:
@@ -1088,7 +1092,7 @@ def renameObject(blockSidebar=False):
     def _renameInner(application, args, func, kwds, self) -> bool:
         """Add items to the undo stack and fire _finaliseAction 'rename'
         """
-        with notificationBlanking(application=application):
+        with notificationBlanking():
             with undoStackBlocking(application=application) as addUndoItem:
                 # call the wrapped rename function
                 result = func(*args, **kwds)
@@ -1115,7 +1119,7 @@ def renameObjectContextManager(self):
     # get the current application
     application = getApplication()
 
-    with notificationBlanking(application=application):
+    with notificationBlanking():
         with undoStackBlocking(application=application) as addUndoItem:
 
             try:
@@ -1300,7 +1304,7 @@ def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
 
         oldValue = getattr(self, attributeName)
 
-        with notificationBlanking(application=application):
+        with notificationBlanking():
             with undoStackBlocking(application=application) as addUndoItem:
 
                 try:
@@ -1334,7 +1338,7 @@ def ccpNmrV3CoreUndoBlock(action='change', **actionKwds):
 
         application = getApplication()  # pass it in to reduce overhead
 
-        with notificationBlanking(application=application):
+        with notificationBlanking():
             with undoBlock(debugText=f'ccpNmrV3CoreUndoBlock: {func}'):
                 # must be done like this as the undo functions are not known
                 with undoStackBlocking(application=application, debugText=f'-> ccpNmrV3CoreUndoBlock, before try') as addUndoItem:

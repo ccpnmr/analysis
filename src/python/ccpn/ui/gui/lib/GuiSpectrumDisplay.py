@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 12:01:25 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -44,12 +44,13 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.lib.SpectrumLib import DIMENSION_TIME, DIMENSION_SAMPLED
-from ccpn.core.lib.WeakRefList import _WeakRefList
+# from ccpn.core.lib.WeakRefList import _WeakRefList
 from ccpn.core import _DEBUG
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
+from ccpn.core.lib.Pid import Pid
 
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -85,6 +86,7 @@ from ccpn.ui._implementation.IntegralListView import IntegralListView
 from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
+
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, \
     BlankedPartial, ccpNmrV3CoreSetter, notificationEchoBlocking, undoBlockWithoutSideBar, \
     waypointBlocking, undoBlock, undoStack
@@ -2779,8 +2781,10 @@ class GuiSpectrumDisplay(CcpnModule):
             getLogger().warning('Error cycling peak symbols')
 
     @logCommand(get='self')
-    def displaySpectrum(self, spectrum):
-        """Display spectrum, with spectrum axes ordered according to display axisCodes
+    def displaySpectrum(self, spectrum: Spectrum | Pid):
+        """Display spectrum, with spectrum axes ordered according to SpectrumDisplay's (i.e. self)
+        axisCodes
+        :param spectrum: A Spectrum instance or Pid of a spectrum
         :return SpectrumView instance or None
         """
         # NB: ._isNew: Defines the display as new, to avoid the isotopeCode and
@@ -2828,11 +2832,10 @@ class GuiSpectrumDisplay(CcpnModule):
                 if ic1 != ic2:
                     raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
 
+        # block and many any undo additions, as the displaySpectrum and removeSpectrum are
+        # "atomic" operations, which are being added to stack at the end
         with undoStackBlocking() as addUndoItem:
             with undoBlock():
-                # block any undo additions, as the displaySpectrum and removeSpectrum are
-                # "atomic" operations, which are being added at the end
-
                 # Make spectrumView
                 if (spectrumView := _newSpectrumView(self, spectrum=spectrum, displayOrder=displayOrder)) \
                         is None:
@@ -2843,7 +2846,7 @@ class GuiSpectrumDisplay(CcpnModule):
             addUndoItem(undo=partial(self.removeSpectrum, spectrum=spectrum.pid),
                         redo=partial(self.displaySpectrum, spectrum=spectrum.pid)
                         )
-        #end waypoint
+        #end undo-block
 
         self._buildContoursForSpectrum(spectrum=spectrum)
         self._setToolbarButtons()

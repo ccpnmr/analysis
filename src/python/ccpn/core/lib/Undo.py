@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-10 20:20:10 +0000 (Sun, November 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -145,7 +145,6 @@ class Undo(deque):
        To create a waypoint use newWaypoint().
     """
 
-    # TODO: get rid of debug and use logging function instead
     def __init__(self, maxWaypoints=MAXUNDOWAYPOINTS, maxOperations=MAXUNDOOPERATIONS, debug=False, application=None):
         """Create Undo object with maximum stack length maxUndoCount"""
 
@@ -153,7 +152,7 @@ class Undo(deque):
         self.maxOperations = maxOperations
         self.nextIndex = 0  # points to next free slot (or first slot to redo)
         self.waypoints = []  # array of last item in each waypoint
-        self._blocked = False  # Block/unblock switch - internal use only
+        self._blockedForUndoRedo = False  # Block/unblock switch while undo-ing or redo-ing
         self._undoItemBlockingLevel = 0  # Blocking level - modify with increase/decreaseBlocking only
         self._waypointBlockingLevel = 0  # Waypoint blocking - modify with increase/decreaseWaypointBlocking/ only
         self._storageBlockingLevel = 0  # Waypoint blocking - modify with increase/decreaseWaypointBlocking/ only
@@ -255,7 +254,7 @@ class Undo(deque):
                          self.maxOperations,
                          self.nextIndex,
                          self.waypoints,
-                         self._blocked,
+                         self._blockedForUndoRedo,
                          self.undoItemBlocking,
                          len(self),
                          self._newItemCount,
@@ -268,7 +267,7 @@ class Undo(deque):
                          self.maxOperations,
                          self.nextIndex,
                          self.waypoints,
-                         self._blocked,
+                         self._blockedForUndoRedo,
                          self.undoItemBlocking,
                          len(self),
                          self._newItemCount,
@@ -280,15 +279,15 @@ class Undo(deque):
         """Undo blocking. If true (non-zero) undo setting is blocked.
         Allows multiple external functions to set blocking without trampling each other
 
-        Modify with increaseBlocking/decreaseBlocking only"""
+        Modify with increaseWaypointBlocking/decreaseWaypointBlocking only"""
         return self._waypointBlockingLevel > 0
 
     def increaseWaypointBlocking(self):
-        """Set one more level of blocking"""
+        """Set one more level of waypoint blocking"""
         self._waypointBlockingLevel += 1
 
     def decreaseWaypointBlocking(self):
-        """Reduce level of blocking - when level reaches zero, undo is unblocked"""
+        """Reduce level of waypoint blocking - when level reaches zero, undo is unblocked"""
         if self.waypointBlocking:
             self._waypointBlockingLevel -= 1
 
@@ -300,7 +299,7 @@ class Undo(deque):
 
         waypoints = self.waypoints
 
-        if self._blocked or self._undoItemBlockingLevel or self.waypointBlocking:  # ejb - added self._blocked 9/6/17
+        if self.waypointBlocking or self._blockedForUndoRedo or self._undoItemBlockingLevel:  # ejb - added self._blockedForUndoRedo 9/6/17
             return
 
         # set the number of items added to the undo deque since the new waypoint was created
@@ -336,7 +335,7 @@ class Undo(deque):
         """
         from ccpn.util.Common import reduceText
 
-        if self._blocked or self._undoItemBlockingLevel:
+        if self._blockedForUndoRedo or self._undoItemBlockingLevel:
             return
 
         if self._debug:
@@ -388,7 +387,7 @@ class Undo(deque):
                 redoArgs=None, redoKwargs=None):
         """Add item to the undo stack.
         """
-        if self._blocked or self._undoItemBlockingLevel:
+        if self._blockedForUndoRedo or self._undoItemBlockingLevel:
             return
 
         if self._debug:
@@ -500,7 +499,7 @@ class Undo(deque):
                 undoTo = max(self.nextIndex - 2, -1)
 
             # block addition of items while operating
-            self._blocked = True
+            self._blockedForUndoRedo = True
             self._lastFuncCall = None
 
             if self.application and self.application._disableUndoException:
@@ -509,8 +508,8 @@ class Undo(deque):
 
                 self._processUndos(undoTo)
 
-                # Added by Rasmus March 2015. Surely we need to reset self._blocked?
-                self._blocked = False
+                # Added by Rasmus March 2015. Surely we need to reset self._blockedForUndoRedo?
+                self._blockedForUndoRedo = False
 
             else:
                 try:
@@ -531,8 +530,8 @@ class Undo(deque):
                     self.nextIndex = undoTo + 1
 
                 finally:
-                    # Added by Rasmus March 2015. Surely we need to reset self._blocked?
-                    self._blocked = False
+                    # Added by Rasmus March 2015. Surely we need to reset self._blockedForUndoRedo?
+                    self._blockedForUndoRedo = False
 
         self.undoChanged.call(lambda x: x(UndoEvents.UNDO_UNDO))
 
@@ -584,7 +583,7 @@ class Undo(deque):
                 redoTo = min(self.nextIndex, len(self))
 
             # block addition of items while operating
-            self._blocked = True
+            self._blockedForUndoRedo = True
             self._lastFuncCall = None
 
             if self.application and self.application._disableUndoException:
@@ -593,8 +592,8 @@ class Undo(deque):
 
                 self._processRedos(redoTo)
 
-                # Added by Rasmus March 2015. Surely we need to reset self._blocked?
-                self._blocked = False
+                # Added by Rasmus March 2015. Surely we need to reset self._blockedForUndoRedo?
+                self._blockedForUndoRedo = False
 
             else:
                 try:
@@ -613,8 +612,8 @@ class Undo(deque):
                     self.nextIndex = redoTo + 1
 
                 finally:
-                    # Added by Rasmus March 2015. Surely we need to reset self._blocked?
-                    self._blocked = False
+                    # Added by Rasmus March 2015. Surely we need to reset self._blockedForUndoRedo?
+                    self._blockedForUndoRedo = False
 
         self.undoChanged.call(lambda x: x(UndoEvents.UNDO_REDO))
 
@@ -651,7 +650,7 @@ class Undo(deque):
         """
         self.nextIndex = 0
         self.waypoints.clear()
-        self._blocked = False
+        self._blockedForUndoRedo = False
         self._undoItemBlockingLevel = 0
         deque.clear(self)
         self.markUndoClear()

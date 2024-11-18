@@ -96,9 +96,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 18:41:44 +0000 (Fri, November 08, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-11-18 11:44:29 +0000 (Mon, November 18, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -924,10 +924,11 @@ class Tuple(_Tuple, _CcpNmrTrait):
     Fixing default_value, minlen, maxlen problem
     """
     def __init__(self, *traits, **kwargs):
-        default_value = kwargs.setdefault('default_value', None)
+        # DeprecationWarning: Specifying Tuple(default_value=None) for no default is deprecated in traitlets 5.0.5.
+        # Use default_value=Undefined
+        default_value = kwargs.setdefault('default_value', Undefined)
         minlen = kwargs.setdefault('minlen', 0)
         maxlen = kwargs.setdefault('maxlen', sys.maxsize)
-
         _Tuple.__init__(self, *traits, **kwargs)
         _CcpNmrTrait.__init__(self)
 

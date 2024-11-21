@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-21 18:22:23 +0100 (Thu, November 21, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -113,14 +113,14 @@ def echoCommand(obj, funcName, *params, values=None, defaults=None,
         getLogger().debug2('_exitEchoCommand')
 
 
-def _resumeNotification(application):
-    """A try/except here because resume Notification MAY in exceptional circumstances
-    cause fatal errors.
-    """
-    with catchExceptions(application=application,
-                         errorStringTemplate='*** FATAL ERROR in resumeNotification: %s',
-                         popupAsWarning=False, printTraceBack=True):
-        application.project.resumeNotification()
+# def _resumeNotification(application):
+#     """A try/except here because resume Notification MAY in exceptional circumstances
+#     cause fatal errors.
+#     """
+#     with catchExceptions(application=application,
+#                          errorStringTemplate='*** FATAL ERROR in resumeNotification: %s',
+#                          popupAsWarning=False, printTraceBack=True):
+#         application.project.resumeNotification()
 
 
 @contextmanager
@@ -147,14 +147,17 @@ def undoBlockWithSideBar(application=None, debugText=''):
         sidebar = application.ui.mainWindow._getSideBar()
         sidebar.increaseSidebarBlocking(withSideBarUpdate=True)
 
-    application.project.suspendNotification()
+    application.project._suspendNotification()
 
     try:
         # transfer control to the calling function
         yield
 
     finally:
-        _resumeNotification(application)
+        # GWV do not do this: it is masking other errors
+        # triggering strange behavior in-turn
+        # _resumeNotification(application)
+        application.project._resumeNotification()
 
         if application.ui and application.ui.mainWindow:
             sidebar = application.ui.mainWindow._getSideBar()
@@ -190,14 +193,17 @@ def undoBlockWithoutSideBar(application=None, debugText=''):
         sidebar = application.ui.mainWindow._getSideBar()
         sidebar.increaseSidebarBlocking(withSideBarUpdate=False)
 
-    application.project.suspendNotification()
+    application.project._suspendNotification()
 
     try:
         # transfer control to the calling function
         yield
 
     finally:
-        _resumeNotification(application)
+        # GWV do not do this: it is masking other errors
+        # triggering strange behavior in-turn
+        # _resumeNotification(application)
+        application.project._resumeNotification()
 
         if application.ui and application.ui.mainWindow:
             sidebar = application.ui.mainWindow._getSideBar()
@@ -325,7 +331,7 @@ def notificationSuspend(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    application.project.suspendNotification()
+    application.project._suspendNotification()
     try:
         # transfer control to the calling function
         yield
@@ -335,20 +341,16 @@ def notificationSuspend(application=None):
 
     finally:
         # clean up after suspending notifications
-        application.project.resumeNotification()
+        application.project._resumeNotification()
 
 
 @contextmanager
-def notificationBlanking(application=None):
+def notificationBlanking():
     """
     Block all notifiers, re-enable at the end of the function block.
     """
+    # local import to avoid cycles
     from ccpn.core.lib.Notifiers import NotifierBase
-    # # get the application
-    # if not application:
-    #     application = getApplication()
-    # if application is None:
-    #     raise RuntimeError('Error getting application')
 
     NotifierBase._increaseNotificationBlanking()
     try:
@@ -921,7 +923,7 @@ def deleteObject():
 
             with undoStackBlocking(application=application) as addUndoItem:
                 # moved above so that the current objects are preserved
-                with notificationBlanking(application=application):
+                with notificationBlanking():
                     _storeDeleteObjectCurrent(self, addUndoItem)
 
                 self._finaliseAction('delete')

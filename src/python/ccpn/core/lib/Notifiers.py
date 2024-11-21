@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-21 18:22:23 +0100 (Thu, November 21, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -57,7 +57,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.AttributeDict import AttributeDict
 from ccpn.util.Common import Sentinel
 
-from ccpn.framework.Application import getCurrent, getProject
+from ccpn.framework.Application import getCurrent, getProject, getApplication
 
 DEBUG = False
 _debugIds = ()
@@ -893,19 +893,6 @@ class NotifierBase(object):
                     cls._notifierSignalsDict[name] = val
         # pass
 
-    # @classmethod
-    # def _findNotifierProperties(cls):
-    #     """Fill the _notifierPropertiesDict with any instances of a NotifierProperty;
-    #     Called with every init, but only effectively executed once per class
-    #     """
-    #     if cls._notifierPropertiesDict == Sentinel:
-    #         cls._notifierPropertiesDict = {}
-    #         for name, val in vars(cls).items():
-    #             if isinstance(val, NotifierProperty):
-    #                 val.klass = cls
-    #                 val.name = name
-    #                 cls._notifierPropertiesDict[name] = val
-    #     # pass
     #-----------------------------------------------------------------------------------------
     # creating, registering and unregistering notifier set for self
     #-----------------------------------------------------------------------------------------
@@ -1294,6 +1281,32 @@ class NotifierBase(object):
             # clean up after blocking notifications
             NotifierBase._decreaseNotificationBlanking()
 
+    #-----------------------------------------------------------------------------------------
+    # Notification suspension
+    #-----------------------------------------------------------------------------------------
+
+    # suspension level - to allow for nested notification disabling
+    _progressSuspension = 0
+
+    @classmethod
+    def _suspendNotification(cls):
+        """Suspend notifier execution and accumulate notifiers for later execution
+        """
+        _app = getApplication()
+        if _app.hasGui:
+            _app.ui._qtApp.progressAboutToChangeSignal.emit(NotifierBase._progressSuspension)
+        NotifierBase._progressSuspension += 1
+        return
+
+    def _resumeNotification(self):
+        """Execute accumulated notifiers and resume immediate notifier execution"""
+        NotifierBase._progressSuspension -= 1
+        if NotifierBase._progressSuspension < 0:
+            raise RuntimeError("Code Error: _progressSuspension below zero")
+        _app = getApplication()
+        if _app.hasGui:
+            _app.ui._qtApp.progressChangedSignal.emit(NotifierBase._progressSuspension)
+        return
 
     #-----------------------------------------------------------------------------------------
     # api 'change' notification blanking level -

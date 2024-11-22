@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-22 12:10:17 +0100 (Fri, November 22, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -2427,7 +2427,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """Creates a new strip by cloning strip with index (default the last) in the display.
         """
         strip = self.getByPid(strip) if isinstance(strip, str) else strip
-        index = strip.stripIndex() if strip else -1
+        indx = strip.stripIndex() if strip else -1
         tilePosition = strip.tilePosition if strip else None
         if tilePosition is None:
             tilePosition = (0, 0)
@@ -2444,11 +2444,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
                     with notificationBlanking():
                         # get the visibility of strip to be copied
-                        copyVisible = self.strips[index].header.headerVisible
+                        copyVisible = self.strips[indx].header.headerVisible
 
                         # inserts the strip into the stripFrame here
                         self._stripAddMode = (self.strips[0]._CcpnGLWidget.pixelX, self.strips[0]._CcpnGLWidget.pixelY)
-                        result = self.strips[index]._clone()
+                        result = self.strips[indx]._clone()
 
                         if not isinstance(result, GuiStrip):
                             raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
@@ -2472,7 +2472,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                                     objsToBeUnDeleted=apiObjectsCreated)
                                 )
 
-                    index = result.stripIndex()
+                    indx = result.stripIndex()
 
                     # add notifier handling to the stack
                     addUndoItem(undo=partial(result.setBlankingAllNotifiers, True),
@@ -2480,12 +2480,12 @@ class GuiSpectrumDisplay(CcpnModule):
 
                     # add layout handling to the undo stack
                     addUndoItem(undo=partial(self._removeStripFromLayout, result),
-                                redo=partial(self._restoreStripToLayout, result, index))
-                    addUndoItem(redo=partial(self._redrawAxes, index),
+                                redo=partial(self._restoreStripToLayout, result, indx))
+                    addUndoItem(redo=partial(self._redrawAxes, indx),
                                 undo=self._redrawAxesAddMode)
 
             # do axis redrawing
-            self._redrawAxes(index)  # this might be getting confused with the ordering
+            self._redrawAxes(indx)  # this might be getting confused with the ordering
 
         return result
 

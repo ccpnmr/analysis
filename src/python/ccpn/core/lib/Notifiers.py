@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-21 18:22:23 +0100 (Thu, November 21, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-22 12:10:16 +0100 (Fri, November 22, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -1229,6 +1229,7 @@ class NotifierBase(object):
         # the routine still works. It will just loop over fewer notifiers.
         # NB: deleting the an active notifier is not allowed.
         _weakNotifiers = _WeakRefList(_notifiers)
+        del(_notifiers)
         while (_notifier := _weakNotifiers.pop()) is not None:
             self._fireSingleNotifier(notifier=_notifier, callbackDict=callbackDict)
 

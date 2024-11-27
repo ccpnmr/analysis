@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-27 10:03:57 +0000 (Wed, November 27, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -58,9 +58,12 @@ from ccpn.core import _DEBUG
 @updateObject(fromVersion='3.0.4',
               toVersion='3.1.0',
               updateFunction=_updateSpectumDisplay_3_0_4_to_3_1_0,
-              updateMethod=UPDATE_POST_OBJECT_INITIALISATION)
+              updateMethod=UPDATE_POST_OBJECT_INITIALISATION
+)
 class SpectrumDisplay(AbstractWrapperObject):
-    """Spectrum display for 1D or nD spectrum"""
+    """Spectrum display for 1D or nD spectrum
+    """
+    #-----------------------------------------------------------------------------------------
 
     #: Short class name, for PID.
     shortClassName = 'GD'
@@ -699,9 +702,9 @@ class SpectrumDisplay(AbstractWrapperObject):
         except Exception as es:
             raise RuntimeError(f'{self.__class__.__name__}.marks: Error setting marks {es}') from es
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Implementation functions
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @classmethod
     def _getAllWrappedData(cls, parent: Window) -> list:
@@ -712,9 +715,9 @@ class SpectrumDisplay(AbstractWrapperObject):
                       parent.project._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
         return [x for x in apiGuiTask.sortedModules() if isinstance(x, ApiBoundDisplay)]
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # CCPN functions
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def _getDimensionsMapping(self, spectrum: Spectrum) -> list:
         """Get the spectrum dimensions in display order
@@ -755,10 +758,10 @@ class SpectrumDisplay(AbstractWrapperObject):
                 # notify the strips to create their cross-references
                 strip._finaliseAction(action, **actionKwds)
 
-    #===========================================================================================
+    #-----------------------------------------------------------------------------------------
     # new<Object> and other methods
     # Call appropriate routines in their respective locations
-    #===========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def copyStrip(self, strip: 'Strip', newIndex=None) -> 'Strip':
         """Make copy of strip in self, at position newIndex - or rightmost.

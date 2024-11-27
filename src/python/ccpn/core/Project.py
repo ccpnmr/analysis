@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-26 13:30:14 +0000 (Tue, November 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-27 15:46:52 +0000 (Wed, November 27, 2024) $"
 __version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
@@ -61,7 +61,7 @@ from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger, updateLogger
 from ccpn.util.decorators import logCommand
-from ccpn.ui.gui.guiSettings import _styleRed
+from ccpn.ui.gui.guiSettings import _styleRed, consoleStyle
 
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.framework.PathsAndUrls import \
@@ -85,7 +85,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 
 
-_DEBUG = True
+_DEBUG = False
 
 
 class Project(AbstractWrapperObject):

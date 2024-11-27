@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-26 10:38:14 +0000 (Tue, November 26, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-27 15:46:52 +0000 (Wed, November 27, 2024) $"
 __version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
@@ -210,8 +210,8 @@ class ViolationTableModule(CcpnTableModule):
         # assume all are initially closed
 
         self.setAcceptDrops(True)
-        self.setGuiNotifier(self.mainWidget, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                            callback=self._processDroppedItems)
+        # self.setGuiNotifier(self.mainWidget, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+        #                     callback=self._processDroppedItems)
 
     def _setCallbacks(self):
         """Set the active callbacks for the module

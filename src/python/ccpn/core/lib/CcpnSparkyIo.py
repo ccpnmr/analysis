@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-22 14:57:06 +0000 (Mon, January 22, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-21 18:22:23 +0100 (Thu, November 21, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,12 +30,11 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 import os
 import time
 import re
-import collections
 import pandas as pd
 import itertools
-from ccpn.util.isotopes import DEFAULT_ISOTOPE_DICT
+from collections import OrderedDict, namedtuple
 
-
+#TODO: EB or LM: why do we have python 2.7 import here?
 try:
     # Python 3
     from itertools import zip_longest
@@ -43,8 +43,10 @@ except:
     from itertools import izip_longest as zip_longest
 
 # from datetime import datetime
-from collections import OrderedDict
+
+# from ccpn.util.isotopes import DEFAULT_ISOTOPE_DICT
 from ccpn.core.Project import Project
+from ccpn.core.lib.ContextManagers import notificationSuspend
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.nef.GenericStarParser import NamedOrderedDict
@@ -109,7 +111,7 @@ SP_TOKEN_STRING = 18
 SP_TOKEN_SQUARE_BRACKET = 19
 SP_TOKEN_BAD_TOKEN = 20
 
-SparkyToken = collections.namedtuple('SparkyToken', ('type', 'value'))
+SparkyToken = namedtuple('SparkyToken', ('type', 'value'))
 
 PEAK_TYPE = 'type'
 PEAK_PEAK = 'peak'
@@ -168,31 +170,15 @@ SPARKY_HASHNAME = 'SparkyHashName'
 
 
 def getSparkyTokenIterator(text):
-    """Iterator that returns an iterator over all STAR tokens in a generic STAR file"""
+    """Iterator that returns an iterator over all STAR tokens in a
+    generic STAR file
+    """
     return (SparkyToken(x.lastindex, x.group(x.lastindex))
             for x in _sparky_pattern.finditer(text))
 
 
 class SparkySyntaxError(ValueError):
     pass
-
-
-# class NamedOrderedDict(OrderedDict):
-#   def __init__(self, name=None):
-#     super(NamedOrderedDict, self).__init__()
-#     self.name = name
-#
-#   def __str__(self):
-#     return '%s(name=%s)' % (self.__class__.__name__, self.name)
-#
-#   def __repr__(self):
-#     return '%s(%s, name=%s)' % (self.__class__.__name__, list(tt for tt in self.items()), self.name)
-#
-#   def addItem(self, tag, value):
-#     if tag in self:
-#       raise ValueError("%s: duplicate key name %s" % (self, tag))
-#     else:
-#       self[tag] = value
 
 
 class SparkyDict(NamedOrderedDict):
@@ -875,125 +861,123 @@ class CcpnSparkyReader:
                     axes[axisNum - 1] = (axisType, axisName)
 
             errorLine = 0
-            try:
-                project.suspendNotification()
+            with notificationSuspend():
 
-                if len(assignRelation) != len([ax for ix, ax in enumerate(axes) if axes[ix]]):
-                    getLogger().info('assignRelation not found: %s' % saveBlock.name)
+                try:
+                    if len(assignRelation) != len([ax for ix, ax in enumerate(axes) if axes[ix]]):
+                        getLogger().info('assignRelation not found: %s' % saveBlock.name)
 
-                else:
+                    else:
 
-                    # read in the peak list
-                    peakBlock = spectra.getBlocks(SPARKY_ORNAMENT, firstOnly=True)
-                    if peakBlock:
-                        peakData = peakBlock.getData(name=SPARKY_PEAK)
+                        # read in the peak list
+                        peakBlock = spectra.getBlocks(SPARKY_ORNAMENT, firstOnly=True)
+                        if peakBlock:
+                            peakData = peakBlock.getData(name=SPARKY_PEAK)
 
-                        if peakData:
-                            spectrum = project.getObjectsByPartialId(className='Spectrum', idStartsWith=spectrumName)
-                            if spectrum:
-                                newPeakList = spectrum[0].peakLists[0]  # get the first one .newPeakList()
+                            if peakData:
+                                spectrum = project.getObjectsByPartialId(className='Spectrum', idStartsWith=spectrumName)
+                                if spectrum:
+                                    newPeakList = spectrum[0].peakLists[0]  # get the first one .newPeakList()
 
-                                if not peakPatternAxes:
-                                    spectrumAxes = spectrum[0].axisCodes
-                                    peakPatternAxes = self._reorderAxes(axes, spectrumAxes)
+                                    if not peakPatternAxes:
+                                        spectrumAxes = spectrum[0].axisCodes
+                                        peakPatternAxes = self._reorderAxes(axes, spectrumAxes)
 
-                                # TODO:ED need to remove hard coding for search of properties
-                                # ii=0
-                                # while ii<len(peakData)-PEAK_MAXSEARCH:
+                                    # TODO:ED need to remove hard coding for search of properties
+                                    # ii=0
+                                    # while ii<len(peakData)-PEAK_MAXSEARCH:
 
-                                # test the first peak to check that it fits in the max/minAliasedFrequency
-                                peakPatternAxes = self._testFirstPeak(peakData, spectrum[0], peakPatternAxes)
+                                    # test the first peak to check that it fits in the max/minAliasedFrequency
+                                    peakPatternAxes = self._testFirstPeak(peakData, spectrum[0], peakPatternAxes)
 
-                                # iterate over the peaks
-                                for thisPeak in peakData:
+                                    # iterate over the peaks
+                                    for thisPeak in peakData:
 
-                                    # if self._getToken(peakData[ii], 0) == PEAK_TYPE\
-                                    #     and self._getToken(peakData[ii], 1) == PEAK_PEAK:
+                                        # if self._getToken(peakData[ii], 0) == PEAK_TYPE\
+                                        #     and self._getToken(peakData[ii], 1) == PEAK_PEAK:
 
-                                    # TODO:ED put some more error checking in here - need to parse properly
+                                        # TODO:ED put some more error checking in here - need to parse properly
 
-                                    found = 0
-                                    # find the peak position
-                                    line = thisPeak.getData(PEAK_POS)
-                                    if line:
-                                        found = found | PEAK_POSNUM
-                                        posList = [float(val) for val in line]
+                                        found = 0
+                                        # find the peak position
+                                        line = thisPeak.getData(PEAK_POS)
+                                        if line:
+                                            found = found | PEAK_POSNUM
+                                            posList = [float(val) for val in line]
 
-                                    # find the resonance numbering
-                                    line = thisPeak.getData(PEAK_RESONANCE)
-                                    if line:
-                                        found = found | PEAK_RESONANCENUM
-                                        resList = line
+                                        # find the resonance numbering
+                                        line = thisPeak.getData(PEAK_RESONANCE)
+                                        if line:
+                                            found = found | PEAK_RESONANCENUM
+                                            resList = line
 
-                                    # find the peak height
-                                    line = thisPeak.getData(PEAK_HEIGHT)
-                                    if line:
-                                        found = found | PEAK_HEIGHTNUM
-                                        heightList = line
+                                        # find the peak height
+                                        line = thisPeak.getData(PEAK_HEIGHT)
+                                        if line:
+                                            found = found | PEAK_HEIGHTNUM
+                                            heightList = line
 
-                                    # find the peak linewidth
-                                    line = thisPeak.getData(PEAK_LINEWIDTH)
-                                    if line:
-                                        found = found | PEAK_LINEWIDTHNUM
-                                        linewidthList = line
+                                        # find the peak linewidth
+                                        line = thisPeak.getData(PEAK_LINEWIDTH)
+                                        if line:
+                                            found = found | PEAK_LINEWIDTHNUM
+                                            linewidthList = line
 
-                                    peakPos = [posList[i] for i in peakPatternAxes]
+                                        peakPos = [posList[i] for i in peakPatternAxes]
 
-                                    if found:
-                                        # make a new peak
-                                        peak = newPeakList.newPeak()
+                                        if found:
+                                            # make a new peak
+                                            peak = newPeakList.newPeak()
 
-                                        if found & PEAK_POSNUM:
-                                            peak.position = peakPos
+                                            if found & PEAK_POSNUM:
+                                                peak.position = peakPos
 
-                                        if found & PEAK_HEIGHTNUM and len(heightList) > 1:
-                                            peak.height = float(heightList[1])
+                                            if found & PEAK_HEIGHTNUM and len(heightList) > 1:
+                                                peak.height = float(heightList[1])
 
-                                        if found & PEAK_LINEWIDTHNUM and len(linewidthList) > 1:
-                                            peak.lineWidths = tuple(float(lw) for lw in linewidthList[:2])
+                                            if found & PEAK_LINEWIDTHNUM and len(linewidthList) > 1:
+                                                peak.lineWidths = tuple(float(lw) for lw in linewidthList[:2])
 
-                                        if found & PEAK_RESONANCENUM:
-                                            nmrChain = project.fetchNmrChain(nmrChainName)
+                                            if found & PEAK_RESONANCENUM:
+                                                nmrChain = project.fetchNmrChain(nmrChainName)
 
-                                            ri = 0
-                                            while ri < len(resList):
-                                                # clip the chain type from the head if present
-                                                if re.search('[A-Z]', resList[ri][0]):
-                                                    resType = resList[ri][0]
-                                                    resName = resList[ri][1:]
-                                                else:
-                                                    resType = ''
-                                                    resName = resList[ri]
-                                                axisCode = resList[ri + 1]
-                                                nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName, residueType=resType)
-                                                self._fetchAndAssignNmrAtom(peak, nmrResidue, axisCode)
-                                                ri += 2
+                                                ri = 0
+                                                while ri < len(resList):
+                                                    # clip the chain type from the head if present
+                                                    if re.search('[A-Z]', resList[ri][0]):
+                                                        resType = resList[ri][0]
+                                                        resName = resList[ri][1:]
+                                                    else:
+                                                        resType = ''
+                                                        resName = resList[ri]
+                                                    axisCode = resList[ri + 1]
+                                                    nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName, residueType=resType)
+                                                    self._fetchAndAssignNmrAtom(peak, nmrResidue, axisCode)
+                                                    ri += 2
 
-                                    # if found & (PEAK_POSNUM | PEAK_RESONANCENUM):    # test without residue
-                                    #   peak = newPeakList.newPeak(ppmPositions=peakPos)
-                                    #
-                                    # elif found == PEAK_ALLFOUND:
-                                    #   # TODO:ED check with specta other than N-H, multidimensional etc.
-                                    #
-                                    #   peak = newPeakList.newPeak(ppmPositions=peakPos)
-                                    #
-                                    #   # TODO:ED check that the molName matches molecule/condition
-                                    #   nmrChain = project.fetchNmrChain(nmrChainName)
-                                    #
-                                    #   ri=0
-                                    #   while ri < len(resList):
-                                    #     resType = resList[ri][0]
-                                    #     resName = resList[ri][1:]     # clip the chain type from the head
-                                    #     axisCode = resList[ri+1]
-                                    #     nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName, residueType=resType)
-                                    #     self._fetchAndAssignNmrAtom(peak, nmrResidue, axisCode)
-                                    #     ri += 2
+                                        # if found & (PEAK_POSNUM | PEAK_RESONANCENUM):    # test without residue
+                                        #   peak = newPeakList.newPeak(ppmPositions=peakPos)
+                                        #
+                                        # elif found == PEAK_ALLFOUND:
+                                        #   # TODO:ED check with specta other than N-H, multidimensional etc.
+                                        #
+                                        #   peak = newPeakList.newPeak(ppmPositions=peakPos)
+                                        #
+                                        #   # TODO:ED check that the molName matches molecule/condition
+                                        #   nmrChain = project.fetchNmrChain(nmrChainName)
+                                        #
+                                        #   ri=0
+                                        #   while ri < len(resList):
+                                        #     resType = resList[ri][0]
+                                        #     resName = resList[ri][1:]     # clip the chain type from the head
+                                        #     axisCode = resList[ri+1]
+                                        #     nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName, residueType=resType)
+                                        #     self._fetchAndAssignNmrAtom(peak, nmrResidue, axisCode)
+                                        #     ri += 2
 
-            except Exception as es:
-                getLogger().warning('Error importing peakList: %s %i' % (saveBlock.name, errorLine))
-
-            finally:
-                project.resumeNotification()
+                except Exception as es:
+                    getLogger().warning('Error importing peakList: %s %i' % (saveBlock.name, errorLine))
+                    getLogger().debug( f'>>> {es}')
 
     def importSparkyProject(self, project, sparkyDict):
         """Import entire project from dataBlock into empty Project"""
@@ -1235,16 +1219,14 @@ class CcpnSparkyReader:
                     # self.importConnectedNmrResidues(project, nmrChain)
 
     def importConnectedNmrResidues(self, project, nmrChain):
-        project.suspendNotification()
-        try:
-            connectedNmrChain = self._connectNmrResidues(nmrChain)
-            # self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
+        with notificationSuspend():
+            try:
+                connectedNmrChain = self._connectNmrResidues(nmrChain)
+                # self._assignNmrResiduesToResidues(connectedNmrChain, ccpnChain)
 
-        except Exception as es:
-            getLogger().warning('Error connecting nmrChain: %s' % (nmrChain.id,))
-
-        finally:
-            project.resumeNotification()
+            except Exception as es:
+                getLogger().warning('Error connecting nmrChain: %s' % (nmrChain.id,))
+                getLogger().debug(f'>>> {es}')
 
     def assignNmrChain(self, nmrChain):
         # not done yet

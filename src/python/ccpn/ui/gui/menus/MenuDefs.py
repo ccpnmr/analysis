@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-12 16:36:04 +0000 (Tue, November 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-13 11:48:04 +0000 (Wed, November 13, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -560,31 +560,12 @@ class MenusDefs(Menu, FrameworkProperties):
     def _copyPeakListCallback(self):
         """Callback to display CopyPeakList popup
         """
-        from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
-
-        if not self.project.peakLists:
-            txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
-            getLogger().warning(txt)
-            MessageDialog.showWarning('Cannot perform a copy', txt)
-            return
-
-        popup = CopyPeakListPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-        popup.exec_()
+        self.ui.copyPeakList()
 
     def _copyPeaksCallback(self):
         """Callback to display CopyPeaks popup
         """
-        from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
-
-        if not self.project.peaks:
-            getLogger().warning('Project has no Peaks: Peaks cannot be copied')
-            MessageDialog.showWarning('Project has no Peaks', 'Peaks cannot be copied')
-            return
-
-        popup = CopyPeaks(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-        peaks = self.current.peaks
-        popup._selectPeaks(peaks)
-        popup.exec_()
+        self.ui.copyPeaks(useCurrent=True)
 
     def _peakCollectionsCallback(self):
         """Callback to display the series peak collections popup

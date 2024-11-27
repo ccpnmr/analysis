@@ -474,6 +474,7 @@ def logCommand(prefix='', get=None, isProperty=False):
 
     return theDecorator
 
+
 def deprecated(newFuncName:str):
     """Define a deprecation decorator.
     :param newFuncName: An optional string that refers to the new API to be used instead.

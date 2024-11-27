@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-21 16:05:20 +0100 (Thu, November 21, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -253,8 +253,10 @@ def _newSpectrumReference(self: Spectrum, dimension: int, dataSource) -> Spectru
     if (apiDataDimRef := apiDataDim.newDataDimRef(expDimRef=apiExpDimRef,
                                                   refPoint=0.0,
                                                   refValue=0.0
-                                                  )) is None:
+                                                  )
+    ) is None:
         raise RuntimeError("Cannot create SpectrumReference for dimension: %s" % dimension)
+
     if (result := SpectrumReference._newInstanceFromApiData(apiObj=apiDataDimRef)) is None:
         raise RuntimeError("Cannot create SpectrumReference for dimension: %s" % dimension)
 

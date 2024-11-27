@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-12 16:36:04 +0000 (Tue, November 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -452,11 +452,11 @@ class Gui(Ui, _Gui_V3_V4):
         super()._initialise(mainWindow=mainWindow, project=project)
 
         with notificationEchoBlocking():
-            with undoStackBlocking(debugText='Gui.initialize'):
-                # Set up mainWindow
-                self._setupMainWindow()
-                self._restoreSpectrumDisplayModules()
-                self._makeActiveWindow()
+            # with undoStackBlocking(debugText='Gui.initialize'):
+            # Set up mainWindow
+            self._setupMainWindow()
+            self._restoreSpectrumDisplayModules()
+            self._makeActiveWindow()
 
     def _restoreSpectrumDisplayModules(self):
         """Code from Framework/Project, restoring spectrumDisplay's
@@ -1925,6 +1925,7 @@ class Gui(Ui, _Gui_V3_V4):
         popup = ExperimentTypePopup(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
         popup.exec_()
 
+    @logCommand('ui.')
     def validatePaths(self, spectra: tuple | list =()):
         """Validate the paths of spectra
         :param spectra: the spectra to validate; defaults to all contained in the project.
@@ -1938,6 +1939,7 @@ class Gui(Ui, _Gui_V3_V4):
         popup = ValidateSpectraPopup(mainWindow=self.mainWindow, spectra=spectra)
         popup.exec_()
 
+    @logCommand('ui.')
     def pick1DPeaks(self):
         """Pick 1D peaks
         """
@@ -1957,6 +1959,7 @@ class Gui(Ui, _Gui_V3_V4):
         popup = PickPeak1DPopup(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
         popup.exec_()
 
+    @logCommand('ui.')
     def pickNDPeaks(self):
         """Pick nD peaks
         """
@@ -1974,6 +1977,39 @@ class Gui(Ui, _Gui_V3_V4):
             return
 
         popup = PickNDPeaksPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
+        popup.exec_()
+
+    @logCommand('ui.')
+    def copyPeakList(self):
+        """Copy a peakList between spectra
+        """
+        from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
+
+        if not self.project.peakLists:
+            txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
+            getLogger().warning(txt)
+            MessageDialog.showWarning('Cannot perform a copy', txt)
+            return
+
+        popup = CopyPeakListPopup(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
+        popup.exec_()
+
+    @logCommand('ui.')
+    def copyPeaks(self, useCurrent: bool = False):
+        """Select peaks to copy between spectra.
+        :param useCurrent: If True, use currently selected peaks.
+        """
+        from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
+
+        if not self.project.peaks:
+            getLogger().warning('Project has no Peaks: Peaks cannot be copied')
+            MessageDialog.showWarning('Project has no Peaks', 'Peaks cannot be copied')
+            return
+
+        popup = CopyPeaks(parent=self.mainWindow._widget, mainWindow=self.mainWindow)
+        if useCurrent:
+            peaks = self.current.peaks
+            popup._selectPeaks(peaks)
         popup.exec_()
 
     #-----------------------------------------------------------------------------------------

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 11:02:22 +0000 (Fri, November 08, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-21 16:05:20 +0100 (Thu, November 21, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -304,7 +304,9 @@ class Peak(AbstractWrapperObject):
 
     @property
     def annotation(self) -> Optional[str]:
-        """Peak text annotation."""
+        """Peak annotation text (can be visualised in SpectrumDisplay).
+        See also: Peak.comment
+        """
         return self._wrappedData.annotation
 
     @annotation.setter
@@ -322,7 +324,8 @@ class Peak(AbstractWrapperObject):
         return self.spectrum.axisCodes
 
     @CcpNmrTypedListProperty(
-            itemTrait=Float(allow_none=False)
+            itemTrait=Float(allow_none=False),
+            validateGetter=False,  # _newPeak: values in the model are None initially
     )
     def position(self) -> list:
         """:return Peak position in ppm (or other relevant unit) in dimension order.
@@ -375,15 +378,20 @@ class Peak(AbstractWrapperObject):
 
     @property
     def positionError(self) -> Tuple[Optional[float], ...]:
-        """Peak position error in ppm (or other relevant unit)."""
+        """Peak position error in ppm (or other relevant unit).
+        """
         return tuple(x.valueError for x in self._wrappedData.sortedPeakDims())
 
     @positionError.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def positionError(self, value: Sequence):
+        # GWV 21/11/24: bypassing setter function in Nmr.py to resolve missing dataDimRef
+        # for the PeakDim object.
+        from ccpn.core.lib.XmlLoader import forceSetattr
+        _valuePerPoint = [specDim._valuePerPoint for specDim in self.spectrum.spectrumDimensions]
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-            peakDim.valueError = value[ii]
+            forceSetattr(peakDim, 'valueError', value[ii] / _valuePerPoint[ii])
 
     @property
     def pointPositions(self) -> Tuple[float, ...]:
@@ -1479,44 +1487,66 @@ def _newPeak(self: PeakList, *, height: float = None, volume: float = None,
                                   annotation=annotation, details=comment)
     if (result := Peak._newInstanceFromApiData(apiObj=apiPeak)) is None:
         raise RuntimeError('Unable to generate new Peak item')
+    #
+    # apiPeakDims = apiPeak.sortedPeakDims()
+    # if ppmPositions:
+    #     if len(ppmPositions) != len(apiPeakDims):
+    #         raise ValueError(f'ppmPositions must be of length {len(apiPeakDims)}')
+    #
+    #     for ii, peakDim in enumerate(apiPeakDims):
+    #         peakDim.value = ppmPositions[ii]
+    #
+    # elif pointPositions:
+    #     if len(pointPositions) != len(apiPeakDims):
+    #         raise ValueError(f'pointPositions must be of length {len(apiPeakDims)}')
+    #
+    #     pointCounts = result.spectrum.pointCounts
+    #     for ii, peakDim in enumerate(apiPeakDims):
+    #         # move the peak to the correct aliased position
+    #         alias = int((pointPositions[ii] - 1) // pointCounts[ii])
+    #         pos = float((pointPositions[ii] - 1) % pointCounts[ii]) + 1.0  # API position starts at 1
+    #         peakDim.numAliasing = alias
+    #         peakDim.position = pos
+    #
+    # if positionError:
+    #     for ii, peakDim in enumerate(apiPeakDims):
+    #         peakDim.valueError = positionError[ii]
+    # if boxWidths:
+    #     for ii, peakDim in enumerate(apiPeakDims):
+    #         peakDim.boxWidth = boxWidths[ii]
+    #
+    # # currently, lineWidths/ppmLineWidths are both in Hz/ppm
+    # if lineWidths:
+    #     for ii, peakDim in enumerate(apiPeakDims):
+    #         peakDim.lineWidth = lineWidths[ii]
+    # elif ppmLineWidths:
+    #     for ii, peakDim in enumerate(apiPeakDims):
+    #         peakDim.lineWidth = ppmLineWidths[ii]
+    # elif pointLineWidths:
+    #     for peakDim, pointLineWidth in zip(apiPeakDims, pointLineWidths):
+    #         peakDim.lineWidth = (pointLineWidth * peakDim.dataDim.valuePerPoint) if pointLineWidth else None
 
-    apiPeakDims = apiPeak.sortedPeakDims()
+    # The following tests are all done to check for None and non-zero length
     if ppmPositions:
-        if len(ppmPositions) != len(apiPeakDims):
-            raise ValueError(f'ppmPositions must be of length {len(apiPeakDims)}')
+        result.ppmPositions = ppmPositions
 
-        for ii, peakDim in enumerate(apiPeakDims):
-            peakDim.value = ppmPositions[ii]
-
-    elif pointPositions:
-        if len(pointPositions) != len(apiPeakDims):
-            raise ValueError(f'pointPositions must be of length {len(apiPeakDims)}')
-
-        pointCounts = result.spectrum.pointCounts
-        for ii, peakDim in enumerate(apiPeakDims):
-            # move the peak to the correct aliased position
-            alias = int((pointPositions[ii] - 1) // pointCounts[ii])
-            pos = float((pointPositions[ii] - 1) % pointCounts[ii]) + 1.0  # API position starts at 1
-            peakDim.numAliasing = alias
-            peakDim.position = pos
+    if pointPositions:
+        result.pointPositions = pointPositions
 
     if positionError:
-        for ii, peakDim in enumerate(apiPeakDims):
-            peakDim.valueError = positionError[ii]
-    if boxWidths:
-        for ii, peakDim in enumerate(apiPeakDims):
-            peakDim.boxWidth = boxWidths[ii]
+        result.positionError = positionError
 
-    # currently, lineWidths/ppmLineWidths are both in Hz/ppm
+    if boxWidths:
+        result.boxWidths = boxWidths
+
     if lineWidths:
-        for ii, peakDim in enumerate(apiPeakDims):
-            peakDim.lineWidth = lineWidths[ii]
-    elif ppmLineWidths:
-        for ii, peakDim in enumerate(apiPeakDims):
-            peakDim.lineWidth = ppmLineWidths[ii]
-    elif pointLineWidths:
-        for peakDim, pointLineWidth in zip(apiPeakDims, pointLineWidths):
-            peakDim.lineWidth = (pointLineWidth * peakDim.dataDim.valuePerPoint) if pointLineWidth else None
+        result.lineWidths = lineWidths
+
+    if ppmLineWidths:
+        result.ppmLineWidths = ppmLineWidths
+
+    if pointLineWidths:
+        result.pointLineWidths = pointLineWidths
 
     result.height = height  # use the method to store the unit-scaled value
     result.volume = volume

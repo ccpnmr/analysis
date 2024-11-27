@@ -50,10 +50,11 @@ from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
+from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
 from ccpn.core.lib.ProjectLib import createLogger
 from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
-    inactivity, logCommandManager, ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSimple, notificationEchoBlocking
+    inactivity, logCommandManager, ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSimple, notificationEchoBlocking, undoStack
 from ccpn.core.lib.XmlLoader import XmlLoader
 
 from ccpn.util import Logging
@@ -1000,13 +1001,17 @@ class Project(AbstractWrapperObject):
         # Active notifiers - saved for later cleanup. CORE APPLICATION ONLY
         self._activeNotifiers = []
 
+        # GWV 21/11/2024: not used
         # list or None. When set used to accumulate pending notifiers
         # Optional list. Elements are (func, onceOnly, wrapperObject, optional oldPid)
-        self._pendingNotifications = []
+        # self._pendingNotifications = []
 
+        # GWV 21/11/2024: not used
         # Notification suspension level - to allow for nested notification suspension
-        self._notificationSuspension = 0
-        self._progressSuspension = 0
+        # self._notificationSuspension = 0
+
+        # GWV 21/11/2024: now in NotifierBase
+        # self._progressSuspension = 0
 
         # Notification blanking level - to allow for nested notification disabling
         # self._notificationBlanking = 0
@@ -1253,10 +1258,11 @@ class Project(AbstractWrapperObject):
                 self._postRestore()
             # end restoring objects
 
-            # we always have the default chemicalShift list
+            # we always have the default chemicalShift list, so nothing on undo stack
             if not self.chemicalShiftLists:
-                getLogger().debug(f'Project.initialise: creating ChemicalShiftList {DEFAULT_CHEMICALSHIFTLIST!r}')
-                self.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
+                with undoStack():
+                    getLogger().debug(f'Project.initialise: creating ChemicalShiftList {DEFAULT_CHEMICALSHIFTLIST!r}')
+                    self.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
 
             # check directories for possible read-only
             _projectPath = aPath(self.path)
@@ -2152,24 +2158,23 @@ class Project(AbstractWrapperObject):
     #     if self._notificationBlanking < 0:
     #         raise TypeError("Code Error: _notificationBlanking below zero!")
 
-    def suspendNotification(self):
-        """Suspend notifier execution and accumulate notifiers for later execution"""
-        if self.application.hasGui:
-            self.application.ui._qtApp.progressAboutToChangeSignal.emit(self._progressSuspension)
-        self._progressSuspension += 1
-
-        return
-        # self._notificationSuspension += 1
-
-    def resumeNotification(self):
-        """Execute accumulated notifiers and resume immediate notifier execution"""
-        self._progressSuspension -= 1
-        if self._progressSuspension < 0:
-            raise RuntimeError("Code Error: _progressSuspension below zero")
-        if self.application.hasGui:
-            self.application.ui._qtApp.progressChangedSignal.emit(self._progressSuspension)
-
-        return
+    # GWV 21/12/2024: now as private classmethods in NotifierBase
+    # def suspendNotification(self):
+    #     """Suspend notifier execution and accumulate notifiers for later execution
+    #     """
+    #     if self.application.hasGui:
+    #         self.application.ui._qtApp.progressAboutToChangeSignal.emit(self._progressSuspension)
+    #     NotifierBase._progressSuspension += 1
+    #     return
+    #
+    # def resumeNotification(self):
+    #     """Execute accumulated notifiers and resume immediate notifier execution"""
+    #     NotifierBase._progressSuspension -= 1
+    #     if NotifierBase._progressSuspension < 0:
+    #         raise RuntimeError("Code Error: _progressSuspension below zero")
+    #     if self.application.hasGui:
+    #         self.application.ui._qtApp.progressChangedSignal.emit(self._progressSuspension)
+    #     return
 
         # TODO suspension temporarily disabled
         # This was broken at one point, and we never found time to fix it
@@ -3462,6 +3467,8 @@ def _newProject(application, name: str, path: Path, isTemporary: bool = False) -
     :return Project instance
     """
     from ccpn.core.lib.ProjectSaveHistory import newProjectSaveHistory
+    # local import to avoid cycles
+    from ccpn.core.ChemicalShiftList import DEFAULT_CHEMICALSHIFTLIST
 
     # creates the project folder
     _path = aPath(path).absolute()
@@ -3479,6 +3486,11 @@ def _newProject(application, name: str, path: Path, isTemporary: bool = False) -
     project._objectVersion = application.applicationVersion
     # writes the project version-history
     project._saveHistory = newProjectSaveHistory(project.path)
+
+    # GWV: Create ChemicalShiftList; Cannot do this here, as the undo machineryis not
+    # yet inplace, as currently (14/11/2024) no way to bypass
+    # getLogger().debug(f'Project.initialise: creating ChemicalShiftList {DEFAULT_CHEMICALSHIFTLIST!r}')
+    # project.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
 
     # project._updateReadOnlyState()
     # project._updateLoggerState()  # these should always be together

@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-09 19:03:26 +0100 (Mon, September 09, 2024) $"
-__version__ = "$Revision: 3.2.6 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-22 12:10:17 +0100 (Fri, November 22, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -68,6 +68,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         """ guiSpectrumDisplay is the parent
             apiSpectrumView is the (API) SpectrumView object
         """
+        GuiSpectrumView.__init__(self)
 
         self.setAcceptedMouseButtons = QtCore.Qt.LeftButton
         self.posLevelsPrev = []
@@ -83,8 +84,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         # have to have this set before _setupBorderItem called
         self._application = self.strip.spectrumDisplay.mainWindow.application
-
-        GuiSpectrumView.__init__(self)
+        #
+        # GuiSpectrumView.__init__(self)
 
         self.setZValue(-1)  # this is so that the contours are drawn on the bottom
 

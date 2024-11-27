@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-26 11:56:03 +0100 (Wed, June 26, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,6 +34,7 @@ from pyqtgraph.dockarea.Container import Container
 
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
+from ccpn.core.lib.ContextManagers import undoBlock
 
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule, MODULENAME, WIDGETSTATE
@@ -214,13 +215,14 @@ class CcpnModuleArea(ModuleArea, DropBase):
             self.mainWindow._processPids(data, position=self.dropArea)
 
         elif DropBase.URLS in data:
-            objs = self.mainWindow._processDroppedItems(data)
-            # discard opening any further items if project loaded (may be inconsistent with mainWindow)
-            if list(filter(lambda obj: isinstance(obj, Project), objs)):
-                return
-            # dropped spectra will automatically open from here
-            spectra = list(filter(lambda obj: isinstance(obj, Spectrum), objs))
-            _openItemObject(self.mainWindow, spectra, position=self.dropArea)
+            with undoBlock():
+                objs = self.mainWindow._processDroppedItems(data)
+                # discard opening any further items if project loaded (may be inconsistent with mainWindow)
+                if list(filter(lambda obj: isinstance(obj, Project), objs)):
+                    return
+                # dropped spectra will automatically open from here
+                spectra = list(filter(lambda obj: isinstance(obj, Spectrum), objs))
+                _openItemObject(self.mainWindow, spectra, position=self.dropArea)
 
         if hasattr(source, 'implements') and source.implements('dock'):
             DockArea.dropEvent(self, event, *args)

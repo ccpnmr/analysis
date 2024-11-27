@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-30 13:46:45 +0100 (Thu, May 30, 2024) $"
-__version__ = "$Revision: 3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-11-22 12:10:16 +0100 (Fri, November 22, 2024) $"
+__version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -304,6 +304,7 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
     :return: a new SampleComponent instance.
     """
 
+    #TODO: DEVEL LM do not use api; use Project.fetchSubstance
     labelling = labelling if labelling is not None else DEFAULT_LABELLING
     if name is None:
         # ensure that always has a name

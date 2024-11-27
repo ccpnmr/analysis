@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-10 09:18:02 +0000 (Sun, November 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-21 16:05:20 +0100 (Thu, November 21, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -6806,6 +6806,7 @@ class CcpnNefReader(CcpnNefContent):
                     peaks[peakLabel] = peak
                     result.append(peak)
 
+                    #TODO: EB: Why are we setting PeakList parameters in a Peak creation loop?
                     if peakListParameters:
                         # spectrum always has a peakList, so need to set the parameters from the saveFrame if (the first peakList)
                         # may be a little slow if lots of peaks

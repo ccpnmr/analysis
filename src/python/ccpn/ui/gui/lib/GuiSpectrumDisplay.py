@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 12:01:25 +0000 (Mon, November 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-11-22 12:10:17 +0100 (Fri, November 22, 2024) $"
 __version__ = "$Revision: 3.2.10.GWV $"
 #=========================================================================================
 # Created
@@ -44,12 +44,13 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.lib.SpectrumLib import DIMENSION_TIME, DIMENSION_SAMPLED
-from ccpn.core.lib.WeakRefList import _WeakRefList
+# from ccpn.core.lib.WeakRefList import _WeakRefList
 from ccpn.core import _DEBUG
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
+from ccpn.core.lib.Pid import Pid
 
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -85,6 +86,7 @@ from ccpn.ui._implementation.IntegralListView import IntegralListView
 from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
+
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, \
     BlankedPartial, ccpNmrV3CoreSetter, notificationEchoBlocking, undoBlockWithoutSideBar, \
     waypointBlocking, undoBlock, undoStack
@@ -2425,7 +2427,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """Creates a new strip by cloning strip with index (default the last) in the display.
         """
         strip = self.getByPid(strip) if isinstance(strip, str) else strip
-        index = strip.stripIndex() if strip else -1
+        indx = strip.stripIndex() if strip else -1
         tilePosition = strip.tilePosition if strip else None
         if tilePosition is None:
             tilePosition = (0, 0)
@@ -2442,11 +2444,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
                     with notificationBlanking():
                         # get the visibility of strip to be copied
-                        copyVisible = self.strips[index].header.headerVisible
+                        copyVisible = self.strips[indx].header.headerVisible
 
                         # inserts the strip into the stripFrame here
                         self._stripAddMode = (self.strips[0]._CcpnGLWidget.pixelX, self.strips[0]._CcpnGLWidget.pixelY)
-                        result = self.strips[index]._clone()
+                        result = self.strips[indx]._clone()
 
                         if not isinstance(result, GuiStrip):
                             raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))
@@ -2470,7 +2472,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                                     objsToBeUnDeleted=apiObjectsCreated)
                                 )
 
-                    index = result.stripIndex()
+                    indx = result.stripIndex()
 
                     # add notifier handling to the stack
                     addUndoItem(undo=partial(result.setBlankingAllNotifiers, True),
@@ -2478,12 +2480,12 @@ class GuiSpectrumDisplay(CcpnModule):
 
                     # add layout handling to the undo stack
                     addUndoItem(undo=partial(self._removeStripFromLayout, result),
-                                redo=partial(self._restoreStripToLayout, result, index))
-                    addUndoItem(redo=partial(self._redrawAxes, index),
+                                redo=partial(self._restoreStripToLayout, result, indx))
+                    addUndoItem(redo=partial(self._redrawAxes, indx),
                                 undo=self._redrawAxesAddMode)
 
             # do axis redrawing
-            self._redrawAxes(index)  # this might be getting confused with the ordering
+            self._redrawAxes(indx)  # this might be getting confused with the ordering
 
         return result
 
@@ -2779,8 +2781,10 @@ class GuiSpectrumDisplay(CcpnModule):
             getLogger().warning('Error cycling peak symbols')
 
     @logCommand(get='self')
-    def displaySpectrum(self, spectrum):
-        """Display spectrum, with spectrum axes ordered according to display axisCodes
+    def displaySpectrum(self, spectrum: Spectrum | Pid):
+        """Display spectrum, with spectrum axes ordered according to SpectrumDisplay's (i.e. self)
+        axisCodes
+        :param spectrum: A Spectrum instance or Pid of a spectrum
         :return SpectrumView instance or None
         """
         # NB: ._isNew: Defines the display as new, to avoid the isotopeCode and
@@ -2828,11 +2832,10 @@ class GuiSpectrumDisplay(CcpnModule):
                 if ic1 != ic2:
                     raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
 
+        # block and many any undo additions, as the displaySpectrum and removeSpectrum are
+        # "atomic" operations, which are being added to stack at the end
         with undoStackBlocking() as addUndoItem:
             with undoBlock():
-                # block any undo additions, as the displaySpectrum and removeSpectrum are
-                # "atomic" operations, which are being added at the end
-
                 # Make spectrumView
                 if (spectrumView := _newSpectrumView(self, spectrum=spectrum, displayOrder=displayOrder)) \
                         is None:
@@ -2843,7 +2846,7 @@ class GuiSpectrumDisplay(CcpnModule):
             addUndoItem(undo=partial(self.removeSpectrum, spectrum=spectrum.pid),
                         redo=partial(self.displaySpectrum, spectrum=spectrum.pid)
                         )
-        #end waypoint
+        #end undo-block
 
         self._buildContoursForSpectrum(spectrum=spectrum)
         self._setToolbarButtons()

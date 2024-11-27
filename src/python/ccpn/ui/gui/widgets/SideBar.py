@@ -1040,7 +1040,8 @@ class SideBarStructure(object):
     )  # end _sidebarData
 
     def _init(self):
-        self._sidebarBlockingLevel = 0
+        # GWV 21/11/2024 Now a class property
+        # self._sidebarBlockingLevel = 0
         self._project = None
         self._sidebar = None
 
@@ -1107,11 +1108,13 @@ class SideBarStructure(object):
         finally:
             self.decreaseSidebarBlocking(node)
 
+    _sidebarBlockingLevel = 0
+
     def increaseSidebarBlocking(self, node=None, withSideBarUpdate=True):
         """increase level of blocking
         """
         # _tmp = self._sidebarBlockingLevel # just for debugging purpose
-        if self._sidebarBlockingLevel == 0:
+        if SideBarStructure._sidebarBlockingLevel == 0:
             self._blockSideBarEvents()
             if withSideBarUpdate:
                 if node:
@@ -1119,7 +1122,7 @@ class SideBarStructure(object):
                 else:
                     self._sidebarData._storeExpandedStates()
 
-        self._sidebarBlockingLevel += 1
+        SideBarStructure._sidebarBlockingLevel += 1
         # _tmp = self._sidebarBlockingLevel # just for debugging purpose
 
     def decreaseSidebarBlocking(self, node=None, withSideBarUpdate=True):
@@ -1127,10 +1130,10 @@ class SideBarStructure(object):
         """
         # _tmp = self._sidebarBlockingLevel # just for debugging purpose
 
-        if self._sidebarBlockingLevel == 0:
+        if SideBarStructure._sidebarBlockingLevel == 0:
             raise RuntimeError('Error: cannot decrease sidebar blocking below 0')
 
-        self._sidebarBlockingLevel -= 1
+        SideBarStructure._sidebarBlockingLevel -= 1
         # check if we arrived at level zero; if so call post-blocking update
         if self._sidebarBlockingLevel == 0:
             self._sidebarData._postBlockingUpdate()

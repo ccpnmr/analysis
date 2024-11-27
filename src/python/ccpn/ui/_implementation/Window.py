@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:49:49 +0100 (Thu, September 19, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__dateModified__ = "$dateModified: 2024-11-26 13:30:14 +0000 (Tue, November 26, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -620,11 +620,11 @@ class Window(AbstractWrapperObject):
                 # marks are not automatically deleted by the model when deleting strips
                 for mark in st.marks:
                     mark.delete()
+                st.close()
+
             # marks are not automatically deleted by the model when deleting strips
             for mark in display.marks:
                 mark.delete()
-
-                st.close()
 
             # Update the list of opened GUI SpectrumDisplays modules
             self.moduleArea._updateSpectrumDisplays()

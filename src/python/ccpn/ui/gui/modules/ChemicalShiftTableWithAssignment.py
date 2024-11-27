@@ -8,8 +8,9 @@ modified by Geerten 1-9/12/2016:
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -18,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-08 12:20:44 +0100 (Wed, May 08, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-11-26 10:38:14 +0000 (Tue, November 26, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,38 +30,38 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.ListWidget import ListWidget
-# from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+# from PyQt5 import QtCore
+# from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+# from ccpn.ui.gui.widgets.Frame import Frame
+# from ccpn.ui.gui.widgets.Label import Label
+# from ccpn.ui.gui.widgets.ListWidget import ListWidget
+# # from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 # from ccpn.ui.gui.widgets.GuiTable import GuiTable
 # from ccpn.ui.gui.widgets.Column import ColumnClass, Column
 # from ccpn.util.Logging import getLogger
 # from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
-# # from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
+# from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 # from ccpn.ui.gui.widgets.Widget import Widget
 # from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation
-# # from ccpn.core.lib.Notifiers import Notifier
+# from ccpn.core.lib.Notifiers import Notifier
 # from ccpn.core.NmrAtom import NmrAtom, NmrResidue
 # from ccpn.core.Peak import Peak
-# # from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTable
+# from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTable
 # from ccpn.ui.gui.widgets.Splitter import Splitter
 # from ccpn.ui.gui.widgets.MessageDialog import showWarning
 # from ccpn.core.lib.CallBack import CallBack
-# from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, getZoomRatio
+# from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
 # from ccpn.core.PeakList import PeakList
 # from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySelectionWidget
-
-
+#
+#
 # logger = getLogger()
 # ALL = '<all>'
-
-
-# NOTE:ED - currently not used
-#  BROKEN with updates to the ChemicalShiftTable
-
+#
+#
+# # NOTE:ED - currently not used
+# #  broken with updates to the ChemicalShiftTable
+#
 # class ChemicalShiftTableWithAssignment(CcpnModule):
 #     """
 #     This Module allows inspection of the NmrAtoms of a selected NmrResidue
@@ -97,8 +98,10 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 #         # settings window
 #
 #         self.splitter = Splitter(QtCore.Qt.Vertical)
-#         self._chemicalShiftFrame = Frame(self.splitter, setLayout=True)  # ejb    # self.splitter.addWidget(self.nmrResidueTable)
-#         self._assignmentFrame = Frame(self.splitter, setLayout=True)  # ejb    # self.splitter.addWidget(self.nmrResidueTable)
+#         self._chemicalShiftFrame = Frame(self.splitter,
+#                                          setLayout=True)  # ejb    # self.splitter.addWidget(self.nmrResidueTable)
+#         self._assignmentFrame = Frame(self.splitter,
+#                                       setLayout=True)  # ejb    # self.splitter.addWidget(self.nmrResidueTable)
 #         self.mainWidget.getLayout().addWidget(self.splitter)
 #
 #         self._AIwidget = Widget(self.settingsWidget, setLayout=True,
@@ -108,15 +111,16 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 #         # underpinning the addNotifier call do not allow for it either
 #         colwidth = 140
 #         self.displaysWidget = SpectrumDisplaySelectionWidget(self._AIwidget, mainWindow=self.mainWindow,
-#                                                  grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-#                                                  vPolicy='minimal',
-#                                                  #minimumWidths=(colwidth, 0, 0),
-#                                                  fixedWidths=(colwidth, 2 * colwidth, None),
-#                                                  orientation='left',
-#                                                  labelText='Display(s)',
-#                                                  tipText='SpectrumDisplay modules to respond to double-click',
-#                                                  texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
-#                                                  )
+#                                                              grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+#                                                              vPolicy='minimal',
+#                                                              #minimumWidths=(colwidth, 0, 0),
+#                                                              fixedWidths=(colwidth, 2 * colwidth, None),
+#                                                              orientation='left',
+#                                                              labelText='Display(s)',
+#                                                              tipText='SpectrumDisplay modules to respond to double-click',
+#                                                              texts=[ALL] + [display.pid for display in
+#                                                                             self.application.ui.mainWindow.spectrumDisplays]
+#                                                              )
 #         self.displaysWidget.setFixedHeights((None, None, 40))
 #
 #         self.sequentialStripsWidget = CheckBoxCompoundWidget(
@@ -151,7 +155,8 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 #         # main window
 #         # Frame-1: NmrAtoms
 #         width = 130
-#         self.frame1 = Frame(self._assignmentFrame, grid=(0, 0), **policies, fShape='styledPanel', fShadow='plain', setLayout=True)  # ejb
+#         self.frame1 = Frame(self._assignmentFrame, grid=(0, 0), **policies, fShape='styledPanel', fShadow='plain',
+#                             setLayout=True)  # ejb
 #         self.frame1.setFixedWidth(width)
 #         self.nmrAtomLabel = Label(self.frame1, 'NmrAtom(s)', bold=True,
 #                                   grid=(0, 0), gridSpan=(1, 1), vAlign='center', margins=[2, 5, 2, 5])
@@ -165,7 +170,8 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 #         self.frame1.hide()
 #
 #         # Frame-2: peaks
-#         self.frame2 = Frame(self._assignmentFrame, grid=(0, 1), gridSpan=(1, 5), **policies, fShape='styledPanel', fShadow='plain', setLayout=True)  # ejb
+#         self.frame2 = Frame(self._assignmentFrame, grid=(0, 1), gridSpan=(1, 5), **policies, fShape='styledPanel',
+#                             fShadow='plain', setLayout=True)  # ejb
 #         self.peaksLabel = Label(self.frame2, 'Peaks assigned to NmrAtom(s)', bold=True,
 #                                 grid=(0, 0), gridSpan=(1, 1), vAlign='center', margins=[2, 5, 2, 5])
 #
@@ -227,15 +233,6 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 #             self.selectChemicalShiftList(chemicalShiftList)
 #         elif selectFirstItem:
 #             self.chemicalShiftTable._chemicalShiftListPulldown.selectFirstItem()
-#
-#         # install the event filter to handle maximising from floated dock
-#         self.installMaximiseEventHandler(self._maximise, self._closeModule)
-#
-#     def _maximise(self):
-#         """
-#         refresh the table on a maximise event
-#         """
-#         self._refreshTable()
 #
 #     def _refreshTable(self, *args):
 #         self.assignedPeaksTable.update()
@@ -302,7 +299,8 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 #             self.assignedPeaksTable._peakList = self._emptyObject()
 #
 #             self.assignedPeaksTable._peakList.peaks = list(
-#                     set([pk for nmrAtom in self.application.current.nmrResidue.nmrAtoms for pk in nmrAtom.assignedPeaks]))
+#                     set([pk for nmrAtom in self.application.current.nmrResidue.nmrAtoms for pk in
+#                          nmrAtom.assignedPeaks]))
 #
 #             self.assignedPeaksTable.populateTable(rowObjects=self.assignedPeaksTable._peakList.peaks,
 #                                                   columnDefs=self.getColumns()
@@ -329,7 +327,6 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 #             nmrAtom = self.application.project.getByPid(pid)
 #             #print('>>', pid, nmrAtom)
 #             if nmrAtom is not None:
-#
 #                 self.assignedPeaksTable.populateTable(rowObjects=nmrAtom.assignedPeaks,
 #                                                       columnDefs=self.getColumns()
 #                                                       )
@@ -435,12 +432,13 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 #                 for display in displays:
 #                     for strip in display.strips:
 #
-#                         validPeakListViews = [pp.peakList for pp in strip.peakListViews if isinstance(pp.peakList, PeakList)]
+#                         validPeakListViews = [pp.peakList for pp in strip.peakListViews if
+#                                               isinstance(pp.peakList, PeakList)]
 #
 #                         if peak.peakList in validPeakListViews:
 #                             widths = None
 #                             if peak.peakList.spectrum.dimensionCount <= 2:
-#                                 widths = getZoomRatio(strip.viewRange())
+#                                 widths = _getCurrentZoomRatio(strip.viewRange())
 #
 #                             navigateToPositionInStrip(strip=strip, positions=peak.position, widths=widths)
 #
@@ -466,4 +464,3 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 #     #   CCPN-INTERNAL: used to get searchWidget
 #     #   """
 #     #   return self.searchWidget
-#

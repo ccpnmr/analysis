@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-06-07 21:57:29 +0100 (Fri, June 07, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2024-11-26 10:38:14 +0000 (Tue, November 26, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -50,14 +50,13 @@ class PythonConsoleModule(CcpnModule):
 
     # _helpFilePath = ccpnModuleHelpPath / 'PythonConsoleModuleHelp.html'
 
-    _isPythonConsoleModule = True # Conveniance;  overridden in PythonConsoleModule
+    _isPythonConsoleModule = True # Convenience;  overridden in PythonConsoleModule
 
 
     def __init__(self, mainWindow, name='Python Console', pythonConsoleWidget=None, closeFunc=None, **kwds):
-        """Create the iPython console module
-
+        """Create the iPython console module.
         """
-        CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closeFunc=closeFunc)
+        super().__init__(mainWindow=mainWindow, name=name)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
@@ -66,7 +65,7 @@ class PythonConsoleModule(CcpnModule):
             pythonConsoleWidget = self.mainWindow.pythonConsole
         self.pythonConsoleWidget = pythonConsoleWidget
 
-        if self.pythonConsoleWidget is None:  # For some reason it can get destroid!
+        if self.pythonConsoleWidget is None:  # For some reason it can get destroyed!
             self.mainWindow.pythonConsole = self.pythonConsoleWidget = IpythonConsole(mainWindow=mainWindow, namespace=mainWindow.namespace)
         self.mainWidget.getLayout().addWidget(self.pythonConsoleWidget)
 

@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 14:34:52 +0100 (Wed, September 11, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-11-26 10:33:23 +0000 (Tue, November 26, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,24 +28,29 @@ __date__ = "$Date: 2024-05-16 11:17:23 +0100 (Thu, May 16, 2024) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5.QtWidgets import QDialog
+from PyQt5 import QtWidgets
 from ccpn.framework.Application import getApplication
 from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon
+from ccpn.ui.gui.guiSettings import consoleStyle
 from ccpn.util.Logging import getLogger
 
 
-BLOCKINGDIALOGS = (QDialog, SpeechBalloon)
+BLOCKINGDIALOGS = (QtWidgets.QDialog, QtWidgets.QMenu, SpeechBalloon)
 _DEBUG = False
 
 
-def getBlockingDialogs(msg: str = None) -> list | None:
-    """Return the list of dialogs that are visible and considered as blocking the mainWindow event-loop.
+def getBlockingDialogs(msg: str = None) -> bool:
+    """Return True if there is a QDialog|QMenu|SpeechBalloon blocking the mainWindow.
     """
     if not isinstance(msg, str):
         raise TypeError(f'msg must be a str')
     app = getApplication()
     if app and app.hasGui:
-        dialogs = list(filter(lambda pp: isinstance(pp, BLOCKINGDIALOGS) and pp.isVisible(),
-                              app.ui._qtApp.allWidgets()))
-        if _DEBUG: getLogger().debug(f'==> found dialogs {msg} {dialogs}')
-        return dialogs
+        state = (QtWidgets.QApplication.activePopupWidget() or
+                 QtWidgets.QApplication.activeModalWidget() or
+                 QtWidgets.QApplication.activeWindow())
+        blocked = isinstance(state, BLOCKINGDIALOGS)
+        if _DEBUG:
+            getLogger().debug(f'{consoleStyle.fg.yellow}==> {msg} {state}:{blocked}'
+                              f'{consoleStyle.reset}')
+        return blocked

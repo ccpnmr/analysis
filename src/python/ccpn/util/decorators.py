@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 13:00:54 +0000 (Mon, October 28, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2024-11-19 19:37:24 +0000 (Tue, November 19, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -561,9 +561,10 @@ def _closeInspectMemory(tracemalloc, snapshot, savingPath=None, topCount=20):
       including file name, line number  and memory usage in KiB per call
 
       Usage:
+      from ccpn.util.decorators import _startInspectMemory, _closeInspectMemory
      tracemalloc, snapshot =  _startInspectMemory()
       ... run the slow/leaky func
-      df = _closeInspectMemory(tracemalloc, snapshot, '~/resultFile.csv')
+      df = _closeInspectMemory(tracemalloc, snapshot, '~resultFile.csv')
       """
 
     import pandas as pd

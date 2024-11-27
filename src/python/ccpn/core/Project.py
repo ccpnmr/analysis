@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 13:00:54 +0000 (Mon, October 28, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-11-26 13:30:14 +0000 (Tue, November 26, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1506,9 +1506,18 @@ class Project(AbstractWrapperObject):
         # Remove undo stack:
         self._resetUndo(maxWaypoints=0)
 
-        # GWV 28/2/28: moved to above
-        # # only update the logger if there have been changes to the project
-        # self._updateLoggerState(readOnly=self.readOnly or not self.isModified)
+        _notified = False
+        try:
+            for od in self._context2Notifiers.values():
+                for notifier in od:
+                    _notified = True
+                    _colour = consoleStyle.fg.darkgrey if notifier.func._theObject.isDeleted else consoleStyle.fg.red
+                    getLogger().debug(f'{_colour}==>  {notifier.func._callback}{consoleStyle.reset}')
+        except Exception as es:
+            getLogger().debug(f'issue cleaning up notifiers {es}')
+        finally:
+            if _notified:
+                getLogger().debug(f'{consoleStyle.fg.darkgreen}==>  done{consoleStyle.reset}')
         # Logging._clearLogHandlers()
 
         self._clearAllApiNotifiers()

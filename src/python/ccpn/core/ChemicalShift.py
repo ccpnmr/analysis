@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-12-04 14:36:51 +0000 (Wed, December 04, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-04 14:51:20 +0000 (Wed, December 04, 2024) $"
 __version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_STATIC, CS
     CS_FIGUREOFMERIT, CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME, \
     CS_COMMENT, CS_COLUMNS, ChemicalShiftState
 from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
+from ccpn.framework.lib.FrameWorkProperties import FrameworkProperties
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
 
@@ -55,7 +56,7 @@ ShiftParameters = namedtuple('ShiftParameters', f'{CS_UNIQUEID} {CS_ISDELETED} {
                                                 f'{CS_COMMENT} ')
 
 
-class ChemicalShift(V3CoreObjectABC):
+class ChemicalShift(V3CoreObjectABC, FrameworkProperties):
     """Chemical Shift, containing a ChemicalShift value for the NmrAtom they belong to.
 
     Chemical shift values are continuously averaged over peaks assigned to the NmrAtom,
@@ -88,6 +89,9 @@ class ChemicalShift(V3CoreObjectABC):
         before the shift can be used
         """
         super().__init__(project, chemicalShiftList, _uniqueId)
+
+        # include .application, .project, .current, .ui, .mainWindow as properties
+        FrameworkProperties.__init__(self)
 
         self._oldValue = self._oldValueError = None
         # GWV 30/10/24: for setting value without NmrAtom check as done from ._recalculateShiftValue
@@ -179,15 +183,14 @@ class ChemicalShift(V3CoreObjectABC):
     @CcpNmrFloatProperty(
             allowNone=True
         )
-    def value(self) -> Optional[float]:
+    def value(self) -> float | None:
         """shift value of ChemicalShift, in unit as defined in the ChemicalShiftList.
         """
         return self._wrapperList._getAttribute(self._uniqueId, CS_VALUE, float)
 
     @value.setter
     @logCommand(get='self', isProperty=True)
-    # @ccpNmrV3CoreSetter()
-    def value(self, val: Optional[float]):
+    def value(self, val: float | None):
         """Set the value for the chemicalShift.
         Integers will be cast as floats on the next get operation.
         """
@@ -200,15 +203,14 @@ class ChemicalShift(V3CoreObjectABC):
     @CcpNmrFloatProperty(
             allowNone=True
         )
-    def valueError(self) -> Optional[float]:
+    def valueError(self) -> float | None:
         """shift valueError of ChemicalShift, in unit as defined in the ChemicalShiftList.
         """
         return self._wrapperList._getAttribute(self._uniqueId, CS_VALUEERROR, float)
 
     @valueError.setter
     @logCommand(get='self', isProperty=True)
-    # @ccpNmrV3CoreSetter()
-    def valueError(self, value: Optional[float]):
+    def valueError(self, value: float | None):
         """Set the valueError for the chemicalShift.
         Integers will be cast as floats on the next get operation.
         """
@@ -221,15 +223,14 @@ class ChemicalShift(V3CoreObjectABC):
     @CcpNmrFloatProperty(
             allowNone=True
             )
-    def figureOfMerit(self) -> Optional[float]:
+    def figureOfMerit(self) -> float | None:
         """Figure of Merit for ChemicalShift, between 0.0 and 1.0 inclusive.
         """
         return self._wrapperList._getAttribute(self._uniqueId, CS_FIGUREOFMERIT, float)
 
     @figureOfMerit.setter
     @logCommand(get='self', isProperty=True)
-    # @ccpNmrV3CoreSetter()
-    def figureOfMerit(self, value: Optional[float]):
+    def figureOfMerit(self, value: float | None):
         """Set the figureOfMerit for the chemicalShift.
         Integers will be cast as floats on the next get operation; only integers 0 and 1 are allowed.
         """
@@ -242,7 +243,7 @@ class ChemicalShift(V3CoreObjectABC):
     #~~~~~~~~~~~~~~~~
 
     @property
-    def nmrAtom(self) -> Optional[NmrAtom]:
+    def nmrAtom(self) -> NmrAtom | None:
         """Attached NmrAtom.
         """
         _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
@@ -251,7 +252,7 @@ class ChemicalShift(V3CoreObjectABC):
     @nmrAtom.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreUndoBlock()
-    def nmrAtom(self, value: Union[NmrAtom, str, Pid, None]):
+    def nmrAtom(self, value: NmrAtom | str | Pid | None):
         """Set the nmrAtom for the chemicalShift
         nmrAtom can be core object of type NmrAtom, or string pid or None
 
@@ -320,7 +321,7 @@ class ChemicalShift(V3CoreObjectABC):
     @CcpNmrUnicodeProperty(
             allowNone=True
             )
-    def chainCode(self) -> Optional[str]:
+    def chainCode(self) -> str | None:
         """chainCode for attached nmrAtom.
         Optional user value if nmrAtom is None
         """
@@ -328,8 +329,7 @@ class ChemicalShift(V3CoreObjectABC):
 
     @chainCode.setter
     @logCommand(get='self', isProperty=True)
-    # @ccpNmrV3CoreSetter()
-    def chainCode(self, value: Optional[str]):
+    def chainCode(self, value: str | None):
         """Set the chainCode for the chemicalShift
         Cannot be changed if there is an nmrAtom already attached
         Must be of type string or None
@@ -346,7 +346,7 @@ class ChemicalShift(V3CoreObjectABC):
     @CcpNmrUnicodeProperty(
             allowNone=True
             )
-    def sequenceCode(self) -> Optional[str]:
+    def sequenceCode(self) -> str | None:
         """sequenceCode for attached nmrAtom.
         Optional user value if nmrAtom is None
         """
@@ -354,8 +354,7 @@ class ChemicalShift(V3CoreObjectABC):
 
     @sequenceCode.setter
     @logCommand(get='self', isProperty=True)
-    # @ccpNmrV3CoreSetter()
-    def sequenceCode(self, value: Optional[str]):
+    def sequenceCode(self, value: str | None):
         """Set the sequenceCode for the chemicalShift
         Cannot be changed if there is an nmrAtom already attached
         Must be of type string or None
@@ -372,7 +371,7 @@ class ChemicalShift(V3CoreObjectABC):
     @CcpNmrUnicodeProperty(
             allowNone=True
             )
-    def residueType(self) -> Optional[str]:
+    def residueType(self) -> str | None:
         """residueType for attached nmrAtom.
         Optional user value if nmrAtom is None
         """
@@ -381,7 +380,7 @@ class ChemicalShift(V3CoreObjectABC):
     @residueType.setter
     @logCommand(get='self', isProperty=True)
     # @ccpNmrV3CoreSetter()
-    def residueType(self, value: Optional[str]):
+    def residueType(self, value: str | None):
         """Set the residueType for the chemicalShift
         Cannot be changed if there is an nmrAtom already attached
         Must be of type string or None
@@ -398,7 +397,7 @@ class ChemicalShift(V3CoreObjectABC):
     @CcpNmrUnicodeProperty(
             allowNone=True
             )
-    def atomName(self) -> Optional[str]:
+    def atomName(self) -> str | None:
         """atomName for attached nmrAtom
         Optional user value if nmrAtom is None
         """
@@ -407,7 +406,7 @@ class ChemicalShift(V3CoreObjectABC):
     @atomName.setter
     @logCommand(get='self', isProperty=True)
     # @ccpNmrV3CoreSetter()
-    def atomName(self, value: Optional[str]):
+    def atomName(self, value: str | None):
         """Set the atomName for the chemicalShift
         Cannot be changed if there is an nmrAtom already attached
         Must be of type string or None
@@ -481,7 +480,7 @@ class ChemicalShift(V3CoreObjectABC):
     # CCPN functions
     #=========================================================================================
 
-    def _getAsTuple(self):
+    def _getAsTuple(self) -> ShiftParameters:
         """Return the contents of the shift as a tuple.
         """
         if self._isDeleted:
@@ -502,7 +501,7 @@ class ChemicalShift(V3CoreObjectABC):
 
         return ShiftParameters(*newRow)
 
-    def _getAsPandasSeries(self):
+    def _getAsPandasSeries(self) -> pd.DataFrame:
         """Return the contents of the shift as a pandas series
         """
         _row = self._getAsTuple()
@@ -578,7 +577,7 @@ class ChemicalShift(V3CoreObjectABC):
                         redo=partial(chemicalShiftList._undoRedoDeletedShifts, _newDeletedShifts))
 
 
-def _newChemicalShift(project: Project, chemicalShiftList, _uniqueId: Optional[int] = None
+def _newChemicalShift(project: Project, chemicalShiftList, _uniqueId: int | None = None
                       ):
     """Create a new chemicalShift attached to the chemicalShiftList.
 
@@ -599,9 +598,9 @@ def _getByTuple(chemicalShiftList,
                 isDeleted: bool = False,
                 static: bool = False,
                 value: float = None, valueError: float = None, figureOfMerit: float = 1.0,
-                nmrAtom: Union[NmrAtom, str, None] = None,
+                nmrAtom: NmrAtom | str | None = None,
                 chainCode: str = None, sequenceCode: str = None, residueType: str = None, atomName: str = None,
-                comment: str = None):
+                comment: str = None) -> ShiftParameters:
     """Create a new tuple object from the supplied parameters
     Check whether a valid tuple can be created, otherwise raise the appropriate errors
     CCPN Internal

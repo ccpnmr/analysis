@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-30 14:15:09 +0000 (Wed, October 30, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-12-04 14:36:51 +0000 (Wed, December 04, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,6 +35,7 @@ import pandas as pd
 from ccpn.core.Project import Project
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
+from ccpn.core.lib.CcpNmrProperties import CcpNmrFloatProperty, CcpNmrCoreObjectProperty, CcpNmrUnicodeProperty
 from ccpn.core.lib.ContextManagers import ccpNmrV3CoreSetter, undoStackBlocking, deleteV3Object, ccpNmrV3CoreUndoBlock
 from ccpn.core.lib.Pid import Pid, createId
 from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_STATIC, CS_VALUE, CS_VALUEERROR, \
@@ -130,9 +131,7 @@ class ChemicalShift(V3CoreObjectABC):
         """
         raise RuntimeError('ChemicalShift name cannot be set')
 
-    #~~~~~~~~~~~~~~~~
-
-    @property
+    @property  # TODO Develop (unsure property)
     def _static(self):
         # Getter/setter for undo/redo
         return self._wrapperList._getAttribute(self._uniqueId, CS_STATIC, bool)
@@ -168,15 +167,6 @@ class ChemicalShift(V3CoreObjectABC):
         """
         return self._static
 
-    # @logCommand(get='self')
-    # def setStatic(self, value: bool):
-    #     """Set the local static state for the chemicalShift.
-    #     """
-    #     if not isinstance(value, bool):
-    #         raise ValueError(f'{self.className}.setStatic must be True/False')
-    #     # use setter above to handle undo/redo
-    #     self._static = value
-
     @property
     def state(self):
         """State of chemicalShift
@@ -186,11 +176,9 @@ class ChemicalShift(V3CoreObjectABC):
         else:
             return ChemicalShiftState.ORPHAN if self.orphan else ChemicalShiftState.DYNAMIC
 
-    #~~~~~~~~~~~~~~~~
-
-    @property
-    # NOTE:ED - added '@checkDeleted' but I don't think they are required
-    # @checkDeleted()
+    @CcpNmrFloatProperty(
+            allowNone=True
+        )
     def value(self) -> Optional[float]:
         """shift value of ChemicalShift, in unit as defined in the ChemicalShiftList.
         """
@@ -198,7 +186,7 @@ class ChemicalShift(V3CoreObjectABC):
 
     @value.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    # @ccpNmrV3CoreSetter()
     def value(self, val: Optional[float]):
         """Set the value for the chemicalShift.
         Integers will be cast as floats on the next get operation.
@@ -209,9 +197,9 @@ class ChemicalShift(V3CoreObjectABC):
             raise ValueError(f'Attribute "value" cannot be changed for {self} with "{_nmrAtomPid}" defined')
         self._wrapperList._setAttribute(self._uniqueId, CS_VALUE, val)
 
-    #~~~~~~~~~~~~~~~~
-
-    @property
+    @CcpNmrFloatProperty(
+            allowNone=True
+        )
     def valueError(self) -> Optional[float]:
         """shift valueError of ChemicalShift, in unit as defined in the ChemicalShiftList.
         """
@@ -219,7 +207,7 @@ class ChemicalShift(V3CoreObjectABC):
 
     @valueError.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    # @ccpNmrV3CoreSetter()
     def valueError(self, value: Optional[float]):
         """Set the valueError for the chemicalShift.
         Integers will be cast as floats on the next get operation.
@@ -230,9 +218,9 @@ class ChemicalShift(V3CoreObjectABC):
             raise ValueError(f'Attribute "valueError" cannot be changed for {self} with "{_nmrAtomPid}" defined')
         self._wrapperList._setAttribute(self._uniqueId, CS_VALUEERROR, value)
 
-    #~~~~~~~~~~~~~~~~
-
-    @property
+    @CcpNmrFloatProperty(
+            allowNone=True
+            )
     def figureOfMerit(self) -> Optional[float]:
         """Figure of Merit for ChemicalShift, between 0.0 and 1.0 inclusive.
         """
@@ -240,7 +228,7 @@ class ChemicalShift(V3CoreObjectABC):
 
     @figureOfMerit.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    # @ccpNmrV3CoreSetter()
     def figureOfMerit(self, value: Optional[float]):
         """Set the figureOfMerit for the chemicalShift.
         Integers will be cast as floats on the next get operation; only integers 0 and 1 are allowed.
@@ -259,27 +247,6 @@ class ChemicalShift(V3CoreObjectABC):
         """
         _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
         return self.project.getByPid(_nmrAtomPid)
-
-    def _nmrAtom(self, value: NmrAtom):
-        """Set the nmrAtom inside core undoBlock
-        """
-        nat = self.nmrAtom
-        if value is None:
-            if nat is None:
-                return
-            self._wrapperList._setAttribute(self._uniqueId, CS_NMRATOM, None)
-            nat._chemicalShifts.remove(self)
-
-        else:
-            # nmrAtom and derived properties
-            self._wrapperList._setAttribute(self._uniqueId, CS_NMRATOM, str(value.pid))
-            self._wrapperList._setAttributes(self._uniqueId, CS_CHAINCODE, CS_ATOMNAME,
-                                             tuple(val or None for val in value.pid.fields))
-            if nat:
-                nat._chemicalShifts.remove(self)
-            value._chemicalShifts.append(self)
-
-            self._recalculateShiftValue(value)
 
     @nmrAtom.setter
     @logCommand(get='self', isProperty=True)
@@ -312,6 +279,7 @@ class ChemicalShift(V3CoreObjectABC):
                 raise ValueError(f'{self.className}.nmrAtom: {nmrAt.pid} already exists')
             value = nmrAt
 
+        # TODO Develop: EB/GWV Think about this (prevents @CcpNmrCoreObjectProperty)
         with undoStackBlocking() as addUndoItem:
             if _oldNmrAt is None:
                 # previously empty - remember the OLD settings - is only required by undo/redo to give previous state
@@ -328,9 +296,30 @@ class ChemicalShift(V3CoreObjectABC):
                 _newSettings = self._wrapperList._getAttributes(self._uniqueId, CS_CHAINCODE, CS_ATOMNAME, (str, str, str, str))
                 addUndoItem(redo=partial(self._wrapperList._setAttributes, self._uniqueId, CS_CHAINCODE, CS_ATOMNAME, _newSettings), )
 
-    #~~~~~~~~~~~~~~~~
+    def _nmrAtom(self, value: NmrAtom):
+        """Set the nmrAtom inside core undoBlock
+        """
+        nat = self.nmrAtom
+        if value is None:
+            if nat is None:
+                return
+            self._wrapperList._setAttribute(self._uniqueId, CS_NMRATOM, None)
+            nat._chemicalShifts.remove(self)
 
-    @property
+        else:
+            # nmrAtom and derived properties
+            self._wrapperList._setAttribute(self._uniqueId, CS_NMRATOM, str(value.pid))
+            self._wrapperList._setAttributes(self._uniqueId, CS_CHAINCODE, CS_ATOMNAME,
+                                             tuple(val or None for val in value.pid.fields))
+            if nat:
+                nat._chemicalShifts.remove(self)
+            value._chemicalShifts.append(self)
+
+            self._recalculateShiftValue(value)
+
+    @CcpNmrUnicodeProperty(
+            allowNone=True
+            )
     def chainCode(self) -> Optional[str]:
         """chainCode for attached nmrAtom.
         Optional user value if nmrAtom is None
@@ -339,7 +328,7 @@ class ChemicalShift(V3CoreObjectABC):
 
     @chainCode.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    # @ccpNmrV3CoreSetter()
     def chainCode(self, value: Optional[str]):
         """Set the chainCode for the chemicalShift
         Cannot be changed if there is an nmrAtom already attached
@@ -354,9 +343,9 @@ class ChemicalShift(V3CoreObjectABC):
         # only set if the nmrAtom has not been set
         self._wrapperList._setAttribute(self._uniqueId, CS_CHAINCODE, value)
 
-    #~~~~~~~~~~~~~~~~
-
-    @property
+    @CcpNmrUnicodeProperty(
+            allowNone=True
+            )
     def sequenceCode(self) -> Optional[str]:
         """sequenceCode for attached nmrAtom.
         Optional user value if nmrAtom is None
@@ -365,7 +354,7 @@ class ChemicalShift(V3CoreObjectABC):
 
     @sequenceCode.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    # @ccpNmrV3CoreSetter()
     def sequenceCode(self, value: Optional[str]):
         """Set the sequenceCode for the chemicalShift
         Cannot be changed if there is an nmrAtom already attached
@@ -380,9 +369,9 @@ class ChemicalShift(V3CoreObjectABC):
         # only set if the nmrAtom has not been set
         self._wrapperList._setAttribute(self._uniqueId, CS_SEQUENCECODE, value)
 
-    #~~~~~~~~~~~~~~~~
-
-    @property
+    @CcpNmrUnicodeProperty(
+            allowNone=True
+            )
     def residueType(self) -> Optional[str]:
         """residueType for attached nmrAtom.
         Optional user value if nmrAtom is None
@@ -391,7 +380,7 @@ class ChemicalShift(V3CoreObjectABC):
 
     @residueType.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    # @ccpNmrV3CoreSetter()
     def residueType(self, value: Optional[str]):
         """Set the residueType for the chemicalShift
         Cannot be changed if there is an nmrAtom already attached
@@ -406,9 +395,9 @@ class ChemicalShift(V3CoreObjectABC):
         # only set if the nmrAtom has not been set
         self._wrapperList._setAttribute(self._uniqueId, CS_RESIDUETYPE, value)
 
-    #~~~~~~~~~~~~~~~~
-
-    @property
+    @CcpNmrUnicodeProperty(
+            allowNone=True
+            )
     def atomName(self) -> Optional[str]:
         """atomName for attached nmrAtom
         Optional user value if nmrAtom is None
@@ -417,7 +406,7 @@ class ChemicalShift(V3CoreObjectABC):
 
     @atomName.setter
     @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    # @ccpNmrV3CoreSetter()
     def atomName(self, value: Optional[str]):
         """Set the atomName for the chemicalShift
         Cannot be changed if there is an nmrAtom already attached
@@ -432,9 +421,6 @@ class ChemicalShift(V3CoreObjectABC):
         # only set if the nmrAtom has not been set
         self._wrapperList._setAttribute(self._uniqueId, CS_ATOMNAME, value)
 
-    #~~~~~~~~~~~~~~~~
-
-    @property
     def assignedPeaks(self) -> tuple:
         """Assigned peaks for attached nmrAtom belonging to this chemicalShiftList.
         """

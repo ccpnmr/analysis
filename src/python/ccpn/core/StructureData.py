@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-20 19:28:49 +0100 (Fri, September 20, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-12-05 10:35:15 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,8 +27,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import datetime
-from typing import Optional
 
+from ccpn.core.lib.CcpNmrProperties import CcpNmrUnicodeProperty
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as ApiNmrConstraintStore
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -93,7 +93,7 @@ class StructureData(AbstractWrapperObject):
         """Parent (containing) object."""
         return self._project
 
-    @property
+    @CcpNmrUnicodeProperty()
     def title(self) -> str:
         """Title of StructureData.
         """
@@ -107,7 +107,7 @@ class StructureData(AbstractWrapperObject):
         getLogger().warning('Deprecated, please use StructureData.name')
         self.name = value
 
-    @property
+    @CcpNmrUnicodeProperty()
     def name(self) -> str:
         """Name of StructureData.
         """
@@ -123,7 +123,7 @@ class StructureData(AbstractWrapperObject):
     def name(self, value: str):
         self.rename(value)
 
-    @property
+    @CcpNmrUnicodeProperty()
     def programName(self) -> str:
         """Name of program performing the calculation
         """
@@ -133,8 +133,10 @@ class StructureData(AbstractWrapperObject):
     def programName(self, value: str):
         self._wrappedData.programName = self._str2none(value)
 
-    @property
-    def programVersion(self) -> Optional[str]:
+    @CcpNmrUnicodeProperty(
+            allowNone=True
+            )
+    def programVersion(self) -> str | None:
         """Version of program performing the calculation
         """
         return self._none2str(self._wrappedData.programVersion)
@@ -143,8 +145,10 @@ class StructureData(AbstractWrapperObject):
     def programVersion(self, value: str):
         self._wrappedData.programVersion = self._str2none(value)
 
-    @property
-    def dataPath(self) -> Optional[str]:
+    @CcpNmrUnicodeProperty(
+            allowNone=True
+            )
+    def dataPath(self) -> str | None:
         """File path where structureData is stored"""
         return self._none2str(self._wrappedData.dataPath)
 
@@ -153,7 +157,7 @@ class StructureData(AbstractWrapperObject):
         self._wrappedData.dataPath = self._str2none(value)
 
     @property
-    def creationDate(self) -> Optional[datetime.datetime]:
+    def creationDate(self) -> datetime.datetime | None:
         """Creation timestamp for StructureData"""
         return self._wrappedData.creationDate
 
@@ -161,8 +165,10 @@ class StructureData(AbstractWrapperObject):
     def creationDate(self, value: datetime.datetime):
         self._wrappedData.creationDate = self._str2none(value)
 
-    @property
-    def uuid(self) -> Optional[str]:
+    @CcpNmrUnicodeProperty(
+            allowNone=True
+            )
+    def uuid(self) -> str | None:
         """Universal identifier for structureData"""
         return self._none2str(self._wrappedData.uuid)
 
@@ -170,8 +176,10 @@ class StructureData(AbstractWrapperObject):
     def uuid(self, value: str):
         self._wrappedData.uuid = self._str2none(value)
 
-    @property
-    def moleculeFilePath(self):
+    @CcpNmrUnicodeProperty(
+            allowNone=True
+            )
+    def moleculeFilePath(self) -> str | None:
         """
         :return: a filePath for corresponding molecule.
         E.g., PDB file path for displaying molecules in a molecular viewer
@@ -180,7 +188,6 @@ class StructureData(AbstractWrapperObject):
         return path
 
     @moleculeFilePath.setter
-    @ccpNmrV3CoreSetter()
     def moleculeFilePath(self, filePath: str = None):
         """
         :param filePath: a filePath for corresponding molecule

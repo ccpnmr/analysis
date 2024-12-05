@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 20:47:13 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-05 21:16:25 +0000 (Thu, December 05, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -1254,8 +1254,8 @@ class Gui(Ui, _Gui_V3_V4):
         if self.mainWindow:
             # ui/gui cleanup; not undo required
             with undoStack() as _:
-                self.mainWindow._stopPythonConsole()
                 self.mainWindow.deleteAllNotifiers()
+                self.mainWindow._stopPythonConsole()
                 self.mainWindow._closeMainWindowModules()
                 self.mainWindow._closeExtraWindowModules()
                 _sideBar = self.mainWindow._getSideBar()

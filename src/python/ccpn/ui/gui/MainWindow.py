@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 20:47:13 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-05 21:16:25 +0000 (Thu, December 05, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -92,7 +92,6 @@ _MULTIPLETS = 4
 _INTEGRAL_PEAKS = 8
 _MULTIPLET_PEAKS = 16
 
-READONLYCHANGED = 'readOnlyChanged'
 PROJECTSAVEAS = 'projectSaveAs'
 PROJECTSAVE = 'projectSave'
 _transparent = QtGui.QColor('orange')
@@ -199,9 +198,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
         # blank display opened later by the _initLayout if there is nothing to show otherwise
         self.writeStatusBar('Ready')
-
-        # GWV 5/12/24: disabled
-        # self._project._undo.undoChanged.add(self._undoChangeCallback)
 
         self._initKeyTimer()
         self._initReadOnlyIcon()
@@ -399,21 +395,26 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.writeStatusBar(successMessage)
         getLogger().info(successMessage)
 
+    def _readOnlyCallback(self, data):
+        """Notifier responds to change in the read-only state of the current project,
+        and updates the read-only icon.
+        """
+        QtCore.QTimer.singleShot(0, self._setReadOnlyIcon)
+
     def _projectNotifierCallback(self, data):
         """Notifier responds to change in the read-only state of the current project,
         and updates the read-only icon.
         """
         if (specifiers := data.get(Notifier.SPECIFIERS)):
-            if specifiers.get(READONLYCHANGED) is not None:
-                QtCore.QTimer.singleShot(0, self._setReadOnlyIcon)
-            elif specifiers.get(PROJECTSAVEAS) is not None or specifiers.get(PROJECTSAVE) is not None:
+            if specifiers.get(PROJECTSAVEAS) is not None or specifiers.get(PROJECTSAVE) is not None:
                 QtCore.QTimer.singleShot(0, self._projectSaveCallback)
 
     def _initKeyTimer(self):
         """
-        Create a timer to reset the keysequences by simulating an escape key if nothing pressed for a second
-        only affects this widget, runs every 0.5s
-        add a small label to the statusBar to show the last keys pressed
+        Create a timer to reset the key-sequences by simulating an escape key
+        if nothing pressed for a second.
+        Only affects this widget, runs every 0.5s.
+        Add a small label to the statusBar to show the last keys pressed.
         """
         # create timer, repeats every 500ms
         self._lastKeyTimer = QtCore.QTimer()
@@ -552,6 +553,10 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
         self.pythonConsole.setProject(project)
         self._updateWindowTitle()
+
+        self.setNotifier(project, [Notifier.OBSERVE], targetName='_readOnly',
+                         callback=self._readOnlyCallback
+                         )
 
         # # GWV - in Framework._initialiseProject
         # # sets working path to current path if required

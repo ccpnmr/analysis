@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:31:16 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-05 21:16:25 +0000 (Thu, December 05, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -47,6 +47,10 @@ import traceback
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
 from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
+
+from ccpn.core.lib.CcpNmrProperties import CcpNmrProperty, CcpNmrCoreObjectProperty, \
+    CcpNmrIntProperty, CcpNmrFloatProperty, CcpNmrUnicodeProperty, CcpNmrBoolProperty, \
+    CcpNmrTypedListProperty
 
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
@@ -1764,6 +1768,18 @@ class Project(AbstractWrapperObject):
     # readOnly handling
     #-----------------------------------------------------------------------------------------
 
+    @CcpNmrBoolProperty(default=True)
+    def _readOnly(self) -> bool:
+        """Read-only flag of the project (default=True)
+        """
+        return  (self._getInternalParameter(self._READONLYPARAMETER) or False)
+
+    @_readOnly.setter
+    def _readOnly(self, value: bool):
+        self._setInternalParameter(self._READONLYPARAMETER, value)
+        self._updateReadOnlyState()
+        self._updateLoggerState(readOnly=self.isReadOnly)
+
     @property
     def isReadOnly(self) -> bool:
         """:return the read-only state of the project.
@@ -1775,22 +1791,20 @@ class Project(AbstractWrapperObject):
         from ccpn.framework.Application import getApplication
 
         _app = getApplication()
-        _readOnly = (self._getInternalParameter(self._READONLYPARAMETER) or False)
-        result = (_readOnly or _app._applicationReadOnlyMode
+        # _readOnly = (self._getInternalParameter(self._READONLYPARAMETER) or False)
+        result = (self._readOnly or _app._applicationReadOnlyMode
                   ) and not self._saveOverrideState
         return result
 
     @logCommand('project.')
-    @ccpNmrV3CoreUndoBlock(readOnlyChanged=True)
-    def setReadOnly(self, readOnly):
+    def setReadOnly(self, readOnly: bool):
         """Set the read-only state of the project.
         """
         if not isinstance(readOnly, bool):
             raise TypeError(f'{self.__class__.__name__}.setReadOnly must be a bool')
 
-        self._setInternalParameter(self._READONLYPARAMETER, readOnly)
-        self._updateReadOnlyState()
-        self._updateLoggerState(readOnly=self.isReadOnly)
+        # self._setInternalParameter(self._READONLYPARAMETER, readOnly)
+        self._readOnly = readOnly
 
     def _updateReadOnlyState(self):
         """Update the state of the xmlLoader from the current read-only state

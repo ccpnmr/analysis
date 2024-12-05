@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:32:07 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-05 20:47:13 +0000 (Thu, December 05, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -2013,7 +2013,26 @@ class GuiSpectrumDisplay(CcpnModule):
         super()._closeModule()
         for sp in self.spectra:
             self._deleteSpectrumNotifiers(spectrum=sp)
-        self.mainWindow._deleteSpectrumDisplay(self)
+
+        # Do not add to undo/redo stack
+        with undoStackBlocking() as _:
+
+            _strips = list(self.strips)
+            # this makes it unrecoverable - okay, as strips not allowed to undo
+            for st in _strips:
+                # marks are not automatically deleted by the model when deleting strips
+                for mark in st.marks:
+                    mark.delete()
+                st.close()
+
+            # marks are not automatically deleted by the model when deleting strips
+            for mark in self.marks:
+                mark.delete()
+
+            # delete self from api model data
+            self.delete()
+            # delete self as a widget
+            self.deleteLater()
 
     def _removeIndexStrip(self, value):
         self.deleteStrip(self.strips[value])

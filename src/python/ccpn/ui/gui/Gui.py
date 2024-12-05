@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:32:07 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-05 20:47:13 +0000 (Thu, December 05, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -443,13 +443,14 @@ class Gui(Ui, _Gui_V3_V4):
 
         self._tipOfTheDayManager = TipOfTheDayManager(gui=self, preferences=application.preferences)
 
-    def _initialise(self, mainWindow, project):
+    def _initialise(self, mainWindow):
         """UI operations done after every project load/create
         """
         if mainWindow is None:
             raise ValueError('Gui.initialize(): Undefined mainWindow')
 
-        super()._initialise(mainWindow=mainWindow, project=project)
+        # The super() call sets the linkage to mainWindow
+        super()._initialise(mainWindow=mainWindow)
 
         with notificationEchoBlocking():
             # with undoStackBlocking(debugText='Gui.initialize'):
@@ -597,8 +598,8 @@ class Gui(Ui, _Gui_V3_V4):
         from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
 
         _app = self.application
+        project = _app.project
         if _app.preferences.general.autoCorrectColours:
-            project = _app.project
             # change sp colours
             for sp in project.spectra:
                 if len(sp.axisCodes) > 1:
@@ -711,7 +712,6 @@ class Gui(Ui, _Gui_V3_V4):
         # The next two lines are essential to have the QT main event loop associated
         # with the new mainWindow; without these, the program just terminates
         self.mainWindow.show()
-        # QtWidgets.QApplication.setActiveWindow(self.mainWindow)
         self._qtApp.setActiveWindow(self.mainWindow)
 
     def startUi(self):
@@ -752,6 +752,7 @@ class Gui(Ui, _Gui_V3_V4):
         _sideBar = self.mainWindow._getSideBar()
         _sideBar.buildTree(self.project, clear=True)
         # self.mainWindow._updateRestoreArchiveMenu()
+        self.mainWindow._setReadOnlyIcon()
         self.mainWindow.namespace['current'] = self.application.current
 
     def echoCommands(self, commands: typing.List[str]):

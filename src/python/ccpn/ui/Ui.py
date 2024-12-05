@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-27 18:58:35 +0000 (Wed, November 27, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-05 20:47:13 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -88,7 +88,7 @@ class Ui(NotifierBase):
         """
         return self.application.current
 
-    def _initialise(self, mainWindow, project):
+    def _initialise(self, mainWindow):
         """UI operations done after every project load/create
         """
         self._mainWindow = mainWindow

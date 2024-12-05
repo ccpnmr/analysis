@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:32:08 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-05 20:47:13 +0000 (Thu, December 05, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -173,9 +173,12 @@ class CcpnModuleArea(ModuleArea, DropBase):
         # self._modulesNames = {}
         # self._ccpnModules = []
         # self._modules = {}  # don't use self.docks, is not updated when removing docks
-        self._openedSpectrumDisplays = []  # keep track of the order of opened spectrumDisplays
+
+        # keep track of the order of opened spectrumDisplays
+        # GWV: this seems necessary for restoring layouts
+        self._openedSpectrumDisplays = []
+
         self._seenModuleStates = {}  # {className: {moduleName:'', state:widgetsState}}
-        # self.setAcceptDrops(True) GWV not needed; handled by DropBase init
 
         self.textLabel = DropAreaLabel
         self.fontLabel = getFont(size='MAXIMUM')
@@ -536,9 +539,9 @@ class CcpnModuleArea(ModuleArea, DropBase):
                     modules.append(module)
         return modules
 
-    def _updateSpectrumDisplays(self):
-        self._openedSpectrumDisplays = [x for x in self._openedSpectrumDisplays if
-                                        x in self.mainWindow.spectrumDisplays]
+    # def _updateSpectrumDisplays(self):
+    #     self._openedSpectrumDisplays = [x for x in self._openedSpectrumDisplays if
+    #                                     x in self.mainWindow.spectrumDisplays]
 
     def _isNameEditing(self):
         """
@@ -585,16 +588,22 @@ class CcpnModuleArea(ModuleArea, DropBase):
             if self.temporary and self.home:
                 self.home.removeTempArea(self)
 
-    def _closeOthers(self, moduleToClose):
-        modules = [module for module in self.ccpnModules if module != moduleToClose]
+    def _closeOthers(self, moduleToKeep):
+        """Close all modules except moduleToKeep
+        CCPNMRINTERNAL: used in context menu of CcpnModule
+        """
+        modules = [module for module in self.ccpnModules if module != moduleToKeep]
         for module in modules:
+            self._openedSpectrumDisplays.remove(module)
             module._closeModule()
 
     def _closeAll(self):
+        """Close all modules of the module area
+        """
         # _modules = list(self.docks.values()) # instant crash on loading test_formats2
         _modules = self.ccpnModules
         for module in _modules:
-            getLogger().debug(f'Closing module {module}')
+            self._openedSpectrumDisplays.remove(module)
             module._closeModule()
 
     ## docksOnly is used for in memory save and restore for the module maximise save and restore system

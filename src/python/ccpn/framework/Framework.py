@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:31:17 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-05 20:47:13 +0000 (Thu, December 05, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -297,13 +297,12 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         """
         return self._applicationReadOnlyMode
 
-    def setApplicationReadOnly(self, value):
+    def setApplicationReadOnly(self, value: bool):
         """Set the global application readOnly state.
+        :param bool value: True/False flag for the readOnly state
         """
         if not isinstance(value, bool):
             raise TypeError(f'{self.__class__.__name__}.setApplicationReadOnly must be a bool')
-        if value == self._applicationReadOnlyMode:
-            return
         self._applicationReadOnlyMode = value
         if self.project:
             self.project._updateReadOnlyState()
@@ -607,13 +606,13 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
         # newProject._initialise() wraps the underlying data, including the wrapped graphics data;
         # i.e. it obtains a new MainWindow instance and returns this for further initialisations
-        self._project, _mainWindow = newProject._initialise(application=self, debugLevel=self._debugLevel)
+        _, _mainWindow = newProject._initialise(application=self, debugLevel=self._debugLevel)
 
         if self.hasGui:
-            self.ui._initialise(mainWindow=_mainWindow, project=newProject)
+            self.ui._initialise(mainWindow=_mainWindow)
         else:
             # The NoUi version has no mainWindow
-            self.ui._initialise(mainWindow=None, project=newProject)
+            self.ui._initialise(mainWindow=None)
 
         # GWV 24/2/24: moved to Project._initialise()
         # newProject._resetUndo(debug=self._debugLevel <= Logging.DEBUG2,
@@ -1079,13 +1078,6 @@ class Framework(HasCcpNmrProperties, NotifierBase):
             self._initialiseProject(_project)  # This also set the linkages
 
         getLogger().debug(f'Opened project "{name}" at {_project.path}')
-
-        # update the logger read-only state
-        _project._updateReadOnlyState()
-        _project._updateLoggerState(readOnly=_project.isReadOnly)
-        if self.mainWindow:
-            self.mainWindow._setReadOnlyIcon()
-
         return _project
 
     # @logCommand('application.')  # decorated in ui class

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:31:17 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-05 20:47:13 +0000 (Thu, December 05, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -1494,7 +1494,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """
         event.ignore()
         # pass control to _closeEvent - this cleans up the focus between windows/popups
-        QtCore.QTimer.singleShot(0, self.Í_closeWindow)
+        QtCore.QTimer.singleShot(0, self._closeWindow)
 
     def _closeEvent(self, event=None, disableCancel=False):
         """Handle close event from other methods

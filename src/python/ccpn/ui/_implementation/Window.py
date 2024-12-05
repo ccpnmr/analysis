@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:32:07 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-05 20:47:13 +0000 (Thu, December 05, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -580,55 +580,31 @@ class Window(AbstractWrapperObject):
 
     def _deleteSpectrumDisplay(self, display):
         """Delete a spectrumDisplay from the moduleArea
-        Removes the display to a hidden moduleArea of mainWindow, deletes the _wrappedData, and disables all notifiers
-        Object is recovered through the deleteObject decorator
         """
-        # with undoBlockWithoutSideBar():
-        with undoStackBlocking() as _:  # Do not add to undo/redo stack
+        # Removes the display to a hidden moduleArea of mainWindow, deletes the _wrappedData, and disables all notifiers
+        # Object is recovered through the deleteObject decorator
+        display._closeModuleDisplay()
 
-            # # get the current state of the layout
-            # _list = self._getModuleInsertList(moduleArea=display.area)
-
-            # # get the list of spectra currently displayed in the spectrumDisplay
-            # specViewList = [(specView, action.isChecked()) for specView in display.spectrumViews
-            #                 for action in display.spectrumToolBar.actions()
-            #                 if action.objectName() == specView.spectrum.pid]
-            #
-            # with undoStackBlocking() as addUndoItem:
-            #     # re-insert spectrumToolbar
-            #     addUndoItem(undo=partial(self._recoverSpectrumToolbar, display, specViewList), )
-            #
-            #     # disable all notifiers in spectrumDisplays
-            #     addUndoItem(undo=partial(self._setBlankingSpectrumDisplayNotifiers, display, False),
-            #                 redo=partial(self._setBlankingSpectrumDisplayNotifiers, display, True))
-            #
-            #     # add/remove spectrumDisplay from module Area - using moveDock method
-            #     addUndoItem(undo=partial(self._restoreModules, _list),
-            #                 redo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None), )
-
-            # # disable the spectrumDisplay notifiers
-            # self._setBlankingSpectrumDisplayNotifiers(display, True)
-
-            # # move to the hidden module area
-            # self._hiddenModules.moveDock(display, position='top', neighbor=None)
-
-            _strips = list(display.strips)
-            # this makes it unrecoverable - okay, as strips not allowed to undo
-            for st in _strips:
-                # marks are not automatically deleted by the model when deleting strips
-                for mark in st.marks:
-                    mark.delete()
-                st.close()
-
-            # marks are not automatically deleted by the model when deleting strips
-            for mark in display.marks:
-                mark.delete()
-
-            # delete the spectrumDisplay
-            display.delete()
-
-            # Update the list of opened GUI SpectrumDisplays modules
-            self.moduleArea._updateSpectrumDisplays()
+        # # Do not add to undo/redo stack
+        # with undoStackBlocking() as _:
+        #
+        #     _strips = list(display.strips)
+        #     # this makes it unrecoverable - okay, as strips not allowed to undo
+        #     for st in _strips:
+        #         # marks are not automatically deleted by the model when deleting strips
+        #         for mark in st.marks:
+        #             mark.delete()
+        #         st.close()
+        #
+        #     # marks are not automatically deleted by the model when deleting strips
+        #     for mark in display.marks:
+        #         mark.delete()
+        #
+        #     # delete the spectrumDisplay
+        #     display.delete()
+        #
+        #     # Update the list of opened GUI SpectrumDisplays modules
+        #     self.moduleArea._updateSpectrumDisplays()
 
     @logCommand('mainWindow.')
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],

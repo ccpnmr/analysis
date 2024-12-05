@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-11 17:55:36 +0100 (Wed, September 11, 2024) $"
-__version__ = "$Revision: 3.2.6 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-05 20:47:14 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -57,10 +57,14 @@ class Menu(QtWidgets.QMenu, Base):
         self.isFloatWidget = isFloatWidget
         self.setToolTipsVisible(True)
 
-    def addItem(self, text, shortcut=None, callback=None, checked=True, checkable=False, icon=None, toolTip=None,
-                **kwargs):
+    def addItem(self, text, shortcut=None, callback=None,
+                      checked=True, checkable=False, enabled=True,
+                      icon=None, toolTip=None,
+                      **kwargs
+                ):
         action = Action(self.getParent(), text, callback=callback, shortcut=shortcut,
-                        checked=checked, checkable=checkable, icon=icon, toolTip=toolTip,
+                        checked=checked, checkable=checkable, enabled=enabled,
+                        icon=icon, toolTip=toolTip,
                         isFloatWidget=self.isFloatWidget, **kwargs)
         self.addAction(action)
         return action

@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-26 13:30:14 +0000 (Tue, November 26, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-05 08:09:12 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1124,7 +1124,7 @@ class StripHeaderWidget(_OpenGLFrameABC):
     def close(self):
         # clean up notifiers
         if self._nmrResidueNotifier:
-            self._nmrResidueNotifier.unRegister()
+            self._nmrResidueNotifier.unRegisterNotifier()
         self._nmrResidueNotifier = None
         super().close()
 

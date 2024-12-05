@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-27 15:46:52 +0000 (Wed, November 27, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-05 17:31:16 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1215,8 +1215,9 @@ class Project(AbstractWrapperObject):
         :param debugLevel: the current debug level, used for settng the logger and undo
         :return (self, mainWindow)
         """
+        # local import to avoid cycles
         from ccpn.core.ChemicalShiftList import DEFAULT_CHEMICALSHIFTLIST
-        from ccpn.ui.gui.guiSettings import _styleBlue
+        from ccpn.core.NmrChain import DEFAULT_NMRCHAINCODE
 
         self._application = application
 
@@ -1233,7 +1234,7 @@ class Project(AbstractWrapperObject):
         self._mainWindow = None  # set by MainWindow.__init__()
 
         # initialise, creating the children; pass in self as we are initialising
-        with inactivity(project=self, debugText='Initialising project'):
+        with (inactivity(project=self, debugText='Initialising project')):
 
             with AbstractWrapperObject._doRestore(self.__class__):
 
@@ -1251,18 +1252,22 @@ class Project(AbstractWrapperObject):
                 self._makeCollections()
                 self._makeCrossReferences()
 
-                # Call any updates
-                self._update()
+                # Call any post-init updates
+                self._updatePostProjectInit()
 
                 # finalise restoration of project
                 self._postRestore()
             # end restoring objects
 
-            # we always have the default chemicalShift list, so nothing on undo stack
-            if not self.chemicalShiftLists:
-                with undoStack():
+            with undoStack():
+                # we always want the default ChemicalShiftList
+                if (_csl := self.getChemicalShiftList(DEFAULT_CHEMICALSHIFTLIST)) is None:
                     getLogger().debug(f'Project.initialise: creating ChemicalShiftList {DEFAULT_CHEMICALSHIFTLIST!r}')
-                    self.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
+                    _csl = self.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
+                # we always want the default NmrChain
+                if (_nc := self.getNmrChain(DEFAULT_NMRCHAINCODE)) is None:
+                    getLogger().debug(f'Project.initialise: creating NmrChain {DEFAULT_NMRCHAINCODE!r}')
+                    _nc = self.newNmrChain(DEFAULT_NMRCHAINCODE)
 
             # check directories for possible read-only
             _projectPath = aPath(self.path)
@@ -1276,6 +1281,7 @@ class Project(AbstractWrapperObject):
                 self.setReadOnly(True)
             else:
                 self.setReadOnly(self.isReadOnly)
+
         self._setUnmodified()
 
         # remove mainWindow from Project instance, and to be returned+
@@ -1467,8 +1473,9 @@ class Project(AbstractWrapperObject):
                                         # hierarchy may still delete bottom-level items
                                         apiObj.delete()
 
-                                except Exception:
+                                except Exception as es:
                                     # there might still be an issue with the removal order
+                                    getLogger().debug2(f'Delete of {apiObj} failed: {es}')
                                     retries.append(apiObj)
 
                             # perform a second pass to catch all the lowest-level items
@@ -1487,7 +1494,7 @@ class Project(AbstractWrapperObject):
                                     # only log anything weird
                                     getLogger().debug2(f'issue purging {apiHint}  -->  {es}')
 
-        getLogger().debug('Done purge')
+        getLogger().debug('Done API purge')
 
     def close(self):
         raise RuntimeError('Please use application.closeProject()')
@@ -1768,8 +1775,10 @@ class Project(AbstractWrapperObject):
         from ccpn.framework.Application import getApplication
 
         _app = getApplication()
-        return ((self._getInternalParameter(self._READONLYPARAMETER) or False) or _app._applicationReadOnlyMode) \
-            and not self._saveOverrideState
+        _readOnly = (self._getInternalParameter(self._READONLYPARAMETER) or False)
+        result = (_readOnly or _app._applicationReadOnlyMode
+                  ) and not self._saveOverrideState
+        return result
 
     @logCommand('project.')
     @ccpNmrV3CoreUndoBlock(readOnlyChanged=True)
@@ -2425,7 +2434,7 @@ class Project(AbstractWrapperObject):
                               includeDefaultChildren=includeDefaultChildren, checkValidity=checkValidity)
         return apiStatus
 
-    def _update(self):
+    def _updatePostProjectInit(self):
         """Call the _updateObject(UPDATE_POST_PROJECT_INITIALISATION) method on
         all objects, including self
         """
@@ -2936,7 +2945,6 @@ class Project(AbstractWrapperObject):
         :return: a new NmrChain instance.
         """
         from ccpn.core.NmrChain import _newNmrChain
-
         return _newNmrChain(self, shortName=shortName, isConnected=isConnected,
                             label=label, comment=comment)
 
@@ -2950,7 +2958,6 @@ class Project(AbstractWrapperObject):
         :return: an NmrChain instance.
         """
         from ccpn.core.NmrChain import _fetchNmrChain
-
         return _fetchNmrChain(self, shortName=shortName)
 
     @logCommand('project.')
@@ -3414,7 +3421,6 @@ class Project(AbstractWrapperObject):
         """Return the collection from the supplied name
         """
         from ccpn.core.Collection import _getCollection
-
         return _getCollection(self, name=name)
 
     @logCommand('project.')
@@ -3426,7 +3432,6 @@ class Project(AbstractWrapperObject):
         :return: a new Collection instance.
         """
         from ccpn.core.Collection import _fetchCollection
-
         return _fetchCollection(self, name=name)
 
     @logCommand('project.')
@@ -3438,7 +3443,6 @@ class Project(AbstractWrapperObject):
         :return: a new Bond instance.
         """
         from ccpn.core.Bond import _newBond
-
         return _newBond(self, **kwds)
 
     def __repr__(self):
@@ -3487,7 +3491,7 @@ def _newProject(application, name: str, path: Path, isTemporary: bool = False) -
     # writes the project version-history
     project._saveHistory = newProjectSaveHistory(project.path)
 
-    # GWV: Create ChemicalShiftList; Cannot do this here, as the undo machineryis not
+    # GWV: Create ChemicalShiftList; Cannot do this here, as the undo machinery is not
     # yet inplace, as currently (14/11/2024) no way to bypass
     # getLogger().debug(f'Project.initialise: creating ChemicalShiftList {DEFAULT_CHEMICALSHIFTLIST!r}')
     # project.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
@@ -3495,7 +3499,7 @@ def _newProject(application, name: str, path: Path, isTemporary: bool = False) -
     # project._updateReadOnlyState()
     # project._updateLoggerState()  # these should always be together
 
-    # the Project initialisation is completed by Project._initialiseProject(), which is called from
+    # the Project initialisation is completed by Project._initialise(), which is called from
     # Framework._initialiseProject when it has done its things.
     # This also checks for the writing of the directories and sets the linkages between
     # application and project.

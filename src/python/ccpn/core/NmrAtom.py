@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 16:23:29 +0100 (Sat, October 26, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-12-05 17:31:15 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,21 +27,24 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import math
+from collections import defaultdict
 from typing import Union, Tuple, Sequence
+
+from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+
+from ccpn.core.NmrChain import DEFAULT_NMRCHAINCODE
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.AbsorbResonance import absorbResonance
 from ccpn.core.lib import Pid
 from ccpn.core.lib.Util import AtomIdTuple
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpnmodel.ccpncore.lib import Constants
+from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, ccpNmrV3CoreSetter
+
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
 from ccpn.util.isotopes import isotopeCode2Nucleus, getIsotopeRecords
-from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
-from collections import defaultdict
 
 
 UnknownIsotopeCode = '?'
@@ -759,7 +762,7 @@ def _produceNmrAtom(self: Project, atomId: str = None, chainCode: str = None,
                     )
 
         # Produce chain
-        nmrChain = self.fetchNmrChain(shortName=chainCode or Constants.defaultNmrChainCode)
+        nmrChain = self.fetchNmrChain(shortName=chainCode or DEFAULT_NMRCHAINCODE)
         nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
         result = nmrResidue.fetchNmrAtom(name)
 

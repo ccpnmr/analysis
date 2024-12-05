@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-21 16:05:20 +0100 (Thu, November 21, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2024-12-05 17:31:17 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -74,7 +74,7 @@ from ccpn.core.Substance import Substance
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
 from ccpn.core.Atom import Atom
-from ccpn.core.NmrChain import NmrChain
+from ccpn.core.NmrChain import NmrChain, DEFAULT_NMRCHAINCODE
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
@@ -7474,8 +7474,8 @@ class CcpnNefReader(CcpnNefContent):
             if not self._checkImport(saveFrame, parameters.get('shortName')):
                 continue
 
-            if parameters['shortName'] == coreConstants.defaultNmrChainCode:
-                nmrChain = project.getNmrChain(coreConstants.defaultNmrChainCode)
+            if parameters['shortName'] == DEFAULT_NMRCHAINCODE:
+                nmrChain = project.getNmrChain(DEFAULT_NMRCHAINCODE)
             else:
                 nmrChain = creatorFunc(**parameters)
             try:
@@ -7601,8 +7601,8 @@ class CcpnNefReader(CcpnNefContent):
         loop = saveFrame[nmrChainLoopName]
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
-            if parameters['shortName'] == coreConstants.defaultNmrChainCode:
-                result = verifyFunc(coreConstants.defaultNmrChainCode)
+            if parameters['shortName'] == DEFAULT_NMRCHAINCODE:
+                result = verifyFunc(DEFAULT_NMRCHAINCODE)
             else:
                 name = parameters['shortName']
                 result = verifyFunc(name)
@@ -8148,7 +8148,7 @@ class CcpnNefReader(CcpnNefContent):
         """Get NmrChain, correcting for possible errors"""
 
         if chainCode is None:
-            chainCode = coreConstants.defaultNmrChainCode
+            chainCode = DEFAULT_NMRCHAINCODE
         newChainCode = chainCode
         while True:
             try:

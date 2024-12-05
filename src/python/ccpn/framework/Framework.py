@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-13 11:03:53 +0000 (Wed, November 13, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2024-12-05 17:31:17 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -612,10 +612,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         if self.hasGui:
             self.ui._initialise(mainWindow=_mainWindow, project=newProject)
         else:
-            # The No
-            #
-            #
-            # Ui version has no mainWindow
+            # The NoUi version has no mainWindow
             self.ui._initialise(mainWindow=None, project=newProject)
 
         # GWV 24/2/24: moved to Project._initialise()
@@ -1414,13 +1411,14 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         from ccpn.core.lib.ProjectLib import _finaliseV2Upgrade
 
         try:
+            # always close old project BEFORE valid load
+            self._closeProject()
             project = _loadV2Project(application=self, path=path)
         except (ValueError, RuntimeError) as es:
             getLogger().warning(f'Error loading {str(path)!r}: {es}')
         else:
-            self._closeProject()  # always close old project AFTER valid load
             self._initialiseProject(project)  # This also sets the linkages
-            #TODO:GWV/EB Should this go into _loadV2Project
+            #TODO:GWV/EB Should/could this go into _loadV2Project
             _finaliseV2Upgrade(project)
             return [project]
         return []
@@ -1434,11 +1432,12 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         from ccpn.core.Project import _loadV3Project
 
         try:
+            # always close old project BEFORE valid load
+            self._closeProject()
             project = _loadV3Project(application=self, path=path)
         except (ValueError, RuntimeError, FileNotFoundError) as es:
             getLogger().warning(f'Error loading {str(path)!r}: {es}')
         else:
-            self._closeProject()  # always close old project AFTER valid load
             self._initialiseProject(project)  # This also sets the linkages
             return [project]
         return []

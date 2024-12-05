@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-21 18:22:23 +0100 (Thu, November 21, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2024-12-05 17:31:17 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -643,8 +643,9 @@ def undoStackBlocking(application=None, project=None, debugText=''):
         # transfer control to the calling function, and pass the addUndoItems function
         yield addUndoItem
 
-    except AttributeError as es:
-        raise es
+    except Exception as es:
+        getLogger().debug(f'UndoStack encountered an error: {es}')
+        raise Exception from es
 
     finally:
         # clean up after blocking undo items

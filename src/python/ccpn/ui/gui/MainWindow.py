@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 15:30:18 +0000 (Mon, November 11, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2024-12-05 17:31:17 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -161,8 +161,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.moduleArea.setContentsMargins(0, 2, 2, 0)
         self.setCentralWidget(self.moduleArea)
 
-        self._hiddenModules = CcpnModuleArea(mainWindow=self)
-        self._hiddenModules.setVisible(False)
+        # self._hiddenModules = CcpnModuleArea(mainWindow=self)
+        # self._hiddenModules.setVisible(False)
 
         # init Module layout dict
         self._moduleLayout = None
@@ -190,6 +190,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._setMouseMode(SELECT)
 
         # Notifiers
+        self._screenChangedEventSet: bool = False  # flag to track setting of the screenChanged
         self._setupNotifiers()
 
         self.feedbackPopup = None
@@ -199,8 +200,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # blank display opened later by the _initLayout if there is nothing to show otherwise
         self.writeStatusBar('Ready')
 
-        #TODO:ED This looks very suspicious; must be a better way with a Notifier
-        self._project._undo.undoChanged.add(self._undoChangeCallback)
+        # GWV 5/12/24: disabled
+        # self._project._undo.undoChanged.add(self._undoChangeCallback)
 
         self._initKeyTimer()
         self._initReadOnlyIcon()
@@ -267,7 +268,10 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         super().show()
         # install handler to resize when moving between displays
         #   cannot be done in __init__ as crashes on linux/windows :O
-        self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+        # self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+        if not self._screenChangedEventSet:
+            self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+            self._screenChangedEventSet = True
 
     def _checkPalette(self, pal: QtGui.QPalette, theme: str = None, themeColour: str = None, themeSD: str = None):
         # test the stylesheet of the QTableView
@@ -446,15 +450,16 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     def makeDisabledFileIcon(self, icon):
         return icon
 
-    def _undoChangeCallback(self, message):
-
-        amDirty = self._project._undo.isDirty()
-        self.setWindowModified(amDirty)
-
-        if not self.project.isTemporary:
-            self.setWindowFilePath(self.application.project.path)
-        else:
-            self.setWindowFilePath("")
+    # GWV: disable as it seems dangerous and messy
+    # def _undoChangeCallback(self, message):
+    #
+    #     amDirty = self._project._undo.isDirty()
+    #     self.setWindowModified(amDirty)
+    #
+    #     if not self.project.isTemporary:
+    #         self.setWindowFilePath(self.application.project.path)
+    #     else:
+    #         self.setWindowFilePath("")
 
         ## Why do we need to set this icons? Very odd behaviour.
         # if self.project.isTemporary:
@@ -1453,17 +1458,14 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.moduleArea.addModule(module, position=position, relativeTo=relativeTo)
 
     def _closeMainWindowModules(self):
-        """Close modules in main window;
+        """Close all modules in main window;
         CCPNINTERNAL: also called from Framework
         """
-        for module in self.moduleArea.ccpnModules:
-            getLogger().debug('Closing module: %s' % module)
-            try:
-                module.setVisible(False)  # GWV not sure why, but this was the effect of prior code
-                module.close()
-            except Exception as es:
-                # wrapped C/C++ object of type StripDisplay1d has been deleted
-                getLogger().debug(f'_closeMainWindowModules: {es}')
+        try:
+            self.moduleArea._closeAll()
+        except Exception as es:
+            # wrapped C/C++ object of type StripDisplay1d has been deleted
+            getLogger().debug(f'_closeMainWindowModules: {es}')
 
     def _closeExtraWindowModules(self):
         """Close modules in any extra window;
@@ -1492,7 +1494,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """
         event.ignore()
         # pass control to _closeEvent - this cleans up the focus between windows/popups
-        QtCore.QTimer.singleShot(0, self._closeWindow)
+        QtCore.QTimer.singleShot(0, self.Í_closeWindow)
 
     def _closeEvent(self, event=None, disableCancel=False):
         """Handle close event from other methods

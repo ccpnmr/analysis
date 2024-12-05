@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 12:15:02 +0000 (Fri, November 08, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2024-12-05 17:31:16 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -946,7 +946,6 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         # rename functions from here
         oldName = self.name
         # self._oldPid = self.pid
-
         self._wrappedData.name = name
 
         return (oldName,)
@@ -1009,8 +1008,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             raise ValueError('Invalid updateMethod "%s"' % updateMethod)
         self._updater.update(updateMethod, obj=self)
 
-    # A class attribute to track depath of object restoring;
-    # root (i.e. Project would become level 0)
+    # A class attribute to track depth of object restoring;
+    # root (i.e. Project) would become level 0
     _objectRestoreLevel = -1
 
     @contextmanager

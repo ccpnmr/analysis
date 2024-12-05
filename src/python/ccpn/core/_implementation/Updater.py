@@ -11,8 +11,9 @@ and its children have been fully initialised.
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -20,9 +21,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:47 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-05 17:31:16 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -66,7 +67,7 @@ class Updater(object):
         # update the object
         raise NotImplementedError('Not yet implemented')
 
-    def _updateV3Object(self, obj, updateFunctions):
+    def _updateV3Object(self, obj, updateFunctions: list | tuple):
         """Updates obj using the updateFunctions stack for obj.className;
         """
         if len(updateFunctions) == 0:
@@ -74,7 +75,7 @@ class Updater(object):
 
         logger = getLogger()
 
-        with inactivity(application=obj.project.application, debugText=f'_updateV3Object {obj}, checking for {len(updateFunctions)} update functions'):
+        with inactivity(debugText=f'_updateV3Object {obj}, checking for {len(updateFunctions)} update functions'):
 
             for fromVersion, toVersion, func in updateFunctions:
                 currentVersion = VersionString(obj._objectVersion.withoutRelease())
@@ -95,13 +96,17 @@ class Updater(object):
         """
 
         if updateMethod == UPDATE_PRE_OBJECT_INITIALISATION:
-            self._updateApiObject(obj, self.preObjectUpdateFunctions[klass.className])
+            if (_funcs := self.preObjectUpdateFunctions[klass.className]):
+                self._updateApiObject(obj, _funcs)
 
         elif updateMethod == UPDATE_POST_OBJECT_INITIALISATION:
-            self._updateV3Object(obj, self.postObjectUpdateFunctions[obj.className])
+            if (_funcs := self.preObjectUpdateFunctions[obj.className]):
+                self._updateV3Object(obj, _funcs)
 
         elif updateMethod == UPDATE_POST_PROJECT_INITIALISATION:
-            self._updateV3Object(obj, self.postProjectUpdateFunctions[obj.className])
+            # This update is called for each object post project initialisation
+            if (_funcs := self.preObjectUpdateFunctions[obj.className]):
+                self._updateV3Object(obj, self.postProjectUpdateFunctions[obj.className])
             # The object is by definition now at the current application version state
             obj._objectVersion = applicationVersion
 
@@ -113,7 +118,7 @@ class Updater(object):
 
 
 def updateObject(fromVersion, toVersion, updateFunction, updateMethod):
-    """Class decorator to register updateFunction for a core-class for one of the
+    """Class decorator to register updateFunction for a core-class for one of
     the three update methods
 
     updateFunction updates the objects -objectVersion attribute from "fromVersion"

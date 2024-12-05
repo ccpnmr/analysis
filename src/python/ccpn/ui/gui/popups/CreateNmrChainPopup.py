@@ -5,8 +5,9 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-05-13 13:17:42 +0100 (Mon, May 13, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-05 17:31:18 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -116,7 +117,7 @@ class CreateNmrChainPopup(CcpnDialogMainWidget):
 
         # GUI
         vGrid = 0
-        self.createNewLabel = Label(_topWidget, text="Create New", grid=(vGrid, 0))
+        self.createNewLabel = Label(_topWidget, text="Create New", grid=(vGrid, 0), hAlign='right')
         self.createNewWidget = RadioButton(_topWidget,
                                            callback=self._selectCreateEmpty,
                                            grid=(vGrid, 1),
@@ -124,7 +125,7 @@ class CreateNmrChainPopup(CcpnDialogMainWidget):
         vGrid += 1
         _topWidget.addSpacer(0, 10, grid=(vGrid, 0))
         vGrid += 1
-        self.cloneFromLabel = Label(_topWidget, text="Clone from", grid=(vGrid, 0))
+        self.cloneFromLabel = Label(_topWidget, text="Clone from", grid=(vGrid, 0), hAlign='right')
         self.cloneOptionsWidget = RadioButtons(_topWidget, texts=CloneOptions,
                                                callback=self._cloneOptionCallback,
                                                direction='v',
@@ -167,7 +168,7 @@ class CreateNmrChainPopup(CcpnDialogMainWidget):
         vGrid += 1
         _topWidget.addSpacer(0, 10, grid=(vGrid, 0))
         vGrid += 1
-        self.labelName = Label(_topWidget, text="Name", grid=(vGrid, 0), )
+        self.labelName = Label(_topWidget, text="Name", grid=(vGrid, 0), hAlign='right' )
         self.nameLineEdit = LineEdit(_topWidget, grid=(vGrid, 1), textAlignment='left')
         vGrid += 1
         self.prefixName = Label(_topWidget, text="SequenceCode Prefix", grid=(vGrid, 0), tipText=PREFIXTipText)

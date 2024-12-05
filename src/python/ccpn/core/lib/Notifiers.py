@@ -31,8 +31,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-22 12:10:16 +0100 (Fri, November 22, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2024-12-05 17:31:17 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -199,9 +199,12 @@ class NotifierABC(object):
 
     @property
     def setterObject(self):
-        """:return the setterObject  of self
+        """:return the setterObject of self
         """
-        return self._setterObject()  # ._setterObject is a weakRef
+        if self._setterObject is None:
+            return None
+        else:
+            return self._setterObject()  # ._setterObject is a weakRef
 
     @property
     def isRegistered(self) -> bool:
@@ -247,6 +250,8 @@ class NotifierABC(object):
         if self._debug:
             sys.stderr.write('>>> unRegister %s\n' % self)
 
+        # if self.id == 122:
+        #     pass
         if not self.isRegistered:
             raise RuntimeError(f'unregisterNotifier(): {self} is not registered')
 
@@ -302,19 +307,25 @@ class NotifierABC(object):
                 _exec = 'executing'
             else:
                 _exec = 'silent'
-
-            _pid = self._theObject.pid if hasattr(self._theObject, 'pid') else self._theObject.__class__.__name__
-
-            # return f'<{self.__class__.__name__} {self.id} ({_exec}): theObject={_pid!r}: {self._trigger!r}->{self._targetName!r}>'
-
         else:
             _exec = 'unregistered'
-            _pid = self._theObject.pid if (self._theObject and hasattr(self._theObject, 'pid'))\
-                                           else 'None'
 
-            # return f'<{self.__class__.__name__} {self.id} (unregistered): theObject=None: {self._trigger!r}->{self._targetName!r}>'
+        _obj = self.theObject
+        if _obj is None:
+            _pid = 'None'
+        elif hasattr(_obj, 'pid'):
+            _pid = _obj.pid
+        else:
+            _pid = _obj.__class__.__name__
 
-        _setter = self.setterObject.pid if hasattr(self.setterObject, 'pid') else self.setterObject.__class__.__name__
+        _setterObj = self.setterObject
+        if _setterObj is None:
+            _setter = 'None'
+        elif hasattr(_setterObj, 'pid'):
+            _setter = _setterObj.pid
+        else:
+            _setter = _setterObj.__class__.__name__
+
         _name = self.__class__.__name__
 
         return f'<{_name} {self.id} ({_exec}): {_pid}:({self._trigger!r}->{self._targetName!r},{self._appliesToTheObject}); setter:{_setter}>'
@@ -1135,9 +1146,10 @@ class NotifierBase(object):
         """
         objNotifiers = self._objectNotifiersDict
         # allNotifiers returns a list, as contents are being changed this is crucial
-        for notifier in objNotifiers.allNotifiers:
-            notifier.unRegisterNotifier()
-            del(notifier)
+        _allNotifiers = _WeakRefList(objNotifiers.allNotifiers)
+        while (_notifier := _allNotifiers.pop()) is not None:
+            _notifier.unRegisterNotifier()
+            del(_notifier)
 
     def _getRegisteredNotifiersBySetter(self, setterObject) -> list[NotifierABC]:
         """:return a list of the registered notifier with ntf.setterObject == setterObject

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-22 12:10:17 +0100 (Fri, November 22, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2024-12-05 17:32:07 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -266,10 +266,8 @@ class GuiSpectrumDisplay(CcpnModule):
         self._spectrumDisplaySettings.stripArrangementChanged.connect(self._stripDirectionChangedInSettings)
         self._spectrumDisplaySettings.zPlaneNavigationModeChanged.connect(self._zPlaneNavigationModeChangedInSettings)
 
-        # notifier to respond to items being dropped onto the spectrumDisplay
+        # Accepting items being dropped onto the spectrumDisplay
         self.setAcceptDrops(True)
-        self._droppedNotifier = self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
-                                                    self._processDroppedItems)
 
         # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
         # the module to another location
@@ -757,6 +755,10 @@ class GuiSpectrumDisplay(CcpnModule):
     def _setNotifiers(self):
         """Setting notifiers
         """
+        self.setGuiNotifier(self, [GuiNotifier.DROPEVENT],
+                                  [DropBase.URLS, DropBase.PIDS],
+                                   callback = self._processDroppedItems)
+
         self.setNotifier(self.project, [Notifier.RENAME, Notifier.DELETE],
                                         Spectrum.className,
                                         callback=self._spectrumChangedCallback)
@@ -2008,6 +2010,7 @@ class GuiSpectrumDisplay(CcpnModule):
         CCPN-INTERNAL: used to close the module
         Closes spectrum display and deletes it from the project.
         """
+        super()._closeModule()
         for sp in self.spectra:
             self._deleteSpectrumNotifiers(spectrum=sp)
         self.mainWindow._deleteSpectrumDisplay(self)

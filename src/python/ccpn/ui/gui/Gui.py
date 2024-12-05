@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2024-12-05 17:32:07 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -42,7 +42,7 @@ from ccpn.framework.Preferences import getPreferences, USER_WORKING_PATH
 from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import (
     notificationEchoBlocking, catchExceptions,
-    logCommandManager, undoStackBlocking, busyHandler
+    logCommandManager, undoStackBlocking, busyHandler, undoStack
 )
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
 
@@ -468,6 +468,7 @@ class Gui(Ui, _Gui_V3_V4):
         current = self.application.current
         preferences = self.application.preferences
 
+        _logger = getLogger()
         # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
         try:
             insertPoint = mainWindow.moduleArea
@@ -476,27 +477,30 @@ class Gui(Ui, _Gui_V3_V4):
                 mainWindow._addModule(module=spectrumDisplay, position='right', relativeTo=insertPoint)
                 insertPoint = spectrumDisplay
 
-        except Exception:
-            getLogger().warning('Impossible to restore SpectrumDisplays')
+        except Exception as es:
+            _logger.debug(f'Restoring {spectrumDisplay} failed: {es}')
+            _logger.warning('Impossible to restore SpectrumDisplays')
 
         try:
             if preferences.general.restoreLayoutOnOpening:
                 Layout.restoreLayout(mainWindow, mainWindow._getLayoutDict(), restoreSpectrumDisplays=False)
         except Exception as e:
-            getLogger().warning(f'Unable to restore Layout {e}')
+            _logger.debug(f'Restoring layout failed: {es}')
+            _logger.warning(f'Unable to restore Layout {e}')
 
         # check that the top moduleArea is correctly formed - strange special case when all modules have
         #   been moved to tempAreas
         mArea = mainWindow.moduleArea
         if mArea.topContainer is not None and mArea.topContainer._container is None:
-            getLogger().debug('Correcting empty topContainer')
+            _logger.debug('Correcting empty topContainer')
             mArea.topContainer = None
 
         try:
             # initialise any colour changes before generating gui strips
             self._correctColours()
         except Exception as es:
-            getLogger().warning(f'Error setting colours - {es}')
+            _logger.debug(f'Correcting colours failed: {es}')
+            _logger.warning(f'Error setting colours - {es}')
 
         # Initialise Strips
         for spectrumDisplay in mainWindow.spectrumDisplays:
@@ -515,7 +519,7 @@ class Gui(Ui, _Gui_V3_V4):
                         spectrumDisplay.mainWidget.setEnabled(False)
                         spectrumDisplay.setEnabled(False)
 
-                        getLogger().error(
+                        _logger.error(
                                 f'Strip {strip} contains bad axes - please close SpectrumDisplay {spectrumDisplay} outlined in red.'
                                 )
                         _badStrip = True
@@ -577,8 +581,8 @@ class Gui(Ui, _Gui_V3_V4):
                 spectrumDisplay.showAxes(stretchValue=True, widths=True,
                                          minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
 
-            except Exception as e:
-                getLogger().warning(f'Impossible to restore spectrumDisplay(s) {e}')
+            except Exception as es:
+                getLogger().warning(f'Unable to restore spectrumDisplay(s): {es}')
 
         try:
             if current.strip is None and len(mainWindow.strips) > 0:
@@ -707,7 +711,8 @@ class Gui(Ui, _Gui_V3_V4):
         # The next two lines are essential to have the QT main event loop associated
         # with the new mainWindow; without these, the program just terminates
         self.mainWindow.show()
-        QtWidgets.QApplication.setActiveWindow(self.mainWindow)
+        # QtWidgets.QApplication.setActiveWindow(self.mainWindow)
+        self._qtApp.setActiveWindow(self.mainWindow)
 
     def startUi(self):
         """Start the UI
@@ -717,7 +722,6 @@ class Gui(Ui, _Gui_V3_V4):
 
         # check whether to skip the execution loop for testing with mainWindow
         import builtins
-
         if not (_skip := getattr(builtins, '_skipExecuteLoop', False)):
             self._qtApp.start()
 
@@ -1035,7 +1039,7 @@ class Gui(Ui, _Gui_V3_V4):
     # File, Project and loading data related methods
     #-----------------------------------------------------------------------------------------
 
-    @logCommand('application.')
+    @logCommand('ui.')
     def newProject(self, name: str = 'newProject') -> Project | None:
         """Create a new project instance with name; create default project if name=None
         :return a Project instance or None
@@ -1069,16 +1073,16 @@ class Gui(Ui, _Gui_V3_V4):
                                    f'Project name changed from "{name}" to "{_name}"\nSee console/log for details',
                                    parent=self)
 
+        newProject = None
         with catchExceptions(errorStringTemplate='Error creating new project: %s'):
-            if self.mainWindow:
-                self.mainWindow.moduleArea._closeAll()
+            # if self.mainWindow:
+            #     self.mainWindow.moduleArea._closeAll()
             newProject = self.application._newProject(name=_name)
             if newProject is None:
                 raise RuntimeError('Unable to create new project')
-
             self.mainWindow.move(oldMainWindowPos)
 
-            return newProject
+        return newProject
 
     def _loadProject(self, dataLoader=None, path=None) -> Project | bool | None:
         """Helper function, loading project from dataLoader instance
@@ -1247,16 +1251,17 @@ class Gui(Ui, _Gui_V3_V4):
         CCPNINTERNAL: called from Framework._closeProject()
         """
         if self.mainWindow:
-            # ui/gui cleanup
-            self.mainWindow.deleteAllNotifiers()
-            self.mainWindow._closeMainWindowModules()
-            self.mainWindow._closeExtraWindowModules()
-            self.mainWindow._stopPythonConsole()
-            _sideBar = self.mainWindow._getSideBar()
-            _sideBar.clearSideBar()
-            _sideBar.deleteLater()
-            self.mainWindow.deleteLater()
-            self._mainWindow = None
+            # ui/gui cleanup; not undo required
+            with undoStack() as _:
+                self.mainWindow._stopPythonConsole()
+                self.mainWindow.deleteAllNotifiers()
+                self.mainWindow._closeMainWindowModules()
+                self.mainWindow._closeExtraWindowModules()
+                _sideBar = self.mainWindow._getSideBar()
+                _sideBar.clearSideBar()
+                _sideBar.deleteLater()
+                self.mainWindow.deleteLater()
+                self._mainWindow = None
 
     @logCommand('application.')
     def saveProjectAs(self, newPath=None, overwrite: bool = False) -> bool:

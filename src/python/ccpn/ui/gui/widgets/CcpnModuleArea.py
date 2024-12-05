@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2024-12-05 17:32:08 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -168,10 +168,11 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         self.moveModule = self.moveDock
         self.setContentsMargins(0, 0, 0, 0)
-        self.currentModuleNames = []
-        self._modulesNames = {}
-        self._ccpnModules = []
-        self._modules = {}  # don't use self.docks, is not updated when removing docks
+
+        # self.currentModuleNames = []
+        # self._modulesNames = {}
+        # self._ccpnModules = []
+        # self._modules = {}  # don't use self.docks, is not updated when removing docks
         self._openedSpectrumDisplays = []  # keep track of the order of opened spectrumDisplays
         self._seenModuleStates = {}  # {className: {moduleName:'', state:widgetsState}}
         # self.setAcceptDrops(True) GWV not needed; handled by DropBase init
@@ -340,26 +341,30 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
     @property
     def ccpnModules(self) -> list:
-        """return all current modules in area"""
-        return self._ccpnModules
+        """return all current modules of self as a list
+        """
+        return list(self.modules.values())
 
-    @ccpnModules.getter
-    def ccpnModules(self):
-        if self is not None:
-            ccpnModules = list(self.findAll()[1].values())
-            return ccpnModules
+    # @ccpnModules.getter
+    # def ccpnModules(self):
+    #     if self is not None:
+    #         ccpnModules = list(self.findAll()[1].values())
+    #         return ccpnModules
 
     @property
     def modules(self) -> dict:
-        """return all current modules in area as a dictionary. Don't use self.docks"""
-        return self._modules
+        """return all current modules of self as a dictionary of (name, module) pairs.
+        Don't use self.docks  GWV: why??
+        """
+        # return self._modules
+        return self.findAll()[1]
 
-    @ccpnModules.getter
-    def modules(self):
-        if self is not None:
-            modules = self.findAll()[1]
-            return modules
-        return {}
+    # @ccpnModules.getter
+    # def modules(self):
+    #     if self is not None:
+    #         modules = self.findAll()[1]
+    #         return modules
+    #     return {}
 
     @property
     def spectrumDisplays(self):
@@ -586,7 +591,10 @@ class CcpnModuleArea(ModuleArea, DropBase):
             module._closeModule()
 
     def _closeAll(self):
-        for module in self.ccpnModules:
+        # _modules = list(self.docks.values()) # instant crash on loading test_formats2
+        _modules = self.ccpnModules
+        for module in _modules:
+            getLogger().debug(f'Closing module {module}')
             module._closeModule()
 
     ## docksOnly is used for in memory save and restore for the module maximise save and restore system

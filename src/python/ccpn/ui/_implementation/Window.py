@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-26 13:30:14 +0000 (Tue, November 26, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-05 17:32:07 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -550,15 +550,15 @@ class Window(AbstractWrapperObject):
                 # add the new module to mainWindow at the required position
                 self._addModule(display, position=position, relativeTo=relativeTo)
                 display._insertPosition = (position, relativeTo)
-
-                with undoStackBlocking() as addUndoItem:
-                    # disable all notifiers in spectrumDisplays
-                    addUndoItem(undo=partial(self._setBlankingSpectrumDisplayNotifiers, display, True),
-                                redo=partial(self._setBlankingSpectrumDisplayNotifiers, display, False))
-
-                    # add/remove spectrumDisplay from module Area - use moveDock not addModule, otherwise introduces extra splitters
-                    addUndoItem(undo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None),
-                                redo=partial(self.moduleArea.moveDock, display, position=position, neighbor=relativeTo))
+                #
+                # with undoStackBlocking() as addUndoItem:
+                #     # disable all notifiers in spectrumDisplays
+                #     addUndoItem(undo=partial(self._setBlankingSpectrumDisplayNotifiers, display, True),
+                #                 redo=partial(self._setBlankingSpectrumDisplayNotifiers, display, False))
+                #
+                #     # add/remove spectrumDisplay from module Area - use moveDock not addModule, otherwise introduces extra splitters
+                #     addUndoItem(undo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None),
+                #                 redo=partial(self.moduleArea.moveDock, display, position=position, neighbor=relativeTo))
 
                 # if not positions and not widths:
                 #     display.autoRange()
@@ -585,6 +585,7 @@ class Window(AbstractWrapperObject):
         """
         # with undoBlockWithoutSideBar():
         with undoStackBlocking() as _:  # Do not add to undo/redo stack
+
             # # get the current state of the layout
             # _list = self._getModuleInsertList(moduleArea=display.area)
 
@@ -605,16 +606,13 @@ class Window(AbstractWrapperObject):
             #     addUndoItem(undo=partial(self._restoreModules, _list),
             #                 redo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None), )
 
-            # disable the spectrumDisplay notifiers
-            self._setBlankingSpectrumDisplayNotifiers(display, True)
+            # # disable the spectrumDisplay notifiers
+            # self._setBlankingSpectrumDisplayNotifiers(display, True)
 
-            # move to the hidden module area
-            self._hiddenModules.moveDock(display, position='top', neighbor=None)
+            # # move to the hidden module area
+            # self._hiddenModules.moveDock(display, position='top', neighbor=None)
 
             _strips = list(display.strips)
-            # delete the spectrumDisplay
-            display.delete()
-
             # this makes it unrecoverable - okay, as strips not allowed to undo
             for st in _strips:
                 # marks are not automatically deleted by the model when deleting strips
@@ -625,6 +623,9 @@ class Window(AbstractWrapperObject):
             # marks are not automatically deleted by the model when deleting strips
             for mark in display.marks:
                 mark.delete()
+
+            # delete the spectrumDisplay
+            display.delete()
 
             # Update the list of opened GUI SpectrumDisplays modules
             self.moduleArea._updateSpectrumDisplays()

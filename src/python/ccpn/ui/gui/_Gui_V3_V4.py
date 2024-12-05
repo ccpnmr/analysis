@@ -41,8 +41,8 @@ class _Gui_V3_V4(object):
         # # fm.setSwapBehavior(QtGui.QSurfaceFormat.DoubleBuffer)
         # QtGui.QSurfaceFormat.setDefaultFormat(fm)
 
-        _qtApp = PyQtApplication(self.application.applicationName,
-                                 self.application.applicationVersion,
+        _qtApp = PyQtApplication(applicationName=self.application.applicationName,
+                                 applicationVersion=self.application.applicationVersion,
                                  organizationName='CCPN',
                                  organizationDomain='ccpn.ac.uk'
                                 )

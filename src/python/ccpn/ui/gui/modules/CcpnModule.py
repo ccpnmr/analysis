@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-26 10:38:13 +0000 (Tue, November 26, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-05 17:32:08 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -505,12 +505,14 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         if self._includeInLastSeen and self.area:
             self.area._seenModuleStates[self.className] = {MODULENAME : self._defaultName,
                                                            WIDGETSTATE: self._getLastSeenWidgetsState()}
-
-        self.mainWindow.application._cleanGarbageCollector()
+        # GWV 5/12/24: disabled as this should not be there
+        # self.mainWindow.application._cleanGarbageCollector()
         try:
             super().close()
-        except Exception:
-            """Remove this dock from the DockArea it lives inside."""
+        except Exception as es:
+            """Remove this dock from the DockArea it lives inside.
+            """
+            getLogger().debug(f'_closeModule raised: {es}')
             self._container = None
             self.sigClosed.emit(self)
 

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-06 14:48:45 +0000 (Fri, December 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-06 14:53:55 +0000 (Fri, December 06, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -125,15 +125,12 @@ class TraceCache():
 
 class GuiSpectrumView(QtWidgets.QGraphicsItem):
 
-    #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
     def __init__(self):
         """ spectrumPane is the parent
             spectrum is the Spectrum object
             dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions
             (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
         """
-
-        #TODO: why not QGraphicsItem like in e.g. PeakListView
         QtWidgets.QGraphicsItem.__init__(self)
 
         self.spectrumGroupsToolBar = None

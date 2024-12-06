@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-12-06 14:48:45 +0000 (Fri, December 06, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -123,7 +123,7 @@ class TraceCache():
 # GuiSpectrumView
 #=========================================================================================
 
-class GuiSpectrumView(QtWidgets.QGraphicsObject):
+class GuiSpectrumView(QtWidgets.QGraphicsItem):
 
     #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
     def __init__(self):
@@ -134,7 +134,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         """
 
         #TODO: why not QGraphicsItem like in e.g. PeakListView
-        QtWidgets.QGraphicsObject.__init__(self)
+        QtWidgets.QGraphicsItem.__init__(self)
 
         self.spectrumGroupsToolBar = None
 

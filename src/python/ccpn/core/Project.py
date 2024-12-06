@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 21:16:25 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-06 14:47:43 +0000 (Fri, December 06, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -1256,14 +1256,15 @@ class Project(AbstractWrapperObject):
                 self._makeCollections()
                 self._makeCrossReferences()
 
+                # finalise restoration of project
+                self._postRestore()
+
                 # Call any post-init updates
                 self._updatePostProjectInit()
 
-                # finalise restoration of project
-                self._postRestore()
             # end restoring objects
 
-            with undoStack():
+            with undoStack() as _:
                 # we always want the default ChemicalShiftList
                 if (_csl := self.getChemicalShiftList(DEFAULT_CHEMICALSHIFTLIST)) is None:
                     getLogger().debug(f'Project.initialise: creating ChemicalShiftList {DEFAULT_CHEMICALSHIFTLIST!r}')

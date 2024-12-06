@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:31:16 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-06 14:47:44 +0000 (Fri, December 06, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ import ccpn.core._implementation.resetSerial
 from ccpn.core._implementation.CoreModel import CoreModel
 from ccpn.core._implementation.Updater import Updater, \
     UPDATE_POST_OBJECT_INITIALISATION, UPDATE_POST_PROJECT_INITIALISATION, \
-    UPDATE_PRE_OBJECT_INITIALISATION
+    UPDATE_PRE_OBJECT_INITIALISATION, UPDATE_OPTIONS
 from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
     apiNotificationBlanking, ccpNmrV3CoreSetter
@@ -245,22 +245,33 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         """
         return self._wrappedData._uniqueId
 
-    def _resetIds(self):
-        # reset id
+    def _resetIds(self, recursive: bool = False):
+        """Make the id of self and update project's pid to object dict
+        Optionally recurse to all decendant objects
+        """
         oldId = self._id
         project = self._project
         parent = self._parent
         className = self.className
+
+        # make an id
         if parent is None:
-            # This is the project
+            # Level-0: This is the project
             _id = self.name
             sortKey = ('',)
+
         elif parent is project:
+            # Level-1 objects whose parent is Project
+            # these ids do not derive from their parent object
             _id = str(self._key)
             sortKey = self._localCcpnSortKey
+
         else:
+            # Level-2 and higher objects;
+            # these ids derive (also) from their parent project
             _id = '%s%s%s' % (parent._id, Pid.IDSEP, self._key)
             sortKey = parent._ccpnSortKey[2:] + self._localCcpnSortKey
+
         self._id = _id
 
         # A bit inelegant, but Nmrresidue is handled specially,
@@ -279,6 +290,12 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         if oldId in dd:
             del dd[oldId]
         dd[_id] = self
+
+        if recursive:
+            for obj in self._getAllDecendants():
+                # we are looping over all decendants of self, so no need to recurse for
+                # the individual objs, as their children are already included
+                obj._resetIds(recursive=False)
 
     @classmethod
     def _nextKey(cls):
@@ -420,6 +437,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         :param parent: container for self (usually of type Project)
         :param name (str | None): target name (as required)
         :return str: new unique name
+
+        NB this is a classmethod as it is used for object instantiation,
+           ie. needs to be called without an instance present.
         """
         if name is None:
             name = cls._defaultName()
@@ -730,8 +750,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     @property
     def _key(self) -> str:
         """Object local identifier, unique for a given type with a given parent.
-
-        Set automatically from other (immutable) object attributes."""
+        Set automatically from other (immutable) object attributes.
+        """
         raise NotImplementedError("Code error: function not implemented")
 
     @property
@@ -936,29 +956,28 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         raise NotImplementedError('Code error: function not implemented')
 
-    def _rename(self, value: str):
+    def _rename(self, value: str) -> tuple:
         """Generic rename method that individual classes can use for implementation
         of their rename method to minimises code duplication
+        Recursively sets id's
+        :return (oldName, newName) tuple
         """
         # validate the name
-        name = self._uniqueName(parent=self.project, name=value)
+        newName = self._uniqueName(parent=self._parent, name=value)
 
         # rename functions from here
         oldName = self.name
-        # self._oldPid = self.pid
-        self._wrappedData.name = name
+        self._wrappedData.name = newName
+        self._resetIds(recursive=True)
 
-        return (oldName,)
+        return (oldName, newName)
 
     def rename(self, value: str):
         """Change the object name or other key attribute(s), changing the object pid,
            and all internal references to maintain consistency.
-           Some Objects (Chain, Residue, Atom) cannot be renamed"""
+           Some Objects (Chain, Residue, Atom) cannot be renamed
+        """
         raise ValueError(f'{self.__class__.__name__} objects cannot be renamed')
-
-    # In addition, each class (except for Project) must define a  newClass method
-    # The function (e.g. Project.newMolecule), ... must create a new child object
-    # AND ALL UNDERLYING DATA, taking in all parameters necessary to do so.
 
     @property
     def collections(self) -> tuple:
@@ -1004,7 +1023,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         """Use post-object or post-project updateMethod (as defined in Updater)
         to update the project
         """
-        if updateMethod not in (UPDATE_POST_OBJECT_INITIALISATION, UPDATE_POST_PROJECT_INITIALISATION):
+        if updateMethod not in UPDATE_OPTIONS:
             raise ValueError('Invalid updateMethod "%s"' % updateMethod)
         self._updater.update(updateMethod, obj=self)
 

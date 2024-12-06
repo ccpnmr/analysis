@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:31:16 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-06 14:47:43 +0000 (Fri, December 06, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -1392,6 +1392,10 @@ class NmrResidue(AbstractWrapperObject):
             # clean-up/delete the chemical-shifts
             for sh in _shs:
                 sh.delete()
+
+    # def _rename(self, value: str | None):
+    #     """ Actual rename method. Only
+    #     """
 
     def _renameChildren(self):
         """Update the chemicalShifts to the rename

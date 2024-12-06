@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:31:16 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-06 14:47:43 +0000 (Fri, December 06, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ from functools import partial
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
 
-from ccpn.core._implementation.updates.update_3_2_11 import _updateNmrChain_to_3_3_0
+from ccpn.core._implementation.updates.update_3_2_11 import _updateOldDefaultNmrChain
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
 
 from ccpn.core.lib import MoleculeLib
@@ -54,18 +54,19 @@ DEFAULT_NMRCHAINCODE = '@0'
 
 @updateObject(
         fromVersion=None,
-        toVersion='3.3.0',
-        updateFunction=_updateNmrChain_to_3_3_0,
+        toVersion=None,  # always to this update: '3.3.0',
+        updateFunction=_updateOldDefaultNmrChain,
         updateMethod=UPDATE_POST_OBJECT_INITIALISATION
 )
 class NmrChain(AbstractWrapperObject):
     """NmrChains are used for NMR assignment.
-    An NmrChain is deemed 'assigned' if the NmrCHain's id corresponds to
+    An NmrChain is deemed 'assigned' if the NmrChain's id corresponds to
     a Chain with the same id.
 
     An NmrChain created without a name will be given the name
     '@ij', where ij is the serial number of the NmrChain. Names of this form are reserved.
     Setting the NmrChain shortName to None will revert to this default name.
+    '@0' denotes the immutable default NmrChain that is always present.
 
     The order of NmrResidues within an NmrChain is arbitrary.
     NmrChains with isConnected==True are used to describe connected but as yet unassigned
@@ -338,9 +339,10 @@ class NmrChain(AbstractWrapperObject):
 
         if start (stop) is None, there is no lower (upper) limit
 
-        NB Will rename nmrResidues one by one, and stop on error."""
+        NB Will rename nmrResidues one by one, and stop on error.
+        """
 
-        nmrResidues = self.nmrResidues
+        nmrResidues = list(self.nmrResidues)
         if offset > 0:
             nmrResidues.reverse()
 
@@ -364,8 +366,9 @@ class NmrChain(AbstractWrapperObject):
 
         if start is not None and stop is not None:
             if len(changedNmrResidues) != stop + 1 - start:
-                self._project._logger.warning("Only %s nmrResidues found in range %s to %s"
-                                              % (len(changedNmrResidues), start, stop))
+                getLogger().warning(
+                        f"Only {len(changedNmrResidues)} nmrResidues found in range {start} to {stop}"
+                )
 
     @logCommand(get='self')
     def setupNmrResiduesFromPeaks(self, peakList, keepAssignments=True):
@@ -375,17 +378,24 @@ class NmrChain(AbstractWrapperObject):
         :param keepAssignments: flag to keep or not-keep existing assignments
         """
         from ccpn.core.lib.AssignmentLib import _fetchNewPeakAssignments
-
         _fetchNewPeakAssignments(peakList=peakList, nmrChain=self, keepAssignments=keepAssignments)
-
 
     def _rename(self, value: str) -> tuple:
         """The actual rename, without checks and decorators
-        :return oldName, newName tuple
+        :return (oldName, newName) tuple
         """
         oldName = self.name
         newName = self._uniqueName(parent=self.project, name=value)
-        self._wrappedData.code = newName
+
+        # GWV: bypassing the sodding api-checks
+        forceSetattr(self._wrappedData, 'code', newName)
+        forceSetattr(self._wrappedData, 'implCode', newName)
+        forceSetattr(self._wrappedData, 'label', newName)
+
+        self._resetIds(recursive=True)
+        for nmrRes in self.nmrResidues:
+            nmrRes._renameChildren()
+
         return oldName, newName
 
     @renameObject(blockSidebar=True)
@@ -411,9 +421,6 @@ class NmrChain(AbstractWrapperObject):
         # rename functions from here
         oldName, newName = self._rename(value)
 
-        for nmrRes in self.nmrResidues:
-            nmrRes._renameChildren()
-
         return (oldName,)
 
     def delete(self):
@@ -434,6 +441,17 @@ class NmrChain(AbstractWrapperObject):
     #-----------------------------------------------------------------------------------------
     # Implementation methods
     #-----------------------------------------------------------------------------------------
+
+    # GWV: code that can be uncommented for debugging purposes
+    # @classmethod
+    # def _restoreObject(cls, project, apiObj):
+    #     """Restores object from apiObj;
+    #     checks for _factoryFunction through _newInstanceFromApiData call
+    #     Restores the children
+    #
+    #     :return Restored object
+    #     """
+    #     super()._restoreObject(project=project, apiObj=apiObj)
 
     @classmethod
     def _getAllWrappedData(cls, parent: Project) -> list:
@@ -608,12 +626,12 @@ def _newNmrChain(project: Project, shortName: str = None, isConnected: bool = Fa
     # Hence: bypass and force it
     dd = {'code': f'_{shortName}', 'isConnected': isConnected, 'label': shortName, 'details': comment}
     newApiNmrChain = apiNmrProject.newNmrChain(**dd)
-    forceSetattr(newApiNmrChain, 'serial', serial)
     forceSetattr(newApiNmrChain, 'code', shortName)
     forceSetattr(newApiNmrChain, 'implCode', shortName)
 
     if (result := NmrChain._newInstanceFromApiData(apiObj=newApiNmrChain, project=project)) is None:
         raise RuntimeError('Unable to generate new NmrChain')
+    result._resetSerial(serial)
     #
     # if serial is not None:
     #     try:

@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:31:16 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-06 14:47:44 +0000 (Fri, December 06, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -45,6 +45,11 @@ from ccpn.framework.Version import applicationVersion, VersionString
 UPDATE_PRE_OBJECT_INITIALISATION = 'update_pre_object_initialisation'
 UPDATE_POST_OBJECT_INITIALISATION = 'update_post_object_initialisation'
 UPDATE_POST_PROJECT_INITIALISATION = 'update_post_project_initialisation'
+UPDATE_OPTIONS = (
+    UPDATE_PRE_OBJECT_INITIALISATION,
+    UPDATE_POST_OBJECT_INITIALISATION,
+    UPDATE_POST_PROJECT_INITIALISATION,
+)
 
 
 @singleton
@@ -81,14 +86,22 @@ class Updater(object):
                 currentVersion = VersionString(obj._objectVersion.withoutRelease())
 
                 if fromVersion is not None and currentVersion < fromVersion:
-                    raise RuntimeError('Error trying to update %s from version %s to version %s; invalid current version %s' % \
-                                       (obj, fromVersion, toVersion, currentVersion))
-                if currentVersion < toVersion:
-                    logger.debug('Updating %s: fromVersion: %s, currentVersion: %s, toVersion: %s, func: %s' %
-                             (obj, fromVersion, currentVersion, toVersion, func)
+                    raise RuntimeError(
+                        f'Error trying to update {obj} from version {fromVersion} to version {toVersion}; '\
+                        f'invalid current version {currentVersion}'
+                    )
+                # execute update function if currentVersion < toVersion,
+                # or toVersion is None, i.e. execute always
+                if toVersion is None or currentVersion < toVersion:
+                    logger.debug(
+                        f'Updating {obj}: {fromVersion = }, {currentVersion = }, {toVersion = }, {func = }'
                     )
                     func(obj)
-                obj._objectVersion = toVersion
+
+                if toVersion is None:
+                    obj._objectVersion = currentVersion
+                else:
+                    obj._objectVersion = toVersion
 
     def update(self, updateMethod, obj, klass=None):
         """Updates obj using the various updateFunctions stacks for
@@ -100,12 +113,12 @@ class Updater(object):
                 self._updateApiObject(obj, _funcs)
 
         elif updateMethod == UPDATE_POST_OBJECT_INITIALISATION:
-            if (_funcs := self.preObjectUpdateFunctions[obj.className]):
+            if (_funcs := self.postObjectUpdateFunctions[obj.className]):
                 self._updateV3Object(obj, _funcs)
 
         elif updateMethod == UPDATE_POST_PROJECT_INITIALISATION:
             # This update is called for each object post project initialisation
-            if (_funcs := self.preObjectUpdateFunctions[obj.className]):
+            if (_funcs := self.postProjectUpdateFunctions[obj.className]):
                 self._updateV3Object(obj, self.postProjectUpdateFunctions[obj.className])
             # The object is by definition now at the current application version state
             obj._objectVersion = applicationVersion

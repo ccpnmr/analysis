@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 21:16:25 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-06 14:47:44 +0000 (Fri, December 06, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -751,7 +751,6 @@ class Gui(Ui, _Gui_V3_V4):
         """
         _sideBar = self.mainWindow._getSideBar()
         _sideBar.buildTree(self.project, clear=True)
-        # self.mainWindow._updateRestoreArchiveMenu()
         self.mainWindow._setReadOnlyIcon()
         self.mainWindow.namespace['current'] = self.application.current
 

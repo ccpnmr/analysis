@@ -25,18 +25,28 @@ __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 __author__ = "$Author: geertenv $"
 __date__ = "$Date: 2024-12-04 9:42:30 +0100 (Wed, December 4, 2024) $"
+
+from ccpn.core.lib.CcpNmrProperties import CcpNmrBoolProperty
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
 #
-from ccpn.core.lib.ContextManagers import undoBlock
+# from ccpn.core.lib.ContextManagers import undoStack
+from ccpn.core.lib.forceAttribute import forceSetattr
 
-def _updateNmrChain_to_3_3_0(nmrChain):
-    """Update the old default nmrChain name
+OLD_NMRCHAINCODE = "@-"
+
+def _updateOldDefaultNmrChain(nmrChain):
+    """Update the old default nmrChain name to the new default one
+    Set the default chain serial to 0
     """
+    # NB all updates executed with inactivity
     from ccpn.core.NmrChain import DEFAULT_NMRCHAINCODE
-    if nmrChain.name == "@-":
-        with undoBlock():
-            nmrChain._rename(DEFAULT_NMRCHAINCODE)
-            for _nr in nmrChain.nmrResidues:
-                _nr.rename()
+
+    _serials = [nc.serial for nc in nmrChain.project.nmrChains]
+    if 0 not in _serials:
+        nmrChain._resetSerial(0)
+
+    if nmrChain.name == OLD_NMRCHAINCODE:
+        nmrChain._rename(DEFAULT_NMRCHAINCODE)

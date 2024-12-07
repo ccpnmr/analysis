@@ -27,8 +27,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-13 11:48:04 +0000 (Wed, November 13, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2024-12-07 15:24:51 +0000 (Sat, December 07, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -215,7 +215,7 @@ class MenusDefs(Menu, FrameworkProperties):
          DynamicMenu('Show/hide Modules', callback=_fillViewShowModulesCallback, checkEnabled=_updateShowHideModules),
          Action("Show/hide Sidebar", self._toggleSidebarCallback, shortcut=' s', checkable=True, checked=True),
          Action("Show/hide Python Console", self._toggleConsoleCallback, shortcut='  ', checkable=True, checked=True,
-                                            checkEnabled=_updatePythonConsole
+                                            checkEnabled=_updatePythonConsoleModule
          ),
 
          ), # end Menu View
@@ -1392,11 +1392,11 @@ def _hasActiveDisplay(node) -> bool:
         return False
 
 
-def _updatePythonConsole(node) -> bool:
+def _updatePythonConsoleModule(node) -> bool:
     """callback to check and update the Show/hide Python Console action
     """
     app = getApplication()
-    if (widget := app.ui.mainWindow._getPythonConsoleWidget()) is not None:
+    if (widget := app.ui.mainWindow._getPythonConsoleModule()) is not None:
         hidden = widget.isHidden()
         checked = not hidden
     else:

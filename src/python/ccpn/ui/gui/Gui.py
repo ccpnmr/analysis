@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-06 14:47:44 +0000 (Fri, December 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-07 15:24:51 +0000 (Sat, December 07, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -768,7 +768,7 @@ class Gui(Ui, _Gui_V3_V4):
                 self.application.ui.mainWindow is not None and \
                 self.application._enableLoggingToConsole:
 
-            console = self.application.ui.mainWindow.pythonConsole
+            console = self.application.ui.mainWindow._pythonConsoleWidget
             for command in commands:
                 command = re.sub(REMOVEDEBUG, '', command)
                 console._write(command + '\n')

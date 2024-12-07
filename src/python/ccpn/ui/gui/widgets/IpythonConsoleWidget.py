@@ -29,18 +29,20 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets, QtCore
-import contextlib
+# import contextlib
+from qtconsole.inprocess import QtInProcessKernelManager
+from qtconsole.rich_jupyter_widget import RichJupyterWidget
+from ipykernel.inprocess.ipkernel import InProcessKernel
 
+from ccpn.ui.gui.guiSettings import _styleRed
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFont, CONSOLEFONT
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Splitter import Splitter
-from qtconsole.rich_jupyter_widget import RichJupyterWidget
-from qtconsole.inprocess import QtInProcessKernelManager
+
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import isWindowsOS
-from ipykernel.inprocess.ipkernel import InProcessKernel
 
 
 # with contextlib.suppress(ImportError):
@@ -85,7 +87,8 @@ class _ProcessKernelManager(QtInProcessKernelManager):
         self._kill_kernel()
 
 
-class IpythonConsole(Widget):
+class IpythonConsoleWidget(Widget):
+
     focusedIn = QtCore.pyqtSignal(QtGui.QFocusEvent)
     mouseMoved = QtCore.pyqtSignal(QtGui.QMouseEvent)
 
@@ -94,14 +97,17 @@ class IpythonConsole(Widget):
         if namespace is None:
             raise ValueError(f'IpythonConsole: undefined namespace')
 
-        super().__init__(parent=mainWindow, setLayout=True, **kwds)
-        # Base._init(self, setLayout=True, **kwds)
+        super().__init__(parent=mainWindow._widget, setLayout=True, **kwds)
 
         # NOTE:ED - check that this is working for Linux/MacOS
         if isWindowsOS():
             import asyncio
-
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+        self.mainWindow = mainWindow
+        self.setStyleSheet(self.mainWindow.styleSheet())
+
+        self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
 
         ## Removed the ccpn kernel until found the cause of threading issues.
         # import warnings
@@ -111,13 +117,11 @@ class IpythonConsole(Widget):
         #     km = _ProcessKernelManager()
 
         km = QtInProcessKernelManager()
+        # GWV: need to start kernel to be able to set other attributes
         km.start_kernel()
+        # GWV: InProcessKernel instance expected any of ['tk', 'gtk', 'wx', 'qt', 'qt4', 'inline']
         km.kernel.gui = 'qt4'
-        self.mainWindow = mainWindow
-        self.mainWindow.pythonConsole = self
-        self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
-        self.setStyleSheet(self.mainWindow.styleSheet())
-
+        km.kernel.shell.push(namespace)
         self.ipythonWidget.kernel_manager = km
 
         self.setMinimumHeight(100)
@@ -131,7 +135,6 @@ class IpythonConsole(Widget):
 
         self.getLayout().setSpacing(1)
 
-        # self.splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
         self.splitter = Splitter(horizontal=False)
         self.splitter.addWidget(self.textEditor)
 
@@ -144,17 +147,16 @@ class IpythonConsole(Widget):
         self.splitter.setStretchFactor(1, 1)
         self.splitter.setChildrenCollapsible(False)
         # self.splitter.setStyleSheet("QSplitter::handle { background-color: gray }")
-
         self.getLayout().addWidget(self.splitter)
-        namespace['runMacro'] = self._runMacro
-        km.kernel.shell.push(namespace)
 
         _font = getFont(name=CONSOLEFONT)
         self.ipythonWidget.setStyleSheet(f'font-family: {_font.fontName}; font-size: {_font.pointSize()}pt;')
 
-        self._startChannels()  # this is important, otherwise the console doesn't run anything
+        # this is deferred until later.
+        # Without it the console doesn't run anything
+        # self._startChannels()
 
-        # hide this widget, it may be visible before the pythonConsoleModule has been instantiated
+        # hide this widget, it may be initialised before the pythonConsoleModule has been instantiated
         self.hide()
 
     def setProject(self, project):
@@ -178,17 +180,17 @@ class IpythonConsole(Widget):
         """
         if macroFile:
             self.ipythonWidget.execute(f'%run {" ".join(extraCommands)} {macroFile}')
-        try:
-            self.mainWindow._fillRecentMacrosMenu()
-        except Exception as e:
-            getLogger().debug('Impossible to fill the menus with recent macros %s' % e)
 
     def _startChannels(self):
         """
         # CCPN INTERNAL - called in constructor of PythonConsoleModule.
         """
-        self.ipythonWidget.kernel_client = self.ipythonWidget.kernel_manager.client()
-        self.ipythonWidget.kernel_client.start_channels()
+        try:
+            self.ipythonWidget.kernel_client = self.ipythonWidget.kernel_manager.client()
+            self.ipythonWidget.kernel_client.start_channels()
+
+        except Exception as es:
+            getLogger().debug(_styleRed(f'Error starting kernel: {es}'))
 
     def _stopChannels(self):
         """
@@ -196,15 +198,28 @@ class IpythonConsole(Widget):
         """
         from IPython import get_ipython
 
-        # soft reset on namespace, without confirmation
-        # https://ipython.readthedocs.io/en/stable/interactive/magics.html
-        if (_ip := get_ipython()) is not None:
-            _ip.run_line_magic('reset', '-sf')
+        try:
 
-        if self.ipythonWidget.kernel_manager is not None:
-            self.ipythonWidget.kernel_manager.shutdown_kernel()
-        self.ipythonWidget.kernel_client.stop_channels()
-        self.ipythonWidget.kernel_client = None
+            # soft reset on namespace, without confirmation
+            # https://ipython.readthedocs.io/en/stable/interactive/magics.html
+            if (_ip := get_ipython()) is not None:
+                _ip.run_line_magic('reset', '-sf')
+
+            # import threading
+            # GWV and LM 06/12/24: investigating threading
+            # _threads = threading.enumerate()
+            # _threadsAlive = [th.is_alive() for th in _threads]
+
+            if self.ipythonWidget.kernel_client:
+                self.ipythonWidget.kernel_client.stop_channels()
+                self.ipythonWidget.kernel_client = None
+            if self.ipythonWidget.kernel_manager:
+                # self.ipythonWidget.kernel_manager.shutdown_kernel()
+                self.ipythonWidget.kernel_manager.request_shutdown()
+                self.ipythonWidget.kernel_manager.finish_shutdown()
+
+        except Exception as es:
+            getLogger().debug(_styleRed('Error shutting down kernel: {es}'))
 
     def _showHistory(self):
         """

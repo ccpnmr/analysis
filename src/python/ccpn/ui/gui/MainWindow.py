@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 21:16:25 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-07 15:24:51 +0000 (Sat, December 07, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -57,12 +57,13 @@ from ccpn.ui.gui.lib.Shortcuts import Shortcuts
 from ccpn.ui.gui.guiSettings import (getColours, GUITABLE_SELECTED_BACKGROUND, consoleStyle)
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
+from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.PlotterWidget import plotter
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
+from ccpn.ui.gui.widgets.IpythonConsoleWidget import IpythonConsoleWidget
 
 from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -168,12 +169,12 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._initModuleLayout()
 
         # Python console module; defined upon first time Class initialisation. Either by toggleConsole or Restoring layouts
-        self.pythonConsoleModule = None
+        self._pythonConsoleModule = None
         # IPythonConsole instance; defined in _setupWindow()
-        self.pythonConsole = None
+        self._pythonConsoleWidget = None
         # IPythonConsole namespace; filled in _setupWindow() and
         self.namespace = {}
-        # can't init PythonConsoleModule, as restore from layout fails then
+        # can't init PythonConsoleModule, as restore from layout then fails
         # self._initPythonConsoleModule()
 
         setWidgetFont(widget=self )
@@ -196,13 +197,11 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._previousStrip = None
         self._currentStrip = None
 
-        # blank display opened later by the _initLayout if there is nothing to show otherwise
-        self.writeStatusBar('Ready')
-
         self._initKeyTimer()
         self._initReadOnlyIcon()
 
         # hide the window here and make visible later
+        self.writeStatusBar('Ready')
         self.hide()
 
     #-----------------------------------------------------------------------------------------
@@ -322,6 +321,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.ui._qtApp.setStyleSheet(styleSheet % colours)
 
         # store the colours in the baseclass, is this the best place?
+        # TODO-DEVELOP: GWV Absolutely NOT!!
         Base._highlight = highlight
         Base._highlightMid = QtGui.QColor.fromHslF(highlight.hueF(), 0.75, 0.65)
         Base._basePalette = pal
@@ -545,13 +545,12 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         Puts relevant information from the project into the appropriate places in the main window.
         """
         self.namespace['project'] = project
-        self.namespace['runMacro'] = self.pythonConsole._runMacro
 
         path = project.path
         msg = path + (' created' if project.isNew else ' opened')
         self.writeStatusBar(msg)
 
-        self.pythonConsole.setProject(project)
+        self._pythonConsoleWidget.setProject(project)
         self._updateWindowTitle()
 
         self.setNotifier(project, [Notifier.OBSERVE], targetName='_readOnly',
@@ -638,14 +637,12 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """Initialise a PythonConsoleModule
         """
         from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
-
-        self.pythonConsoleModule = PythonConsoleModule(mainWindow=self)
-        self._addModule(module=self.pythonConsoleModule, position='bottom')
+        self._pythonConsoleModule = PythonConsoleModule(mainWindow=self)
+        self._addModule(module=self._pythonConsoleModule, position='bottom')
 
     def _setupWindow(self):
         """
         Sets up SideBar, python console and splitters to divide up main window properly.
-
         """
 
         self.namespace = {'application'             : self.application,
@@ -660,6 +657,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                           'mainWindow'              : self,
                           'project'                 : self.application.project,
                           'loadProject'             : self.application.loadProject,
+                          'runMacro'                : self.application.runMacro,
                           # 'newProject' : self.application.newProject, this is a crash!
                           'info'                    : getLogger().info,
                           'warning'                 : getLogger().warning,
@@ -673,8 +671,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                           'plotter'                 : plotter
                           }
 
-        # Make a PythonConsole
-        self.pythonConsole = IpythonConsole(mainWindow=self, namespace=self.namespace)
+        # Make a IPythonConsole widget
+        self._pythonConsoleWidget = IpythonConsoleWidget(mainWindow=self, namespace=self.namespace)
 
         # create the sidebar
         self._sideBarFrame = Frame(self, setLayout=True)  # in this frame is inserted the search widget
@@ -715,12 +713,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._temporaryWidgetStore = Frame(parent=self, showBorder=None, setLayout=False)
         self._temporaryWidgetStore.hide()
 
-        # set the background/fontSize for the tooltips
-        # self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
-        #                    'color: {TOOLTIP_FOREGROUND}; '
-        #                    'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
-
-
     #---------------------------------------------------------------------------------------------
     # Version-3/4 compatibility functionalities
     #---------------------------------------------------------------------------------------------
@@ -747,11 +739,17 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """
         return self._sideBarFrame
 
-    def _getPythonConsoleWidget(self):
+    def _getPythonConsoleWidget(self) -> IpythonConsoleWidget:
         """Helper routine to get the Python console widget; different implementation between different version
         :return widget or None if it does not exist
         """
-        return self.pythonConsoleModule
+        return self._pythonConsoleWidget
+
+    def _getPythonConsoleModule(self) -> PythonConsoleModule:
+        """Helper routine to get the Python console Module; different implementation between different version
+        :return Module or None if it does not exist
+        """
+        return self._pythonConsoleModule
 
     #---------------------------------------------------------------------------------------------
     # Menu and shortcut's
@@ -1486,8 +1484,9 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                 getLogger().debug(f'_closeExtraWindowModules: {es}')
 
     def _stopPythonConsole(self):
-        if self.pythonConsoleModule:
-            self.pythonConsoleModule.pythonConsoleWidget._stopChannels()
+        # Stop the Ipython console channels and kernel manager
+        if self._pythonConsoleWidget:
+            self._pythonConsoleWidget._stopChannels()
 
     def _closeWindowFromUpdate(self, event=None, disableCancel=True):
         # set the active window to mainWindow so that the quit popup centres correctly.
@@ -1831,7 +1830,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """Write message to the console
         :param message: A string to be displayed (\n is appended)
         """
-        console = self.pythonConsole
+        console = self._pythonConsoleWidget
         console._write(f'{message}\n')
 
     def _deleteSelectedItems(self, parent=None):
@@ -2781,29 +2780,26 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             module.setVisible(flag)
 
     def _toggleConsole(self):
-        """
-        - Show/hide the pythonConsole module .
+        """Show/hide the pythonConsole module .
         """
         # GWV: Somehow the code (Layout restore?) cannot deal with the PythonConsoleModule
         # being initialised by MainWindow, but hidden until needed. So we initialise it here
         # if there is not PythonConsoleModule
-        from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
 
         _init = False
-        if self.pythonConsoleModule is None:
+        if self._pythonConsoleModule is None:
             # No pythonConsole module detected, so create one.
             self._initPythonConsoleModule()
             _init = True
 
-        _justCreated = False
-        if self.pythonConsoleModule is None:  # No pythonConsole module detected, so create one.
-            self.moduleArea.addModule(PythonConsoleModule(self), 'bottom')
-            _justCreated = True
-        if self.pythonConsoleModule:
-            if self.pythonConsoleModule.isHidden() or _init:
-                self.pythonConsoleModule.show()
-            elif not _justCreated:
-                self.pythonConsoleModule.hide()
+        if not self._pythonConsoleModule:
+            raise RuntimeError(f'No PythonConsoleModule present')
+
+        _hidden = self._pythonConsoleModule.isHidden()
+        if _hidden or _init:
+            self._pythonConsoleModule.show()
+        else:
+            self._pythonConsoleModule.hide()
 
     def _toggleSidebar(self):
         """Toggle the visibility of the Sidebar

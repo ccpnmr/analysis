@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-11-13 13:22:52 +0000 (Wed, November 13, 2024) $"
-__version__ = "$Revision: 3.2.10 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-07 15:24:51 +0000 (Sat, December 07, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,7 +40,7 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule, MODULENAME, WIDGETSTATE
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
+from ccpn.ui.gui.widgets.IpythonConsoleWidget import IpythonConsoleWidget
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -136,9 +136,9 @@ class MacroEditor(CcpnModule):
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
             self.preferences = self.application.preferences
-            self._pythonConsole = self.mainWindow.pythonConsole
+            self._pythonConsole = self.mainWindow._pythonConsoleWidget
             if self._pythonConsole is None:
-                self._pythonConsole = IpythonConsole(self.mainWindow)
+                self._pythonConsole = IpythonConsoleWidget(self.mainWindow)
 
         if self.preferences:
             self.userMacroDirPath = self.preferences.general.userMacroPath
@@ -294,7 +294,7 @@ class MacroEditor(CcpnModule):
                 self._openPythonConsoleModule()
             self._pythonConsole._runMacro(path)
         else:
-            # Used when running the editor outside of Analysis. Run from an external IpythonConsole
+            # Used when running the editor outside of Analysis. Run from an external IpythonConsoleWidget
             self._runOnTempIPythonConsole()
 
     def _runAsTemp(self):
@@ -335,7 +335,7 @@ class MacroEditor(CcpnModule):
                     self._pythonConsole._runMacro(self.filePath)
 
         else:
-            # Used when running the editor outside of Analysis. Run from an external IpythonConsole
+            # Used when running the editor outside of Analysis. Run from an external IpythonConsoleWidget
             getLogger().warning('Profiler not implemented yet outside Assign')
             self._runOnTempIPythonConsole()
 

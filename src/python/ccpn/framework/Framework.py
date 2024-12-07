@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 20:47:13 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-07 15:24:51 +0000 (Sat, December 07, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -2569,7 +2569,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
             self.preferences._addRecentMacro(_path)
 
         with undoBlock():
-            self.ui.mainWindow.pythonConsole._runMacro(_path, extraCommands=extraCommands)
+            self.ui.mainWindow._pythonConsoleWidget._runMacro(_path, extraCommands=extraCommands)
 
     #################################################################################################
 

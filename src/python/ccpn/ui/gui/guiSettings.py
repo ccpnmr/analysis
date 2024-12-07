@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 11:00:44 +0100 (Thu, September 12, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2024-12-07 15:24:51 +0000 (Sat, December 07, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -713,12 +713,12 @@ def setColourScheme(theme, colourName, themeSD, force=False):
         getLogger().warning('Gui interface of application not defined; colourScheme not set')
 
 
-def setDefaultColourScheme():
-    """Conveniance to set default colour scheme
-    :return the Default colour scheme
-    """
-    setColourScheme(DEFAULT)
-    return DEFAULT
+# def setDefaultColourScheme():
+#     """Conveniance to set default colour scheme
+#     :return the Default colour scheme
+#     """
+#     setColourScheme(DEFAULT)
+#     return DEFAULT
 
 
 @singleton

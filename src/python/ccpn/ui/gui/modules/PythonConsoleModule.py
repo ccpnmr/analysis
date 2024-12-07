@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-26 10:38:14 +0000 (Tue, November 26, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-07 15:24:51 +0000 (Sat, December 07, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,7 +30,7 @@ __date__ = "$Date: 2017-05-10 16:04:41 +0000 (Wed, May 10, 2017) $"
 
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
+from ccpn.ui.gui.widgets.IpythonConsoleWidget import IpythonConsoleWidget
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getMainWindow
 from ccpn.framework.PathsAndUrls import ccpnModuleHelpPath
@@ -38,7 +38,7 @@ from ccpn.framework.PathsAndUrls import ccpnModuleHelpPath
 
 class PythonConsoleModule(CcpnModule):
     """
-    Gui module to display the Ipyhton console within the program
+    Gui module to display the Ipython console within the program
     """
 
     includeSettingsWidget = True
@@ -60,17 +60,21 @@ class PythonConsoleModule(CcpnModule):
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application
+        # Backlink defined here
+        self.mainWindow._pythonConsoleModule = self
 
         if not pythonConsoleWidget:
-            pythonConsoleWidget = self.mainWindow.pythonConsole
+            pythonConsoleWidget = self.mainWindow._pythonConsoleWidget
         self.pythonConsoleWidget = pythonConsoleWidget
 
         if self.pythonConsoleWidget is None:  # For some reason it can get destroyed!
-            self.mainWindow.pythonConsole = self.pythonConsoleWidget = IpythonConsole(mainWindow=mainWindow, namespace=mainWindow.namespace)
+            getLogger().debug(f'Opening PythonConsoleModule: No pythonConsoleWidget!')
+            self.mainWindow._pythonConsoleWidget = self.pythonConsoleWidget = IpythonConsoleWidget(mainWindow=mainWindow, namespace=mainWindow.namespace)
+
         self.mainWidget.getLayout().addWidget(self.pythonConsoleWidget)
 
         self.pythonConsoleWidget._startChannels()
-        self.mainWindow.pythonConsoleModule = self
+
         # self._menuAction = self.mainWindow._findMenuAction('View', 'Python Console')
         # if self._menuAction:
         #     self._menuAction.setChecked(True)

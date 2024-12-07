@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:31:17 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-07 15:41:34 +0000 (Sat, December 07, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -46,7 +46,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
 
-from ccpn.ui.gui.guiSettings import _styleMagenta
+from ccpn.ui.gui.guiSettings import _styleMagenta, _styleRed
 
 #--------------------------------------------------------------------------------------------
 
@@ -237,10 +237,13 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
         yield
 
     except Exception as es:
+        getLogger().debug(_styleRed(f'Caught exception: {es}'))
+
         if errorStringTemplate is None or errorStringTemplate.count('%s') != 1:
             errorStringTemplate = f'%s\n[malformed template]'
 
         getLogger().warning(errorStringTemplate % str(es))
+
         if printTraceBack or application._isInDebugMode:
             traceback.print_exc()  # please give more info about the error!
 
@@ -644,7 +647,7 @@ def undoStackBlocking(application=None, project=None, debugText=''):
         yield addUndoItem
 
     except Exception as es:
-        getLogger().debug(f'UndoStack encountered an error: {es}')
+        getLogger().debug(_styleRed(f'UndoStack encountered an error: {es}'))
         raise Exception from es
 
     finally:
@@ -787,7 +790,7 @@ def _storeNewObjectCurrent(result, thisAddUndoItem):
                             redo=storeObj._restoreCurrentSelectedObject,
                             )
         except Exception:
-            getLogger().debug(f'Current does not have attribute {result.__class__.__name__}')
+            getLogger().debug(_styleRed('Current does not have attribute {result.__class__.__name__}'))
 
 
 def _storeDeleteObjectCurrent(self, thisAddUndoItem):
@@ -1188,7 +1191,7 @@ def progressHandler(parent=None, *, title: str = 'Progress',
         getLogger().debug('progressHandler: cancelled')
     except Exception as es:
         # handle other errors
-        getLogger().debug(f'progressHandler: {es}')
+        getLogger().debug(_styleRed(f'progressHandler: {es}'))
         progress.error = es
         if raiseErrors:
             raise es
@@ -1231,7 +1234,7 @@ def busyHandler(parent=None, *, title: str = 'Busy',
         getLogger().debug('busyHandler: cancelled')
     except Exception as es:
         # handle other errors
-        getLogger().debug(f'busyHandler: {es}')
+        getLogger().debug(_styleRed(f'busyHandler: {es}'))
         progress.error = es
         if raiseErrors:
             raise es
@@ -1313,7 +1316,8 @@ def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
                 try:
                     # call the wrapped function
                     result = func(*args, **kwds)
-                except Exception:
+                except Exception as es:
+                    getLogger().debug(_styleRed(f'ccpNmrV3CoreSetter: {es}'))
                     raise
 
                 finally:
@@ -1353,7 +1357,8 @@ def ccpNmrV3CoreUndoBlock(action='change', **actionKwds):
                 try:
                     # call the wrapped function
                     result = func(*args, **kwds)
-                except Exception:
+                except Exception as es:
+                    getLogger().debug(_styleRed(f'ccpNmrV3CoreUndoBlock: {es}'))
                     raise
 
                 finally:
@@ -1395,6 +1400,7 @@ def ccpNmrV3CoreSimple():
                     # call the wrapped function
                     result = func(*args, **kwds)
                 except Exception as es:
+                    getLogger().debug(_styleRed(f'ccpNmrV3CoreSimple: {es}'))
                     raise
 
                 finally:

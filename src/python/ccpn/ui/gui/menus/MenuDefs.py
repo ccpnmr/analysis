@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-07 15:24:51 +0000 (Sat, December 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-09 09:03:55 +0000 (Mon, December 09, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -1396,7 +1396,7 @@ def _updatePythonConsoleModule(node) -> bool:
     """callback to check and update the Show/hide Python Console action
     """
     app = getApplication()
-    if (widget := app.ui.mainWindow._getPythonConsoleModule()) is not None:
+    if (widget := app.ui.mainWindow._getPythonConsoleWidget()) is not None:
         hidden = widget.isHidden()
         checked = not hidden
     else:

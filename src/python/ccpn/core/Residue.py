@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-10 12:10:51 +0000 (Tue, December 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-10 20:51:19 +0000 (Tue, December 10, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -28,22 +28,25 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 from functools import partial
+
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
+
 from ccpn.core.Chain import Chain
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import undoStackBlocking, renameObject, undoBlock, \
-    undoBlockWithoutSideBar, notificationEchoBlocking
+    undoBlockWithoutSideBar, notificationEchoBlocking, newObject
+
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoStackBlocking, renameObject, undoBlock, \
-    undoBlockWithoutSideBar, notificationEchoBlocking
+
 
 
 class Residue(AbstractWrapperObject):
     """A molecular Residue, contained in a Chain, and containing Atoms.
     Crucial attributes: residueType (e.g. 'ALA'), residueVariant (NEF-based), sequenceCode (e.g. '123')
     """
+    #-----------------------------------------------------------------------------------------
 
     #: Short class name, for PID.
     shortClassName = 'MR'
@@ -63,13 +66,14 @@ class Residue(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiResidue._metaclass.qualifiedName()
+    _ignoreNewApiObjectCallback = True
 
     # Number of fields that comprise the object's pid; Used to get parent id's
     _numberOfIdFields = 2
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # CCPN properties
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @property
     def _apiResidue(self) -> ApiResidue:
@@ -234,9 +238,9 @@ class Residue(AbstractWrapperObject):
         else:
             raise ValueError("%s configuration must be one of %s" % (self, allowedValues))
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # property STUBS: hot-fixed later
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @property
     def atoms(self) -> list['Atom']:
@@ -245,9 +249,9 @@ class Residue(AbstractWrapperObject):
         """
         return []
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # getter STUBS: hot-fixed later
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def getAtom(self, relativeId: str) -> 'Atom | None':
         """STUB: hot-fixed later
@@ -255,9 +259,9 @@ class Residue(AbstractWrapperObject):
         """
         return None
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Core methods
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @property
     def nextResidue(self) -> typing.Optional['Residue']:
@@ -388,9 +392,15 @@ class Residue(AbstractWrapperObject):
         """
         return any([a.isAssigned for a in self.atoms])
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Implementation methods
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
+
+    # For debugging purposes
+    def __init__(self, project: 'Project', wrappedData):
+        super().__init__(project, wrappedData)
+
+        self._apiMolResidue = None
 
     @classmethod
     def _getAllWrappedData(cls, parent: Chain) -> list:
@@ -452,10 +462,10 @@ class Residue(AbstractWrapperObject):
         if not super()._finaliseAction(action):
             return
 
-    #===========================================================================================
+    #-----------------------------------------------------------------------------------------
     # new<Object> and other methods
     # Call appropriate routines in their respective locations
-    #===========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @logCommand(get='self')
     def newAtom(self, name: str, elementSymbol: str = None, **kwds) -> 'Atom':
@@ -470,7 +480,6 @@ class Residue(AbstractWrapperObject):
         :return: a new Atom instance.
         """
         from ccpn.core.Atom import _newAtom
-
         return _newAtom(self, name=name, elementSymbol=elementSymbol, **kwds)
 
     def _removeNonChemAtoms(self):
@@ -485,16 +494,17 @@ class Residue(AbstractWrapperObject):
 
     @property
     def _chemCompVar(self):
-        """
-        :return:
+        """ :return: the CcpNmr ChemComp variant for self
         """
         return self._wrappedData.chemCompVar
 
-    def _getChemCompAtomGroups(self):
+    def _getChemCompAtomGroups(self) -> set:
         """
         """
+        if not self._chemCompVar:
+            return {}
+
         atomGroups = {}
-        if not self._chemCompVar: return
         atomSets = self._chemCompVar.chemAtomSets
         for atomSet in atomSets:
             if not atomSet.chemAtomSets:
@@ -504,23 +514,49 @@ class Residue(AbstractWrapperObject):
 
         return atomGroups
 
-    def _addAtomsFromChemSets(self):
-        if not self._chemCompVar:
-            return
-        atomSets = self._chemCompVar.chemAtomSets
+    # GWV 10/12/24: not used and routine does nothing
+    # def _addAtomsFromChemSets(self):
+    #     if not self._chemCompVar:
+    #         return
+    #     atomSets = self._chemCompVar.chemAtomSets
 
-    def _getChemAtomNames(self):
+    def _getChemAtomNames(self) -> list:
+        """:return: the list of atom names from the chemCompVar obj.
+        It uses chemCompVar instead of chemCompVar.chemComp.chemAtoms because
+        the latter includes LinkAtom like 'next_1'
         """
-        :return: gets the atom names from the chemCompVar obj.
-        It uses chemCompVar instead of chemCompVar.chemComp.chemAtoms because the latter includes LinkAtom like 'next_1'
-        """
-        chemCompVar = self._wrappedData.chemCompVar
         chemAtomNames = []
-        if chemCompVar:
-            chemAtoms = self._wrappedData.chemCompVar.chemAtoms
+        if self._chemCompVar is not None:
+            chemAtoms = self._chemCompVar.sortedChemAtoms()
             chemAtomNames = [atom.name for atom in chemAtoms]
         return chemAtomNames
 
 #=========================================================================================
-# Connections to parents:
+# new<Object> and other methods
 #=========================================================================================
+
+@newObject(klass=Residue)
+def _newResidue(chain: Chain, apiMolResidue) -> Residue:
+    """Create a new Residue instance
+    """
+    # local import to avoid cycles
+    from ccpn.core.Atom import _newAtom
+
+    apiChain = chain._wrappedData
+    newApiResidue = apiChain.newResidue(
+        seqId = apiMolResidue.serial,
+        seqCode = apiMolResidue.seqCode,
+        seqInsertCode = apiMolResidue.seqInsertCode,
+        linking = apiMolResidue.linking,
+        descriptor = apiMolResidue.descriptor)
+
+    if (result := Residue._newInstanceFromApiData(apiObj=newApiResidue, project=chain.project)) is None:
+        raise RuntimeError('Unable to generate new Residue')
+
+    for apiAtom in newApiResidue.atoms:
+        _newAtom(result, name=apiAtom.name, apiAtom=apiAtom)
+
+    # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
+    # result.resetVariantToDefault()
+
+    return result

@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:55:39 +0100 (Thu, September 19, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-10 20:51:19 +0000 (Tue, December 10, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,7 +40,9 @@ from ccpn.util.Logging import getLogger
 
 
 class Atom(AbstractWrapperObject):
-    """A molecular Atom, contained in a Residue."""
+    """A molecular Atom, contained in a Residue.
+    """
+    #-----------------------------------------------------------------------------------------
 
     #: Class name and Short class name, for PID.
     shortClassName = 'MA'
@@ -60,7 +62,10 @@ class Atom(AbstractWrapperObject):
 
     _ignoreNewApiObjectCallback = True
 
+    #-----------------------------------------------------------------------------------------
     # CCPN properties
+    #-----------------------------------------------------------------------------------------
+
     @property
     def _apiAtom(self) -> ApiAtom:
         """ CCPN atom matching Atom"""
@@ -94,7 +99,8 @@ class Atom(AbstractWrapperObject):
 
     @property
     def boundAtoms(self) -> tuple['Atom', ...]:
-        """Atoms that are covalently bound to this Atom"""
+        """Atoms that are covalently bound to this Atom
+        """
         getDataObj = self._project._data2Obj.get
         apiAtom = self._wrappedData
 
@@ -116,8 +122,10 @@ class Atom(AbstractWrapperObject):
         return tuple(getDataObj(x) for x in apiAtom.sortedGenericBonds())
 
     @property
-    def realAtoms(self):
-        """Recursively find all real atoms that combined  make up this atom. See componentAtoms"""
+    def realAtoms(self) -> list:
+        """Recursively find all real atoms that combined  make up this atom.
+        See componentAtoms
+        """
 
         def _getRealAtoms(atom):
             atoms = []
@@ -145,7 +153,8 @@ class Atom(AbstractWrapperObject):
         For non-stereo atoms (e.g. HBx, HBy, HGx%) it gives the two alternative stereospecific atoms
 
         Compound atoms may be nested - e.g. Valine HG1% has the components HG11, HG12, HG13
-        and is itself a component of HGx%, HGy%, HG%, and QG"""
+        and is itself a component of HGx%, HGy%, HG%, and QG
+        """
         getDataObj = self._project._data2Obj.get
         apiAtom = self._wrappedData
         return tuple(getDataObj(x) for x in self._wrappedData.components)
@@ -156,7 +165,8 @@ class Atom(AbstractWrapperObject):
         - reverse of 'componentAtoms'
 
         Compound atoms may be nested - e.g. Valine HG1% has the components HG11, HG12, HG13
-        and is itself a component of HGx%, HGy%, HG%, and QG"""
+        and is itself a component of HGx%, HGy%, HG%, and QG
+        """
         getDataObj = self._project._data2Obj.get
         apiAtom = self._wrappedData
         return tuple(getDataObj(x) for x in self._wrappedData.atomGroups)
@@ -234,9 +244,9 @@ class Atom(AbstractWrapperObject):
         if not self.nmrAtom.chemicalShifts: return False  # either None or len==0
         return True
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Implementation functions
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @classmethod
     def _getAllWrappedData(cls, parent: Residue) -> list:
@@ -259,42 +269,45 @@ class Atom(AbstractWrapperObject):
             # need to rename the bonds as their pids rely on the atom-ids
             bond._finaliseAction(action, **actionKwds)
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # CCPN functions
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
-    #===========================================================================================
-    # new<Object> and other methods
-    # Call appropriate routines in their respective locations
-    #===========================================================================================
+    @property
+    def _chemAtom(self):
+        """:return the ChemAtom instance
+        """
+        return self._wrappedData.chemAtom
 
 
 #=========================================================================================
-# Connections to parents:
+# new<Object>
 #=========================================================================================
 
 @newObject(Atom)
-def _newAtom(self: Residue, name: str, elementSymbol: str = None) -> 'Atom':
+def _newAtom(self: Residue, name: str, elementSymbol: str = None, apiAtom=None) -> 'Atom':
     """Create new Atom within Residue. If elementSymbol is None, it is derived from the name
 
     See the Atom class for details.
 
     :param name:
     :param elementSymbol:
+    :param apiAtom: create Atom using existing api Atom instance
     :return: a new Atom instance.
     """
     from ccpn.util.isotopes import name2ElementSymbol
 
-    lastAtom = self.getAtom(name)
-    if lastAtom is not None:
-        raise ValueError(f"Cannot create {lastAtom.longPid}, atom name {name} already in use")
-    if elementSymbol is None:
-        elementSymbol = name2ElementSymbol(name)
+    if (_atom := self.getAtom(name)) is not None:
+        raise ValueError(f"Cannot create Atom with {name = }; {_atom} already exists")
 
-    apiAtom = self._wrappedData.newAtom(name=name, elementSymbol=elementSymbol)
+    if not apiAtom:
+        if elementSymbol is None:
+            elementSymbol = name2ElementSymbol(name)
+        apiAtom = self._wrappedData.newAtom(name=name, elementSymbol=elementSymbol)
+
     if (result := Atom._newInstanceFromApiData(apiObj=apiAtom)) is None:
         raise RuntimeError('Unable to generate new Atom item')
 
-    apiAtom.expandNewAtom()
+    # apiAtom.expandNewAtom()
 
     return result

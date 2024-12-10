@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:49:49 +0100 (Thu, September 19, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-10 20:51:19 +0000 (Tue, December 10, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,6 +45,7 @@ from ccpn.util import Common as commonUtil
 from ccpn.util.Constants import DEFAULT_LABELLING
 from ccpn.util.decorators import logCommand
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.util.Logging import getLogger
 
 
 _apiClassNameMap = {
@@ -651,8 +652,9 @@ class Substance(AbstractWrapperObject):
         self._setInternalParameter(self._REFERENCESPECTRA, [sp.pid for sp in validSpecs])
 
     @property
-    def _molecule(self):
+    def _apiMolecule(self):
         """Get the attached molecule
+        CCPNMRINTERNAL: used in substanceToNef
         """
         return self._wrappedData.molecule
 
@@ -744,6 +746,7 @@ class Substance(AbstractWrapperObject):
 
                                   )
 
+        #TODO DEVELOP: rename returns a different tuple compared to super class
         return (oldName, oldLabelling,)
 
     #=========================================================================================
@@ -996,19 +999,29 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
 
     if isinstance(name, int):
         name = str(name)
-    if name is None:
-        # ensure that always has a name
-        name = Substance._uniqueName(parent=self, name=name)
-    self._validateStringValue(attribName='name', value=name, allowNone=True)
-    self._validateStringValue(attribName='labelling', value=labelling, allowNone=True)
+    elif name is None:
+        name = Substance._defaultName()
+
+    # ensure that name is unique name and validate it
+    name = Substance._uniqueName(parent=self, name=name)
+    Substance._validateStringValue(attribName='name', value=name, allowNone=False)
+
+    # validate the labelling
+    Substance._validateStringValue(attribName='labelling', value=labelling, allowNone=True)
 
     apiNmrProject = self._wrappedData
-    if apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name,
-                                                                            labeling=apiLabeling) is not None:
-        # ensure that always has a name
-        name = Substance._uniqueName(parent=self, name=name)
-    if apiNmrProject.root.findFirstMolecule(name=name) is not None:
-        raise ValueError("Molecule name %s is already in use for API Molecule" % name)
+    if (apiSampleComponent := apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(
+            name=name,
+            labeling=apiLabeling
+            )
+    ) is not None:
+        getLogger().debug(f'Unexpected error: {name=} used for {apiSampleComponent}')
+        raise ValueError(f"This should not happen: Molecule name {name} is already in use for API Sample component")
+
+    if (apiMolecule := apiNmrProject.root.findFirstMolecule(name=name)
+    ) is not None:
+        getLogger().debug(f'Unexpected error: {name=} used for {apiMolecule}')
+        raise ValueError(f"This should not happen: Molecule name {name} is already in use for API Molecule")
 
     # NOTE: ED I need to open the undoStack here so this adds to the list
     apiMolecule = MoleculeModify.createMolecule(apiNmrProject.root, sequence, molType=molType,
@@ -1029,6 +1042,7 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
     return result
 
 
+# TODO-DEVELOP: Ed: this is messy; please discuss with GWV
 @contextmanager
 def _addUndoApiObject(project, apiObject):
     def _getApiObjectTree(apiObject) -> tuple:

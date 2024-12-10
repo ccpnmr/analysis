@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-10 12:10:51 +0000 (Tue, December 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-10 20:51:19 +0000 (Tue, December 10, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -26,20 +26,24 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Tuple, Optional, Union, Sequence
+from typing import Tuple, Optional, Union, Sequence, List
 import numpy as np
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Substance import Substance, SampleComponent
-from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, inactivity
+from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, inactivity, undoStack
 from ccpn.core.lib import Pid
+from ccpn.core.lib.forceAttribute import forceSetattr
+
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
+
 from ccpnmodel.ccpncore.lib.CopyData import copySubTree
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule import Molecule
+from ccpnmodel.ccpncore.lib.molecule.MoleculeModify import createMolecule
 from ccpnmodel.ccpncore.api.ccp.lims import Sample
 
 
@@ -114,8 +118,9 @@ class Chain(AbstractWrapperObject):
 
     @property
     def role(self) -> str:
-        """The role of the chain in a molecular complex or sample - free text. Could be 'free',
-        ''bound', 'open', 'closed', 'minor form B', ..."""
+        """The role of the chain in a molecular complex or sample - free text.
+        Examples: 'free', 'bound', 'open', 'closed', 'minor form B', ...
+        """
         return self._wrappedData.role
 
     @role.setter
@@ -128,20 +133,32 @@ class Chain(AbstractWrapperObject):
         return self._wrappedData.molecule.isStdCyclic
 
     @property
-    def substances(self) -> Tuple[Substance, ...]:
-        """Substances matching to Chain (based on chain.compoundName)"""
+    def substances(self) -> list:
+        """:return a list of Substances matching to Chain (based on chain.compoundName)
+        """
         compoundName = self.compoundName
-        return tuple(x for x in self.project.substances if x.name == compoundName)
+        return [x for x in self.project.substances if x.name == compoundName]
+
+    @property
+    def substance(self) -> Substance | None:
+        """:return: the first of the substances, generally the only one or None
+        """
+        result = self.substances
+        if result:
+            return result[0]
+        else:
+            return None
 
     @property
     def sampleComponents(self) -> Tuple[SampleComponent, ...]:
-        """SampleComponents matching to Chain (based on chain.compoundName)"""
+        """SampleComponents matching to Chain (based on chain.compoundName)
+        """
         compoundName = self.compoundName
         return tuple(x for x in self.project.sampleComponents if x.name == compoundName)
 
     @property
     def nmrChain(self) -> Optional['NmrChain']:
-        """NmrChain to which Chain is assigned"""
+        """NmrChain to which Chain is (optionally) assigned"""
         try:
             return self._project.getNmrChain(self._id)
         except Exception:
@@ -248,19 +265,21 @@ class Chain(AbstractWrapperObject):
                 getLogger().warning("Only %s residues found in range %s tos %s" % (len(changedResidues), start, stop))
 
     @property
-    def sequence(self):
+    def sequence(self) -> str:
         """
         :return: the full sequence as a single string of one letter codes
         """
-        sequence = ''
-        for residue in self.residues:
-            if residue is not None:
-                if c := residue.shortName:
-                    sequence += c
-        return sequence
+        sequence = [residue.shortName for residue in self.residues
+                    if residue and residue.shortName
+                    ]
+        # for residue in self.residues:
+        #     if residue is not None:
+        #         if c := residue.shortName:
+        #             sequence += c
+        return ''.join(sequence)
 
     @property
-    def sequenceCcpCodes(self):
+    def sequenceCcpCodes(self) -> list:
         """
         :return: A list of  CcpCodes used to build the sequence
         """
@@ -338,9 +357,9 @@ class Chain(AbstractWrapperObject):
     def chainType(self):
         return self._wrappedData.molecule.molType
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Implementation functions
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     # For debugging purposes
     def __init__(self, project: 'Project', wrappedData):
@@ -379,24 +398,50 @@ class Chain(AbstractWrapperObject):
 def _newChain(project: Project, substance: Substance, shortName: str, role, comment: str):
     """Make a new Chain instance
     """
-    apiRoot = project._wrappedData.root
+    from ccpn.core.Residue import _newResidue
+
+    apiProject = project._wrappedData
     apiMolSystem = project._wrappedData.molSystem
     apiMolecule = substance._apiSubstance.molecule
     apiMolecule.isFinalised = True
-    newApiChain = apiMolSystem.newChain(molecule=apiMolecule,
+
+    # dummy molecule without residues to fool the api newChain creation;
+    # Don't push on undo stack as it will be deleted next
+    # In spite of delete, the model seems to hang onto it, so check if it exist first
+    with undoStack() as _:
+        if (_dummy := apiProject.root.findFirstMolecule(name='dummy')) is None:
+            _dummy = createMolecule(apiProject.root,
+                                    sequence=[],
+                                    name='dummy'
+                                    )
+            _dummy.details = 'dummy substance to create the chain without residues'
+
+    newApiChain = apiMolSystem.newChain(molecule=_dummy,
                                         code=shortName, role=role,
                                         details=comment)
     if (result := Chain._newInstanceFromApiData(apiObj=newApiChain, project=project)) is None:
         raise RuntimeError('Unable to generate new Chain item')
 
+    # remove the dummy molecule and set the real one;
+    # need to force this as model will not allow it
+    with undoStack() as _:
+        forceSetattr(newApiChain, 'molecule', apiMolecule)
+        forceSetattr(apiMolecule, 'chains', set([ApiChain]))
+        forceSetattr(_dummy, 'chains', set())
+        _dummy.delete()
+
+    # Now add the residues as defined by substance
+    for apiMolResidue in apiMolecule.sortedMolResidues():
+        _newResidue(result, apiMolResidue)
+
     return result
 
 
-def _getChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: str = None,
-              startNumber: int = 1, molType: str = None, isCyclic: bool = False,
-              shortName: str = None, role: str = None, comment: str = None,
-              serial: int = None) -> Chain:
-    pass
+# def _getChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: str = None,
+#               startNumber: int = 1, molType: str = None, isCyclic: bool = False,
+#               shortName: str = None, role: str = None, comment: str = None,
+#               serial: int = None) -> Chain:
+#     pass
 
 
 
@@ -437,7 +482,7 @@ def _createChain(self: Project,
 
     # shortName, i.e. the chain name
     shortName = Chain._uniqueName(parent=self, name=shortName) \
-                if shortName else _nextChainCode()
+                if shortName else _nextChainCode(project=self)
 
     sequenceHandler: SequenceHandler = SequenceHandler(self.project, moleculeType=molType)
     ccpCodes:list  = []
@@ -451,7 +496,6 @@ def _createChain(self: Project,
             raise ValueError(msg)
 
         ccpCodes = sequenceMap.get(CCPCODE)
-
 
     # GWV The code above assures shortName does not already exist
     # previous = self.getChain(shortName.translate(Pid.remapSeparators))
@@ -482,26 +526,27 @@ def _createChain(self: Project,
                                                 isCyclic=isCyclic,
                                                 comment=comment)
 
-
         result = _newChain(self, substance, shortName, role, comment)
 
-        if result:
-            with inactivity():
-
-                if expandFromAtomSets:
-                    expandChainAtoms(result,
-                                     replaceStarWithPercent=True,
-                                     addPseudoAtoms=addPseudoAtoms,
-                                     addNonstereoAtoms=addNonstereoAtoms,
-                                     setBoundsForAtomGroups=True,
-                                     atomNamingSystem='PDB_REMED',
-                                     pseudoNamingSystem='AQUA')
-
-                for residue in result.residues:
-                    # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
-                    residue.resetVariantToDefault()
-                    if not residue.residueType:
-                        self.project.deleteObjects(*residue.atoms)
+        # GWV 10/12/24: Atoms are added by the newResidue method called from newChain
+        #
+        # if result:
+        #     with inactivity():
+        #
+        #         if expandFromAtomSets:
+        #             expandChainAtoms(result,
+        #                              replaceStarWithPercent=True,
+        #                              addPseudoAtoms=addPseudoAtoms,
+        #                              addNonstereoAtoms=addNonstereoAtoms,
+        #                              setBoundsForAtomGroups=True,
+        #                              atomNamingSystem='PDB_REMED',
+        #                              pseudoNamingSystem='AQUA')
+        #
+        #         for residue in result.residues:
+        #             # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
+        #             residue.resetVariantToDefault()
+        #             if not residue.residueType:
+        #                 self.project.deleteObjects(*residue.atoms)
 
     return result
 
@@ -543,9 +588,9 @@ def _createChainFromSubstance(self: Substance, shortName: str = None, role: str 
     if (result := AbstractWrapperObject._restoreObject(project=self.project, apiObj=newApiChain)) is None:
         raise RuntimeError('Unable to generate new Chain item')
 
-    for residue in result.residues:
-        # Necessary as CCPN V2 default protonation states do not match the NEF / V3 standard
-        residue.resetVariantToDefault()
+    # for residue in result.residues:
+    #     # Necessary as CCPN V2 default protonation states do not match the NEF / V3 standard
+    #     residue.resetVariantToDefault()
 
     if expandFromAtomSets:
         from ccpn.core.lib.MoleculeLib import expandChainAtoms

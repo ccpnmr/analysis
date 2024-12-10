@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-10 12:10:51 +0000 (Tue, December 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-10 20:51:19 +0000 (Tue, December 10, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -648,7 +648,7 @@ def undoStackBlocking(application=None, project=None, debugText=''):
 
     except Exception as es:
         getLogger().debug(_styleRed(f'UndoStack encountered an error: {es}'))
-        raise Exception from es
+        raise es
 
     finally:
         # clean up after blocking undo items
@@ -823,6 +823,7 @@ def newObject(klass):
 
         with notificationBlanking():
             with undoStackBlocking(application=application, debugText=f'newObject: {func}') as addUndoItem:
+
                 result = func(*args, **kwds)
                 if result is None:
                     return None

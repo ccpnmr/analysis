@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:31:17 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-10 20:51:20 +0000 (Tue, December 10, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -1909,7 +1909,7 @@ class CcpnNefWriter:
         substanceType = substance.substanceType
         result['substance_type'] = substanceType
         if substanceType == 'Molecule':
-            apiMolecule = substance._molecule
+            apiMolecule = substance._apiMolecule
             if apiMolecule is not None:
                 result['sequence_string'] = substance.sequenceString
                 result['start_number'] = apiMolecule.sortedMolResidues()[0].seqCode

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:31:15 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-10 12:10:51 +0000 (Tue, December 10, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ import numpy as np
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Substance import Substance, SampleComponent
-from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, inactivity
 from ccpn.core.lib import Pid
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
@@ -47,7 +47,8 @@ NotFound = 'NotFound'  # used to create missing residues
 
 
 class Chain(AbstractWrapperObject):
-    """A molecular Chain, containing one or more Residues."""
+    """A molecular Chain, containing one or more Residues
+    """
 
     #: Short class name, for PID.
     shortClassName = 'MC'
@@ -67,6 +68,8 @@ class Chain(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiChain._metaclass.qualifiedName()
+
+    _ignoreNewApiObjectCallback = True
 
     #=========================================================================================
     # CCPN properties
@@ -298,7 +301,7 @@ class Chain(AbstractWrapperObject):
 
     @logCommand(get='self')
     def toNmrChain(self, nmrChainName=None, ):
-        """ Makes a new NmrChain from its ressidues/atoms.
+        """ Makes a new NmrChain from its residues/atoms.
 
         :param nmrChainName: str. Default None to use the same name as the chain. If the name is already taken, it creates a sequential code.
         :return the newly created nmrChain object
@@ -327,8 +330,9 @@ class Chain(AbstractWrapperObject):
                             isotopeCode = DEFAULT_ISOTOPE_DICT.get(atom.elementSymbol)
                             nmrResidue.newNmrAtom(atom.name, isotopeCode=isotopeCode)
             return nmrChain
+
         except Exception as e:
-            self.project._logger.warning(f"Error in creating an NmrChain from Chain: {e}")
+            getLogger() .warning(f"Error in creating an NmrChain from Chain: {e}")
 
     @property
     def chainType(self):
@@ -337,6 +341,10 @@ class Chain(AbstractWrapperObject):
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
+
+    # For debugging purposes
+    def __init__(self, project: 'Project', wrappedData):
+        super().__init__(project, wrappedData)
 
     @classmethod
     def _getAllWrappedData(cls, parent: Project) -> list:
@@ -368,12 +376,17 @@ class Chain(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(Chain)
-def _newApiChain(self: Project, apiMolecule, shortName, role, comment):
-    apiMolSystem = self._wrappedData.molSystem
+def _newChain(project: Project, substance: Substance, shortName: str, role, comment: str):
+    """Make a new Chain instance
+    """
+    apiRoot = project._wrappedData.root
+    apiMolSystem = project._wrappedData.molSystem
+    apiMolecule = substance._apiSubstance.molecule
     apiMolecule.isFinalised = True
-    newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
+    newApiChain = apiMolSystem.newChain(molecule=apiMolecule,
+                                        code=shortName, role=role,
                                         details=comment)
-    if (result := Chain._newInstanceFromApiData(apiObj=newApiChain, project=self._project)) is None:
+    if (result := Chain._newInstanceFromApiData(apiObj=newApiChain, project=project)) is None:
         raise RuntimeError('Unable to generate new Chain item')
 
     return result
@@ -386,11 +399,13 @@ def _getChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: 
     pass
 
 
-@undoBlock()
-def _createChain(self: Project, compoundName: str = None,
-                 sequence: str = None,
-                 startNumber: int = 1, molType: str = None, isCyclic: bool = False,
-                 shortName: str = None, role: str = None, comment: str = None,
+
+def _createChain(self: Project,
+                 compoundName: str = None,
+                 sequence: str = None, startNumber: int = 1,
+                 molType: str = None, isCyclic: bool = False,
+                 shortName: str = None, role: str = None,
+                 comment: str = None,
                  expandFromAtomSets: bool = True,
                  addPseudoAtoms: bool = True,
                  addNonstereoAtoms: bool = True,
@@ -418,28 +433,30 @@ def _createChain(self: Project, compoundName: str = None,
     :return: a new Chain instance.
     """
     from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, ISVALID, ERRORS
+    from ccpn.core.lib.MoleculeLib import expandChainAtoms, _nextChainCode
 
-    ccpCodes = []
+    # shortName, i.e. the chain name
+    shortName = Chain._uniqueName(parent=self, name=shortName) \
+                if shortName else _nextChainCode()
+
+    sequenceHandler: SequenceHandler = SequenceHandler(self.project, moleculeType=molType)
+    ccpCodes:list  = []
     if sequence is not None:
-        sequenceHandler = SequenceHandler(self.project, moleculeType=molType)
-        sequenceMap = sequenceHandler.parseSequence(sequence)
-        isValid = sequenceMap[ISVALID]
-        if not isValid:
+        # parse the sequence  --> list of ccpCodes
+        sequenceMap: dict = sequenceHandler.parseSequence(sequence)
+        if not sequenceMap[ISVALID]:
             errorsIndices = sequenceMap.get(ERRORS, [])
             errors = ', '.join(map(str, errorsIndices))
-            msg = f'''The given sequence is not valid. Found errors at positions(s): {errors} '''
+            msg = f'The given sequence is not valid. Found errors at positions(s): {errors}'
             raise ValueError(msg)
+
         ccpCodes = sequenceMap.get(CCPCODE)
 
-    apiMolSystem = self._wrappedData.molSystem
-    shortName = (
-        Chain._uniqueName(parent=self, name=shortName)
-        if shortName
-        else apiMolSystem.nextChainCode()
-    )
-    previous = self._project.getChain(shortName.translate(Pid.remapSeparators))
-    if previous is not None:
-        raise ValueError(f"'{previous.longPid}' already exists")
+
+    # GWV The code above assures shortName does not already exist
+    # previous = self.getChain(shortName.translate(Pid.remapSeparators))
+    # if previous is not None:
+    #     raise ValueError(f"'{previous.longPid}' already exists")
 
     apiRefComponentStore = self._apiNmrProject.sampleStore.refSampleComponentStore
     # if compoundName is None:
@@ -456,38 +473,35 @@ def _createChain(self: Project, compoundName: str = None,
                 "If you want to create a second identical chain from an existing substance, please clone the chain."
                 % compoundName)
 
-    substance = self.createPolymerSubstance(sequence=ccpCodes, name=name,
-                                            startNumber=startNumber, molType=molType,
-                                            isCyclic=isCyclic, comment=comment)
+    with undoBlock():
 
-    apiMolecule = substance._apiSubstance.molecule
+        substance = self.createPolymerSubstance(name=name,
+                                                molType=molType,
+                                                sequence=ccpCodes,
+                                                startNumber=startNumber,
+                                                isCyclic=isCyclic,
+                                                comment=comment)
 
-    # try:
-    if True:
-        result = _newApiChain(self, apiMolecule, shortName, role, comment)
-        if result and expandFromAtomSets:
-            from ccpn.core.lib.MoleculeLib import expandChainAtoms
 
-            expandChainAtoms(result,
-                             replaceStarWithPercent=True,
-                             addPseudoAtoms=addPseudoAtoms,
-                             addNonstereoAtoms=addNonstereoAtoms,
-                             setBoundsForAtomGroups=True,
-                             atomNamingSystem='PDB_REMED',
-                             pseudoNamingSystem='AQUA')
+        result = _newChain(self, substance, shortName, role, comment)
 
-    # except Exception as es:
-    #     if substance:
-    # clean up and remove the created substance
-    # substance.delete()
-    # raise RuntimeError('Unable to generate new Chain item') from es
+        if result:
+            with inactivity():
 
-    for residue in result.residues:
-        # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
-        residue.resetVariantToDefault()
-        if not residue.residueType:
-            with undoBlock():
-                self.project.deleteObjects(*residue.atoms)
+                if expandFromAtomSets:
+                    expandChainAtoms(result,
+                                     replaceStarWithPercent=True,
+                                     addPseudoAtoms=addPseudoAtoms,
+                                     addNonstereoAtoms=addNonstereoAtoms,
+                                     setBoundsForAtomGroups=True,
+                                     atomNamingSystem='PDB_REMED',
+                                     pseudoNamingSystem='AQUA')
+
+                for residue in result.residues:
+                    # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
+                    residue.resetVariantToDefault()
+                    if not residue.residueType:
+                        self.project.deleteObjects(*residue.atoms)
 
     return result
 

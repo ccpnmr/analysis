@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 16:23:30 +0100 (Sat, October 26, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-12-10 12:10:51 +0000 (Tue, December 10, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -269,10 +269,10 @@ def expandChainAtoms(chain,
     molSystem = apiChain.molSystem
 
     if not atomNamingSystem in NamingSystems:
-        atomNamingSystem = 'PDB_REMED'
+        raise ValueError(f' Invalid atomNamingSystem: {atomNamingSystem}')
 
     if not pseudoNamingSystem in NamingSystems:
-        pseudoNamingSystem = 'AQUA'
+        raise ValueError(f' Invalid pseudoNamingSystem: {pseudoNamingSystem}')
 
     # Set elementSymbol and add missing atoms (lest something breaks lower down)
     for residue in apiChain.sortedResidues():
@@ -439,7 +439,7 @@ def expandChainAtoms(chain,
                                 newName = ''.join(ll)
                                 newNames.append(newName)
                                 if residue.findFirstAtom(name=newName) is not None:
-                                    print("WARNING, new atom already exists: %s %s %s %s"
+                                    getLogger().warning("New atom already exists: %s %s %s %s"
                                           % (residue.chain.code, residue.seqId, residue.ccpCode, newName))
                                 else:
                                     residue.newAtom(name=newName, atomType='nonstereo', elementSymbol=elementSymbol,
@@ -478,8 +478,8 @@ def expandChainAtoms(chain,
                             break
 
 
-def _nextChainCode(project):
-    """This gives a "next" available chain code.
+def _nextChainCode(project) -> str:
+    """:return: a "next" available chain code.
        First does A-Z, then A1-Z1, then A2-Z2, etc.
     """
 

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 16:23:29 +0100 (Sat, October 26, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-12-10 12:10:51 +0000 (Tue, December 10, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -289,7 +289,8 @@ class Residue(AbstractWrapperObject):
         return result
 
     def resetVariantToDefault(self):
-        """Reset Residue.residueVariant to the default variant"""
+        """Reset Residue.residueVariant to the default variant
+        """
         atomNamesMissing, extraAtomNames = self._wrappedData.getAtomNameDifferences()
         # No need for testing - the names returned are guaranteed to be missing/superfluous
         for atomName in atomNamesMissing:

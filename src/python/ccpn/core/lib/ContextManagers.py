@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-07 15:41:34 +0000 (Sat, December 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-10 12:10:51 +0000 (Tue, December 10, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -845,8 +845,8 @@ def newObject(klass):
                     # only add current if required
                     _storeNewObjectCurrent(result, addUndoItem)
 
-        # set the _objectVersion
-        result._objectVersion = application.applicationVersion
+                # set the _objectVersion
+                result._objectVersion = application.applicationVersion
 
         result._finaliseAction('create')
 
@@ -855,6 +855,7 @@ def newObject(klass):
     return theDecorator
 
 
+# TODO-DEVEL: get rid of this
 def newObjectList(klasses):
     """A decorator wrap a newObject method's of the various classes in an undo block and calls
     result._finalise('create') for each object in the results list
@@ -898,9 +899,11 @@ def newObjectList(klasses):
 
         # handle notifying all objects in the list - e.g. sampleComponent also makes a substance
         for result in results:
-            result._finaliseAction('create')
             # set the _objectVersion
-            result._objectVersion = application.applicationVersion
+            with undoStackBlocking(application=application) as _:
+                result._objectVersion = application.applicationVersion
+
+            result._finaliseAction('create')
 
         # return the primary object
         return results[0] if results else None
@@ -1024,10 +1027,10 @@ def newV3Object():
                     addUndoItem(undo=partial(result._finaliseAction, 'delete'),
                                 redo=partial(result._finaliseAction, 'create'))
 
-        result._finaliseAction('create')
+                    # set the _objectVersion
+                    result._objectVersion = application.applicationVersion
 
-        # set the _objectVersion
-        result._objectVersion = application.applicationVersion
+        result._finaliseAction('create')
 
         return result
 

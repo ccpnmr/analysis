@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:32:08 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-10 12:10:51 +0000 (Tue, December 10, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -213,6 +213,7 @@ class IpythonConsoleWidget(Widget):
             if self.ipythonWidget.kernel_client:
                 self.ipythonWidget.kernel_client.stop_channels()
                 self.ipythonWidget.kernel_client = None
+            # https://ipython.org/ipython-doc/3/api/generated/IPython.kernel.manager.html
             if self.ipythonWidget.kernel_manager:
                 # self.ipythonWidget.kernel_manager.shutdown_kernel()
                 self.ipythonWidget.kernel_manager.request_shutdown()

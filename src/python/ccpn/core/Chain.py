@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-10 20:51:19 +0000 (Tue, December 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-11 09:47:48 +0000 (Wed, December 11, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -395,10 +395,25 @@ class Chain(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(Chain)
-def _newChain(project: Project, substance: Substance, shortName: str, role, comment: str):
-    """Make a new Chain instance
+def _newChain(project: Project, substance: Substance, useNefAtomNomenclature: bool = True,
+              shortName: str|None = None,
+              role: str|None = None, comment: str|None = None
+              ):
+    """Make a new Chain instance as defined by a Substance instance
+    :param project: the Project instance
+    :param substance: a Substance instance defining the chain
+    :param useNefAtomNomenclature: flag to define NEF atom nomenclature to be used, rather
+                                   than only IUPAC-defined atoms (default=True)
+    :param str shortName: name for new chain (optional; defaults to next available from (A, B, C, ...)
+    :param str role: role for new chain (optional)
+    :param str comment: comment for new chain (optional)
     """
     from ccpn.core.Residue import _newResidue
+    from ccpn.core.lib.MoleculeLib import _nextChainCode
+
+    # shortName, i.e. the chain name
+    shortName = Chain._uniqueName(parent=project, name=shortName) \
+                if shortName else _nextChainCode(project=project)
 
     apiProject = project._wrappedData
     apiMolSystem = project._wrappedData.molSystem
@@ -407,7 +422,7 @@ def _newChain(project: Project, substance: Substance, shortName: str, role, comm
 
     # dummy molecule without residues to fool the api newChain creation;
     # Don't push on undo stack as it will be deleted next
-    # In spite of delete, the model seems to hang onto it, so check if it exist first
+    # In spite of delete, the model seems to hang onto it, so check if it exists first
     with undoStack() as _:
         if (_dummy := apiProject.root.findFirstMolecule(name='dummy')) is None:
             _dummy = createMolecule(apiProject.root,
@@ -418,7 +433,8 @@ def _newChain(project: Project, substance: Substance, shortName: str, role, comm
 
     newApiChain = apiMolSystem.newChain(molecule=_dummy,
                                         code=shortName, role=role,
-                                        details=comment)
+                                        details=comment
+                                        )
     if (result := Chain._newInstanceFromApiData(apiObj=newApiChain, project=project)) is None:
         raise RuntimeError('Unable to generate new Chain item')
 
@@ -430,51 +446,39 @@ def _newChain(project: Project, substance: Substance, shortName: str, role, comm
         forceSetattr(_dummy, 'chains', set())
         _dummy.delete()
 
-    # Now add the residues as defined by substance
+    # Now add the residues and atoms as defined by substance
     for apiMolResidue in apiMolecule.sortedMolResidues():
-        _newResidue(result, apiMolResidue)
+        _newResidue(result, apiMolResidue, useNefAtomNomenclature=useNefAtomNomenclature)
 
     return result
-
-
-# def _getChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: str = None,
-#               startNumber: int = 1, molType: str = None, isCyclic: bool = False,
-#               shortName: str = None, role: str = None, comment: str = None,
-#               serial: int = None) -> Chain:
-#     pass
-
 
 
 def _createChain(self: Project,
                  compoundName: str = None,
                  sequence: str = None, startNumber: int = 1,
                  molType: str = None, isCyclic: bool = False,
-                 shortName: str = None, role: str = None,
+                 useNefAtomNomenclature: bool = True,
+                 shortName: str = None,
+                 role: str = None,
                  comment: str = None,
-                 expandFromAtomSets: bool = True,
-                 addPseudoAtoms: bool = True,
-                 addNonstereoAtoms: bool = True,
                  **kwargs,
                  ) -> Chain:
-    """Create new chain from sequence of residue codes, using default variants.
+    """Create new Substance and a new Chain from sequence of residue codes, using default variants.
+    Automatically creates the Substance if the compoundName is not already taken
 
-    Automatically creates the corresponding polymer Substance if the compoundName is not already taken
-
-    See the Chain class for details.
     :param sequence: str or list of str. Only for standard Residues. One of the following options:
-                                - string of Code1Letter un-separated or space/comma-separated;
-                                - string of Code3Letter/CcpCodes space/comma-separated; if Only one residue, must be given as a List
-                                - list of single strings either of Code1Letter or Code3Letter or CcpCodes
-
+                    - string of Code1Letter un-separated or space/comma-separated;
+                    - string of Code3Letter/CcpCodes space/comma-separated; if Only one residue, must be given as a List
+                    - list of single strings either of Code1Letter or Code3Letter or CcpCodes
+                    See the Chain class for details.
+    :param useNefAtomNomenclature: flag to define NEF atom nomenclature to be used, rather
+                                   than only IUPAC-defined atoms (default=True)
     :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
     :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
     :param int startNumber: number of first residue in sequence
     :param str shortName: shortName for new chain (optional)
     :param str role: role for new chain (optional)
     :param str comment: comment for new chain (optional)
-    :param bool expandFromAtomSets: Create new Atoms corresponding to the ChemComp AtomSets definitions.
-                Eg. H1, H2, H3 equivalent atoms will add a new H% atom. This will facilitate assignments workflows.
-                See ccpn.core.lib.MoleculeLib.expandChainAtoms for details.
     :return: a new Chain instance.
     """
     from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, ISVALID, ERRORS
@@ -526,27 +530,12 @@ def _createChain(self: Project,
                                                 isCyclic=isCyclic,
                                                 comment=comment)
 
-        result = _newChain(self, substance, shortName, role, comment)
-
+        result = _newChain(self, substance=substance,
+                                 useNefAtomNomenclature=useNefAtomNomenclature,
+                                 shortName=shortName,
+                                 role=role, comment=comment
+                           )
         # GWV 10/12/24: Atoms are added by the newResidue method called from newChain
-        #
-        # if result:
-        #     with inactivity():
-        #
-        #         if expandFromAtomSets:
-        #             expandChainAtoms(result,
-        #                              replaceStarWithPercent=True,
-        #                              addPseudoAtoms=addPseudoAtoms,
-        #                              addNonstereoAtoms=addNonstereoAtoms,
-        #                              setBoundsForAtomGroups=True,
-        #                              atomNamingSystem='PDB_REMED',
-        #                              pseudoNamingSystem='AQUA')
-        #
-        #         for residue in result.residues:
-        #             # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
-        #             residue.resetVariantToDefault()
-        #             if not residue.residueType:
-        #                 self.project.deleteObjects(*residue.atoms)
 
     return result
 

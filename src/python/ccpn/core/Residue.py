@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-10 20:51:19 +0000 (Tue, December 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-11 09:47:48 +0000 (Wed, December 11, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ from ccpn.core.Chain import Chain
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import undoStackBlocking, renameObject, undoBlock, \
-    undoBlockWithoutSideBar, notificationEchoBlocking, newObject
+    undoBlockWithoutSideBar, notificationEchoBlocking, newObject, apiNotificationBlanking, undoStack
 
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
@@ -292,20 +292,21 @@ class Residue(AbstractWrapperObject):
 
         return result
 
-    def resetVariantToDefault(self):
-        """Reset Residue.residueVariant to the default variant
-        """
-        atomNamesMissing, extraAtomNames = self._wrappedData.getAtomNameDifferences()
-        # No need for testing - the names returned are guaranteed to be missing/superfluous
-        for atomName in atomNamesMissing:
-            self.newAtom(name=atomName)
-        for atomName in extraAtomNames:
-            self.getAtom(atomName).delete()
+    # GWV 11/12/24: superseeded by _newResidue implementation
+    # def resetVariantToDefault(self):
+    #     """Reset Residue.residueVariant to the default variant
+    #     """
+    #     atomNamesMissing, extraAtomNames = self._wrappedData.getAtomNameDifferences()
+    #     # No need for testing - the names returned are guaranteed to be missing/superfluous
+    #     for atomName in atomNamesMissing:
+    #         self.newAtom(name=atomName)
+    #     for atomName in extraAtomNames:
+    #         self.getAtom(atomName).delete()
 
     @staticmethod
     def _setFragmentResidues(chainFragment, residues):
         """set the residues connected to the chainFragment
-        CCPN Internal - ussed to handle removing reside link from the api
+        CCPN Internal - used to handle removing residue link from the api
         """
         chainFragment.__dict__['residues'] = tuple(residues)
 
@@ -400,7 +401,7 @@ class Residue(AbstractWrapperObject):
     def __init__(self, project: 'Project', wrappedData):
         super().__init__(project, wrappedData)
 
-        self._apiMolResidue = None
+        # self._apiMolResidue = None
 
     @classmethod
     def _getAllWrappedData(cls, parent: Chain) -> list:
@@ -471,9 +472,8 @@ class Residue(AbstractWrapperObject):
     def newAtom(self, name: str, elementSymbol: str = None, **kwds) -> 'Atom':
         """Create new Atom within Residue. If elementSymbol is None, it is derived from the name
 
+        Optional keyword arguments can be passed in;
         See the Atom class for details.
-
-        Optional keyword arguments can be passed in; see Atom._newAtom for details.
 
         :param name:
         :param elementSymbol:
@@ -536,8 +536,12 @@ class Residue(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(klass=Residue)
-def _newResidue(chain: Chain, apiMolResidue) -> Residue:
-    """Create a new Residue instance
+def _newResidue(chain: Chain, apiMolResidue, useNefAtomNomenclature: bool) -> Residue:
+    """Create a new Residue instance and its encompassing atoms
+    :param chain: A Chain instance
+    :param apiMolResidue: A API MolResidue instance containing the definitions for the new residue
+    :param useNefAtomNomenclature: flag to define NEF atom nomenclature to be used, rather than only IUPAC
+    :return: A Residue instance.
     """
     # local import to avoid cycles
     from ccpn.core.Atom import _newAtom
@@ -548,15 +552,43 @@ def _newResidue(chain: Chain, apiMolResidue) -> Residue:
         seqCode = apiMolResidue.seqCode,
         seqInsertCode = apiMolResidue.seqInsertCode,
         linking = apiMolResidue.linking,
-        descriptor = apiMolResidue.descriptor)
+        descriptor = apiMolResidue.descriptor
+    )
 
     if (result := Residue._newInstanceFromApiData(apiObj=newApiResidue, project=chain.project)) is None:
         raise RuntimeError('Unable to generate new Residue')
 
-    for apiAtom in newApiResidue.atoms:
-        _newAtom(result, name=apiAtom.name, apiAtom=apiAtom)
+    # Add the atoms
+    with apiNotificationBlanking():
 
-    # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
-    # result.resetVariantToDefault()
+        _atoms = []
+
+        # TODO DEVELOP: implement this, getting a proper list of valid names in case of True
+        useNefAtomNomenclature = False
+
+        if useNefAtomNomenclature:
+            # Use NEF atom nomenclature
+            _validNames = 'N CA C H'.split()
+            for apiAtom in newApiResidue.atoms:
+                if apiAtom.name in _validNames:
+                    _atom = _newAtom(result, name=apiAtom.name, apiAtom=apiAtom)
+                    _atoms.append(_atom)
+                else:
+                    with undoStack() as _:
+                        apiAtom.delete()
+
+                _missed = set(_validNames) - set(at.name for at in _atoms)
+                for _atomName in _missed:
+                    _atom = _newAtom(result, name=_atomName)
+                    _atoms.append(_atom)
+
+        else:
+            # Just use the IUPAC as derived from the CcpNmr machinery
+            for apiAtom in newApiResidue.atoms:
+                _atom = _newAtom(result, name=apiAtom.name, apiAtom=apiAtom)
+                _atoms.append(_atom)
+
+            # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
+            # result.resetVariantToDefault()
 
     return result

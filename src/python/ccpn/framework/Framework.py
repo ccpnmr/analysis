@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-07 15:24:51 +0000 (Sat, December 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-11 09:47:48 +0000 (Wed, December 11, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -235,8 +235,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
         # Resources
         sys.stderr.write('==> Loading resources... ')
-        self.resources = None
-        # self.resources = Resources(self)
+        self._resources = Resources(self)
         sys.stderr.write('Done!\n')
 
         # get a user interface; nb. ui.start() is called by the application
@@ -309,6 +308,13 @@ class Framework(HasCcpNmrProperties, NotifierBase):
             self.project._updateLoggerState()
             if self.mainWindow:
                 self.mainWindow._setReadOnlyIcon()
+
+    @property
+    def resources(self) -> Resources:
+        """:return the Resources object with access to reference chemical
+        shifts, reference molecule definitions, isotope records, etc.
+        """
+        return self._resources
 
     #-----------------------------------------------------------------------------------------
     # Useful (?) directories as Path instances

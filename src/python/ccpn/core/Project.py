@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-06 14:47:43 +0000 (Fri, December 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-11 09:47:48 +0000 (Wed, December 11, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -2275,9 +2275,10 @@ class Project(AbstractWrapperObject):
         This method is called from the api upon creation of a corresponding api object
         See AbstractWrapperObject._linkWrapperClasses where the apiNotifier is set for this callback
         """
-        if self._apiBlocking != 0:
+        if self._apiBlocking != 0 or NotifierBase._apiNotificationBlanking != 0:
             getLogger().debug(_styleRed(f'blocking _newApiObject {self} {wrappedData} {cls}'))
             return
+
         if (result := self._data2Obj.get(wrappedData)) is not None:
             raise RuntimeError(
                     f'Project._newApiObject: {result} already exists; Cannot create again and this should not happen!')
@@ -2311,8 +2312,9 @@ class Project(AbstractWrapperObject):
     def _finaliseApiDelete(self, wrappedData):
         """Clean up after object deletion
         """
-        if self._apiBlocking != 0:
+        if self._apiBlocking != 0 or NotifierBase._apiNotificationBlanking != 0:
             return
+
         if not wrappedData.isDeleted:
             raise ValueError(f"_finaliseApiDelete called before wrapped data are deleted: {wrappedData}")
         # get object
@@ -2334,8 +2336,9 @@ class Project(AbstractWrapperObject):
         """restore undeleted wrapper object, and call creation notifiers,
         same as _newObject.
         """
-        if self._apiBlocking != 0:
+        if self._apiBlocking != 0 or NotifierBase._apiNotificationBlanking != 0:
             return
+
         if wrappedData.isDeleted:
             raise ValueError(f"_finaliseApiUnDelete called before wrapped data are deleted: {wrappedData}")
         try:
@@ -2362,6 +2365,7 @@ class Project(AbstractWrapperObject):
 
         if NotifierBase._apiNotificationBlanking != 0 or self._apiBlocking != 0:
             return
+
         if not (target := operator.attrgetter(pathToObject)(wrappedData)):
             return
         elif hasattr(target, '_metaclass'):
@@ -3198,11 +3202,9 @@ class Project(AbstractWrapperObject):
                     compoundName: str = None,
                     startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                     shortName: str = None, role: str = None, comment: str = None,
-                    expandFromAtomSets: bool = True,
-                    addPseudoAtoms: bool = True, addNonstereoAtoms: bool = True,
                     **kwds):
         """Create new chain from sequence of residue codes, using default variants.
-        Automatically creates the corresponding polymer Substance if the compoundName is not already taken
+        Automatically creates the corresponding Substance if the compoundName is not already taken
         See the Chain class for details.
         Optional keyword arguments can be passed in; see Chain._createChain for details.
         :param sequence: str or list of str.
@@ -3212,21 +3214,21 @@ class Project(AbstractWrapperObject):
                     sequence =  'A A A A A A'
                     sequence =  'A, A, A, A, A, A'
                     sequence =  ['A', 'A', 'A', 'A', 'A']
-                - 3-Letter-Code  (standards and non-standards)
+                - 3-Letter-Code  (standard and non-standard)
                     sequence =  'ALA ALA ALA ALA'
                     sequence =  'ALA, ALA, ALA, ALA'
                     sequence =  ['ALA', 'ALA', 'ALA']
-                - ccpCodes:  (standards and non-standards)
+                - ccpCodes:  (standard and non-standard)
                     - sequence containing Standard residue(s) CcpCodes e.g.::
                         sequence = 'Ala Leu Ala'
                         sequence = 'Ala, Leu, Ala'
                         sequence = ['Ala', 'Leu', 'Ala']
                     - sequence containing Non-Standard residue(s) CcpCodes e.g.:
                         sequence = ['Ala', 'Aba', Orn]
-                    - sequence of a small-molecule CcpCodes: (Note you need to import the ChemComp first if not available in the Project. see docs)
+                    - sequence of a small-molecule CcpCodes: (Note you need to import the ChemComp first
+                                                              if not available in the Project. see docs)
                         sequence = ['Atp']  # if only one code Must be in a list
                         sequence = ['MySmallMolecule'] # if only one code Must be in a list
-
 
         :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
         :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
@@ -3234,20 +3236,15 @@ class Project(AbstractWrapperObject):
         :param str shortName: shortName for new chain (optional)
         :param str role: role for new chain (optional)
         :param str comment: comment for new chain (optional)
-        :param bool expandFromAtomSets: Create new Atoms corresponding to the ChemComp AtomSets definitions.
-                Eg. H1, H2, H3 equivalent atoms will add a new H% atom. This will facilitate assignments workflows.
-                See ccpn.core.lib.MoleculeLib.expandChainAtoms for details.
         :return: a new Chain instance.
         """
         from ccpn.core.Chain import _createChain
-
         return _createChain(self,
                             sequence=sequence,
                             compoundName=compoundName,
                             startNumber=startNumber, molType=molType, isCyclic=isCyclic,
                             shortName=shortName, role=role, comment=comment,
-                            expandFromAtomSets=expandFromAtomSets, addPseudoAtoms=addPseudoAtoms,
-                            addNonstereoAtoms=addNonstereoAtoms, **kwds)
+                            **kwds)
 
     # GWV: why not newChain to be consistent???
     newChain = createChain

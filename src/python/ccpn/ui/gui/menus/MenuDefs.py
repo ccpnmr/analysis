@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-09 09:03:55 +0000 (Mon, December 09, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-12 12:09:56 +0000 (Thu, December 12, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -859,7 +859,7 @@ class MenusDefs(Menu, FrameworkProperties):
         dialog._show()
         path = dialog.selectedFile()
         if path is not None:
-            self.ui.newMacroEditor(path=path)
+            self.ui.showMacroEditor(path=path)
 
     def _runMacroCallback(self):
         """Callback for running macro

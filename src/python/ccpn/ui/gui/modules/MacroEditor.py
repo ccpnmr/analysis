@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-07 15:24:51 +0000 (Sat, December 07, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-12 12:09:56 +0000 (Thu, December 12, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -608,7 +608,7 @@ class MacroEditor(CcpnModule):
         console.show()
 
     def _openPythonConsoleModule(self):
-        if self.mainWindow.pythonConsoleModule is None:  # No pythonConsole module detected, so create one.
+        if self.mainWindow._pythonConsoleModule is None:  # No pythonConsole module detected, so create one.
             self.mainWindow._initPythonConsoleModule()
 
     def _deleteTempMacro(self, filePath):

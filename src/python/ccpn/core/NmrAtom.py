@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 16:23:29 +0100 (Sat, October 26, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-12-12 11:38:36 +0000 (Thu, December 12, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,6 +33,7 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.AbsorbResonance import absorbResonance
 from ccpn.core.lib import Pid
+from ccpn.core.lib.CcpNmrProperties import CcpNmrUnicodeProperty
 from ccpn.core.lib.Util import AtomIdTuple
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Constants
@@ -142,7 +143,9 @@ class NmrAtom(AbstractWrapperObject):
         ll = [parent._parent.shortName, parent.sequenceCode, parent.residueType, self.name]
         return AtomIdTuple(*(x or None for x in ll))
 
-    @property
+    @CcpNmrUnicodeProperty(
+            allowNone=True
+            )
     def name(self) -> str:
         """Atom name string (e.g. 'HA')"""
         return self._wrappedData.name

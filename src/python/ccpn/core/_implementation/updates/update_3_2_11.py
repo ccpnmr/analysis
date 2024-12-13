@@ -18,16 +18,13 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:31:17 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-13 12:42:05 +0000 (Fri, December 13, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: geertenv $"
 __date__ = "$Date: 2024-12-04 9:42:30 +0100 (Wed, December 4, 2024) $"
-
-from ccpn.core.lib.CcpNmrProperties import CcpNmrBoolProperty
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -44,9 +41,8 @@ def _updateOldDefaultNmrChain(nmrChain):
     # NB all updates executed with inactivity
     from ccpn.core.NmrChain import DEFAULT_NMRCHAINCODE
 
-    _serials = [nc.serial for nc in nmrChain.project.nmrChains]
-    if 0 not in _serials:
-        nmrChain._resetSerial(0)
-
     if nmrChain.name == OLD_NMRCHAINCODE:
+        _serials = [nc.serial for nc in nmrChain.project.nmrChains]
+        if 0 not in _serials:
+            nmrChain._resetSerial(0)
         nmrChain._rename(DEFAULT_NMRCHAINCODE)

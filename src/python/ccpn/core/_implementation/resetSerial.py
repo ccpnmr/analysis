@@ -4,8 +4,10 @@ resetSerial function
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2018"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -15,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: geertenv $"
-__dateModified__ = "$dateModified: 2021-01-13 10:28:41 +0000 (Wed, Jan 13, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-13 12:42:05 +0000 (Fri, December 13, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,6 +28,9 @@ __date__ = "$Date: 2021-01-13 10:28:41 +0000 (Wed, Jan 13, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+from ccpn.framework.Application import getApplication, getProject
+
 
 def resetSerial(apiObject, newSerial):
     """ADVANCED Reset serial of object to newSerial, resetting parent link
@@ -51,15 +56,13 @@ def resetSerial(apiObject, newSerial):
         return
 
     elif newSerial in downdict:
-        # get the identifier of the v3 object
-        from ccpn.framework.Application import getApplication
+        # newSerial is in use;
+        # get the identifier of the v3 object to report the error
 
-        getApp = getApplication()
+        project = getProject()
         v3obj = None
-        if getApp:
-            project = getApp.project
-            if project and apiObject in project._data2Obj:
-                v3obj = project._data2Obj[apiObject]
+        if project and apiObject in project._data2Obj:
+            v3obj = project._data2Obj[apiObject]
         raise ValueError("Cannot reset serial to %s - value already in use (%s)" % (newSerial, v3obj or apiObject))
 
     else:

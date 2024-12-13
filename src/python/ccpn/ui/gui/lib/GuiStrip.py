@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-30 14:15:09 +0000 (Wed, October 30, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-12-13 12:42:05 +0000 (Fri, December 13, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -41,7 +41,8 @@ from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar
-from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND
+from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND, \
+    _styleRed
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
 from ccpn.util.decorators import logCommand
@@ -229,7 +230,8 @@ class _StripOverlay(QtWidgets.QWidget):
 
 class GuiStrip(Frame):
     """"A class with Gui-related methods and Attributes for a Strip.
-    Inherits from _implementation.Strip and therefore NotifierBase
+    Final assembled Strip class Inherits both from this one and
+    from _implementation.Strip and therefore NotifierBase
     """
 
     #---------------------------------------------------------------------------------------------
@@ -641,8 +643,10 @@ class GuiStrip(Frame):
                     objList = spectrum = None
                 callbackDict['_list'] = objList
                 callbackDict['_spectrum'] = spectrum
-        except Exception:
-            pass
+
+        except Exception as es:
+            getLogger(_styleRed(f'Modifying callbackDict failed: {es}'))
+
         self._queueAppend([func, callbackDict])
 
     def viewRange(self):

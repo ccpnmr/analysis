@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-11 09:47:48 +0000 (Wed, December 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-13 12:42:05 +0000 (Fri, December 13, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -34,7 +34,8 @@ from ccpn.core.Project import Project
 from ccpn.core.Substance import Substance, SampleComponent
 from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, inactivity, undoStack
 from ccpn.core.lib import Pid
-from ccpn.core.lib.forceAttribute import forceSetattr
+from ccpn.core.lib.forceAttribute import forceSetattr, forceGetattr
+from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, ISVALID, ERRORS
 
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
@@ -394,12 +395,20 @@ class Chain(AbstractWrapperObject):
 # Call appropriate routines in their respective locations
 #=========================================================================================
 
+# @newObject(Chain)
+# def _newChain(project: Project, substance: Substance, useNefAtomNomenclature: bool = True,
+#               shortName: str|None = None,
+#               role: str|None = None, comment: str|None = None
+#               ):
 @newObject(Chain)
-def _newChain(project: Project, substance: Substance, useNefAtomNomenclature: bool = True,
-              shortName: str|None = None,
-              role: str|None = None, comment: str|None = None
+def _newChain(project: Project,
+              sequence: list,
+              useNefAtomNomenclature: bool = True,
+              shortName: str | None = None,
+              role: str | None = None,
+              comment: str | None = None
               ):
-    """Make a new Chain instance as defined by a Substance instance
+    """Make a new Chain instance as defined by the sequence
     :param project: the Project instance
     :param substance: a Substance instance defining the chain
     :param useNefAtomNomenclature: flag to define NEF atom nomenclature to be used, rather
@@ -416,41 +425,120 @@ def _newChain(project: Project, substance: Substance, useNefAtomNomenclature: bo
                 if shortName else _nextChainCode(project=project)
 
     apiProject = project._wrappedData
-    apiMolSystem = project._wrappedData.molSystem
-    apiMolecule = substance._apiSubstance.molecule
-    apiMolecule.isFinalised = True
+    apiMolSystem = apiProject.molSystem
 
-    # dummy molecule without residues to fool the api newChain creation;
-    # Don't push on undo stack as it will be deleted next
-    # In spite of delete, the model seems to hang onto it, so check if it exists first
-    with undoStack() as _:
-        if (_dummy := apiProject.root.findFirstMolecule(name='dummy')) is None:
-            _dummy = createMolecule(apiProject.root,
-                                    sequence=[],
-                                    name='dummy'
-                                    )
-            _dummy.details = 'dummy substance to create the chain without residues'
+    # first create the polymer without any residue definitions
+    polymer = Polymer(
+            project=project,
+            name=shortName,
+            comment=f'API molecule of chain {shortName}',
+    )
 
-    newApiChain = apiMolSystem.newChain(molecule=_dummy,
-                                        code=shortName, role=role,
+    # Create the new Chain; since apiMolecule has no residue definitions,
+    # it will be an empty chain
+    apiMolecule = polymer.apiMolecule
+    newApiChain = apiMolSystem.newChain(molecule=apiMolecule,
+                                        code=shortName,
+                                        role=role,
                                         details=comment
                                         )
     if (result := Chain._newInstanceFromApiData(apiObj=newApiChain, project=project)) is None:
         raise RuntimeError('Unable to generate new Chain item')
 
-    # remove the dummy molecule and set the real one;
-    # need to force this as model will not allow it
-    with undoStack() as _:
-        forceSetattr(newApiChain, 'molecule', apiMolecule)
-        forceSetattr(apiMolecule, 'chains', set([ApiChain]))
-        forceSetattr(_dummy, 'chains', set())
-        _dummy.delete()
-
-    # Now add the residues and atoms as defined by substance
+    # Now define the sequence
+    polymer.defineSequence(moleculeType = 'protein',
+                           sequence = sequence,
+                           isCyclic = False,
+                           startNumber = 1
+                           )
+    # And add the residues and atoms as defined by polymer
     for apiMolResidue in apiMolecule.sortedMolResidues():
         _newResidue(result, apiMolResidue, useNefAtomNomenclature=useNefAtomNomenclature)
 
     return result
+
+
+from ccpnmodel.ccpncore.api.ccp.molecule.Molecule import Molecule as ApiMolecule
+
+class Polymer(object):
+    """Class to hold polymer, i.e. an API Molecule info
+    """
+
+    def __init__(self, project: Project, name: str, comment: str = None):
+        """Init self and create an Empty API Molecule
+        :param project: the Project instance
+        :param name: the name of the API molecule
+        :param comment: comment for the polymer
+        """
+        self.project = project
+        self.name = name
+        self.comment = comment
+        self.apiMolecule: ApiMolecule = self.newApiMolecule()
+
+    @property
+    def _wrappedData(self):
+        """A hack to mimick wrappedData so it can take
+        the newObject decorator.
+        """
+        return self.apiMolecule
+
+    def newApiMolecule(self) -> ApiMolecule:
+        """Create and return the API molecule
+        """
+        apiProject = self.project._wrappedData
+        # check if name exists
+        if (_dummy := apiProject.root.findFirstMolecule(name=self.name)) is not None:
+            raise ValueError(f'Unable to generate API Molecule instance; {self.name!r} already exists')
+
+        with undoStack() as _:
+            apiMolecule = apiProject.root.newMolecule(name=self.name)
+            if self.comment:
+                apiMolecule.details = self.comment
+            return apiMolecule
+
+    def defineSequence(self,
+                       moleculeType: str,
+                       sequence: list | tuple,
+                       isCyclic: bool,
+                       startNumber: int,
+                      ):
+        """
+        Make a new API Molecule from sequence, using SequenceHandler to parse the sequence.
+        :param moleculeType: molecule type; one of
+        :param sequence: a sequence (list, tuple, str) of molecule type; see chain for details
+        :return self
+        """
+        # Parse the sequence
+        sequenceHandler: SequenceHandler = SequenceHandler(self.project, moleculeType=moleculeType)
+        ccpCodes:list = []
+        if sequence is not None:
+            # parse the sequence  --> list of ccpCodes
+            sequenceMap: dict = sequenceHandler.parseSequence(sequence)
+            if not sequenceMap[ISVALID]:
+                errorsIndices = sequenceMap.get(ERRORS, [])
+                errors = ', '.join(map(str, errorsIndices))
+                msg = f'The given sequence is not valid. Found errors at positions(s): {errors}'
+                raise ValueError(msg)
+
+            ccpCodes = sequenceMap.get(CCPCODE)
+
+        if ccpCodes:
+            with undoStack() as _:
+                # Have to unassign the 'chains' attribute and re-assign afterward
+                # as we (might) have used apiMolecule to create a chain
+                _apiChains = forceGetattr(self.apiMolecule, 'chains')
+                forceSetattr(self.apiMolecule, 'chains', set())
+                self.apiMolecule.extendMolResidues(sequence=ccpCodes,
+                                         molType=moleculeType,
+                                         startNumber=startNumber,
+                                         isCyclic=isCyclic
+                                         )
+                forceSetattr(self.apiMolecule, 'chains', _apiChains)
+        return self
+
+    # @classmethod
+    # def _undoDelete(cls, obj):
+    #     """Method"""
 
 
 def _createChain(self: Project,
@@ -481,8 +569,8 @@ def _createChain(self: Project,
     :param str comment: comment for new chain (optional)
     :return: a new Chain instance.
     """
-    from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, ISVALID, ERRORS
-    from ccpn.core.lib.MoleculeLib import expandChainAtoms, _nextChainCode
+    # from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, ISVALID, ERRORS
+    from ccpn.core.lib.MoleculeLib import _nextChainCode
 
     # shortName, i.e. the chain name
     shortName = Chain._uniqueName(parent=self, name=shortName) \

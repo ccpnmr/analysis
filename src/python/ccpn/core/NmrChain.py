@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-06 14:47:43 +0000 (Fri, December 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-13 12:42:05 +0000 (Fri, December 13, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -111,8 +111,10 @@ class NmrChain(AbstractWrapperObject):
 
     @property
     def _key(self) -> str:
-        """short form of name, as used for id with illegal characters replaced by Pid.altCharacter"""
-        return self._wrappedData.code.translate(Pid.remapSeparators)
+        """short form of name, as used for id with illegal characters
+        replaced by Pid.altCharacter
+        """
+        return self.name.translate(Pid.remapSeparators)
 
     @property
     def _localCcpnSortKey(self) -> typing.Tuple:
@@ -120,29 +122,33 @@ class NmrChain(AbstractWrapperObject):
         return (self._wrappedData.code,)
 
     @property
-    def shortName(self) -> str:
-        """short form of name, used in Pid and to identify the NmrChain
-        Names of the form '@ijk' and '#ijk' (where ijk is an integers)
-        are reserved and cannot be set. They can be obtained by the deassign command.
-        Connected NmrChains (isConnected == True) always have canonical names of the form '#ijk'"""
-        return self._wrappedData.code
-
-    name = shortName
+    def name(self) -> str:
+        """Name of the NmrChain, used in Pid.
+        Names of the form '@ijk' and '#ijk' (where ijk is an integers) are
+        reserved and cannot be set. They can be obtained by the deassign command.
+        Connected NmrChains (isConnected == True) always have canonical names of
+        the form '#ijk'
+        """
+        return str(self._wrappedData.code).strip()
 
     @name.setter
     def name(self, value: str):
-        """set name of nmrResidue."""
+        """set name of nmrChain."""
         self.rename(value)
 
-    @property
-    def label(self) -> str:
-        """Identifying label of NmrChain. Defaults to '?'"""
-        return self._wrappedData.label
+    # backward compatibility
+    shortName = name
 
-    @label.setter
-    def label(self, value: str):
-        """Set label of NmrChain."""
-        self._wrappedData.label = value
+    # GWV 12/12/24: disabled
+    # @property
+    # def label(self) -> str:
+    #     """Identifying label of NmrChain. Defaults to '?'"""
+    #     return self._wrappedData.label
+    #
+    # @label.setter
+    # def label(self, value: str):
+    #     """Set label of NmrChain."""
+    #     self._wrappedData.label = value
 
     @property
     def _parent(self) -> Project:
@@ -388,9 +394,12 @@ class NmrChain(AbstractWrapperObject):
         newName = self._uniqueName(parent=self.project, name=value)
 
         # GWV: bypassing the sodding api-checks
-        forceSetattr(self._wrappedData, 'code', newName)
-        forceSetattr(self._wrappedData, 'implCode', newName)
+        # implCode and code are linked; cannot set one without the other.
+        # Hack: Adding space that will be stripped by the name property.
+        _code = f' {newName}'
         forceSetattr(self._wrappedData, 'label', newName)
+        forceSetattr(self._wrappedData, 'implCode', _code)
+        forceSetattr(self._wrappedData, 'code', _code)
 
         self._resetIds(recursive=True)
         for nmrRes in self.nmrResidues:
@@ -544,15 +553,14 @@ class NmrChain(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(NmrChain)
-def _newNmrChain(project: Project, shortName: str = None, isConnected: bool = False,
-                 label: str = '?', comment: str = None) -> NmrChain:
+def _newNmrChain(project: Project, name: str = None, isConnected: bool = False,
+                 comment: str = None) -> NmrChain:
     """Create new NmrChain. Setting isConnected=True produces a connected NmrChain.
 
     See the NmrChain class for details.
 
-    :param str shortName: shortName for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer
+    :param str name: name for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer
     :param bool isConnected: (default to False) If true the NmrChain is a connected stretch. This can NOT be changed later
-    :param str label: Modifiable NmrChain identifier that does not change with reassignment. Defaults to '@ijk'/'#ijk'
     :param str comment: comment for new nmrChain (optional)
     :return: a new nmrChain instance.
     """
@@ -566,23 +574,23 @@ def _newNmrChain(project: Project, shortName: str = None, isConnected: bool = Fa
 
     apiNmrProject = project._apiNmrProject
 
-    if shortName is None:
+    if name is None:
         if isConnected:
-            shortName = f'#{serial}'
+            _name = f'#{serial}'
         else:
-            shortName = f'@{serial}'
+            _name = f'@{serial}'
     else:
-        shortName = NmrChain._uniqueName(parent=project, name=shortName)
+        _name = NmrChain._uniqueName(parent=project, name=name)
 
     # some sanity checks
     _ids = [nc.id for nc in project.nmrChains]
-    if shortName in _ids:
-        raise ValueError(f"NmrChain {shortName} already used")
+    if _name in _ids:
+        raise ValueError(f"NmrChain {name} already used")
 
-    if shortName[0:0] == "@" and isConnected:
-        raise ValueError(f'Connected NmrChain should not start with "@"; got {shortName}')
+    if _name[0:0] == "@" and isConnected:
+        raise ValueError(f'Connected NmrChain should not start with "@"; got {_name}')
 
-    if shortName[0:0] == "#" and not isConnected:
+    if _name[0:0] == "#" and not isConnected:
         raise ValueError(f'Un-connected NmrChain should not start with "#"; got {shortName}')
 
     # serial = None
@@ -623,11 +631,13 @@ def _newNmrChain(project: Project, shortName: str = None, isConnected: bool = Fa
 
     # GWV 3/12/24: cannot add serial to initiating parameters
     #              cannot set # or @ shortnames!!!
-    # Hence: bypass and force it
-    dd = {'code': f'_{shortName}', 'isConnected': isConnected, 'label': shortName, 'details': comment}
+    # Hence: bypass and force it;
+    # also add a space to name that will be stripped by the name property
+    _code = f' {_name}'
+    dd = {'code': _code, 'isConnected': isConnected, 'label': _name, 'details': comment}
     newApiNmrChain = apiNmrProject.newNmrChain(**dd)
-    forceSetattr(newApiNmrChain, 'code', shortName)
-    forceSetattr(newApiNmrChain, 'implCode', shortName)
+    forceSetattr(newApiNmrChain, 'code', _code)
+    forceSetattr(newApiNmrChain, 'implCode', _code)
 
     if (result := NmrChain._newInstanceFromApiData(apiObj=newApiNmrChain, project=project)) is None:
         raise RuntimeError('Unable to generate new NmrChain')

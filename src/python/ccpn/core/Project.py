@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-11 09:47:48 +0000 (Wed, December 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-13 12:42:05 +0000 (Fri, December 13, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -1636,7 +1636,8 @@ class Project(AbstractWrapperObject):
             try:
                 with self._xmlLoader.blockReading():
                     # only need to check what is already there
-                    apiStatus = self._getAPIObjectsStatus()
+                    # completeScan = False skips attribute value validation
+                    apiStatus = self._getAPIObjectsStatus(completeScan=False)
                 if apiStatus.invalidObjects:
                     # if deleteInvalidObjects:
                     # delete here ...
@@ -2438,8 +2439,8 @@ class Project(AbstractWrapperObject):
         Parameters:
         completeScan: bool, True to perform a complete validity check of all found API objects
         includeDefaultChildren: bool, False to exclude default objects for inspection such as
-                                ChemComps and associated, nmrExpPrototypes etc.See _APIStatus._excludedChildren
-                                for the full list of exclusions.
+                                ChemComps and associated, nmrExpPrototypes etc.
+                                See _APIStatus._excludedChildren for the full list of exclusions.
         checkValidity: bool, default True, check the validity of each API object
                        set to False if only the list is required, note that this overrides completeScan
         Return: the API Status object. See _APIStatus for full description
@@ -2953,19 +2954,16 @@ class Project(AbstractWrapperObject):
         return _newHdf5Spectrum(self, isotopeCodes=isotopeCodes, name=name, path=path, **parameters)
 
     @logCommand('project.')
-    def newNmrChain(self, shortName: str = None, isConnected: bool = False, label: str = '?',
-                    comment: str = None):
+    def newNmrChain(self, name: str = None, isConnected: bool = False, comment: str = None):
         """Create new NmrChain. Setting isConnected=True produces a connected NmrChain.
 
-        :param str shortName: shortName for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer
+        :param str name: name for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer)
         :param bool isConnected: (default to False) If true the NmrChain is a connected stretch. This can NOT be changed later
-        :param str label: Modifiable NmrChain identifier that does not change with reassignment. Defaults to '@ijk'/'#ijk'
         :param str comment: comment for new nmrChain (optional)
         :return: a new NmrChain instance.
         """
         from ccpn.core.NmrChain import _newNmrChain
-        return _newNmrChain(self, shortName=shortName, isConnected=isConnected,
-                            label=label, comment=comment)
+        return _newNmrChain(self, name=name, isConnected=isConnected, comment=comment)
 
     @logCommand('project.')
     def fetchNmrChain(self, shortName: str = None):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-11 09:47:48 +0000 (Wed, December 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-15 18:51:28 +0000 (Sun, December 15, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from ccpn.core.lib.ContextManagers import undoStackBlocking, renameObject, undoB
 
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
+from ccpn.util.Logging import getLogger
 
 
 
@@ -75,14 +76,16 @@ class Residue(AbstractWrapperObject):
     # CCPN properties
     #-----------------------------------------------------------------------------------------
 
-    @property
-    def _apiResidue(self) -> ApiResidue:
-        """ API residue matching Residue"""
-        return self._wrappedData
+    # GWV 15/12/24: moved downwards
+    # @property
+    # def _apiResidue(self) -> ApiResidue:
+    #     """ API residue matching Residue"""
+    #     return self._wrappedData
 
     @property
     def sequenceCode(self) -> str:
-        """Residue sequence code and id (e.g. '1', '127B') """
+        """Residue sequence code and id (e.g. '1', '127B')
+        """
         obj = self._wrappedData
         objSeqCode = obj.seqCode
         result = (obj.seqInsertCode or '').strip()
@@ -92,7 +95,9 @@ class Residue(AbstractWrapperObject):
 
     @property
     def _key(self) -> str:
-        """Residue ID. Identical to sequenceCode.residueType. Characters translated for pid"""
+        """Residue ID. Identical to sequenceCode.residueType.
+        Characters translated for pid
+        """
         return Pid.createId(self.sequenceCode, self.residueType)
 
     @property
@@ -102,26 +107,50 @@ class Residue(AbstractWrapperObject):
 
     @property
     def _parent(self) -> Chain:
-        """Chain containing residue."""
+        """:return the Chain instance containing self.
+        """
         return self._project._data2Obj[self._wrappedData.chain]
 
     chain = _parent
 
     @property
     def residueType(self) -> str:
-        """Residue type name string (e.g. 'ALA')"""
-        return self._wrappedData.code3Letter or ''
+        """Residue type name string (e.g. 'ALA').
+        """
+        return self.threeLetterCode or ''
+
+    @property
+    def threeLetterCode(self) -> str:
+        """:return the three-letter of self as defined by its chemComp definition
+                   or None in case of error.
+        """
+        try:
+            return self._chemComp.code3Letter
+        except Exception as es:
+            getLogger().debug(f'getting threeLetterCode encountered an error: {es}')
+            return None
+
+    @property
+    def oneLetterCode(self) -> str:
+        """:return the one-letter of self as defined by its chemComp definition.
+                   or None in case of error.
+        """
+        try:
+            return self._chemComp.code1Letter
+        except Exception as es:
+            getLogger().debug(f'getting oneLetterCode encountered an error: {es}')
+            return None
 
     @property
     def shortName(self) -> str:
-        return self._wrappedData.chemCompVar.chemComp.code1Letter or '?'
+        return self._chemComp.code1Letter or '?'
 
     @property
     def ccpCode(self) -> str:
-        """Residue sequence ccpcode (e.g. 'Ala', 'Aba') retrieved from the ChemComp"""
-        obj = self._wrappedData
-        ccpCode = obj.ccpCode
-        return ccpCode
+        """Residue sequence ccpcode (e.g. 'Ala', 'Aba') retrieved from
+        the ChemComp
+        """
+        return self._chemComp
 
     @property
     def linking(self) -> str:
@@ -214,8 +243,8 @@ class Residue(AbstractWrapperObject):
 
     @property
     def descriptor(self) -> str:
-        """variant descriptor (protonation state etc.) for residue, as defined in the CCPN V2 ChemComp
-        description."""
+        """variant descriptor (protonation state etc.) for residue, as defined in the
+        CCPN V2 ChemComp description."""
         return self._wrappedData.descriptor
 
     @descriptor.setter
@@ -271,7 +300,7 @@ class Residue(AbstractWrapperObject):
         molResidue = apiResidue.molResidue.nextMolResidue
         if molResidue is None:
             result = None
-            self._project._logger.debug("No next residue - API ")
+            getLogger().debug("No next residue - API ")
         else:
             result = self._project._data2Obj.get(
                     apiResidue.chain.findFirstResidue(seqId=molResidue.serial))
@@ -400,8 +429,22 @@ class Residue(AbstractWrapperObject):
     # For debugging purposes
     def __init__(self, project: 'Project', wrappedData):
         super().__init__(project, wrappedData)
-
         # self._apiMolResidue = None
+
+    @property
+    def _apiResidue(self) -> ApiResidue:
+        """ API residue matching Residue"""
+        return self._wrappedData
+
+    @property
+    def _apiMolResidue(self):
+        """:return The API MolResidue instance as derived from the
+                   _polymer associated with self.chain and self.sequenceCode,
+                   or None if not defined
+        """
+        if (_polymer := self.chain._polymer) is None:
+            raise RuntimeError(f'Polymer not defined in {self.chain}')
+        return _polymer._getApiMolResidue(self.sequenceCode)
 
     @classmethod
     def _getAllWrappedData(cls, parent: Chain) -> list:
@@ -493,10 +536,22 @@ class Residue(AbstractWrapperObject):
                 self.project.deleteObjects(*pseudoAtoms)
 
     @property
-    def _chemCompVar(self):
-        """ :return: the CcpNmr ChemComp variant for self
+    def _chemComp(self) -> str:
+        """:return the chemComp instance or None if not defined
         """
-        return self._wrappedData.chemCompVar
+        if (apiMolResidue := self._apiMolResidue) is None:
+            getLogger().debug(f'Undefined apiMolResidue for {self}; returning None for chempComp')
+            return None
+        return apiMolResidue.chemComp
+
+    @property
+    def _chemCompVar(self):
+        """:return the chemCompVar instance or None if not defined
+        """
+        if (apiMolResidue := self._apiMolResidue) is None:
+            getLogger().debug(f'Undefined apiMolResidue for {self}; returning None for chempComp')
+            return None
+        return apiMolResidue.chemCompVar
 
     def _getChemCompAtomGroups(self) -> set:
         """
@@ -530,6 +585,7 @@ class Residue(AbstractWrapperObject):
             chemAtoms = self._chemCompVar.sortedChemAtoms()
             chemAtomNames = [atom.name for atom in chemAtoms]
         return chemAtomNames
+
 
 #=========================================================================================
 # new<Object> and other methods

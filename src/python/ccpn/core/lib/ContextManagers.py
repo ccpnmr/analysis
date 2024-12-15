@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-10 20:51:19 +0000 (Tue, December 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-15 18:51:29 +0000 (Sun, December 15, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -783,14 +783,14 @@ class _ObjectStore(object):
 
 
 def _storeNewObjectCurrent(result, thisAddUndoItem):
-    if hasattr(result, CURRENT_ATTRIBUTE_NAME):
+    if getattr(result, CURRENT_ATTRIBUTE_NAME, None) is not None:
         try:
             storeObj = _ObjectStore(result)
             thisAddUndoItem(undo=storeObj._storeCurrentSelectedObject,
                             redo=storeObj._restoreCurrentSelectedObject,
                             )
         except Exception:
-            getLogger().debug(_styleRed('Current does not have attribute {result.__class__.__name__}'))
+            getLogger().debug(_styleRed(f'Current does not have attribute {result.__class__.__name__}'))
 
 
 def _storeDeleteObjectCurrent(self, thisAddUndoItem):

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:34:13 +0100 (Fri, October 25, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-12-15 18:51:28 +0000 (Sun, December 15, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -23,7 +23,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""CCPN core package.
+"""
+CCPN core package.
 
 Within the CcpNmr applications (AnalysisAssign, AnalysisScreen, etc) there is always a project open,
 assigned to the variable 'project'.
@@ -72,6 +73,8 @@ IntegralList are both children of Spectrum; and Peak is a child of PeakList.
   \-------Note
   \-------Collection
   \-------DataTable
+  \-------_Polymer
+  
 
 The **Project** object serves as container for all other data objects and the starting
 point for navigation.
@@ -135,6 +138,7 @@ A **Collection** is a container, a set of core objects. It can also contain nest
 
 A **DataTable** is a container for a pandas dataFrame object.
 
+A _Polymer is a container to hold sequence and topology information
 
 Common Class elements
 ^^^^^^^^^^^^^^^^^^^^^
@@ -239,38 +243,6 @@ NmrResidue objects behave in there different ways:
 
 """
 
-# Previous documentation with links to top level functions. Kept here to serve as example
-
-
-# All data are organised in Projects. The standard ways of starting a project are:
-#
-# - myProject = :ref:`ccpn-loadProject-ref` (*path*, ...)
-# - myProject = :ref:`ccpn-newProject-ref` (*projectName*, ...)
-
-
-# .. currentmodule:: ccpn
-#
-# Module level functions :
-# ------------------------
-#
-# .. _ccpn-loadProject-ref:
-#
-# ccpn.loadProject
-# ^^^^^^^^^^^^^^^^
-#
-# .. autofunction:: ccpn.loadProject
-#
-# .. _ccpn-newProject-ref:
-#
-# ccpn.newProject
-# ^^^^^^^^^^^^^^^
-#
-# .. autofunction:: ccpn.newProject
-
-# Import classes and set to this module
-# All classes must be imported in correct order for subsequent code
-# to work
-
 _PRINT_HOTFIXES = False
 _coreImportOrder = (
     'Project',
@@ -311,6 +283,7 @@ _coreImportOrder = (
         'Collection',
         'Note',
         '_PeakCluster',
+        '_Polymer',
     )
 
 _DEBUG = True
@@ -465,22 +438,26 @@ from ccpn.core.Note import Note as _Note
 NOTE_CLASSNAME = _Note.className
 _Note._registerCoreClass()
 
+from ccpn.core._implementation._Polymer import _Polymer
+POLYMER_CLASSNAME = _Polymer.className
+_Polymer._registerCoreClass()
 
-# GUI classes
-_uiImportOrder = (
-    'Window',
-    'SpectrumDisplay',
-        'Strip',
-            'Axis',
-            'SpectrumView',
-                'PeakListView',
-                'PeakView',
-                'MultipletListView',
-                'MultipletView',
-                'IntegralListView'
-                'IntegralView',
-    'Mark',
-)
+
+# # GUI classes
+# _uiImportOrder = (
+#     'Window',
+#     'SpectrumDisplay',
+#         'Strip',
+#             'Axis',
+#             'SpectrumView',
+#                 'PeakListView',
+#                 'PeakView',
+#                 'MultipletListView',
+#                 'MultipletView',
+#                 'IntegralListView'
+#                 'IntegralView',
+#     'Mark',
+# )
 
 from ccpn.ui.gui.MainWindow import MainWindow as _MainWindow
 MAINWINDOW_CLASSNAME = _MainWindow.className

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-06 14:47:44 +0000 (Fri, December 06, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-15 18:51:28 +0000 (Sun, December 15, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -930,8 +930,11 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         while len(objsToBeChecked) > 0:
             obj = objsToBeChecked.pop()
             if obj:
-                obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter,
-                                 topObjectsToCheck)  # This builds the list/set
+                obj._checkDelete(apiObjectlist,
+                                 objsToBeChecked,
+                                 linkCounter,
+                                 topObjectsToCheck
+                )  # This builds the list/set
 
         for topObjectToCheck in topObjectsToCheck:
             if (not (topObjectToCheck.__dict__.get('isModifiable'))):

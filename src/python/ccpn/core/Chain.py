@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-13 12:42:05 +0000 (Fri, December 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-15 18:51:28 +0000 (Sun, December 15, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -30,9 +30,11 @@ from typing import Tuple, Optional, Union, Sequence, List
 import numpy as np
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core._implementation._Polymer import _Polymer, _newPolymer
 from ccpn.core.Project import Project
 from ccpn.core.Substance import Substance, SampleComponent
-from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, inactivity, undoStack
+
+from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, inactivity, undoStack, newObjectList
 from ccpn.core.lib import Pid
 from ccpn.core.lib.forceAttribute import forceSetattr, forceGetattr
 from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, ISVALID, ERRORS
@@ -40,6 +42,8 @@ from ccpn.core.lib.ChainLib import SequenceHandler, CCPCODE, ISVALID, ERRORS
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
+
+from ccpn.ui.gui.guiSettings import _styleRed
 
 from ccpnmodel.ccpncore.lib.CopyData import copySubTree
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
@@ -54,7 +58,7 @@ NotFound = 'NotFound'  # used to create missing residues
 class Chain(AbstractWrapperObject):
     """A molecular Chain, containing one or more Residues
     """
-
+    #-----------------------------------------------------------------------------------------
     #: Short class name, for PID.
     shortClassName = 'MC'
     # Attribute it necessary as subclasses must use superclass className
@@ -76,9 +80,9 @@ class Chain(AbstractWrapperObject):
 
     _ignoreNewApiObjectCallback = True
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # CCPN properties
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @property
     def _apiChain(self) -> ApiChain:
@@ -91,27 +95,51 @@ class Chain(AbstractWrapperObject):
         return self._wrappedData.code.translate(Pid.remapSeparators)
 
     @property
-    def shortName(self) -> str:
-        """short form of name"""
+    def name(self) -> str:
+        """Name of the chain"""
         return self._wrappedData.code
 
-    @shortName.setter
-    def shortName(self, value: str):
+    @name.setter
+    def name(self, value: str):
         self.rename(value)
 
-    # GWV: more logical attribute!
-    name = shortName
+    # GWV: 15/12/24; backward compatibility
+    shortName =name
+
+    @renameObject(blockSidebar=True)
+    @logCommand(get='self')
+    def rename(self, value: str):
+        """Rename Chain, changing its name and pid.
+        """
+        if (_polymer := self._polymer) is None:
+            raise RuntimeError(f'Unable to get associated _Polymer instance')
+
+        if self.nmrChain:
+            getLogger().warning(f'{self.__class__.__name__}.rename will lose or change the assigned nmrChain')
+
+        newName = self._uniqueName(parent=self.project, name=value)
+
+        # rename functions from here; renameDecorator will handle undo-ing and notifier blanking
+        # and subsequent firing
+        oldName = self.name
+        # do not use self.name = newName, as this causes infinite recursion!
+        # _apiRename will do all API admin
+        self._apiRename(newName)
+        self._resetIds(recursive=True)
+        # rename the associated _Polymer instance
+        _polymer.rename(newName)
+
+        return (oldName, newName)
 
     @property
     def compoundName(self) -> str:
-        """Short name of chemical compound (e.g. 'Lysozyme') making up Chain"""
-        return self._wrappedData.molecule.name
+        """Name of chemical compound (e.g. 'Lysozyme') making up Chain
+        """
+        #TODO-DEVEL: change this to refer to substance (if defined)
+        if (_polymer := self._polymer) is None:
+            raise RuntimeError(f'Unable to get associated _Polymer instance')
+        return _polymer.name
 
-    # Api does not allow setting of compoundName
-    # @compoundName.setter
-    # def compoundName(self, value: str):
-    #     self._wrappedData.molecule.name = value
-    #
     @property
     def _parent(self) -> Project:
         """Parent (containing) object."""
@@ -130,8 +158,11 @@ class Chain(AbstractWrapperObject):
 
     @property
     def isCyclic(self) -> bool:
-        """True if this is a cyclic polymer."""
-        return self._wrappedData.molecule.isStdCyclic
+        """True if this is a cyclic polymer.
+        """
+        if (_polymer := self._polymer) is None:
+            raise RuntimeError(f'Unable to get associated _Polymer instance')
+        return _polymer.isCyclic
 
     @property
     def substances(self) -> list:
@@ -161,8 +192,9 @@ class Chain(AbstractWrapperObject):
     def nmrChain(self) -> Optional['NmrChain']:
         """NmrChain to which Chain is (optionally) assigned"""
         try:
-            return self._project.getNmrChain(self._id)
-        except Exception:
+            return self.project.getNmrChain(self.id)
+        except Exception as es:
+            getLogger().debug(_styleRed(f'Getting NmrChain yielded error: {es}'))
             return None
 
     # GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom
@@ -173,9 +205,19 @@ class Chain(AbstractWrapperObject):
     #   else:
     #     value.chain = self
 
-    #=========================================================================================
-    # property STUBS: hot-fixed later
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
+    # property (STUBS: hot-fixed later)
+    #-----------------------------------------------------------------------------------------
+
+    @property
+    def _polymer(self) -> Optional['_Polymer']:
+        """:return The _Polymer instance associated with self
+        or None (if not present).
+        """
+        # local import to avoid cycles
+        from ccpn.core._implementation._Polymer import _Polymer
+        _pid = Pid.createPid(_Polymer.shortClassName, self.name)
+        return self.project.getByPid(_pid)
 
     @property
     def atoms(self) -> list['Atom']:
@@ -191,9 +233,9 @@ class Chain(AbstractWrapperObject):
         """
         return []
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # getter STUBS: hot-fixed later
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def getAtom(self, relativeId: str) -> 'Atom | None':
         """STUB: hot-fixed later
@@ -207,9 +249,9 @@ class Chain(AbstractWrapperObject):
         """
         return None
 
-    #=========================================================================================
-    # Core methods
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
+    # methods
+    #-----------------------------------------------------------------------------------------
 
     @logCommand(get='self', prefix='newChain=')
     def clone(self, shortName: str = None):
@@ -222,8 +264,10 @@ class Chain(AbstractWrapperObject):
 
     def _lock(self):
         """Finalise chain so that it can no longer be modified, and add missing data."""
+        if (_polymer := self._polymer) is None:
+            raise RuntimeError(f'Unable to get associated _Polymer instance')
         with undoBlock():
-            self._wrappedData.molecule.isFinalised = True
+            _polymer.lock()
 
     @logCommand(get='self')
     def renumberResidues(self, offset: int, start: int = None,
@@ -355,8 +399,13 @@ class Chain(AbstractWrapperObject):
             getLogger() .warning(f"Error in creating an NmrChain from Chain: {e}")
 
     @property
-    def chainType(self):
-        return self._wrappedData.molecule.molType
+    def moleculeType(self):
+        if (_polymer := self._polymer) is None:
+            raise RuntimeError(f'Unable to get associated _Polymer instance')
+        return _polymer.moleculeType
+
+    # backward compatibility
+    chainType = moleculeType
 
     #-----------------------------------------------------------------------------------------
     # Implementation functions
@@ -372,22 +421,57 @@ class Chain(AbstractWrapperObject):
         molSystem = parent._wrappedData.molSystem
         return [] if molSystem is None else molSystem.sortedChains()
 
-    @renameObject()
-    @logCommand(get='self')
-    def rename(self, value: str):
-        """Rename Chain, changing its shortName and Pid.
+    def _apiRename(self: 'Chain', newCode: str):
+        """Rename chain in place, fixing all stored references to the chainCode
+        Adapted from API renameChain in _ccp.molecule.MolSystem.Chain
         """
-        if self.nmrChain:
-            getLogger().warning(f'{self.__class__.__name__}.rename will lose or change the assigned nmrChain')
+        apiChain = self._apiChain
+        molSystem = apiChain.molSystem
+        oldCode = apiChain.code
 
-        name = self._uniqueName(parent=self.project, name=value)
+        if molSystem.findFirstChain(code=newCode) is not None:
+            raise ValueError(f"Cannot rename API Chain %s, name {newCode} already exists")
 
-        # rename functions from here
-        oldName = self.shortName
-        # self._oldPid = self.pid
-        self._apiChain.renameChain(name)
+        root = apiChain.root
+        root.__dict__['override'] = True
+        try:
 
-        return (oldName,)
+            # Fix apiChain
+            parentDict = molSystem.__dict__['chains']
+            del parentDict[oldCode]
+            apiChain.code = newCode
+            parentDict[newCode] = apiChain
+
+        finally:
+            # reset override and set isModified
+            root.__dict__['override'] = False
+            self.__dict__['isModified'] = True
+
+    # GWV 15/12/24: moved up to be in a more logical place
+    # @renameObject()
+    # @logCommand(get='self')
+    # def rename(self, value: str):
+    #     """Rename Chain, changing its name and pid.
+    #     """
+    #     if (_polymer := self._polymer) is None:
+    #         raise RuntimeError(f'Unable to get associated _Polymer instance')
+    #
+    #     if self.nmrChain:
+    #         getLogger().warning(f'{self.__class__.__name__}.rename will lose or change the assigned nmrChain')
+    #
+    #     newName = self._uniqueName(parent=self.project, name=value)
+    #
+    #     # rename functions from here; renameDecorator will handle undo-ing and notifier blanking
+    #     # and subsequent firing
+    #     oldName = self.name
+    #     # do not use self.name = newName, as this causes infinite recursion!
+    #     # _apiRename will do all API admin
+    #     self._apiRename(newName)
+    #     self._resetIds(recursive=True)
+    #     # rename the associated _Polymer instance
+    #     _polymer.rename(newName)
+    #
+    #     return (oldName, newName)
 
 
 #=========================================================================================
@@ -395,150 +479,79 @@ class Chain(AbstractWrapperObject):
 # Call appropriate routines in their respective locations
 #=========================================================================================
 
-# @newObject(Chain)
-# def _newChain(project: Project, substance: Substance, useNefAtomNomenclature: bool = True,
-#               shortName: str|None = None,
-#               role: str|None = None, comment: str|None = None
-#               ):
-@newObject(Chain)
+@newObjectList((Chain.className, _Polymer.className))
 def _newChain(project: Project,
-              sequence: list,
+              name: str | None = None,
+              sequence: list = (),
+              startNumber: int = 1,
+              moleculeType: str | None = None,
+              isCyclic: bool = False,
               useNefAtomNomenclature: bool = True,
-              shortName: str | None = None,
-              role: str | None = None,
               comment: str | None = None
               ):
     """Make a new Chain instance as defined by the sequence
     :param project: the Project instance
-    :param substance: a Substance instance defining the chain
-    :param useNefAtomNomenclature: flag to define NEF atom nomenclature to be used, rather
-                                   than only IUPAC-defined atoms (default=True)
-    :param str shortName: name for new chain (optional; defaults to next available from (A, B, C, ...)
-    :param str role: role for new chain (optional)
+    :param str name: name for new chain (optional; defaults to next available from (A, B, C, ...)
+    :param sequence: a Sequence[str] or str of one-letter codes defining the chain
+    :param int startNumber: number of first residue in sequence
+    :param str moleculeType: molecule type; i.e. ('protein','DNA', 'RNA' or other).
+    :param useNefAtomNomenclature: flag to define NEF atom nomenclature to be used,
+                                   rather than only IUPAC-defined atoms (default=True)
     :param str comment: comment for new chain (optional)
     """
     from ccpn.core.Residue import _newResidue
     from ccpn.core.lib.MoleculeLib import _nextChainCode
 
-    # shortName, i.e. the chain name
-    shortName = Chain._uniqueName(parent=project, name=shortName) \
-                if shortName else _nextChainCode(project=project)
+    # name, i.e. the chain name
+    name = Chain._uniqueName(parent=project, name=name) \
+                if name else _nextChainCode(project=project)
 
     apiProject = project._wrappedData
     apiMolSystem = apiProject.molSystem
 
-    # first create the polymer without any residue definitions
-    polymer = Polymer(
+    # first create the polymer without any residue definitions.
+    # Thus, when we make the chain, no residues are automatically
+    # added.
+    polymer = _newPolymer(
             project=project,
-            name=shortName,
-            comment=f'API molecule of chain {shortName}',
+            name=name,
+            comment=f'Polymer for Chain {name}',
     )
 
     # Create the new Chain; since apiMolecule has no residue definitions,
     # it will be an empty chain
-    apiMolecule = polymer.apiMolecule
+    apiMolecule = polymer._apiMolecule
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule,
-                                        code=shortName,
-                                        role=role,
-                                        details=comment
+                                        code=name,
                                         )
+
     if (result := Chain._newInstanceFromApiData(apiObj=newApiChain, project=project)) is None:
         raise RuntimeError('Unable to generate new Chain item')
+    if comment:
+        result.comment = comment
 
     # Now define the sequence
-    polymer.defineSequence(moleculeType = 'protein',
+    polymer.defineSequence(moleculeType = moleculeType,
                            sequence = sequence,
-                           isCyclic = False,
-                           startNumber = 1
+                           isCyclic = isCyclic,
+                           startNumber = startNumber,
                            )
-    # And add the residues and atoms as defined by polymer
-    for apiMolResidue in apiMolecule.sortedMolResidues():
+
+    # And add the Residues and Atoms as defined by polymer
+    for apiMolResidue in polymer._apiMolResidues:
         _newResidue(result, apiMolResidue, useNefAtomNomenclature=useNefAtomNomenclature)
 
-    return result
+    # Cannot put things on the undo stack because of _checkDelete()
+    # in ccpnmodel/ccpncore/api/ccp/molecule/Molecule.py,
+    # apiMolecule.chains is set.
+    # Deleting apiChain fails because of its molecule reference.
+    # Hence, unset these cross-references in the model.
+    # TODO-DEVEL: remove this restriction
+    forceSetattr(apiMolecule, 'chains', set())
+    forceSetattr(newApiChain, 'molecule', None)
 
+    return (result, polymer)
 
-from ccpnmodel.ccpncore.api.ccp.molecule.Molecule import Molecule as ApiMolecule
-
-class Polymer(object):
-    """Class to hold polymer, i.e. an API Molecule info
-    """
-
-    def __init__(self, project: Project, name: str, comment: str = None):
-        """Init self and create an Empty API Molecule
-        :param project: the Project instance
-        :param name: the name of the API molecule
-        :param comment: comment for the polymer
-        """
-        self.project = project
-        self.name = name
-        self.comment = comment
-        self.apiMolecule: ApiMolecule = self.newApiMolecule()
-
-    @property
-    def _wrappedData(self):
-        """A hack to mimick wrappedData so it can take
-        the newObject decorator.
-        """
-        return self.apiMolecule
-
-    def newApiMolecule(self) -> ApiMolecule:
-        """Create and return the API molecule
-        """
-        apiProject = self.project._wrappedData
-        # check if name exists
-        if (_dummy := apiProject.root.findFirstMolecule(name=self.name)) is not None:
-            raise ValueError(f'Unable to generate API Molecule instance; {self.name!r} already exists')
-
-        with undoStack() as _:
-            apiMolecule = apiProject.root.newMolecule(name=self.name)
-            if self.comment:
-                apiMolecule.details = self.comment
-            return apiMolecule
-
-    def defineSequence(self,
-                       moleculeType: str,
-                       sequence: list | tuple,
-                       isCyclic: bool,
-                       startNumber: int,
-                      ):
-        """
-        Make a new API Molecule from sequence, using SequenceHandler to parse the sequence.
-        :param moleculeType: molecule type; one of
-        :param sequence: a sequence (list, tuple, str) of molecule type; see chain for details
-        :return self
-        """
-        # Parse the sequence
-        sequenceHandler: SequenceHandler = SequenceHandler(self.project, moleculeType=moleculeType)
-        ccpCodes:list = []
-        if sequence is not None:
-            # parse the sequence  --> list of ccpCodes
-            sequenceMap: dict = sequenceHandler.parseSequence(sequence)
-            if not sequenceMap[ISVALID]:
-                errorsIndices = sequenceMap.get(ERRORS, [])
-                errors = ', '.join(map(str, errorsIndices))
-                msg = f'The given sequence is not valid. Found errors at positions(s): {errors}'
-                raise ValueError(msg)
-
-            ccpCodes = sequenceMap.get(CCPCODE)
-
-        if ccpCodes:
-            with undoStack() as _:
-                # Have to unassign the 'chains' attribute and re-assign afterward
-                # as we (might) have used apiMolecule to create a chain
-                _apiChains = forceGetattr(self.apiMolecule, 'chains')
-                forceSetattr(self.apiMolecule, 'chains', set())
-                self.apiMolecule.extendMolResidues(sequence=ccpCodes,
-                                         molType=moleculeType,
-                                         startNumber=startNumber,
-                                         isCyclic=isCyclic
-                                         )
-                forceSetattr(self.apiMolecule, 'chains', _apiChains)
-        return self
-
-    # @classmethod
-    # def _undoDelete(cls, obj):
-    #     """Method"""
 
 
 def _createChain(self: Project,
@@ -867,11 +880,13 @@ def _cloneChain(self: Chain, shortName: str = None):
 
     return result
 
+#=========================================================================================
+# getter's
+#=========================================================================================
 
 def getter(self: Substance) -> Tuple[Chain, ...]:
     name = self.name
     return tuple(x for x in self._project.chains if x.compoundName == name)
-
 
 Substance.chains = property(getter, None, None,
                             "ccpn.Chains that correspond to ccpn.Substance (if defined)"
@@ -882,19 +897,13 @@ def getter(self: SampleComponent) -> Tuple[Chain, ...]:
     name = self.name
     return tuple(x for x in self._project.chains if x.compoundName == name)
 
-
 SampleComponent.chains = property(getter, None, None,
                                   "ccpn.Chains that correspond to ccpn.SampleComponent (if defined)"
                                   )
-
 del getter
 
 # Clean-up
-
 Chain.clone.__annotations__['return'] = Chain
-
-# Connections to parents:
-# No 'new' function - chains are made elsewhere
 
 
 # Notifiers:

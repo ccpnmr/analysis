@@ -31,7 +31,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 17:31:17 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-15 18:51:29 +0000 (Sun, December 15, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -60,11 +60,11 @@ from ccpn.util.Common import Sentinel
 from ccpn.framework.Application import getCurrent, getProject, getApplication
 
 DEBUG = False
-_debugIds = ()
+# _debugIds = (75, 84, 92, 94,95,96)  # for these _id's, debug will be True. This allows for selective debugging
+_debugIds = (124, 127)
 
 _STRICT = True  # Flag to enforce type checking; relaxed for testing ccpnv4 code
 
-# _debugIds = (75, 84, 92, 94,95,96)  # for these _id's, debug will be True. This allows for selective debugging
 
 
 def skip(*args, **kwargs):
@@ -250,8 +250,6 @@ class NotifierABC(object):
         if self._debug:
             sys.stderr.write('>>> unRegister %s\n' % self)
 
-        # if self.id == 122:
-        #     pass
         if not self.isRegistered:
             raise RuntimeError(f'unregisterNotifier(): {self} is not registered')
 

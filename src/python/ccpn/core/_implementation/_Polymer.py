@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-15 18:51:29 +0000 (Sun, December 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-16 11:46:17 +0000 (Mon, December 16, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -175,11 +175,12 @@ class _Polymer(AbstractWrapperObject):
         """Delete the polymer sequence
         Routine for undo-ing
         """
-        _apiRoot = self._apiMolecule.root
-        forceSetattr(_apiRoot, 'override', True)
-        for apiRes in list(self._apiMolecule.sortedMolResidues()):
-            apiRes.delete()
-        forceSetattr(_apiRoot, 'override', False)
+        # _apiRoot = self._apiMolecule.root
+        # forceSetattr(_apiRoot, 'override', True)
+        with self._apiOverride():
+            for apiRes in list(self._apiMolecule.sortedMolResidues()):
+                apiRes.delete()
+        # forceSetattr(_apiRoot, 'override', False)
 
     def defineSequence(self,
                        moleculeType: str,

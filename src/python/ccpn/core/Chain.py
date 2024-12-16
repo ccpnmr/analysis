@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-15 18:51:28 +0000 (Sun, December 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-16 11:46:16 +0000 (Mon, December 16, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -312,15 +312,11 @@ class Chain(AbstractWrapperObject):
     @property
     def sequence(self) -> str:
         """
-        :return: the full sequence as a single string of one letter codes
+        :return: the full sequence as a single string of one-letter codes
         """
-        sequence = [residue.shortName for residue in self.residues
-                    if residue and residue.shortName
+        sequence = [residue.oneLetterCode for residue in self.residues
+                    if residue and residue.oneLetterCode
                     ]
-        # for residue in self.residues:
-        #     if residue is not None:
-        #         if c := residue.shortName:
-        #             sequence += c
         return ''.join(sequence)
 
     @property
@@ -432,20 +428,13 @@ class Chain(AbstractWrapperObject):
         if molSystem.findFirstChain(code=newCode) is not None:
             raise ValueError(f"Cannot rename API Chain %s, name {newCode} already exists")
 
-        root = apiChain.root
-        root.__dict__['override'] = True
-        try:
-
+        with self._apiOverride():
             # Fix apiChain
-            parentDict = molSystem.__dict__['chains']
-            del parentDict[oldCode]
             apiChain.code = newCode
+            parentDict = forceGetattr(molSystem, 'chains')
+            del parentDict[oldCode]
             parentDict[newCode] = apiChain
-
-        finally:
-            # reset override and set isModified
-            root.__dict__['override'] = False
-            self.__dict__['isModified'] = True
+            forceSetattr(apiChain, 'isModified', True)
 
     # GWV 15/12/24: moved up to be in a more logical place
     # @renameObject()
@@ -543,7 +532,7 @@ def _newChain(project: Project,
 
     # Cannot put things on the undo stack because of _checkDelete()
     # in ccpnmodel/ccpncore/api/ccp/molecule/Molecule.py,
-    # apiMolecule.chains is set.
+    # if apiMolecule.chains is set.
     # Deleting apiChain fails because of its molecule reference.
     # Hence, unset these cross-references in the model.
     # TODO-DEVEL: remove this restriction

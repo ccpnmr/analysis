@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-15 18:51:28 +0000 (Sun, December 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-16 11:46:16 +0000 (Mon, December 16, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import functools
 import string
+import sys
 import typing
 import re
 from contextlib import contextmanager
@@ -46,6 +47,7 @@ from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
     apiNotificationBlanking, ccpNmrV3CoreSetter
 from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.core.lib.forceAttribute import forceSetattr
 
 from ccpn.framework.Version import VersionString
 from ccpn.framework.Application import getApplication
@@ -905,6 +907,20 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         result = [getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self)]
         return result
 
+    @contextmanager
+    def _apiOverride(self):
+        """Context manager to set override of API root
+        """
+        _apiRoot = self._wrappedData.root
+        try:
+            forceSetattr(_apiRoot, 'override', True)
+            yield
+        except Exception as es:
+            getLogger().debug(_styleRed(f'While override encountered: {es}'))
+            raise es
+        finally:
+            forceSetattr(_apiRoot, 'override', False)
+
     def _getApiObjectTree(self) -> tuple:
         """Retrieve the apiObject tree contained by this object
 
@@ -1112,7 +1128,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         :return A list of objects created
         """
         project = self._project
-        data2Obj = project._data2Obj
+        # data2Obj = project._data2Obj
         app = getApplication()
 
         result = []
@@ -1126,25 +1142,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                 continue
 
             # self._indentedDebug2(f'getting apiData for {childClass.className}', enter=True, dots=True)
-
             # recursively create children
             apiObjs = childClass._getAllWrappedData(self)
             for apiObj in apiObjs:
-                # obj = data2Obj.get(apiObj)
-                # if obj is None:
-                #     # obj does not exist; restore it from apiObj
-                #
-                #     # GWV 13 Feb 24:
-                #     # Catching  errors on _restoreObject() here at such a low level is a bad idea
-                #     # as the project and its window is in an undefined state. Better raise a hard
-                #     # error
-                #
-                #     obj = childClass._restoreObject(project=project, apiObj=apiObj)
-                #
-                # # obj should exist now
-                # if obj is None:
-                #     raise RuntimeError(f'Error restoring api-child {self._apiObjectString(apiObj)} of {self}')
-
                 if obj := childClass._restoreObject(project=project, apiObj=apiObj):
                     result.append(obj)
 
@@ -1154,38 +1154,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         """Handle post-initialising children after all children have been restored
         #CCPNNMR-Internal - subclass and call this at the end
         """
-
         # indented debugging just to be sure is running in the correct order
         # used in conjunction with _restoreObject at the start
         self._indentedDebug2(text=f'_postRestore:   Restored {self.className} {self}', enter=False)
-
-    #  For restore 3.2 branch
-    # def _restoreChildren(self, classes=['all']):
-    #     """GWV: A method to restore the children of self
-    #     classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
-    #     """
-    #     _classMap = dict([(cls.className, cls) for cls in self._childClasses])
-    #
-    #     # loop over all the child-classses
-    #     for clsName, apiChildren in self._getApiChildren(classes=classes).items():
-    #
-    #         cls = _classMap.get(clsName)
-    #         if cls is None:
-    #             raise RuntimeError('Undefined class "%s"' % clsName)
-    #
-    #         for apiChild in apiChildren:
-    #
-    #             newInstance = self._newInstanceWithApiData(cls=cls, apiData=apiChild)
-    #             if newInstance is None:
-    #                 raise RuntimeError('Error creating new instance of class "%s"' % clsName)
-    #
-    #             # add the newInstance to the appropriate mapping dictionaries
-    #             self._project._data2Obj[apiChild] = newInstance
-    #             _d = self._project._pid2Obj.setdefault(clsName, {})
-    #             _d[newInstance.pid] = newInstance
-    #
-    #             # recursively do the children of newInstance
-    #             newInstance._restoreChildren(classes=classes)
 
     @classmethod
     def _newInstanceFromApiData(cls, apiObj, project=None):
@@ -1296,7 +1267,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     def _linkWrapperClasses(cls, ancestors: list = None, Project: 'Project' = None, _allGetters=None):
         """Recursively set up links and functions involving children for wrapper classes
 
-        NB classes that have already been linked are ignored, but their children are still processed"""
+        NB classes that have already been linked are ignored, but their children are still processed
+        """
 
         if Project:
             assert ancestors, "Code errors, _linkWrapperClasses called with Project but no ancestors"
@@ -1318,7 +1290,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                     if not hasattr(ancestor, funcName):
                         if _DEBUG:
                             # getLogger is not initialised yet
-                            print(f'--> missing getter stub {ancestor}:{funcName}')
+                            sys.stderr.write(f'-->  _linkWrapperClasses: missing getter stub {ancestor}:{funcName}\n')
                         if funcName in _DISCARD_METHODS:
                             continue
                     setattr(ancestor, funcName, func)
@@ -1374,7 +1346,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
                     if not hasattr(ancestor, linkName):
                         if _DEBUG:
-                            print(f'--> missing property stub {ancestor}:{linkName}')
+                            sys.stderr.write(f'--> _linkWrapperClasses: missing property stub {ancestor}:{linkName}\n')
                         if linkName in _DISCARD_METHODS:
                             continue
                     setattr(ancestor, linkName, prop)

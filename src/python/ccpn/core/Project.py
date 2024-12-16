@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-13 12:42:05 +0000 (Fri, December 13, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-16 14:30:32 +0000 (Mon, December 16, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -2276,16 +2276,17 @@ class Project(AbstractWrapperObject):
         This method is called from the api upon creation of a corresponding api object
         See AbstractWrapperObject._linkWrapperClasses where the apiNotifier is set for this callback
         """
+        if cls._ignoreNewApiObjectCallback:
+            return
+
         if self._apiBlocking != 0 or NotifierBase._apiNotificationBlanking != 0:
             getLogger().debug(_styleRed(f'blocking _newApiObject {self} {wrappedData} {cls}'))
             return
 
         if (result := self._data2Obj.get(wrappedData)) is not None:
+            # print(traceback.print_stack())  # useful for tracking the exact error
             raise RuntimeError(
                     f'Project._newApiObject: {result} already exists; Cannot create again and this should not happen!')
-        if cls._ignoreNewApiObjectCallback:
-            return
-        # print(traceback.print_stack())  # useful for tracking the exact error
 
         obj = cls._newInstanceFromApiData(project=self, apiObj=wrappedData)
         if _DEBUG:

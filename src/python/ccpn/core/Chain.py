@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-16 11:46:16 +0000 (Mon, December 16, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-16 14:30:31 +0000 (Mon, December 16, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -254,13 +254,13 @@ class Chain(AbstractWrapperObject):
     #-----------------------------------------------------------------------------------------
 
     @logCommand(get='self', prefix='newChain=')
-    def clone(self, shortName: str = None):
-        """Make copy of chain.
+    def clone(self, newName: str = None, useNefAtomNomenclature: bool = True):
+        """Make clone (copy) of chain.
+        :param newName: the new name for the cloned chain
+        :param useNefAtomNomenclature: Flag to use NefAtomNomenclature (defaults to True)
+        :return a Chain instance
         """
-        # extracted as function below.
-        # - fires a single notifier for the chain creation
-
-        return _cloneChain(self, shortName=shortName)
+        return _cloneChain(self, newName=newName, useNefAtomNomenclature=useNefAtomNomenclature)
 
     def _lock(self):
         """Finalise chain so that it can no longer be modified, and add missing data."""
@@ -809,65 +809,89 @@ def _newChainFromChemComp(project, chemComp,
             return chain
 
 
-@newObject(Chain)
-def _cloneChain(self: Chain, shortName: str = None):
-    """Make copy of chain.
+def _cloneChain(chain: Chain, newName: str = None, useNefAtomNomenclature: bool = True) -> Chain:
+    """Make copy of chain with newName (defaults to next chain code A, B, C, ...)
+    :param chain: the Chain instance to be cloned
+    :param newName: the new name for the cloned chain
+    :param useNefAtomNomenclature: Flag to use NefAtomNomenclature (defaults to True)
+    :return a Chain instance
     """
+    #TODO-DEVELOP: deal with bonds
+    from ccpn.core.lib.MoleculeLib import _nextChainCode
 
-    # _newApiObject no longer fires a ny notifiers. Single notifier is now handled by the decorator
-    # FIXME This is broken for Non-Standard Residues. (probably never tested as it never implemented in V3)
-    # Check if there are Non-standards. Clone is not yet available for Non-Standards
-    from ccpn.core.lib.ChainLib import SequenceHandler
+    # name, i.e. the chain name
+    project = chain.project
+    _name = Chain._uniqueName(parent=project, name=newName) \
+                if newName else _nextChainCode(project=project)
 
-    chain = self
-    sequenceHandler = SequenceHandler(chain.project, moleculeType=chain.chainType)
-    standardCcpCodes = sequenceHandler.getAvailableCcpCodes(standardsOnly=True)
-    ccpCodes = chain.sequenceCcpCodes
-    nonStandardResidues = set()
-    for ccpCode in ccpCodes:
-        if ccpCode not in standardCcpCodes:
-            nonStandardResidues.add(ccpCode)
-    if len(nonStandardResidues) > 0:
-        nstdResiduesStr = ', '.join(list(nonStandardResidues))
-        raise ValueError(f'The chain {chain} contains Non-Standard Residue(s): "{nstdResiduesStr}". '
-                         f'Clone is not yet available for this chain')
-
-    apiChain = self._wrappedData
-    apiMolSystem = apiChain.molSystem
-    dataObj = self._project._data2Obj
-
-    if shortName is None:
-        shortName = apiMolSystem.nextChainCode()
-
-    if apiMolSystem.findFirstChain(code=shortName) is not None:
-        raise ValueError("Project already has one Chain with shortName %s" % shortName)
-
-    topObjectParameters = {'code'            : shortName,
-                           'pdbOneLetterCode': shortName[0]}
-
-    with undoBlock():
-        try:
-            newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
-                                      topObjectParameters=topObjectParameters)
-        except Exception as es:
-            # put in an error trap but now doesn't seem to re-create the error
-            raise ValueError('Error cloning chain - %s' % str(es)) from es
-
-        if (result := Chain._newInstanceFromApiData(apiObj=newApiChain, project=self._project)) is None:
-            raise RuntimeError('Unable to generate new Chain item')
-
-        # Add intra-chain generic bonds
-        for apiGenericBond in apiMolSystem.genericBonds:
-            ll = []
-            for aa in apiGenericBond.atoms:
-                if aa.residue.chain is apiChain:
-                    ll.append(dataObj[aa])
-            if len(ll) == 2:
-                relativeIds = list(x._id.split(Pid.IDSEP, 1)[1] for x in ll)
-                newAtoms = list(result.getAtom(x) for x in relativeIds)
-                newAtoms[0].addInterAtomBond(newAtoms[1], apiGenericBond.bondType)
+    _sequence = [res.ccpCode for res in chain.residues]
+    result = _newChain(project,
+                       name=_name,
+                       sequence=_sequence,
+                       startNumber=chain.startNumber,
+                       moleculeType=chain.moleculeType,
+                       isCyclic=chain.isCyclic,
+                       useNefAtomNomenclature=useNefAtomNomenclature,
+                       comment=f'Clone of {chain}'
+    )
 
     return result
+
+    #
+    # # _newApiObject no longer fires a ny notifiers. Single notifier is now handled by the decorator
+    # # FIXME This is broken for Non-Standard Residues. (probably never tested as it never implemented in V3)
+    # # Check if there are Non-standards. Clone is not yet available for Non-Standards
+    # from ccpn.core.lib.ChainLib import SequenceHandler
+    #
+    # chain = self
+    # sequenceHandler = SequenceHandler(chain.project, moleculeType=chain.chainType)
+    # standardCcpCodes = sequenceHandler.getAvailableCcpCodes(standardsOnly=True)
+    # ccpCodes = chain.sequenceCcpCodes
+    # nonStandardResidues = set()
+    # for ccpCode in ccpCodes:
+    #     if ccpCode not in standardCcpCodes:
+    #         nonStandardResidues.add(ccpCode)
+    # if len(nonStandardResidues) > 0:
+    #     nstdResiduesStr = ', '.join(list(nonStandardResidues))
+    #     raise ValueError(f'The chain {chain} contains Non-Standard Residue(s): "{nstdResiduesStr}". '
+    #                      f'Clone is not yet available for this chain')
+    #
+    # apiChain = self._wrappedData
+    # apiMolSystem = apiChain.molSystem
+    # dataObj = self._project._data2Obj
+    #
+    # if shortName is None:
+    #     shortName = apiMolSystem.nextChainCode()
+    #
+    # if apiMolSystem.findFirstChain(code=shortName) is not None:
+    #     raise ValueError("Project already has one Chain with shortName %s" % shortName)
+    #
+    # topObjectParameters = {'code'            : shortName,
+    #                        'pdbOneLetterCode': shortName[0]}
+    #
+    # with undoBlock():
+    #     try:
+    #         newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
+    #                                   topObjectParameters=topObjectParameters)
+    #     except Exception as es:
+    #         # put in an error trap but now doesn't seem to re-create the error
+    #         raise ValueError('Error cloning chain - %s' % str(es)) from es
+    #
+    #     if (result := Chain._newInstanceFromApiData(apiObj=newApiChain, project=self._project)) is None:
+    #         raise RuntimeError('Unable to generate new Chain item')
+    #
+    #     # Add intra-chain generic bonds
+    #     for apiGenericBond in apiMolSystem.genericBonds:
+    #         ll = []
+    #         for aa in apiGenericBond.atoms:
+    #             if aa.residue.chain is apiChain:
+    #                 ll.append(dataObj[aa])
+    #         if len(ll) == 2:
+    #             relativeIds = list(x._id.split(Pid.IDSEP, 1)[1] for x in ll)
+    #             newAtoms = list(result.getAtom(x) for x in relativeIds)
+    #             newAtoms[0].addInterAtomBond(newAtoms[1], apiGenericBond.bondType)
+    #
+    # return result
 
 #=========================================================================================
 # getter's

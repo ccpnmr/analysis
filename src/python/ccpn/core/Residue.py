@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-15 18:51:28 +0000 (Sun, December 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-16 14:30:32 +0000 (Mon, December 16, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -150,7 +150,7 @@ class Residue(AbstractWrapperObject):
         """Residue sequence ccpcode (e.g. 'Ala', 'Aba') retrieved from
         the ChemComp
         """
-        return self._chemComp
+        return self._chemComp.ccpCode
 
     @property
     def linking(self) -> str:

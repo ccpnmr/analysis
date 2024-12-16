@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-16 11:46:17 +0000 (Mon, December 16, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-16 14:30:32 +0000 (Mon, December 16, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -98,24 +98,20 @@ class _Polymer(AbstractWrapperObject):
         Adapted from API renameChain in _ccp.molecule.MolSystem.Chain
         """
         apiMolecule = self._apiMolecule
-        root = apiMolecule.root
+        apiRoot = apiMolecule.root
         oldName = apiMolecule.name
 
-        if root.findFirstMolecule(name=newName) is not None:
+        if apiRoot.findFirstMolecule(name=newName) is not None:
             raise ValueError(f"Cannot rename API Molecule, name {newName} already exists")
 
-        root.__dict__['override'] = True
-        try:
-            # Fix apiMolecule
-            parentDict = root.__dict__['molecules']
-            del parentDict[oldName]
+        with self._apiOverride():
+            # Fix apiMolecule references
             apiMolecule.name = newName
+            parentDict = forceGetattr(apiRoot,'molecules')
+            del parentDict[oldName]
             parentDict[newName] = apiMolecule
-
-        finally:
-            # reset override and set isModified
-            root.__dict__['override'] = False
-            apiMolecule.__dict__['isModified'] = True
+            # set isModified
+            forceSetattr(apiMolecule,'isModified', True)
 
     @renameObject()
     def rename(self, newName: str):
@@ -207,7 +203,7 @@ class _Polymer(AbstractWrapperObject):
             if not sequenceMap[ISVALID]:
                 errorsIndices = sequenceMap.get(ERRORS, [])
                 errors = ', '.join(map(str, errorsIndices))
-                msg = f'The given sequence is not valid. Found errors at positions(s): {errors}'
+                msg = f'Invalid sequence; Found errors at positions(s): {errors}'
                 raise ValueError(msg)
 
             ccpCodes = sequenceMap.get(CCPCODE)
@@ -229,10 +225,10 @@ class _Polymer(AbstractWrapperObject):
                 addUndoItem(undo=self._deleteSequence,
                             redo=partial(self.defineSequence,
                                  moleculeType=moleculeType,
-                                 sequence=sequence,
+                                 sequence=ccpCodes,
                                  isCyclic=isCyclic,
                                  startNumber=startNumber,
-                                 override=True,
+                                 override=True
                                  )
                 )
 
@@ -296,7 +292,7 @@ class _Polymer(AbstractWrapperObject):
 
     def __str__(self):
         _locked = 'locked' if self.isLocked else 'unlocked'
-        return f'<{self.pid} ({self.moleculeType}, {_locked})>'
+        return f'<{self.pid} ({self.moleculeType}, len={len(self)}, {_locked})>'
 
     __repr__ = __str__
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-16 11:46:16 +0000 (Mon, December 16, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-16 14:30:32 +0000 (Mon, December 16, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -1290,7 +1290,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                     if not hasattr(ancestor, funcName):
                         if _DEBUG:
                             # getLogger is not initialised yet
-                            sys.stderr.write(f'-->  _linkWrapperClasses: missing getter stub {ancestor}:{funcName}\n')
+                            sys.stderr.write(f'--> _linkWrapperClasses: missing getter stub {ancestor}:{funcName}\n')
                         if funcName in _DISCARD_METHODS:
                             continue
                     setattr(ancestor, funcName, func)

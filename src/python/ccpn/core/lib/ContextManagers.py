@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-15 18:51:29 +0000 (Sun, December 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-16 16:47:09 +0000 (Mon, December 16, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -821,67 +821,25 @@ def newObject(klass):
 
         application = getApplication()  # pass it in to reduce overhead
 
-        with notificationBlanking():
-            with undoStackBlocking(application=application, debugText=f'newObject: {func}') as addUndoItem:
 
-                result = func(*args, **kwds)
-                if result is None:
-                    return None
+        # sidebar needs to be silent;
+        # make an undo black with sidebar suspended while creating
+        # the new objects
+        with undoBlockWithSideBar():
+            # notification done after the creation
+            with notificationBlanking():
+                # undo/redo added explicitly
+                with undoStackBlocking(application=application, debugText=f'newObject: {func}') as addUndoItem:
 
-                if not isinstance(result, klass):
-                    raise RuntimeError(f'Expected an object of class {klass}, obtained {result.__class__}')
+                    result = func(*args, **kwds)
+                    if result is None:
+                        return None
 
-                # retrieve list of created api objects from the result
-                apiObjectsCreated = result._getApiObjectTree()
-                addUndoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
-                                                obj=result, trigger='delete', preExecution=True,
-                                                objsToBeDeleted=apiObjectsCreated),
-                            redo=BlankedPartial(result._wrappedData.root._unDelete,
-                                                topObjectsToCheck=(result._wrappedData.topObject,),
-                                                obj=result, trigger='create', preExecution=False,
-                                                objsToBeUnDeleted=apiObjectsCreated)
-                            )
+                    if not isinstance(result, klass):
+                        raise RuntimeError(f'Expected an object of class {klass}, obtained {result.__class__}')
 
-                if application.project._undo.storageBlockingLevel < 1:
-                    # only add current if required
-                    _storeNewObjectCurrent(result, addUndoItem)
-
-                # set the _objectVersion
-                result._objectVersion = application.applicationVersion
-
-        result._finaliseAction('create')
-
-        return result
-
-    return theDecorator
-
-
-# TODO-DEVEL: get rid of this
-def newObjectList(klasses):
-    """A decorator wrap a newObject method's of the various classes in an undo block and calls
-    result._finalise('create') for each object in the results list
-    klasses is a list of strings of type klass.__class__.__name__ to remove restriction on circular imports
-    The primary object (first in the list) is returned and must be the first type in klasses list
-    """
-    from ccpn.core.lib import Undo
-
-    @decorator.decorator
-    def theDecorator(*args, **kwds):
-        func = args[0]
-        args = args[1:]  # Optional 'self' is now args[0]
-
-        application = getApplication()  # pass it in to reduce overhead
-
-        with notificationBlanking():
-            with undoStackBlocking(application=application) as addUndoItem:
-                results = func(*args, **kwds)
-                if not results or results[0].__class__.__name__ != klasses[0]:
-                    raise RuntimeError(
-                            f'Expected an object of class {repr(klasses[0])}, obtained {results[0].__class__}')
-
-                for result in results:
-                    if result.__class__.__name__ not in klasses:
-                        raise RuntimeError(f'Expected an object in class types {klasses}, obtained {result.__class__}')
+                    # set the _objectVersion
+                    result._objectVersion = application.applicationVersion
 
                     # retrieve list of created api objects from the result
                     apiObjectsCreated = result._getApiObjectTree()
@@ -898,13 +856,67 @@ def newObjectList(klasses):
                         # only add current if required
                         _storeNewObjectCurrent(result, addUndoItem)
 
-        # handle notifying all objects in the list - e.g. sampleComponent also makes a substance
-        for result in results:
-            # set the _objectVersion
-            with undoStackBlocking(application=application) as _:
-                result._objectVersion = application.applicationVersion
-
             result._finaliseAction('create')
+
+        return result
+
+    return theDecorator
+
+
+# TODO-DEVEL: combine into one with newObject
+def newObjectList(klasses):
+    """A decorator wrap a newObject method's of the various classes in an undo block and calls
+    result._finalise('create') for each object in the results list
+    klasses is a list of strings of type klass.__class__.__name__ to remove restriction on circular imports
+    The primary object (first in the list) is returned and must be the first type in klasses list
+    """
+    from ccpn.core.lib import Undo
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+
+        application = getApplication()  # pass it in to reduce overhead
+
+        # sidebar needs to be silent;
+        # make an undo black with sidebar suspended while creating
+        # the new objects
+        with undoBlockWithSideBar():
+            # notification done after the creation
+            with notificationBlanking():
+                # undo/redo added explicitly
+                with undoStackBlocking(application=application) as addUndoItem:
+                    results = func(*args, **kwds)
+                    if not results or results[0].__class__.__name__ != klasses[0]:
+                        raise RuntimeError(f'No new objects were created')
+
+                    for result in results:
+                        if result.__class__.__name__ not in klasses:
+                            raise RuntimeError(f'Expected an object in class types {klasses}, obtained {result.__class__}')
+
+                        # set the _objectVersion
+                        result._objectVersion = application.applicationVersion
+
+                        # retrieve list of created api objects from the result
+                        apiObjectsCreated = result._getApiObjectTree()
+                        addUndoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
+                                                        obj=result, trigger='delete', preExecution=True,
+                                                        objsToBeDeleted=apiObjectsCreated),
+                                    redo=BlankedPartial(result._wrappedData.root._unDelete,
+                                                        topObjectsToCheck=(result._wrappedData.topObject,),
+                                                        obj=result, trigger='create', preExecution=False,
+                                                        objsToBeUnDeleted=apiObjectsCreated)
+                                    )
+
+                        if application.project._undo.storageBlockingLevel < 1:
+                            # only add current if required
+                            _storeNewObjectCurrent(result, addUndoItem)
+
+
+            # handle notifying all objects in the list - e.g. sampleComponent also makes a substance
+            for result in results:
+                result._finaliseAction('create')
 
         # return the primary object
         return results[0] if results else None

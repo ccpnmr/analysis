@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-16 14:30:32 +0000 (Mon, December 16, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-16 18:55:07 +0000 (Mon, December 16, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -439,12 +439,12 @@ class Residue(AbstractWrapperObject):
     @property
     def _apiMolResidue(self):
         """:return The API MolResidue instance as derived from the
-                   _polymer associated with self.chain and self.sequenceCode,
+                   _molecularTemplate associated with self.chain and self.sequenceCode,
                    or None if not defined
         """
-        if (_polymer := self.chain._polymer) is None:
-            raise RuntimeError(f'Polymer not defined in {self.chain}')
-        return _polymer._getApiMolResidue(self.sequenceCode)
+        if (_molecularTemplate := self.chain._molecularTemplate) is None:
+            raise AttributeError(f'MolecularTemplate not defined in {self.chain}')
+        return _molecularTemplate._getApiMolResidue(self.sequenceCode)
 
     @classmethod
     def _getAllWrappedData(cls, parent: Chain) -> list:

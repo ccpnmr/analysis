@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-16 14:30:32 +0000 (Mon, December 16, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-16 18:55:07 +0000 (Mon, December 16, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -58,14 +58,15 @@ from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
 from ccpn.core.lib.ProjectLib import createLogger
 from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
-    inactivity, logCommandManager, ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSimple, notificationEchoBlocking, undoStack
+    inactivity, logCommandManager, ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSimple, notificationEchoBlocking, \
+    undoStack
 from ccpn.core.lib.XmlLoader import XmlLoader
 
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger, updateLogger
-from ccpn.util.decorators import logCommand
+from ccpn.util.decorators import logCommand, deprecated
 from ccpn.ui.gui.guiSettings import _styleRed, consoleStyle
 
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
@@ -3195,58 +3196,76 @@ class Project(AbstractWrapperObject):
 
         return _newSpectrumGroup(self, name=name, spectra=spectra, **kwds)
 
-    @logCommand('project.')
+    @deprecated('project.newChain')
     def createChain(self,
                     sequence: Union[str, Sequence[str]] = None,
                     compoundName: str = None,
                     startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                     shortName: str = None, role: str = None, comment: str = None,
                     **kwds):
-        """Create new chain from sequence of residue codes, using default variants.
-        Automatically creates the corresponding Substance if the compoundName is not already taken
-        See the Chain class for details.
-        Optional keyword arguments can be passed in; see Chain._createChain for details.
-        :param sequence: str or list of str.
-            allowed sequence formats:
-                - 1-Letter-Code (only standards)
-                    sequence =  'AAAAAA'
-                    sequence =  'A A A A A A'
-                    sequence =  'A, A, A, A, A, A'
-                    sequence =  ['A', 'A', 'A', 'A', 'A']
-                - 3-Letter-Code  (standard and non-standard)
-                    sequence =  'ALA ALA ALA ALA'
-                    sequence =  'ALA, ALA, ALA, ALA'
-                    sequence =  ['ALA', 'ALA', 'ALA']
-                - ccpCodes:  (standard and non-standard)
-                    - sequence containing Standard residue(s) CcpCodes e.g.::
-                        sequence = 'Ala Leu Ala'
-                        sequence = 'Ala, Leu, Ala'
-                        sequence = ['Ala', 'Leu', 'Ala']
-                    - sequence containing Non-Standard residue(s) CcpCodes e.g.:
-                        sequence = ['Ala', 'Aba', Orn]
-                    - sequence of a small-molecule CcpCodes: (Note you need to import the ChemComp first
-                                                              if not available in the Project. see docs)
-                        sequence = ['Atp']  # if only one code Must be in a list
-                        sequence = ['MySmallMolecule'] # if only one code Must be in a list
+        result= self.newChain(
+                name=shortName,
+                sequence=sequence,
+                startNumber=startNumber,
+                moleculeType=molType,
+                isCyclic=isCyclic,
+                comment=comment
+        )
+        result.role = role
+        return result
 
-        :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
-        :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
+    @logCommand('project.')
+    def newChain(self,
+                 name: str | None = None,
+                 sequence: list = (),
+                 startNumber: int = 1,
+                 moleculeType: str | None = None,
+                 isCyclic: bool = False,
+                 useNefAtomNomenclature: bool = True,
+                 comment: str | None = None
+                 ):
+        """Create a new Chain instance as defined by the sequence of residue codes, using default variants
+        :param str name: name for new chain (optional; defaults to next available from (A, B, C, ...)
+        :param sequence: a Sequence[str] or str of one-letter codes defining the chain (see below)
         :param int startNumber: number of first residue in sequence
-        :param str shortName: shortName for new chain (optional)
-        :param str role: role for new chain (optional)
+        :param str moleculeType: molecule type; i.e. ('protein','DNA', 'RNA' or other).
+        :param useNefAtomNomenclature: flag to define NEF atom nomenclature to be used,
+                                       rather than only IUPAC-defined atoms (default=True)
         :param str comment: comment for new chain (optional)
         :return: a new Chain instance.
-        """
-        from ccpn.core.Chain import _createChain
-        return _createChain(self,
-                            sequence=sequence,
-                            compoundName=compoundName,
-                            startNumber=startNumber, molType=molType, isCyclic=isCyclic,
-                            shortName=shortName, role=role, comment=comment,
-                            **kwds)
 
-    # GWV: why not newChain to be consistent???
-    newChain = createChain
+        Sequence: str or list of str. Allowed sequence formats:
+        - 1-Letter-Code (only standards)
+            sequence =  'AAAAAA'
+            sequence =  'A A A A A A'
+            sequence =  'A, A, A, A, A, A'
+            sequence =  ['A', 'A', 'A', 'A', 'A']
+        - 3-Letter-Code  (standard and non-standard)
+            sequence =  'ALA ALA ALA ALA'
+            sequence =  'ALA, ALA, ALA, ALA'
+            sequence =  ['ALA', 'ALA', 'ALA']
+        - ccpCodes:  (standard and non-standard)
+            - sequence containing Standard residue(s) CcpCodes e.g.::
+                sequence = 'Ala Leu Ala'
+                sequence = 'Ala, Leu, Ala'
+                sequence = ['Ala', 'Leu', 'Ala']
+            - sequence containing Non-Standard residue(s) CcpCodes e.g.:
+                sequence = ['Ala', 'Aba', Orn]
+            - sequence of a small-molecule CcpCodes: (Note you need to import the ChemComp first
+                                                      if not available in the Project. see docs)
+                sequence = ['Atp']  # if only one code Must be in a list
+                sequence = ['MySmallMolecule'] # if only one code Must be in a list
+        """
+        from ccpn.core.Chain import _newChain
+        return _newChain(self,
+                         name=name,
+                         sequence=sequence,
+                         startNumber=startNumber,
+                         moleculeType=moleculeType,
+                         isCyclic=isCyclic,
+                         useNefAtomNomenclature=useNefAtomNomenclature,
+                         comment=comment,
+                         )
 
     @logCommand('project.')
     def newSubstance(self, name: str = None, labelling: str = None, substanceType: str = 'Molecule',

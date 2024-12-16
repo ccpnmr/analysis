@@ -1,6 +1,6 @@
 """
-This class defines the Polymer object: a class to hold
-polymer information, i.e. the sequence of residues and
+This class defines the MolecularTemplate object: a class to hold
+polymer-template information, i.e. the sequence of residues and
 their topology.
 Currently maintained by the API as a Molecule instance
 and associated ChemComps.
@@ -58,21 +58,21 @@ from ccpn.util.Logging import getLogger
 
 
 
-class _Polymer(AbstractWrapperObject):
-    """A class to hold polymer information, i.e. the sequence of residues and
-    their topology.
+class _MolecularTemplate(AbstractWrapperObject):
+    """A class to hold polymer-template information, i.e. the sequence of
+    residues and their topology.
     """
     #-----------------------------------------------------------------------------------------
 
     #: Short class name, for PID.
-    shortClassName = 'PM'
+    shortClassName = 'MT'
     # Attribute it necessary as subclasses must use superclass className
-    className = '_Polymer'
+    className = '_MolecularTemplate'
 
     _parentClass = Project
 
     #: Name of plural link to instances of class
-    _pluralLinkName = '_polymers'
+    _pluralLinkName = '_molecularTemplates'
 
     # the attribute name used by current
     _currentAttributeName = None
@@ -246,7 +246,7 @@ class _Polymer(AbstractWrapperObject):
 
     @classmethod
     def _getAllWrappedData(cls, parent: Project) -> list:
-        """get wrappedData for all _Polymer children of the
+        """get wrappedData for all _MolecularTemplate children of the
         root parent project; i.e. apiNmrProject.root
         """
         root = parent._wrappedData.root
@@ -291,8 +291,11 @@ class _Polymer(AbstractWrapperObject):
         return len(self._apiMolResidues)
 
     def __str__(self):
-        _locked = 'locked' if self.isLocked else 'unlocked'
-        return f'<{self.pid} ({self.moleculeType}, len={len(self)}, {_locked})>'
+        if self.isDeleted:
+            return f'<{self.pid}>'
+        else:
+            _locked = 'locked' if self.isLocked else 'unlocked'
+            return f'<{self.pid} ({self.moleculeType}, len={len(self)}, {_locked})>'
 
     __repr__ = __str__
 
@@ -301,9 +304,9 @@ class _Polymer(AbstractWrapperObject):
 # New<object> methods
 #=========================================================================================
 
-@newObject(_Polymer)
-def _newPolymer(project: Project, name: str, comment: str = None) -> _Polymer:
-    """Create a new _Polymer instance
+@newObject(_MolecularTemplate)
+def _newPolymer(project: Project, name: str, comment: str = None) -> _MolecularTemplate:
+    """Create a new _MolecularTemplate instance
     """
     apiProject = project._wrappedData
 
@@ -313,8 +316,8 @@ def _newPolymer(project: Project, name: str, comment: str = None) -> _Polymer:
 
     apiMolecule = apiProject.root.newMolecule(name=name)
 
-    if (result := _Polymer._newInstanceFromApiData(apiObj=apiMolecule, project=project)) is None:
-        raise RuntimeError(f'Unable to generate _Polymer instance {name!r}')
+    if (result := _MolecularTemplate._newInstanceFromApiData(apiObj=apiMolecule, project=project)) is None:
+        raise RuntimeError(f'Unable to generate _MolecularTemplate instance {name!r}')
 
     if comment:
         # avoid triggering logging, notification, ...

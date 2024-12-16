@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-15 18:51:28 +0000 (Sun, December 15, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-16 18:55:07 +0000 (Mon, December 16, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -438,9 +438,9 @@ from ccpn.core.Note import Note as _Note
 NOTE_CLASSNAME = _Note.className
 _Note._registerCoreClass()
 
-from ccpn.core._implementation._Polymer import _Polymer
-POLYMER_CLASSNAME = _Polymer.className
-_Polymer._registerCoreClass()
+from ccpn.core._implementation._MolecularTemplate import _MolecularTemplate
+POLYMER_CLASSNAME = _MolecularTemplate.className
+_MolecularTemplate._registerCoreClass()
 
 
 # # GUI classes

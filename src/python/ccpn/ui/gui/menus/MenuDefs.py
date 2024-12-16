@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-12 12:09:56 +0000 (Thu, December 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-16 18:55:08 +0000 (Mon, December 16, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -332,8 +332,9 @@ class MenusDefs(Menu, FrameworkProperties):
     #-----------------------------------------------------------------------------------------
     # Development Menu
     #-----------------------------------------------------------------------------------------
-        _devMenu = Menu(DEVELOPMENT_MENU,
-                        DynamicMenu('Debug', callback=_fillDevelopmentDebugCallback),
+        _devMenu = Menu( DEVELOPMENT_MENU,
+            DynamicMenu('Debug', callback=_fillDevelopmentDebugCallback),
+            Action('Print Undo Stack', callback=self._printUndoStackCallback),
         )
         # optionally add development menu before Help menu
         if app._isInDebugMode:
@@ -966,6 +967,14 @@ class MenusDefs(Menu, FrameworkProperties):
         else:
             MessageDialog.showWarning('Submit Feedback',
                                       'Could not connect to the server, please check your internet connection.')
+    #-----------------------------------------------------------------------------------------
+    # development
+    #-----------------------------------------------------------------------------------------
+
+    def _printUndoStackCallback(self):
+        """Callback for Development-->Print Undo Stack
+        """
+        self.application._getUndo().print()
 
     #-----------------------------------------------------------------------------------------
     # Implementation methods

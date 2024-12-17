@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-12-12 11:38:36 +0000 (Thu, December 12, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-17 14:14:04 +0000 (Tue, December 17, 2024) $"
 __version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ import math
 from typing import Union, Tuple, Sequence
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
+from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.AbsorbResonance import absorbResonance
 from ccpn.core.lib import Pid
@@ -174,11 +175,15 @@ class NmrAtom(AbstractWrapperObject):
             value = None
         return value
 
-    def _setIsotopeCode(self, value):
-        """
-        :param value:  value must be defined, if not set then can set to arbitrary value see UnknownIsotopeCode definition
-        this means it can still be set at any isotopeCode later, otherwise
-        need to undo or create new nmrAtom
+    def _setIsotopeCode(self, value: str | None):
+        """Set the isotope code for this NmrAtom (CCPN Internal)
+
+        :param value:  value must be defined, if not set then can
+        set to arbitrary value see UnknownIsotopeCode definition
+        this means it can still be set at any isotopeCode later,
+        otherwise need to undo or create new nmrAtom
+
+        :raise ValueError: If not None or Str, or if invalid IsotopeCode.
 
         CCPNINTERNAL: used in _newNmrAtom, Peak.assignDimension
         """
@@ -198,26 +203,26 @@ class NmrAtom(AbstractWrapperObject):
         result = [getDataObj(x) for x in ll]
 
         nmrResidue = self.nmrResidue
-        if nmrResidue.residue is None:
-            # NmrResidue is unassigned. Add ad-hoc protein inter-residue bonds
-            if self.name == 'N':
-                for rx in (nmrResidue.previousNmrResidue, nmrResidue.getOffsetNmrResidue(-1)):
-                    if rx is not None:
-                        na = rx.getNmrAtom('C')
-                        if na is not None:
-                            result.append(na)
-            elif self.name == 'C':
-                for rx in (nmrResidue.nextNmrResidue, nmrResidue.getOffsetNmrResidue(1)):
-                    if rx is not None:
-                        na = rx.getNmrAtom('N')
-                        if na is not None:
-                            result.append(na)
-        #
+        if nmrResidue.residue is not None:
+            return result
+
+        # NmrResidue is unassigned. Add ad-hoc protein inter-residue bonds
+        if self.name == 'N':
+            for rx in (nmrResidue.previousNmrResidue, nmrResidue.getOffsetNmrResidue(-1)):
+                if rx is not None and (na := rx.getNmrAtom('C') is not None):
+                    result.append(na)
+        elif self.name == 'C':
+            for rx in (nmrResidue.nextNmrResidue, nmrResidue.getOffsetNmrResidue(1)):
+                if rx is not None and (na := rx.getNmrAtom('N')) is not None:
+                    result.append(na)
+
         return result
 
     @property
-    def assignedPeaks(self) -> Tuple['Peak']:
-        """All Peaks assigned to the NmrAtom"""
+    def assignedPeaks(self) -> tuple['Peak', ...]:
+        """All Peaks assigned to the NmrAtom
+
+        :return a tuple of all peaks assigned to the NmrAtom"""
         apiResonance = self._wrappedData
         apiPeaks = {x.peakDim.peak for x in apiResonance.peakDimContribs}
         apiPeaks |= {x.peakDim.peak for x in apiResonance.peakDimContribNs}
@@ -259,32 +264,32 @@ class NmrAtom(AbstractWrapperObject):
         self._wrappedData.name = None
 
     @logCommand(get='self')
-    def assignTo(self, chainCode: str = None, sequenceCode: Union[int, str] = None,
+    def assignTo(self, chainCode: str = None, sequenceCode: int | str = None,
                  residueType: str = None, name: str = None, mergeToExisting=False) -> 'NmrAtom':
-        """Assign NmrAtom to naming parameters) and return the reassigned result
-
-        If the assignedTo NmrAtom already exists the function raises ValueError.
-        If mergeToExisting is True it instead merges the current NmrAtom into the target
-        and returns the merged target. NB Merging is NOT undoable
-
-        WARNING: is mergeToExisting is True, always use in the form "x = x.assignTo(...)",
-        as the call 'x.assignTo(...) may cause the source x object to be deleted.
+        """Assign NmrAtom to naming parameters and return the reassigned result
 
         Passing in empty parameters (e.g. chainCode=None) leaves the current value unchanged. E.g.:
         for NmrAtom NR:A.121.ALA.HA calling with sequenceCode=124 will assign to
         (chainCode='A', sequenceCode=124, residueType='ALA', atomName='HA')
 
-
         The function works as:
-
         nmrChain = project.fetchNmrChain(shortName=chainCode)
 
         nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
 
         (or nmrChain.fetchNmrResidue(sequenceCode=sequenceCode) if residueType is None)
-        """
 
-        oldPid = self.longPid
+        .. note:: WARNING if mergeToExisting is True, always use in the form "x = x.assignTo(...)",
+        as the call 'x.assignTo(...)' may cause the source x object to be deleted.
+
+        :param chainCode: ChainCode e.g.
+        :param sequenceCode: SequenceCode e.g.
+        :param residueType: residueType e.g.
+        :param name: name e.g.
+        :param mergeToExisting: If True merges the current NmrAtom into the target
+        and returns the merged target. NB Merging is NOT undoable
+        :raise ValueError If the assignedTo NmrAtom already exists
+        """
         apiResonance = self._apiResonance
         apiResonanceGroup = apiResonance.resonanceGroup
 
@@ -298,11 +303,9 @@ class NmrAtom(AbstractWrapperObject):
             residueType = residueType or apiResonanceGroup.residueType
             name = name or apiResonance.name
 
-            for ss in chainCode, sequenceCode, residueType, name:
-                if ss and Pid.altCharacter in ss:
-                    raise ValueError(
-                            f"Character {Pid.altCharacter} not allowed in ccpn.NmrAtom id : {chainCode}.{sequenceCode}.{residueType}.{name}"
-                            )
+            if any(Pid.altCharacter in pidStr for pidStr in (chainCode, sequenceCode, residueType, name)):
+                raise ValueError(f"Character {Pid.altCharacter} not allowed in ccpn.NmrAtom id :"
+                                 f" {chainCode}.{sequenceCode}.{residueType}.{name}")
 
             oldNmrResidue = self.nmrResidue
             nmrChain = self._project.fetchNmrChain(chainCode)
@@ -321,7 +324,6 @@ class NmrAtom(AbstractWrapperObject):
             if nmrResidue is oldNmrResidue:
                 if name != self.name:
                     # NB self.name can never be returned as None
-
                     if result is self:
                         # self._wrappedData.name = name or None
                         self.rename(name or None)
@@ -332,31 +334,8 @@ class NmrAtom(AbstractWrapperObject):
                     else:
                         raise ValueError("New assignment clash with existing assignment,"
                                          " and merging is disallowed")
-
             else:
                 if result is self:
-                    # if nmrResidue.getNmrAtom(self.name) is None:
-                    #     if name != self.name:
-                    #         # self._wrappedData.name = name or None
-                    #         self.rename(name or None)
-                    #     # self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
-                    #     self._setApiResonanceGroup(self._apiResonance, nmrResidue)
-                    #
-                    # elif name is None or oldNmrResidue.getNmrAtom(name) is None:
-                    #     if name != self.name:
-                    #         # self._wrappedData.name = name or None
-                    #         self.rename(name or None)
-                    #     # self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
-                    #     self._setApiResonanceGroup(self._apiResonance, nmrResidue)
-                    #
-                    # else:
-                    #     # self._wrappedData.name = None  # Necessary to avoid name clashes
-                    #     self.rename(None)  # Necessary to avoid name clashes
-                    #     self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
-                    #     # self._setApiResonanceGroup(self._apiResonance, nmrResidue)
-                    #     # self._wrappedData.name = name
-                    #     self.rename(name or None)
-
                     # Necessary to avoid name clashes - also handles all notifiers
                     #   is it firing too many now though?
                     self.rename(None)
@@ -373,7 +352,11 @@ class NmrAtom(AbstractWrapperObject):
         return result
 
     @logCommand(get='self')
-    def mergeNmrAtoms(self, nmrAtoms: Union['NmrAtom', Sequence['NmrAtom']]):
+    def mergeNmrAtoms(self, nmrAtoms: 'NmrAtom' | Sequence['NmrAtom']):
+        """Merge a list of NmrAtom's resonances into this NmrAtom
+
+        :param nmrAtoms: The atom or list of atoms to merge.
+        """
         nmrAtoms = makeIterableList(nmrAtoms)
         nmrAtoms = [self.project.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom for nmrAtom in nmrAtoms]
         if not all(isinstance(nmrAtom, NmrAtom) for nmrAtom in nmrAtoms):
@@ -446,9 +429,9 @@ class NmrAtom(AbstractWrapperObject):
         """
         if self.isotopeCode is not None and (symbol := isotopeCode2Nucleus(self.isotopeCode)) is not None and len(
                 symbol) > 0:
-            _name = '@%s_%d' % (symbol[0:1], self._uniqueId)
+            _name = f'@{symbol[0:1]}_{self._uniqueId:d}'
         else:
-            _name = '@_%d' % self._uniqueId
+            _name = f'@_{self._uniqueId:d}'
         return _name
 
     # Sub-class two methods to get '@' names
@@ -457,7 +440,7 @@ class NmrAtom(AbstractWrapperObject):
         return '@'
 
     @classmethod
-    def _uniqueName(cls, parent: nmrResidue, name=None) -> str:
+    def _uniqueName(cls, parent: nmrResidue, name: str | None =None) -> str:
         """Subclassed to get the '@' default name behavior.
         :param parent: in this case, parent MUST be of type NmrResidue
         :param name (str | None): target name (as required)
@@ -465,7 +448,7 @@ class NmrAtom(AbstractWrapperObject):
         """
         if name is None:
             _id = parent.project._queryNextUniqueIdValue(cls.className)
-            name = '%s_%d' % (cls._defaultName(), _id)
+            name = f'{cls._defaultName()}_{_id:d}'
         return super(NmrAtom, cls)._uniqueName(parent=parent, name=name)
 
     def _finaliseAction(self, action: str, **actionKwds):
@@ -516,10 +499,6 @@ class NmrAtom(AbstractWrapperObject):
         self._wrappedData.name = value
         # set isotopeCode to the correct value
         self._wrappedData.isotopeCode = isotopeCode or UnknownIsotopeCode  # self._UNKNOWN_VALUE_STRING
-
-        # now handled by _finaliseAction
-        # self._childActions.append(self._renameChemicalShifts)
-        # self._finaliseChildren.extend((sh, 'change') for sh in self.chemicalShifts)
 
         return (oldName,)
 
@@ -590,10 +569,12 @@ class NmrAtom(AbstractWrapperObject):
 
         return valuesDict
 
-    def _recalculateShiftValue(self, spectra, simulatedPeakScale: float = 0.0001):
+    def _recalculateShiftValue(self, spectra: list[Spectrum, ...], simulatedPeakScale: float = 0.0001):
         """Get a new shift value from the assignedPeaks
+        :param spectra: list of spectra to perform the recalculation on
+        :param simulatedPeakScale: scales the figure of merit weight
+        :return: mean and value error (undefined for single contributions)
         """
-
         apiResonance = self._wrappedData
         sum1 = sum2 = N = 0.0
         peakDims = []
@@ -666,7 +647,6 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
     :param comment: optional string comment
     :return: a new NmrAtom instance.
     """
-
     apiNmrProject = self._project._wrappedData
     resonanceGroup = self._wrappedData
 
@@ -674,17 +654,6 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
         raise TypeError(f'Name {name} must be of type string (or None)')
     if not isinstance(comment, (str, type(None))):
         raise TypeError(f'Comment {comment} must be of type string (or None)')
-
-    # if not name:
-    #     # generate (temporary) default name, to be changed later after we created the object
-    #     _name = NmrAtom._uniqueName(self.project)
-    #
-    # else:
-    #     # Check for name clashes
-    #     _name = name
-    #     previous = self.getNmrAtom(_name.translate(Pid.remapSeparators))
-    #     if previous is not None:
-    #         raise ValueError(f'newNmrAtom: name {_name!r} clashes with {previous}')
 
     # ensure uniqueName
     _name = NmrAtom._uniqueName(self, name=name)
@@ -715,8 +684,6 @@ def _fetchNmrAtom(self: NmrResidue, name: str, isotopeCode=None):
     :param name: string name for new nmrAto if created
     :return: new or existing nmrAtom
     """
-    # resonanceGroup = self._wrappedData
-
     with undoBlock():
         result = (self.getNmrAtom(name.translate(Pid.remapSeparators)) or
                   self.newNmrAtom(name=name, isotopeCode=isotopeCode))
@@ -732,10 +699,9 @@ def _produceNmrAtom(self: Project, atomId: str = None, chainCode: str = None,
                     residueType: str = None, name: str = None) -> NmrAtom:
     """Get chainCode, sequenceCode, residueType and atomName from dot-separated atomId or Pid
     or explicit parameters, and find or create an NmrAtom that matches
-    Empty chainCode gets NmrChain:@- ; empty sequenceCode get a new NmrResidue"""
-
+    Empty chainCode gets NmrChain:@- ; empty sequenceCode get a new NmrResidue
+    """
     with undoBlock():
-
         # Get ID parts to use
         if sequenceCode is not None:
             sequenceCode = str(sequenceCode) or None

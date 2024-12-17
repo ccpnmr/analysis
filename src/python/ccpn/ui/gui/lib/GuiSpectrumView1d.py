@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:57 +0100 (Thu, October 24, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-12-17 22:37:39 +0000 (Tue, December 17, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,6 +33,7 @@ from PyQt5 import QtGui
 
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView, SpectrumCache
 from ccpn.util.Colour import spectrumColours, colorSchemeTable
+from ccpn.util.Logging import getLogger
 
 
 class GuiSpectrumView1d(GuiSpectrumView):
@@ -49,8 +50,14 @@ class GuiSpectrumView1d(GuiSpectrumView):
         # GWV 24/10/24: no usage; if needed use getApplication or self.project.application
         # self._application = self.strip.spectrumDisplay.mainWindow.application
 
+        self.hPhaseTrace = None
+        self.buildContours = True
+        self.buildContoursOnly = False
+
+    def _postRestore(self):
+        """PostRestore actions
+        """
         self.data = self.spectrum.positions, self.spectrum.intensities
-        # print('>>>filePath', self.spectrum.filePath, self.spectrum.positions, self.spectrum.intensities)
 
         # for strip in self.strips:
         if self.spectrum.sliceColour is None:
@@ -58,10 +65,6 @@ class GuiSpectrumView1d(GuiSpectrumView):
                 self.spectrum.sliceColour = list(spectrumColours.keys())[len(self.strip.spectrumViews) - 1]
             else:
                 self.spectrum.sliceColour = list(spectrumColours.keys())[(len(self.strip.spectrumViews) % 12) - 1]
-
-        self.hPhaseTrace = None
-        self.buildContours = True
-        self.buildContoursOnly = False
 
     def getVisibleState(self, dimensionCount=None):
         """Get the visible state for the X/Y axes
@@ -118,7 +121,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
             # may be empty
             glList.vertices[dim::2] = self.spectrum.positions
             glList.vertices[1 - dim::2] = self.spectrum.intensities
-        except Exception:
+        except Exception as es:
+            getLogger().debug(f'_buildGLContours: ignoring exception: {es} ')
             pass
 
     @staticmethod

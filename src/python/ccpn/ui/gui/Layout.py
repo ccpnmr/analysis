@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 08:23:53 +0000 (Mon, October 28, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-12-17 22:37:39 +0000 (Tue, December 17, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -82,7 +82,6 @@ METADATA = '_metadata'
 MODULES = 'modules'
 
 
-@singleton
 class ModuleLayout(FrameworkProperties):
     """Class holding module layout information
     """
@@ -99,7 +98,7 @@ class ModuleLayout(FrameworkProperties):
         return self.layout
 
     def updateDict(self):
-        """Update the the dict with title, warning and general info
+        """Update the dict with title, warning and general info
         """
         self.layout[Title] = TitleText
         self.layout[Warning] = WarningMessage

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-11 09:47:48 +0000 (Wed, December 11, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-17 22:37:38 +0000 (Tue, December 17, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -1319,8 +1319,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         # update the logger read-only state
         self.project._updateReadOnlyState()
         self.project._updateLoggerState(readOnly=self.project.isReadOnly)
-        if self.mainWindow:
-            self.mainWindow._setReadOnlyIcon()
+        # if self.mainWindow:
+        #     self.mainWindow._setReadOnlyIcon()
 
         return objs
 

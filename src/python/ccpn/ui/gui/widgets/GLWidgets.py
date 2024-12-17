@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-09 19:03:26 +0100 (Mon, September 09, 2024) $"
-__version__ = "$Revision: 3.2.6 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-17 22:37:39 +0000 (Tue, December 17, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1679,7 +1679,8 @@ class Gui1dWidget(CcpnGLWidget):
                                                                     blendMode=False,
                                                                     drawMode=GL.GL_LINE_STRIP,
                                                                     dimension=2,
-                                                                    GLContext=self)
+                                                                    GLContext=self
+                                                      )
                 spectrumView._buildGLContours(self._contourList[spectrumView])
 
                 self._buildSpectrumSetting(spectrumView=spectrumView, stackCount=stackCount)

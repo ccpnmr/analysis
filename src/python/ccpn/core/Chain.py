@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-16 18:55:07 +0000 (Mon, December 16, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-17 22:37:21 +0000 (Tue, December 17, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ from typing import Tuple, Optional, Union, Sequence, List
 import numpy as np
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core._implementation._MolecularTemplate import _MolecularTemplate, _newPolymer
+from ccpn.core._implementation._MolecularTemplate import _MolecularTemplate, _newMolecularTemplate
 from ccpn.core.Project import Project
 from ccpn.core.Substance import Substance, SampleComponent
 
@@ -278,16 +278,22 @@ class Chain(AbstractWrapperObject):
             _molecularTemplate.lock()
 
     @logCommand(get='self')
-    def renumberResidues(self, offset: int, start: int = None,
-                         stop: int = None):
-        """Renumber residues in range start-stop (inclusive) by adding offset
+    def renumberResidues(self, offset: int, start: int = None, stop: int = None) -> list['Residue']:
+        """Renumber sequenceCode of the residues in range start-stop (inclusive)
+        by adding offset.
+        NB Will rename residues one by one, and stop on error.
 
-        The residue number is the integer starting part of the sequenceCode,
-        e.g. residue '12B' is renumbered to '13B' (offset=1)
-
-        if start (stop) is None, there is no lower (upper) limit
-
-        NB Will rename residues one by one, and stop on error."""
+        :param offset: offset to add to the integer part of the sequenceCode.
+        :param start: start index of residues to renumber.
+                      The start index is the integer starting part of the
+                      sequenceCode, e.g. for residue '12B' it is 12.
+                      If start is None, there is no lower limit
+        :param stop: stop index of residues to renumber.
+                     The stop index is the integer as  defined above for the
+                     start.
+                     If stop is None, there is no upper limit
+        :return The list of renumbered residues
+        """
 
         # Must be here to avoid circular imports
         from ccpn.core.lib import MoleculeLib
@@ -297,25 +303,33 @@ class Chain(AbstractWrapperObject):
             residues.reverse()
 
         changedResidues = []
-
         with undoBlock():
             for residue in residues:
-                sequenceCode = residue.sequenceCode
-                code, ss, unused = commonUtil.parseSequenceCode(sequenceCode)
-                # assert unused is None
-                if code is not None:
-                    if ((start is None or code >= start)
-                            and (stop is None or code <= stop)):
-                        newSequenceCode = MoleculeLib._incrementedSequenceCode(residue.sequenceCode, offset)
-                        residue.rename(newSequenceCode)
-                        changedResidues.append(residue)
+                _intCode = residue._sequenceCodeAsInteger
+                if (    (start is None or _intCode >= start)
+                    and (stop is None or _intCode <= stop)
+                ):
+                    residue.renumber(offset=offset)
+                    changedResidues.append(residue)
 
-            for residue in changedResidues:
-                residue._finaliseAction('rename')
+        #     sequenceCode = residue.sequenceCode
+            #     code, ss, unused = commonUtil.parseSequenceCode(sequenceCode)
+            #     # assert unused is None
+            #     if code is not None:
+            #         if ((start is None or code >= start)
+            #                 and (stop is None or code <= stop)):
+            #             newSequenceCode = MoleculeLib._incrementedSequenceCode(residue.sequenceCode, offset)
+            #             residue.rename(newSequenceCode)
+            #             changedResidues.append(residue)
+            #
+            # for residue in changedResidues:
+            #     residue._finaliseAction('rename')
 
-        if start is not None and stop is not None:
-            if len(changedResidues) != stop + 1 - start:
-                getLogger().warning("Only %s residues found in range %s tos %s" % (len(changedResidues), start, stop))
+        getLogger().info(f"Renumbered {len(changedResidues)} out of {len(residues)} possible residues")
+        if offset > 0:
+            changedResidues.reverse()
+
+        return changedResidues
 
     @property
     def sequence(self) -> str:
@@ -347,18 +361,19 @@ class Chain(AbstractWrapperObject):
     @property
     def _sequenceCodesAsIntegers(self):
         """
-        :return: list of sequence codes as integers. If a code cannot be interpreted as int it uses nan (float). This is to keep the same lenght as the residues and to allow
+        :return: list of sequence codes as integers. If a code cannot be interpreted as int
+        it uses nan (float). This is to keep the same length as the residues and to allow
         numerical operations such as min, max or proper sorting.
         """
-        codes = []
+        _intCodes = []
         for r in self.residues:
-            try:
-                sequenceCode = int(r.sequenceCode)
-                codes.append(sequenceCode)
-            except Exception as ex:
-                codes.append(np.nan)
-                getLogger().debug3(f'Cannot convert {r.sequenceCode} to integer. {ex}')
-        return codes
+            _code = r._sequenceCodeAsInteger
+            if isinstance(_code, int):
+                _intCodes.append(_code)
+            else:
+                _intCodes.append(np.nan)
+                getLogger().debug3(f'Cannot convert {r.sequenceCode} to integer.')
+        return _intCodes
 
     @property
     def hasAssignedAtoms(self) -> bool:
@@ -444,6 +459,16 @@ class Chain(AbstractWrapperObject):
             parentDict[newCode] = apiChain
             forceSetattr(apiChain, 'isModified', True)
 
+    def _apiDisconnectFromMolecule(self):
+        """Sever the API link between self and an API Molecule instance
+        Used by _NewChain and when upgrading to 3.3.0 project
+        """
+        apiChain = self._apiChain
+        apiMolecule = apiChain.molecule
+        if apiMolecule is not None and apiChain in apiMolecule.chains:
+            forceSetattr(apiChain, 'molecule', None)
+            forceSetattr(apiMolecule, 'chains', set())
+
     # GWV 15/12/24: moved up to be in a more logical place
     # @renameObject()
     # @logCommand(get='self')
@@ -509,15 +534,15 @@ def _newChain(project: Project,
     # first create the polymer without any residue definitions.
     # Thus, when we make the chain, no residues are automatically
     # added.
-    polymer = _newPolymer(
+    _template = _newMolecularTemplate(
             project=project,
             name=name,
-            comment=f'Polymer for Chain {name}',
+            comment=f'_MolecularTemplate for Chain {name}',
     )
 
     # Create the new Chain; since apiMolecule has no residue definitions,
     # it will be an empty chain
-    apiMolecule = polymer._apiMolecule
+    apiMolecule = _template._apiMolecule
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule,
                                         code=name,
                                         )
@@ -528,26 +553,26 @@ def _newChain(project: Project,
         result.comment = comment
 
     # Now define the sequence
-    polymer.defineSequence(moleculeType = moleculeType,
+    _template.defineSequence(moleculeType = moleculeType,
                            sequence = sequence,
                            isCyclic = isCyclic,
                            startNumber = startNumber,
                            )
 
-    # And add the Residues and Atoms as defined by polymer
-    for apiMolResidue in polymer._apiMolResidues:
+    # And add the Residues and Atoms as defined by _MolecularTemplate
+    for apiMolResidue in _template._apiMolResidues:
         _newResidue(result, apiMolResidue, useNefAtomNomenclature=useNefAtomNomenclature)
 
     # Cannot put things on the undo stack because of _checkDelete()
     # in ccpnmodel/ccpncore/api/ccp/molecule/Molecule.py,
     # if apiMolecule.chains is set.
     # Deleting apiChain fails because of its molecule reference.
-    # Hence, unset these cross-references in the model and use association
-    # by name from hereon
-    forceSetattr(apiMolecule, 'chains', set())
-    forceSetattr(newApiChain, 'molecule', None)
 
-    return (result, polymer)
+    # Hence, unset these cross-references in the model and use
+    # association by name from hereon
+    result._apiDisconnectFromMolecule()
+
+    return (result, _template)
 
 
 @newObject(Chain)

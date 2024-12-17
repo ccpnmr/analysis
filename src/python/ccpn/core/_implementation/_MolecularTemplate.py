@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-16 14:30:32 +0000 (Mon, December 16, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-17 22:37:21 +0000 (Tue, December 17, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -305,7 +305,7 @@ class _MolecularTemplate(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(_MolecularTemplate)
-def _newPolymer(project: Project, name: str, comment: str = None) -> _MolecularTemplate:
+def _newMolecularTemplate(project: Project, name: str, comment: str = None) -> _MolecularTemplate:
     """Create a new _MolecularTemplate instance
     """
     apiProject = project._wrappedData

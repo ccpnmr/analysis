@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-16 16:47:09 +0000 (Mon, December 16, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-18 14:17:37 +0000 (Wed, December 18, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -347,45 +347,48 @@ def notificationSuspend(application=None):
         application.project._resumeNotification()
 
 
-@contextmanager
+# @contextmanager
 def notificationBlanking():
+    """Block all notifiers, re-enable at the end of the function block.
     """
-    Block all notifiers, re-enable at the end of the function block.
-    """
-    # local import to avoid cycles
-    from ccpn.core.lib.Notifiers import NotifierBase
+    return doBlock(notification=True)
 
-    NotifierBase._increaseNotificationBlanking()
-    try:
-        # transfer control to the calling function
-        yield
+    # # local import to avoid cycles
+    # from ccpn.core.lib.Notifiers import NotifierBase
+    #
+    # NotifierBase._increaseNotificationBlanking()
+    # try:
+    #     # transfer control to the calling function
+    #     yield
+    #
+    # except AttributeError as es:
+    #     raise es
+    #
+    # finally:
+    #     # clean up after blocking notifications
+    #     NotifierBase._decreaseNotificationBlanking()
 
-    except AttributeError as es:
-        raise es
 
-    finally:
-        # clean up after blocking notifications
-        NotifierBase._decreaseNotificationBlanking()
-
-
-@contextmanager
+# @contextmanager
 def apiNotificationBlanking(application=None):
     """Block api new/create/change/delete notifiers, re-enable at the end of the function block.
     """
-    # get the application
-    if not application and not (application := getApplication()):
-        raise RuntimeError('Error getting application')
-    application.project._increaseApiNotificationBlanking()
-    try:
-        # transfer control to the calling function
-        yield
-    except AttributeError as es:
-        raise es
-    finally:
-        # clean up after blocking notifications
-        application.project._decreaseApiNotificationBlanking()
-        if application.project._apiNotificationBlanking < 0:
-            raise RuntimeError('*** Code Error: _apiNotificationBlanking below zero')
+    return doBlock(apiNotification=True)
+
+    # # get the application
+    # if not application and not (application := getApplication()):
+    #     raise RuntimeError('Error getting application')
+    # application.project._increaseApiNotificationBlanking()
+    # try:
+    #     # transfer control to the calling function
+    #     yield
+    # except AttributeError as es:
+    #     raise es
+    # finally:
+    #     # clean up after blocking notifications
+    #     application.project._decreaseApiNotificationBlanking()
+    #     if application.project._apiNotificationBlanking < 0:
+    #         raise RuntimeError('*** Code Error: _apiNotificationBlanking below zero')
 
 
 @contextmanager
@@ -410,29 +413,30 @@ def _apiBlocking(application=None):
             raise RuntimeError('*** Code Error: _apiBlocking below zero')
 
 
-@contextmanager
+# @contextmanager
 def notificationEchoBlocking(application=None):
+    """Disable echoing of commands to the terminal, re-enable at the end
+    of the function block.
     """
-    Disable echoing of commands to the terminal, re-enable at the end of the function block.
-    """
+    return doBlock(echoing=True)
 
-    # get the application
-    if not application:
-        application = getApplication()
-    if application is None:
-        raise RuntimeError('Error getting application')
-
-    application._increaseEchoBlocking()
-    try:
-        # transfer control to the calling function
-        yield
-
-    except AttributeError as es:
-        raise es
-
-    finally:
-        # clean up after disabling echo blocking
-        application._decreaseEchoBlocking()
+    # # get the application
+    # if not application:
+    #     application = getApplication()
+    # if application is None:
+    #     raise RuntimeError('Error getting application')
+    #
+    # application._increaseEchoBlocking()
+    # try:
+    #     # transfer control to the calling function
+    #     yield
+    #
+    # except AttributeError as es:
+    #     raise es
+    #
+    # finally:
+    #     # clean up after disabling echo blocking
+    #     application._decreaseEchoBlocking()
 
 
 @contextmanager
@@ -467,69 +471,85 @@ def logCommandManager(prefix, funcName, *args, **kwds):
 
 
 @contextmanager
-def inactivity(application=None, project=None, debugText='Inactivity'):
+def doBlock(
+        echoing: bool = False,  # commandline echoing blocking
+        sideBar: bool = False,  # sidebar update blanking
+        notification: bool = False, # notification blanking
+        apiNotification: bool = False,  # API notification blanking
+        undoAddition: bool = False,  # Undo adding to stack blocking
+        undoWaypoint: bool = False, # Undo waypoint blocking
+    ):
+    """Context manager to set a variety of blocking behavior.
     """
-    Block all notifiers, apiNotifiers, undo and echo-ing
+    # local import to avoid cycles
+    from ccpn.core.lib.Notifiers import NotifierBase
+
+    _app = getApplication()
+    _undo = _app._getUndo() if _app and _app.project else None
+    _sideBarObj = _app.ui.mainWindow._getSideBar() \
+                  if _app.hasGui and _app.ui.mainWindow is not None \
+                  else None
+
+    if echoing:
+        _app._increaseEchoBlocking()
+
+    if sideBar and _sideBarObj:
+        _sideBarObj.increaseSidebarBlocking(withSideBarUpdate=True)
+
+    if notification:
+        NotifierBase._increaseNotificationBlanking()
+
+    if apiNotification:
+        NotifierBase._increaseApiNotificationBlanking()
+
+    if _undo and undoAddition:
+        _undo.increaseBlocking()
+
+    if _undo and undoWaypoint:
+        _undo.increaseWaypointBlocking()
+
+    try:
+        yield
+
+    except Exception as es:
+        getLogger().debug(f'doBalock return with exception: {es}')
+        raise es
+
+    finally:
+        if echoing:
+            _app._decreaseEchoBlocking()
+
+        if sideBar and _sideBarObj:
+            _sideBarObj.decreaseSidebarBlocking(withSideBarUpdate=True)
+
+        if notification:
+            NotifierBase._decreaseNotificationBlanking()
+
+        if apiNotification:
+            NotifierBase._decreaseApiNotificationBlanking()
+
+        if _undo and undoAddition:
+            _undo.decreaseBlocking()
+
+        if _undo and undoWaypoint:
+            _undo.decreaseWaypointBlocking()
+
+
+def inactivity(project=None, debugText=''):
+    """
+    Block all notifiers, apiNotifiers, undo, sidebar and echo-ing
     re-enable at the end of the function block.
     We allow passing in of application and project, as this is used in the
     initialisation when not all is proper yet.
     """
-
-    # get the application
-    if not application:
-        application = getApplication()
-    if application is None:
-        raise RuntimeError('Error getting application')
-
-    if project is None:
-        project = application.project
-    if project is None:
-        raise RuntimeError('Error getting project')
-
-    if (_undo := project._undo) is None:
-        raise RuntimeError('Error getting undo')
-
-
-    try:
-        application._increaseEchoBlocking()
-        project._increaseNotificationBlanking()
-        project._increaseApiNotificationBlanking()
-        _undo.increaseBlocking()
-        # transfer control to the calling function
-        yield
-
-    except AttributeError as es:
-        raise es
-
-    finally:
-        # clean up after blocking notifications
-        _undo.decreaseBlocking()
-        project._decreaseNotificationBlanking()
-        project._decreaseApiNotificationBlanking()
-        application._decreaseEchoBlocking()
-
-
-# @contextmanager
-# def notificationUnblanking():
-#     """
-#     Unblock all notifiers, disable at the end of the function block.
-#     Used inside notificationBlanking if a notifier is required for a single event
-#     """
-#
-#     # get the current application
-#     application = getApplication()
-#
-#     application.project._decreaseNotificationBlanking()
-#     try:
-#         # transfer control to the calling function
-#         yield
-#
-#     except AttributeError as es:
-#         raise es
-#
-#     finally:
-#         # clean up after blocking notifications
-#         application.project._increaseNotificationBlanking()
+    getLogger().debug2(f'> Enter Inactivity: {debugText}')
+    return doBlock(echoing=True,
+                   sideBar=True,
+                   notification=True,
+                   apiNotification=True,
+                   undoAddition=True,
+                   undoWaypoint=True,
+                  )
 
 
 @contextmanager
@@ -1122,11 +1142,18 @@ def renameObject(blockSidebar=False):
                 if result is None:
                     return False
 
-                addUndoItem(undo=BlankedPartial(func, self, 'rename', False, self, *result),
-                            redo=BlankedPartial(func, self, 'rename', False, *args, **kwds)
+                if isinstance(result, tuple) and len(result) == 2:
+                    oldName, newName = result
+                else:
+                    raise RuntimeError(f'Rename function should return (oldName, newName) tuple; got {result}')
+
+                addUndoItem(undo=partial(func, self, oldName),
+                            redo=partial(func, self, newName)
                             )
 
-        self._finaliseAction('rename')
+        # trigger RENAME notifier on project, self and the whole tree down from self
+        for obj in [self.project, self] + self._getAllDecendants():
+            obj._finaliseAction('rename')
 
         return True
 

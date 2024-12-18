@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-16 14:30:32 +0000 (Mon, December 16, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-18 12:14:36 +0000 (Wed, December 18, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -555,17 +555,13 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
     @property
     def _ccpnInternalData(self) -> dict:
-        """Dictionary containing arbitrary type data for internal use.
-
-        Data can be nested strings, numbers, lists, tuples, (ordered) dicts,
-        numpy arrays, pandas structures, CCPN Tensor objects, and any
-        object that can be serialised to JSON. This does NOT include CCPN or
-        CCPN API objects.
-
+        """Dict of (nameSpace, dict) key,value pairs containing arbitrary
+        type data for internal use.
+        Only to be accessed via the getParameter() and setParameter() methods.
         NB This returns the INTERNAL dictionary. There is NO encapsulation
-
         Data are kept on save and reload, but there is NO guarantee against
-        trampling by other code"""
+        trampling by other code
+        """
         result = self._wrappedData.ccpnInternalData
         if result is None:
             result = {}
@@ -620,23 +616,43 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     _CCPNMR_NAMESPACE = '_ccpNmrV3internal'
 
     def _setInternalParameter(self, parameterName: str, value):
-        """Sets parameterName for CCPNINTERNAL namespace to value; value must be json seriliasable"""
+        """Sets parameterName for CCPNINTERNAL namespace to value; value must be json seriliasable
+        """
         self.setParameter(self._CCPNMR_NAMESPACE, parameterName, value)
 
-    def _getInternalParameter(self, parameterName: str):
-        """Gets parameterName for CCPNINTERNAL namespace"""
-        return self.getParameter(self._CCPNMR_NAMESPACE, parameterName)
+    def _setDefaultInternalParameter(self, parameterName: str, defaultValue):
+        """Sets parameterName for CCPNINTERNAL with defaultValue if parameterName is not present.
+        Returns value of parameterName for nameSpace, i.e. the value if it was present, or
+        defaultValue if it was not. Akin to dict.setdefault().
+        """
+        return self.setDefaultParameter(self._CCPNMR_NAMESPACE, parameterName, defaultValue=defaultValue)
+
+    def _getInternalParameter(self, parameterName: str, defaultValue=None):
+        """Gets parameterName for CCPNINTERNAL namespace
+        """
+        return self.getParameter(self._CCPNMR_NAMESPACE, parameterName, defaultValue=defaultValue)
 
     def _hasInternalParameter(self, parameterName: str):
-        """Returns true if parameterName for CCPNINTERNAL namespace exists"""
+        """Returns true if parameterName for CCPNINTERNAL namespace exists
+        """
         return self.hasParameter(self._CCPNMR_NAMESPACE, parameterName)
 
     def _deleteInternalParameter(self, parameterName: str):
-        """Delete the parameter from CCPNINTERNAL namespace if exists and remove namespace if empty"""
+        """Delete the parameter from CCPNINTERNAL namespace if exists and remove namespace
+        if empty"""
         self.deleteParameter(self._CCPNMR_NAMESPACE, parameterName)
 
     def setParameter(self, namespace: str, parameterName: str, value):
-        """Sets parameterName for namespace to value; value must be json serialisable"""
+        """Sets parameterName for namespace to value.
+        :param namespace: The namespace identifier
+        :param parameterName: The parameter name
+        :param value: The value to be set
+                      Value can be nested strings, numbers, lists, tuples, (ordered) dicts,
+                      numpy arrays, pandas structures, CCPN Tensor objects, and any
+                      object that can be serialised to JSON.
+                      This does NOT include CcpNmr V3 Core objects or anything with XML incompatible
+                      characters.
+        """
         checkXml = str(value)
         # check that the value does not contains characters incompatible with xml
         pos = re.search('[<>]', checkXml, re.MULTILINE)
@@ -644,17 +660,35 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             raise RuntimeError("data cannot contain xml tags '{}' at pos {}".format(pos.group(), pos.span()))
         space = self._ccpnInternalData.setdefault(namespace, {})
         space[parameterName] = value
-        # Explicit flag assignment to enforce saving
-        self._wrappedData.__dict__['isModified'] = True
+        # Explicit flag assignment to enforce saving the API object
+        forceSetattr(self._wrappedData,'isModified', True)
 
-    def getParameter(self, namespace: str, parameterName: str):
-        """:returns value of parameterName for namespace or None if not present
+    def setDefaultParameter(self, namespace: str, parameterName: str, defaultValue):
+        """Sets parameterName for namespace with defaultValue if parameterName is not present.
+        Returns value of parameterName for nameSpace, i.e. the value if it was present, or
+        defaultValue if it was not. Akin to dict.setdefault().
+        :param namespace: The namespace identifier
+        :param parameterName: The parameter name
+        :param defaultValue: The value to set if parameterName is not present
+                             Value can be nested strings, numbers, lists, tuples, (ordered) dicts,
+                             numpy arrays, pandas structures, CCPN Tensor objects, and any
+                             object that can be serialised to JSON.
+                             This does NOT include CcpNmr V3 Core objects or anything with XML incompatible
+                             characters.
+        :return the value of parameterName for nameSpace
+        """
+        if not self.hasParameter(namespace=namespace, parameterName=parameterName):
+            self.setParameter(namespace=namespace, parameterName=parameterName, value=defaultValue)
+        return self.getParameter(namespace=namespace, parameterName=parameterName)
+
+    def getParameter(self, namespace: str, parameterName: str, defaultValue=None):
+        """:returns value of parameterName for namespace or defaultValue if not present
         """
         space = self._ccpnInternalData.get(namespace)
         if space is not None:
-            return space.get(parameterName)
+            return space.get(parameterName, defaultValue)
         else:
-            return None
+            return defaultValue
 
     def hasParameter(self, namespace: str, parameterName: str):
         """Returns true if parameterName for namespace exists"""
@@ -664,18 +698,20 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         return parameterName in space
 
     def deleteParameter(self, namespace: str, parameterName: str):
-        """Delete the parameter from namespace if exists and remove namespace if empty
+        """Delete the parameter from namespace if exists and remove namespace if empty.
+        :return value of deleted parameter or None
         """
         data = self._ccpnInternalData
-        space = data.get(namespace)
-        if space is None:
-            return False
-        # remove the parameterName and namespace
-        space.pop(parameterName, None)
+        if (space := data.get(namespace, None)) is None:
+            return None
+        # remove the parameterName from the namespace
+        value = space.pop(parameterName, None)
+        # remove the namespace if empty
         if not space:
             data.pop(namespace, None)
         # Explicit flag assignment to enforce saving
-        self._wrappedData.__dict__['isModified'] = True
+        forceSetattr(self._wrappedData,'isModified', True)
+        return value
 
     def _setNonApiAttributes(self, attribs):
         """Set the non-api attributes that are stored in ccpnInternal

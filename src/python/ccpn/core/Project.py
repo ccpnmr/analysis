@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-16 18:55:07 +0000 (Mon, December 16, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-18 14:19:04 +0000 (Wed, December 18, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -1239,7 +1239,7 @@ class Project(AbstractWrapperObject):
         self._mainWindow = None  # set by MainWindow.__init__()
 
         # initialise, creating the children; pass in self as we are initialising
-        with (inactivity(project=self, debugText='Initialising project')):
+        with inactivity(project=self, debugText='Initialising project'):
 
             with AbstractWrapperObject._doRestore(self.__class__):
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-17 22:37:21 +0000 (Tue, December 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-18 14:19:04 +0000 (Wed, December 18, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -83,16 +83,24 @@ class Residue(AbstractWrapperObject):
     #     """ API residue matching Residue"""
     #     return self._wrappedData
 
+    # GWV: temp in internal space until model is adjusted
+    _SEQUENCE_CODE_OFFSET = 'seqCodeOffset'
+
+    @property
+    def _intSequenceCode(self) -> int:
+        """:return the numeric part of the sequence code of the residue
+        including any offset as an integer.
+        """
+        _offset = self._setDefaultInternalParameter(self._SEQUENCE_CODE_OFFSET, 0)
+        return self._wrappedData.seqCode + _offset
+
     @property
     def sequenceCode(self) -> str:
-        """Residue sequence code and id (e.g. '1', '127B')
+        """Residue sequence code (e.g. '1', '127B')
         """
         apiResidue = self._wrappedData
-        objSeqCode = apiResidue.seqCode  # i.e. the integer-part of the sequenceCode
-        result = (apiResidue.seqInsertCode or '').strip()
-        if objSeqCode is not None:
-            result = str(objSeqCode) + result
-        return result
+        result = f'{self._intSequenceCode}{apiResidue.seqInsertCode or ""}'
+        return result.strip()
 
     @property
     def _key(self) -> str:
@@ -121,7 +129,7 @@ class Residue(AbstractWrapperObject):
         return self.threeLetterCode or ''
 
     @property
-    def threeLetterCode(self) -> str:
+    def threeLetterCode(self) -> str | None:
         """:return the three-letter of self as defined by its chemComp definition
                    or None in case of error.
         """
@@ -132,7 +140,7 @@ class Residue(AbstractWrapperObject):
             return None
 
     @property
-    def oneLetterCode(self) -> str:
+    def oneLetterCode(self) -> str | None:
         """:return the one-letter of self as defined by its chemComp definition.
                    or None in case of error.
         """
@@ -335,23 +343,20 @@ class Residue(AbstractWrapperObject):
     #     for atomName in extraAtomNames:
     #         self.getAtom(atomName).delete()
 
-    @property
-    def _sequenceCodeAsInteger(self) -> int | None:
-        """
-        :return: sequenceCode as integers. If a code cannot be interpreted as int
-        it returns None.
-        """
-        code, _, _ = commonUtil.parseSequenceCode(self.sequenceCode)
-        return code
-
+    # GWV: piggy-back onto the rename decorator here, as this
+    # effectively puts renumber method on the undo stack
+    # using the tuple of two returned arguments and triggers
+    # RENAME notifiers
+    @renameObject()
     def renumber(self, offset: int):
         """Renumber self by adding offset to integer part of
         sequenceCode; e.g. for offset 1, sequenceCode "12B" becomes "13B"
         """
-        # Must be here to avoid circular imports
-        from ccpn.core.lib import MoleculeLib
-        newSequenceCode = MoleculeLib._incrementedSequenceCode(self.sequenceCode, offset)
-        self.rename(newSequenceCode)
+        _currentOffset = self._setDefaultInternalParameter(self._SEQUENCE_CODE_OFFSET, 0)
+        _newOffset = _currentOffset + offset
+        self._setInternalParameter(self._SEQUENCE_CODE_OFFSET, _newOffset)
+        self._resetIds(recursive=True)
+        return(-offset, offset)
 
     @staticmethod
     def _setFragmentResidues(chainFragment, residues):
@@ -404,7 +409,7 @@ class Residue(AbstractWrapperObject):
             return None
 
     @property
-    def allNmrResidues(self) -> tuple['NmrResidue']:
+    def allNmrResidues(self) -> typing.Tuple['NmrResidue']:
         """AllNmrResidues corresponding to Residue - E.g. (for MR:A.87)
         NmrResidues NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.
         """
@@ -435,6 +440,7 @@ class Residue(AbstractWrapperObject):
                         ll = [x for x in nmrChain.nmrResidues if x.sequenceCode == sequenceCode]
                         if ll:
                             result.extend(ll)
+
         return tuple(sorted(result))
 
     @property
@@ -452,8 +458,9 @@ class Residue(AbstractWrapperObject):
     def __init__(self, project: 'Project', wrappedData):
 
         # link to _MolecularTemplate MolResidue for self as the linkage is lost;
-        # set in PostRestore and _newResidue; need to be defined before
-        # super call, as the _key property needs it to make an _id. need it
+        # set in PostRestore and _newResidue;
+        # needs to be defined before super call, as the _key property needs it to
+        # make an _id.
         self._apiMolResidue_ = None
 
         super().__init__(project, wrappedData)
@@ -516,39 +523,40 @@ class Residue(AbstractWrapperObject):
     @renameObject()
     @logCommand(get='self')
     def rename(self, sequenceCode: str = None):
-        """Reset Residue.sequenceCode (residueType is immutable).
-        Renaming to None sets the sequence code to the seqId (serial number equivalent)
+        """Set Residue.sequenceCode (residueType is immutable).
+        :param sequenceCode: the new sequenceCode
+                             SequenceCode == None resets to current value,
+                             but still triggers the RENAME notifiers
         """
         # rename functions from here
         apiResidue = self._wrappedData
 
+        _currentSequenceCode = self.sequenceCode
         if sequenceCode is None:
-            seqCode = apiResidue.seqId
-            seqInsertCode = ' '
+            self._resetIds(recursive=True)
+            return (_currentSequenceCode, _currentSequenceCode)
 
-        else:
-            # Parse values from sequenceCode
-            code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
-            if code is None or offset is not None:
-                raise ValueError("Illegal value for Residue.sequenceCode: %s" % sequenceCode)
-            seqCode = code
-            seqInsertCode = ss or ' '
+        # Parse values from sequenceCode
+        code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
+        if code is None or offset is not None:
+            raise ValueError(f"Illegal value for Residue.sequenceCode:{sequenceCode}")
+
+        seqCodeOffset = self._getInternalParameter(self._SEQUENCE_CODE_OFFSET, 0)
+        seqCode = code - seqCodeOffset
+        seqInsertCode = ss or ' '
 
         previous = apiResidue.chain.findFirstResidue(seqCode=seqCode, seqInsertCode=seqInsertCode)
         if (previous not in (None, apiResidue)):
             raise ValueError("New sequenceCode %s clashes with existing Residue %s"
                              % (sequenceCode, self._project._data2Obj.get(previous)))
 
-        if apiResidue.seqInsertCode and apiResidue.seqInsertCode != ' ':
-            oldSequenceCode = '.'.join((str(apiResidue.seqCode), apiResidue.seqInsertCode))
-        else:
-            oldSequenceCode = str(apiResidue.seqCode)
-        # self._oldPid = self.pid
-
+        # update the modelValues
         apiResidue.seqCode = seqCode
         apiResidue.seqInsertCode = seqInsertCode
 
-        return (oldSequenceCode,)
+        self._resetIds(recursive=True)
+
+        return (_currentSequenceCode, self.sequenceCode)
 
     def _finaliseAction(self, action: str, **actionKwds):
         """Subclassed to handle delete/create

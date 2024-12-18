@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-10 12:10:51 +0000 (Tue, December 10, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-18 14:19:04 +0000 (Wed, December 18, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -31,10 +31,13 @@ import string
 
 import typing
 from collections import OrderedDict
+
 from ccpn.util import Common as commonUtil
 from ccpn.core.Atom import Atom
 from ccpn.core.Chain import Chain
 from ccpn.core.Project import Project
+
+from ccpn.util.Logging import getLogger
 
 
 NamingSystems = [

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-17 22:37:21 +0000 (Tue, December 17, 2024) $"
+__dateModified__ = "$dateModified: 2024-12-18 14:19:04 +0000 (Wed, December 18, 2024) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -305,25 +305,12 @@ class Chain(AbstractWrapperObject):
         changedResidues = []
         with undoBlock():
             for residue in residues:
-                _intCode = residue._sequenceCodeAsInteger
+                _intCode = residue._intSequenceCode
                 if (    (start is None or _intCode >= start)
                     and (stop is None or _intCode <= stop)
                 ):
                     residue.renumber(offset=offset)
                     changedResidues.append(residue)
-
-        #     sequenceCode = residue.sequenceCode
-            #     code, ss, unused = commonUtil.parseSequenceCode(sequenceCode)
-            #     # assert unused is None
-            #     if code is not None:
-            #         if ((start is None or code >= start)
-            #                 and (stop is None or code <= stop)):
-            #             newSequenceCode = MoleculeLib._incrementedSequenceCode(residue.sequenceCode, offset)
-            #             residue.rename(newSequenceCode)
-            #             changedResidues.append(residue)
-            #
-            # for residue in changedResidues:
-            #     residue._finaliseAction('rename')
 
         getLogger().info(f"Renumbered {len(changedResidues)} out of {len(residues)} possible residues")
         if offset > 0:
@@ -367,7 +354,7 @@ class Chain(AbstractWrapperObject):
         """
         _intCodes = []
         for r in self.residues:
-            _code = r._sequenceCodeAsInteger
+            _code = r._intSequenceCod
             if isinstance(_code, int):
                 _intCodes.append(_code)
             else:

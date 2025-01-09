@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-09 18:49:04 +0000 (Thu, January 09, 2025) $"
+__dateModified__ = "$dateModified: 2025-01-09 19:18:16 +0000 (Thu, January 09, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -1624,19 +1624,29 @@ class GuiSpectrumDisplay(CcpnModule):
         """Navigate to the peak position in the strip
         """
         from ccpn.ui.gui.lib.SpectrumDisplayLib import navigateToPeakInStrip
-
         # use the library method
         navigateToPeakInStrip(self, strip, peak, widths=None)
 
     def _handleStrip(self, moveStrip, dropStrip):
         """Move a strip within a spectrumDisplay by dragging the strip label to another strip
         """
-        if moveStrip.spectrumDisplay == self:
-            strips = self.orderedStrips
-            stripInd = strips.index(dropStrip)
+        if not isinstance(moveStrip, GuiStrip):
+            showWarning('Dropping strip', f'Invalid source {moveStrip.pid!r} to drop')
+            return
 
-            if stripInd != strips.index(moveStrip):
-                moveStrip.moveTo(stripInd)
+        if not isinstance(dropStrip, GuiStrip):
+            showWarning('Dropping strip', f'Cannot drop {moveStrip.pid!r} onto {moveStrip.pid!r}')
+            return
+
+        if not moveStrip.spectrumDisplay == self:
+            showWarning('Dropping strip', f'Cannot drop {moveStrip.pid!r} onto {self.pid!r}')
+            return
+
+        strips = self.orderedStrips
+        stripInd = strips.index(dropStrip)
+
+        if stripInd != strips.index(moveStrip):
+            moveStrip.moveTo(stripInd)
 
     def _handlePeakList(self, peakList):
         """See if peaklist can be copied

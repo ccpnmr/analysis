@@ -4,7 +4,7 @@ GUI Display Strip class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-22 12:10:17 +0100 (Fri, November 22, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2025-01-09 18:49:04 +0000 (Thu, January 09, 2025) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,7 +33,7 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, ccpNmrV3CoreSetter
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, ccpNmrV3CoreSetter, apiNotificationBlanking
 from ccpn.core._implementation.updates.update_3_0_4 import _updateStrip_3_0_4_to_3_1_0
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
@@ -427,13 +427,9 @@ class Strip(AbstractWrapperObject):
     #=========================================================================================
 
     def _clone(self):
-        """create new strip that duplicates this one, appending it at the end
+        """create new strip that duplicates this self, appending it at the end
         """
-        # from ccpn.ui._implementation.Axis import Axis as _Axis
-        apiStrip = self._wrappedData.clone()
-        # result = AbstractWrapperObject._restoreObject(project=self.project, apiObj=apiStrip)
-        result = self._newInstanceFromApiData(apiObj=apiStrip, project=self.project)
-        return result
+        return _cloneStrip(self)
 
     @logCommand(get='self')
     def moveStrip(self, newIndex: int):
@@ -635,6 +631,9 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
 # SpectrumDisplay.copyStrip = _copyStrip
 # del _copyStrip
 
+#=========================================================================================
+# _new<Object> and _clone<Object>
+#=========================================================================================
 
 def _newStrip(spectrumDisplay) -> Strip:
     """Create a new strip for spectrumDisplay
@@ -646,6 +645,20 @@ def _newStrip(spectrumDisplay) -> Strip:
     if (strip := Strip._newInstanceFromApiData(apiObj=apiStrip)) is None:
         raise RuntimeError('_newStrip(): Unable to generate new Strip')
     return strip
+
+
+def _cloneStrip(strip: Strip) -> Strip:
+    """create new strip that duplicates this one, appending it at the end
+    """
+    # Silence the API callback, as it wrappedData.clone() also creates additional
+    # objects such as SpectrumView and PeakListView(s)
+    with apiNotificationBlanking():
+        apiStrip = strip._wrappedData.clone()
+
+    # Create a Strip from the apiStrip data as if we are restoring the object
+    # and its children
+    result = Strip._restoreObject(project=strip.project, apiObj=apiStrip)
+    return result
 
 
 #=========================================================================================

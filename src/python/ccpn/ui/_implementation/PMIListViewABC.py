@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 17:29:34 +0100 (Thu, October 24, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2025-01-09 18:49:04 +0000 (Thu, January 09, 2025) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -81,14 +81,14 @@ class PMIListViewABC(AbstractWrapperObject):
         """Set the primary classType for the child list attached to this container
         """
         # MUST BE SUBCLASSED
-        raise NotImplementedError("Code error: function not implemented")
+        raise NotImplementedError(f"Code error: {self.__class__.__name__}._setListClasses function not implemented")
 
     @property
     def _listObject(self):
         """:return: the Peak|Multiplet|Integral List object associated with this view
         """
         # MUST BE SUBCLASSED
-        raise NotImplementedError("Code error: function not implemented")
+        raise NotImplementedError(f"Code error: {self.__class__.__name__}._listObject function not implemented")
 
     # GWV 24/20/24: replaced by explicit __init__ of class
     # def _init(self):

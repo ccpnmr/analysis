@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-13 12:42:05 +0000 (Fri, December 13, 2024) $"
+__dateModified__ = "$dateModified: 2025-01-09 18:49:05 +0000 (Thu, January 09, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -548,7 +548,7 @@ class GuiStrip(Frame):
         """Resize event to handle resizing of frames that overlay the OpenGL frame
         """
         # MUST BE SUBCLASSED
-        raise NotImplementedError("Code error: function not implemented")
+        raise NotImplementedError(f"Code error: {self.__class__.__name__}._resize function not implemented")
 
     def _selectCallback(self, widgets):
         # print('>>>select', widget1, widget2)

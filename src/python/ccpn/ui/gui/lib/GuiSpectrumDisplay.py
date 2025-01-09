@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-05 20:47:13 +0000 (Thu, December 05, 2024) $"
+__dateModified__ = "$dateModified: 2025-01-09 18:49:04 +0000 (Thu, January 09, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -2448,15 +2448,23 @@ class GuiSpectrumDisplay(CcpnModule):
     def addStrip(self, strip=None) -> 'GuiStripNd':
         """Creates a new strip by cloning strip with index (default the last) in the display.
         """
-        strip = self.getByPid(strip) if isinstance(strip, str) else strip
-        indx = strip.stripIndex() if strip else -1
-        tilePosition = strip.tilePosition if strip else None
-        if tilePosition is None:
-            tilePosition = (0, 0)
-
         if self.phasingFrame.isVisible():
             showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
             return
+
+        if strip is None:
+            strip = self.orderedStrips[-1]
+        elif isinstance(strip, str):
+            strip = self.getByPid(strip)
+
+        if not isinstance(strip, GuiStrip):
+            showWarning(str(self.windowTitle()), 'Please provide a Strip instance or a Strip-Pid')
+            return
+
+        indx = strip.stripIndex()
+        tilePosition = strip.tilePosition if strip else None
+        if tilePosition is None:
+            tilePosition = (0, 0)
 
         with undoStackBlocking():  # Do not add to undo/redo stack
             with undoStackBlocking() as addUndoItem:
@@ -2466,11 +2474,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
                     with notificationBlanking():
                         # get the visibility of strip to be copied
-                        copyVisible = self.strips[indx].header.headerVisible
+                        copyVisible = strip.header.headerVisible
 
                         # inserts the strip into the stripFrame here
                         self._stripAddMode = (self.strips[0]._CcpnGLWidget.pixelX, self.strips[0]._CcpnGLWidget.pixelY)
-                        result = self.strips[indx]._clone()
+                        result = strip._clone()
 
                         if not isinstance(result, GuiStrip):
                             raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))

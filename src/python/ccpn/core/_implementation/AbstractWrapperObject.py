@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-18 12:14:36 +0000 (Wed, December 18, 2024) $"
+__dateModified__ = "$dateModified: 2025-01-09 18:49:03 +0000 (Thu, January 09, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -1007,9 +1007,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         """
         if cls not in parent._childClasses:
-            raise RuntimeError('Code error: cls not in child classes')
+            raise RuntimeError(f'Code error: {cls.__name__} not in child classes of {parent.__class__.__name__}')
 
-        raise NotImplementedError('Code error: function not implemented')
+        raise NotImplementedError(f'Code error: {cls.__name__}._getAllWrappedData function not implemented')
 
     def _rename(self, value: str) -> tuple:
         """Generic rename method that individual classes can use for implementation

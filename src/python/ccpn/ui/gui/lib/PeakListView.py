@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:34:14 +0100 (Fri, October 25, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2025-01-10 16:38:47 +0000 (Fri, January 10, 2025) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,7 +33,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
 from ccpn.ui._implementation.PeakListView import PeakListView as _PeakListViewCoreClass
 from ccpn.ui._implementation.PeakListView import _newApiPeakListView
-from ccpn.ui._implementation.PeakView import PeakView as KlassView
+from ccpn.ui._implementation.PeakView import PeakView as _PeakViewCoreClass
 from ccpn.ui.gui.guiSettings import _styleBlue
 
 from ccpn.util.Logging import getLogger
@@ -61,8 +61,8 @@ class _PeakListViewGuiClass(GuiListViewABC):
         for apiObj in lView.peakList.peaks:
             if apiObj not in vObjs:
                 apiView = factoryFunc(peak=apiObj, peakSerial=0)
-                if KlassView._newInstanceFromApiData(apiObj=apiView, project=project) is None:
-                    raise RuntimeError(f'Unable to generate new {KlassView.__name__}')
+                if _PeakViewCoreClass._newInstanceFromApiData(apiObj=apiView, project=project) is None:
+                    raise RuntimeError(f'Unable to generate new {_PeakViewCoreClass.__name__}')
 
 
 class PeakListView(_PeakListViewCoreClass, _PeakListViewGuiClass):

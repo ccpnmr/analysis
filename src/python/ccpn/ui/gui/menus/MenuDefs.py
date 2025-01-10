@@ -15,7 +15,7 @@ Note for Actions:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-16 18:55:08 +0000 (Mon, December 16, 2024) $"
+__dateModified__ = "$dateModified: 2025-01-10 16:38:47 +0000 (Fri, January 10, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -248,7 +248,7 @@ class MenusDefs(Menu, FrameworkProperties):
         Action("Copy Peaks...", self._copyPeaksCallback, shortcut='cp', checkEnabled=_projectHasPeaks),
         Action("Peak Collections...", self._peakCollectionsCallback, shortcut='sc', checkEnabled=_projectHasPeaks),
         Action("Estimate Peak Volumes...", self._estimateVolumesCallback, shortcut='ev', checkEnabled=_projectHasPeaks),
-        Action("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, shortcut='ec', checkEnabled=_projectHasPeaks),
+        Action("Estimate Currently Selected Peak Volumes", self._estimateCurrentVolumesCallback, shortcut='ec', checkEnabled=_projectHasCurrentPeaks),
         Action("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, shortcut='rl', checkEnabled=_projectHasSpectra),
 
         Separator(),
@@ -585,7 +585,7 @@ class MenusDefs(Menu, FrameworkProperties):
         """
         Displays Estimate Volumes Popup.
         """
-        self.mainWindow._showEstimateVolumesPopup()
+        self.ui.estimateVolumes()
 
     def _estimateCurrentVolumesCallback(self):
         """Calculate volumes for the currently selected peaks
@@ -1304,6 +1304,13 @@ def _projectHasPeaks(node) -> bool:
     """
     project = getProject()
     return bool(project and project.peaks)
+
+
+def _projectHasCurrentPeaks(node) -> bool:
+    """callback to test if project has peaks selected
+    """
+    app = getApplication()
+    return bool(app.current.peaks)
 
 
 def _projectHasSpectra(node) -> bool:

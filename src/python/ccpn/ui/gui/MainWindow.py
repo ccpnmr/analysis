@@ -4,7 +4,7 @@ This file contains the MainWindow class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-07 15:24:51 +0000 (Sat, December 07, 2024) $"
+__dateModified__ = "$dateModified: 2025-01-10 16:38:47 +0000 (Fri, January 10, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -2079,7 +2079,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             getLogger().warning('Estimate Volumes: Project has no peakLists.')
             MessageDialog.showWarning('Estimate Volumes', 'Project has no peakLists.')
         else:
-            from ccpn.ui.gui.popups.EstimateVolumes import EstimatePeakListVolumes
+            from ccpn.ui.gui.popups.EstimateVolumes import EstimatePeakListVolumesPopup
 
             if self.current.strip and not self.current.strip.isDeleted:
                 spectra = [specView.spectrum for specView in self.current.strip.spectrumDisplay.spectrumViews]
@@ -2087,21 +2087,21 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                 spectra = self.project.spectra
 
             if spectra:
-                popup = EstimatePeakListVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
-                                                spectra=spectra)
+                popup = EstimatePeakListVolumesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                                     spectra=spectra)
                 popup.exec_()
             else:
-                getLogger().warning('Estimate Volumes: no specta selected.')
+                getLogger().warning('Estimate Volumes: no spectra selected.')
                 MessageDialog.showWarning('Estimate Volumes', 'no specta selected.')
 
     def _showEstimateCurrentVolumesPopup(self):
         """
         Calculate volumes for the currently selected peaks
         """
-        from ccpn.ui.gui.popups.EstimateVolumes import EstimateCurrentVolumes
+        from ccpn.ui.gui.popups.EstimateVolumes import EstimateCurrentVolumesPopup
 
         if self.current.peaks:
-            popup = EstimateCurrentVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup = EstimateCurrentVolumesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
         else:
             getLogger().warning('Estimate Current Volumes: no current.peaks')

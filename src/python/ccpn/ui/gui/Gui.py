@@ -4,7 +4,7 @@ The top-level Gui class for all user interactions
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-07 15:24:51 +0000 (Sat, December 07, 2024) $"
+__dateModified__ = "$dateModified: 2025-01-10 16:38:46 +0000 (Fri, January 10, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -1986,7 +1986,7 @@ class Gui(Ui, _Gui_V3_V4):
 
     @logCommand('ui.')
     def copyPeakList(self):
-        """Copy a peakList between spectra
+        """Open a popup to copy a peakList between spectra
         """
         from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
 
@@ -2001,7 +2001,7 @@ class Gui(Ui, _Gui_V3_V4):
 
     @logCommand('ui.')
     def copyPeaks(self, useCurrent: bool = False):
-        """Select peaks to copy between spectra.
+        """Open a popup to select peaks to copy between spectra.
         :param useCurrent: If True, use currently selected peaks.
         """
         from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
@@ -2016,6 +2016,24 @@ class Gui(Ui, _Gui_V3_V4):
             peaks = self.current.peaks
             popup._selectPeaks(peaks)
         popup.exec_()
+
+    @logCommand('ui.')
+    def estimateVolumes(self):
+        """Open a popup to estimate the volume of peaks in selected peakLists
+        """
+        from ccpn.ui.gui.popups.EstimateVolumes import EstimatePeakListVolumesPopup
+
+        if not self.project.peakLists:
+            getLogger().warning('Estimate Volumes: Project has no peakLists.')
+            MessageDialog.showWarning('Estimate Volumes', 'Project has no peakLists.')
+            return
+
+        spectra = self.project.spectra
+        if spectra:
+            popup = EstimatePeakListVolumesPopup(parent=self.mainWindow,
+                                                 mainWindow=self.mainWindow,
+                                                 spectra=spectra)
+            popup.exec_()
 
     #-----------------------------------------------------------------------------------------
     # Molecules

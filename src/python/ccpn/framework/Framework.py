@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-17 22:37:38 +0000 (Tue, December 17, 2024) $"
+__dateModified__ = "$dateModified: 2025-01-10 16:38:45 +0000 (Fri, January 10, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -601,7 +601,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         Previous project should have been closed by _closeProject()
         """
         if self._project is not None:
-            raise RuntimeError(f'Cannot initialise {newProject} withoout closing {self._project} first')
+            raise RuntimeError(f'Cannot initialise {newProject} without closing {self._project} first')
 
         # Linkages; need to be here as downstream code depends on it
         self._project = newProject
@@ -1807,7 +1807,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     # GWV 6/2/24: to gui.py
     @deprecated('ui.editSpectrumGroup')
     def showSpectrumGroupsPopup(self):
-        """Deprecated method: Use Gui.editSpectrumGroup instead"""
+        """Deprecated method: Use Gui.editSpectrumGroup instead
+        """
         editMode = len(self.project.spectrumGroups) > 0
         return self.ui.editSpectrumGroup(editMode=editMode)
 
@@ -1840,8 +1841,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #
     @deprecated('ui.newSpectrumGroupFromPseudoSpectrum')
     def showPseudoSpectrumPopup(self):
-        """Deprecated method:
-        Use ui.newSpectrumGroupFromPseudoSpectrum instead
+        """Deprecated method: Use ui.newSpectrumGroupFromPseudoSpectrum instead
         """
         self.ui.newSpectrumGroupFromPseudoSpectrum()
 
@@ -1858,7 +1858,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     @deprecated('ui.makeProjection')
     def showProjectionPopup(self):
-        """This method is deprecated; use Gui.makeProjection instead"""
+        """This method is deprecated; use Gui.makeProjection instead
+        """
         self.ui.makeProjection()
 
     #     if not self.project.spectra:
@@ -1872,7 +1873,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     @deprecated('ui.setExperimentTypes')
     def showExperimentTypePopup(self):
-        """This method is deprecated; use Gui.setExperimentTypes instead"""
+        """This method is deprecated; use Gui.setExperimentTypes instead
+        """
         self.ui.setExperimentTypes()
 
     # GWV 6/2/24: moved to Gui
@@ -1891,7 +1893,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     @deprecated('ui.validateSpectra')
     def showValidateSpectraPopup(self, spectra=None, defaultSelected=None):
-        """This method is deprecated; use Gui.validateSpectra instead"""
+        """This method is deprecated; use Gui.validateSpectra instead
+        """
         self.ui.validatePaths(spectra=spectra)
 
     #     """
@@ -1909,7 +1912,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     deprecated('ui.pick1DPeaks')
     def showPeakPick1DPopup(self):
-        """This method is deprecated; use Gui.pick1DPeaks instead"""
+        """This method is deprecated; use Gui.pick1DPeaks instead
+        """
         self.ui.pick1DPeaks()
 
     #     """
@@ -1932,7 +1936,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     @deprecated('ui.pickNDPeaks')
     def showPeakPickNDPopup(self):
-        """This method is deprecated; use Gui.pickNDPeaks instead"""
+        """This method is deprecated; use Gui.pickNDPeaks instead
+        """
         self.ui.pickNDPeaks()
 
     #     """
@@ -1955,7 +1960,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     @deprecated('ui.copyPeakList')
     def showCopyPeakListPopup(self):
-        """This method is deprecated; use Gui.copyPeakList instead"""
+        """This method is deprecated; use Gui.copyPeakList instead
+        """
         self.ui.copyPeakList()
 
     #     if not self.project.peakLists:
@@ -1983,11 +1989,14 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         popup.exec()
     #         popup.raise_()
     #
-    # GWV 6/2/24: to MainWindow
-    # def showEstimateVolumesPopup(self):
-    #     """
-    #     Displays Estimate Volumes Popup.
-    #     """
+
+    # GWV 6/2/24 and 10/1/2025: to ui
+    @deprecated('ui.copyPeakList')
+    def showEstimateVolumesPopup(self):
+        """This method is deprecated; use Gui.estimateVolumes instead
+        """
+        self.ui.estimateVolumes()
+
     #     if not self.project.peakLists:
     #         getLogger().warning('Estimate Volumes: Project has no peakLists.')
     #         MessageDialog.showWarning('Estimate Volumes', 'Project has no peakLists.')
@@ -2022,7 +2031,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         getLogger().warning('Estimate Current Volumes: no current.peaks')
     #         MessageDialog.showWarning('Estimate Current Volumes', 'no current.peaks')
     #
-    # GWV 27/324: copied to _Gui_V3_V4
+    # GWV 27/3/24: copied to _Gui_V3_V4
     # @logCommand('application.')
     # def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
     #     """Make a strip plot from peaks or nmrChains
@@ -2269,7 +2278,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         restraintTableModule.selectRestraintTable(restraintTable)
     #     return restraintTableModule
 
-    # GWV 11/9/20245: moved to Gui
+    # GWV 11/9/2024: moved to Gui
     # @logCommand('application.')
     # def showStructureTable(self, position='bottom', relativeTo=None,
     #                        structureEnsemble=None, selectFirstItem=False):
@@ -2614,17 +2623,14 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     __repr__ = __str__
 
+#end class
 # register CcpNmrProperties
 Framework._registerCcpNmrProperties()
 
-#-----------------------------------------------------------------------------------------
-#end class
-#-----------------------------------------------------------------------------------------
 
-
-#-----------------------------------------------------------------------------------------
+#=========================================================================================
 # code for testing purposes
-#-----------------------------------------------------------------------------------------
+#=========================================================================================
 
 def createFramework(projectPath=None, **kwds):
     # stop circular import when run from main entry point

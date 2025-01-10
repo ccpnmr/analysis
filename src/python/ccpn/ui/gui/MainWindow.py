@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-10 16:38:47 +0000 (Fri, January 10, 2025) $"
+__dateModified__ = "$dateModified: 2025-01-10 18:28:33 +0000 (Fri, January 10, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -93,8 +93,6 @@ _MULTIPLETS = 4
 _INTEGRAL_PEAKS = 8
 _MULTIPLET_PEAKS = 16
 
-PROJECTSAVEAS = 'projectSaveAs'
-PROJECTSAVE = 'projectSave'
 _transparent = QtGui.QColor('orange')
 
 
@@ -386,6 +384,11 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._readOnlyWidget.setEnabled(True)
         self._readOnlyWidget.updateGeometry()
 
+    def _projectSaveSignalCallback(self, data):
+        """Notifier responds to triggering the Project._projectSaveSignal
+        """
+        QtCore.QTimer.singleShot(0, self._projectSaveCallback)
+
     def _projectSaveCallback(self):
         """Update the gui state from a save/saveAs notification.
         """
@@ -401,13 +404,14 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """
         QtCore.QTimer.singleShot(0, self._setReadOnlyIcon)
 
-    def _projectNotifierCallback(self, data):
-        """Notifier responds to change in the read-only state of the current project,
-        and updates the read-only icon.
-        """
-        if (specifiers := data.get(Notifier.SPECIFIERS)):
-            if specifiers.get(PROJECTSAVEAS) is not None or specifiers.get(PROJECTSAVE) is not None:
-                QtCore.QTimer.singleShot(0, self._projectSaveCallback)
+    # GWV 10/1/2025: replaced with Project._projectSaveSignal
+    # def _projectNotifierCallback(self, data):
+    #     """Notifier responds to change in the read-only state of the current project,
+    #     and updates the read-only icon.
+    #     """
+    #     if (specifiers := data.get(Notifier.SPECIFIERS)):
+    #         if specifiers.get(PROJECTSAVEAS) is not None or specifiers.get(PROJECTSAVE) is not None:
+    #             QtCore.QTimer.singleShot(0, self._projectSaveCallback)
 
     def _initKeyTimer(self):
         """
@@ -514,7 +518,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.setNotifier(self.application.project, [Notifier.CHANGE], 'SpectrumDisplay', self._spectrumDisplayChanged)
         # GWV: changed to OBSERVE notifier on Strip.pinned
         # self.setNotifier(self.application.project, [Notifier.CHANGE], 'Strip', self._stripPinnedChanged)
-        self.setNotifier(self.application.project, [Notifier.CHANGE], 'Project', self._projectNotifierCallback)
+
+        self.setNotifier(self.application.project, [Notifier.OBSERVE], '_projectSaveSignal', self._projectSaveSignalCallback)
 
     # def _activatedkeySequence(self, ev):
     #     key = ev.key()

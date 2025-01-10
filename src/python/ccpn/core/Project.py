@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-10 17:40:27 +0000 (Fri, January 10, 2025) $"
+__dateModified__ = "$dateModified: 2025-01-10 18:28:33 +0000 (Fri, January 10, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ from ccpn.core.lib.CcpNmrProperties import CcpNmrProperty, CcpNmrCoreObjectPrope
 
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
-from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.core.lib.Notifiers import NotifierBase, NotifierSignal
 from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
 from ccpn.core.lib.ProjectLib import createLogger
 from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
@@ -100,6 +100,7 @@ class Project(AbstractWrapperObject):
     navigating between them. All objects are organised in an hiarchical tree-like manner,
     as children, grandchildren, etc.
     """
+    #-----------------------------------------------------------------------------------------
 
     #: Short class name, for PID.
     shortClassName = 'PR'
@@ -148,9 +149,14 @@ class Project(AbstractWrapperObject):
 
     _LOWEST_COMPATIBLE_VERSION = '3.1.0'
 
+    #-----------------------------------------------------------------------------------------
+
     # set to positive to override the read-only status of a project
     #   required to use save/saveAs but keep the project.readOnly status until the next load
     _saveOverrideState = 0
+
+    # Signal triggered on save/saveAs
+    _projectSaveSignal = NotifierSignal()
 
     #-----------------------------------------------------------------------------------------
     # Property Attributes of the data structure
@@ -1673,8 +1679,8 @@ class Project(AbstractWrapperObject):
             self._isTemporary = False
             self._isNew = False
 
-        # fire a notifier to respond to the save-action
-        self._finaliseAction('change', projectSave=True)
+        # fire the notifierSignal to signal to the save-action
+        self._projectSaveSignal = True
 
     def _autoBackup(self):
         """Auto-backup project
@@ -2036,7 +2042,7 @@ class Project(AbstractWrapperObject):
         return self._activateApiNotifier(*tt)
 
     def _unregisterApiNotifier(self, notifierTuple):
-        """Remove acxtive notifier from project. ADVANVED but free to use.
+        """Remove active notifier from project. ADVANCED but free to use.
         Use return value of _registerApiNotifier to identify the relevant notiifier"""
         self._activeNotifiers.remove(notifierTuple)
         Notifiers.unregisterNotify(*notifierTuple)

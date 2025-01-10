@@ -9,7 +9,7 @@ GWV April-2017: Derived from an earlier version of DropBase
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -20,9 +20,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-11 18:57:17 +0100 (Wed, September 11, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2025-01-10 16:36:44 +0000 (Fri, January 10, 2025) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -38,8 +38,6 @@ import json
 from PyQt5 import QtGui, QtCore, QtWidgets
 
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.Notifiers import NotifierBase, _getRegisteredNotifiers
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 # GST maybe this too high level but because of the way drag events are handled cooperatively
 # at the moment it needs to be here...
@@ -87,6 +85,10 @@ class DropBase:
     #     self._dropEventCallback = callback
 
     def dragEnterEvent(self, event):
+
+        # local imports to avoid cycles
+        from ccpn.core.lib.Notifiers import _getRegisteredNotifiers
+        from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
         # self.checkForBadDragEvent(event)
 
@@ -211,7 +213,9 @@ class DropBase:
         Catch dropEvent and dispatch to processing callback
         'Native' treatment of CcpnModule instances
         """
-        from ccpn.core.lib.Notifiers import NotifierBase
+        # local imports to avoid cycles
+        from ccpn.core.lib.Notifiers import _getRegisteredNotifiers
+        from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
         if self.inDragToMaximisedModule:
             return

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-11 17:55:36 +0100 (Wed, September 11, 2024) $"
-__version__ = "$Revision: 3.2.6 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2025-01-10 11:23:16 +0000 (Fri, January 10, 2025) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -84,10 +84,11 @@ class SpectrumGroupToolBar(ToolBar):
                                                     );
                             }
                             """
-        self._currentSpectrumNotifier = CurrentNotifier(
-                                  targetName=SpectrumGroup._pluralLinkName,
-                                  callback=self._onCurrentNotifier,
-                                  ),
+        # GWV 10/1/2025: Notifier now set by GuiSpectrumDisplay, but still calls _onCurrentNotifier()!
+        # self._currentSpectrumNotifier = CurrentNotifier(
+        #                           targetName=SpectrumGroup._pluralLinkName,
+        #                           callback=self._onCurrentNotifier,
+        #                           ),
 
         # self._spectrumGroups = []
 
@@ -175,7 +176,10 @@ class SpectrumGroupToolBar(ToolBar):
         # widget.setFixedSize(75, 30)
         _addActionIcon(action, spectrumGroup, self.spectrumDisplay)
 
+    # GWV 10/1/2025: moved Notifier to GuiSpectrumDisplay
     def _onCurrentNotifier(self, data):
+        """CCPNINTERNAL: called from notifier set by GuiSPectrumDisplay
+        """
         current = getCurrent()
         for action in self.actions():
             if widget := self.widgetForAction(action):

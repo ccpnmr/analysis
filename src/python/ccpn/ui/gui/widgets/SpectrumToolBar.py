@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:18 +0100 (Fri, October 25, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2025-01-10 11:23:16 +0000 (Fri, January 10, 2025) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -69,10 +69,11 @@ class SpectrumToolBar(ToolBar):
         # self.project = getProject()
         # self.current = getCurrent()
         self._firstButton = 0
-        self._currentSpectrumNotifier = CurrentNotifier(
-                                                 targetName=Spectrum._pluralLinkName,
-                                                 callback=self._onCurrentSpectrumNotifier,
-                                                 ),
+        # GWV 10/1/2025: Notifier now set by GuiSpectrumDisplay, but still calls _onCurrentSpectrumNotifier()!
+        # self._currentSpectrumNotifier = CurrentNotifier(
+        #                                          targetName=Spectrum._pluralLinkName,
+        #                                          callback=self._onCurrentSpectrumNotifier,
+        #                                          ),
         self._styleSheet = """
                             /*  currentField is a property on the widgetAction
                                 that can be set to True to enable a highlighted border;
@@ -284,7 +285,7 @@ class SpectrumToolBar(ToolBar):
             _SCMitem(name='Properties...',
                      typeItem=ItemTypes.get(ITEM), icon='icons/null',
                      callback=partial(self._showSpectrumProperties, button)),
-            _SCMitem(name='Remove Spectrum',
+            _SCMitem(name='Remove Spectrum from SpectrumDisplay',
                      typeItem=ItemTypes.get(ITEM), icon='icons/null',
                      callback=partial(self._removeSpectrum, button)),
             ]
@@ -694,5 +695,8 @@ class SpectrumToolBar(ToolBar):
                 widget.style().unpolish(widget)
                 widget.style().polish(widget)
 
+    # GWV 10/1/2025: moved Notifier to GuiSpectrumDisplay
     def _onCurrentSpectrumNotifier(self, data):
+        """CCPNINTERNAL: called from Notifier set by GuiSpectrumDisplay
+        """
         self._setButtonColourScheme()

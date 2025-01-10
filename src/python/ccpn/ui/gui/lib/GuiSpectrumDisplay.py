@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-09 19:18:16 +0000 (Thu, January 09, 2025) $"
+__dateModified__ = "$dateModified: 2025-01-10 11:23:16 +0000 (Fri, January 10, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -793,6 +793,10 @@ class GuiSpectrumDisplay(CcpnModule):
                                         callback=self._spectrumDisplayChanged,
                                         onceOnly=True)
 
+        self.setCurrentNotifier(targetName=Spectrum._pluralLinkName,
+                                callback=self._currentSpectraChangedCallback
+                                )
+
     @property
     def _flipped(self):
         """Return 0|1 depending on whether the 1d spectrum-display is flipped with intensity on the x-axis.
@@ -1215,6 +1219,12 @@ class GuiSpectrumDisplay(CcpnModule):
 
         GLSignals = GLNotifier(parent=None)
         GLSignals.emitPaintEvent()
+
+    def _currentSpectraChangedCallback(self, callbackDict: dict):
+        """Callback when Current.spectra changed; update the SpectrumToolbars
+        """
+        self.spectrumToolBar._onCurrentSpectrumNotifier(callbackDict)
+        self.spectrumGroupToolBar._onCurrentNotifier(callbackDict)
 
     def getVisibleSpectra(self) -> list[Spectrum]:
         """:return a list of spectra currently visible in the spectrumDisplay

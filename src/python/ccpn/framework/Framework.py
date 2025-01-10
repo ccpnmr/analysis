@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-10 16:38:45 +0000 (Fri, January 10, 2025) $"
+__dateModified__ = "$dateModified: 2025-01-10 17:40:27 +0000 (Fri, January 10, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -302,12 +302,19 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         """
         if not isinstance(value, bool):
             raise TypeError(f'{self.__class__.__name__}.setApplicationReadOnly must be a bool')
+
         self._applicationReadOnlyMode = value
-        if self.project:
-            self.project._updateReadOnlyState()
-            self.project._updateLoggerState()
-            if self.mainWindow:
-                self.mainWindow._setReadOnlyIcon()
+        # trigger the project status updates by getting its current status and setting it again
+        _projectReadonly = self.project._readOnly
+        self.project.setReadOnly(_projectReadonly)
+
+        #
+        # if value:
+        #     self.project.setReadOnly(value)
+            # self.project._updateReadOnlyState()
+            # self.project._updateLoggerState()
+            # if self.mainWindow:
+            #     self.mainWindow._setReadOnlyIcon()
 
     @property
     def resources(self) -> Resources:

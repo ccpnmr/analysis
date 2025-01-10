@@ -7,7 +7,7 @@ from __future__ import annotations
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-18 14:19:04 +0000 (Wed, December 18, 2024) $"
+__dateModified__ = "$dateModified: 2025-01-10 17:40:27 +0000 (Fri, January 10, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import functools
+import sys
 # import os
 import typing
 import operator
@@ -1557,7 +1558,7 @@ class Project(AbstractWrapperObject):
         finally:
             logger._loggingCommandBlock -= 1
             if logger._loggingCommandBlock < 0:
-                print(f'--> logger blocking already at 0')
+                sys.stderr.write(f'--> logger blocking already at 0\n')
 
     @logCommand('project.')
     def saveAs(self, newPath: str, overwrite: bool = False, copySubDirectories: bool = True):
@@ -1806,7 +1807,6 @@ class Project(AbstractWrapperObject):
         if not isinstance(readOnly, bool):
             raise TypeError(f'{self.__class__.__name__}.setReadOnly must be a bool')
 
-        # self._setInternalParameter(self._READONLYPARAMETER, readOnly)
         self._readOnly = readOnly
 
     def _updateReadOnlyState(self):

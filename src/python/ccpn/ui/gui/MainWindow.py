@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-10 18:28:33 +0000 (Fri, January 10, 2025) $"
+__dateModified__ = "$dateModified: 2025-01-12 16:40:10 +0000 (Sun, January 12, 2025) $"
 __version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
@@ -257,6 +257,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # self._checkPalette(self.palette())
         # self.application.ui._changeThemeInstant()
         # catch the initial palette-changed signal
+        #TODO-ED: I think this is the _qtApp of ui!?; why is it set here?
         QtWidgets.QApplication.instance().sigPaletteChanged.connect(self._checkPalette)
         super().show()
         # install handler to resize when moving between displays
@@ -452,8 +453,9 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     #     """
     #     return self.application.current
 
-    def makeDisabledFileIcon(self, icon):
-        return icon
+    # GWV 12/10/2025: not used and seems pretty useless to begin with!
+    # def makeDisabledFileIcon(self, icon):
+    #     return icon
 
     # GWV: disable as it seems dangerous and messy
     # def _undoChangeCallback(self, message):
@@ -1252,14 +1254,18 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         try:
             if key in [QtCore.Qt.Key_Tab, QtCore.Qt.Key_Backtab]:
                 self._lastKeyList.append('Tab')
+
             elif chr(key).isascii():
                 if chr(key) == ' ':
                     self._lastKeyList.append('Space')
                 else:
                     self._lastKeyList.append(chr(key))
+
             if len(self._lastKeyList) > 2:
                 self._lastKeyList.pop(0)
-        except Exception:
+
+        except Exception as es:
+            getLogger().debug(f'MainWindow._addKeyToStatusBar: {es}')
             self._lastKeyList = []
 
         self._lastKeyStatus.setText(''.join(self._lastKeyList))
@@ -1496,6 +1502,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     def _closeWindowFromUpdate(self, event=None, disableCancel=True):
         # set the active window to mainWindow so that the quit popup centres correctly.
         self._closeWindow(event=event, disableCancel=disableCancel)
+        # TODO-ED: use proper method from ui
         os._exit(0)
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
@@ -1562,6 +1569,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                 self.deleteAllNotifiers()
                 self.application._closeProject()  # close if saved
                 QtWidgets.QApplication.quit()
+                # TODO-ED: use proper method from ui
                 os._exit(0)  # HARSH! actually crash issue only seems to affect newTestApplication :|
 
             else:
@@ -1577,6 +1585,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             self.deleteAllNotifiers()
             self.application._closeProject()
             QtWidgets.QApplication.quit()
+            # TODO-ED: use proper method from ui
             os._exit(0)  # HARSH! actually crash issue only seems to affect newTestApplication :|
 
         else:
@@ -1595,7 +1604,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
         editor.textBox.setText(text)
 
-    def _highlightCurrentStrip(self, data: Notifier):
+    def _highlightCurrentStrip(self, data: dict):
         """Callback on current to highlight the strip
         """
         previousStrip = data[Notifier.PREVIOUSVALUE]
@@ -1617,7 +1626,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             currentStrip._attachZPlaneWidgets()
             currentStrip.spectrumDisplay._highlightAxes(currentStrip, True)
 
-    def _spectrumDisplayChanged(self, data):
+    def _spectrumDisplayChanged(self, data: dict):
         """Callback on spectrumDisplay change
         """
         trigger = data[Notifier.TRIGGER]
@@ -1656,6 +1665,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         :param position: The cursor position in "natural" (e.g. ppm) units
         :return: None
         """
+        #TODO-ED: may as well return False; but to what purpose?
         assert 0 == 1
 
     def _scanDataLoaders(self, dataLoaders, func: callable = lambda _: True, result=None, depth=0) -> list:
@@ -1704,6 +1714,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
         _obj = data.get('theObject')
         _droppedOnSideBar = (_obj is not None and isinstance(_obj, SideBar))
+
         # dataLoaders: A list of (url, dataLoader, createsNewProject, ignore) tuples.
         # createsNewProject: to evaluate later call _loadProject; e.g. for NEF
         # ignore: user opted to skip this one; e.g. a spectrum already present
@@ -2433,6 +2444,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                 # colour = colourMarks[atomName[:min(2,len(atomName))]]
                 colour = colourMarks.get(atomName[:min(2, len(atomName))])
                 if not colour:
+                    #TODO-ED: DEFAULT is not known; FIX this
                     colour = colourMarks.get(guiSettings.DEFAULT)
 
                 # exit if mark exists
@@ -2891,19 +2903,15 @@ class MainWindow(_CoreClassMainWindow, GuiMainWindow):
         # this __init__ is called from Project._restoreChildren, as currently the
         # Window (and its children) is a child of the Project modeled data.
         # Hence, the convoluted way of initialising the Gui objects (MainWindow,
-        # SpectrumDisplay's, Strips, etc).
-
-        logger = getLogger()
+        # SpectrumDisplay's, Strips, etc.).
 
         _CoreClassMainWindow.__init__(self, project, wrappedData)
+        GuiMainWindow.__init__(self, application=project.application)
 
-        application = project.application
-        GuiMainWindow.__init__(self, application=application)
-
-        # patches for now; insert MainWindow back into project;
+        # patches for now; insert MainWindow instance back into project;
         # it is being picked-up by Framework for calls to the subsequent
         # initialisations.
         project._mainWindow = self
 
-        logger.debug(_styleBlue(f'MainWindow.__init__>> Initialised {self}')
-                     )
+        getLogger().debug(_styleBlue(f'MainWindow.__init__>> Initialised {self}')
+                         )

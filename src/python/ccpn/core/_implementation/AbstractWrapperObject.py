@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-08 12:15:02 +0000 (Fri, November 08, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-01-16 18:15:44 +0000 (Thu, January 16, 2025) $"
+__version__ = "$Revision: 3.2.13 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import functools
 import string
+import sys
 import typing
 import re
 from contextlib import contextmanager
@@ -1297,7 +1298,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                     if not hasattr(ancestor, funcName):
                         if _DEBUG:
                             # getLogger is not initialised yet
-                            print(f'--> missing getter stub {ancestor}:{funcName}')
+                            sys.stderr.write(f'--> missing getter stub {ancestor}:{funcName}\n')
                         if funcName in _DISCARD_METHODS:
                             continue
                     setattr(ancestor, funcName, func)
@@ -1353,7 +1354,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
                     if not hasattr(ancestor, linkName):
                         if _DEBUG:
-                            print(f'--> missing property stub {ancestor}:{linkName}')
+                            sys.stderr.write(f'--> missing property stub {ancestor}:{linkName}\n')
                         if linkName in _DISCARD_METHODS:
                             continue
                     setattr(ancestor, linkName, prop)

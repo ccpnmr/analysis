@@ -16,7 +16,7 @@ SidebarClassTreeItems: A Tree with a number of dynamically added items of type V
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -28,7 +28,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-26 13:30:14 +0000 (Tue, November 26, 2024) $"
+__dateModified__ = "$dateModified: 2025-01-06 17:24:27 +0000 (Mon, January 06, 2025) $"
 __version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
@@ -77,7 +77,7 @@ from ccpn.core.lib.Pid import Pid
 # from ccpn.ui.gui.guiSettings import sidebarFont
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, showNotImplementedMessage
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.Label import Label
@@ -831,9 +831,8 @@ class SidebarClassCollectionItems(SidebarClassItems):
 # Callback routines
 #===========================================================================================================
 
-def NYI(*args, **kwds):
-    info = showInfo('Not implemented yet!',
-                    'This function has not been implemented in the current version')
+def NIY(*args, **kwds):
+    showNotImplementedMessage()
 
 
 #===========================================================================================================
@@ -948,7 +947,7 @@ class SideBarStructure(object):
                                       callback=_raiseChainPopup(),
                                       menuAction=_openItemChainTable(position='bottom', relativeTo=None), isDraggable=True, children=[
                         SidebarClassTreeItems(klass=Residue, rebuildOnRename='Chain-ClassTreeItems',
-                                              callback=NYI, menuAction=_openItemResidueTable(position='bottom', relativeTo=None), isDraggable=True,
+                                              callback=NIY, menuAction=_openItemResidueTable(position='bottom', relativeTo=None), isDraggable=True,
                                               children=[
                                                   # SidebarItem('<New Atom>', callback=_raiseAtomNewPopup(editMode=False)),
 
@@ -1257,6 +1256,17 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         self._searchSelection = []
         self._searchNotifiers = []
         self._setStyle()
+
+    def closeEvent(self, event):
+        """Clean-up and close.
+        """
+        from ccpn.ui.gui.guiSettings import consoleStyle
+        from ccpn.util.Logging import getLogger
+
+        getLogger().debug(f'{consoleStyle.fg.yellow}==> closeEvent  {self}{consoleStyle.reset}')
+        self.clearSideBar()
+        self.deleteAllNotifiers()
+        super().closeEvent(event)
 
     def _setStyle(self):
         """Set the focus/noFocus colours for the widget

@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-28 08:23:53 +0000 (Mon, October 28, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-12-11 19:13:08 +0000 (Wed, December 11, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -370,19 +370,17 @@ def _ccpnModulesImporter(path, neededModules):
 
 
 def _openCcpnModule(mainWindow, ccpnModules, className, moduleName=None):
-    for ccpnModule in ccpnModules:
-        if ccpnModule is not None:
-            if ccpnModule.className == className:
-                try:
-                    newCcpnModule = ccpnModule(mainWindow=mainWindow, name=moduleName)
-                    newCcpnModule._restored = True
-                    # newCcpnModule.rename(newCcpnModule.name().split('.')[0])
-
-                    # mainWindow.moduleArea.addModule(newCcpnModule)
-                    mainWindow._addModule(module=newCcpnModule)
-
-                except Exception as e:
-                    getLogger().debug("Layout restore failed: %s" % e)
+    if not (ccpnModule := next(
+            filter(lambda md: md is not None and md.className == className, ccpnModules),
+            None)):
+        getLogger().debug(f"Layout restore failed {moduleName} not found")
+        return
+    try:
+        newCcpnModule = ccpnModule(mainWindow=mainWindow, name=moduleName)
+        newCcpnModule._restored = True
+        mainWindow._addModule(newCcpnModule)
+    except Exception as es:
+        getLogger().debug(f"Layout restore failed {moduleName}: {es}")
 
 
 def _getApplicationSpecificModules(mainWindow, applicationName) -> list:
@@ -535,33 +533,32 @@ def restoreLayout(mainWindow, layout, restoreSpectrumDisplays=False):
         if SpectrumDisplays in layout:
             _openSpectrumDisplays(mainWindow, layout[SpectrumDisplays])
 
-    if FileNames in layout:
-        neededModules = layout.get(FileNames)  # getattr(layout, FileNames)
-        if len(neededModules) > 0:
-            if GuiModules in layout:
-                # if ClassNameModuleName in layout.guiModules:
-                #   classNameGuiModuleNameList = getattr(layout.guiModules, ClassNameModuleName)
+    if (FileNames in layout and
+            (neededModules := layout.get(FileNames)) and
+            GuiModules in layout):
+        # if ClassNameModuleName in layout.guiModules:
+        #   classNameGuiModuleNameList = getattr(layout.guiModules, ClassNameModuleName)
 
-                classNameGuiModuleNameList = layout.get(GuiModules)  # getattr(layout, GuiModules)
-                # Checks if  modules  are present in the layout file. If not stops it
-                if not list(_traverse(classNameGuiModuleNameList)):
-                    return
+        classNameGuiModuleNameList = layout.get(GuiModules)  # getattr(layout, GuiModules)
+        # Checks if  modules  are present in the layout file. If not stops it
+        if not list(_traverse(classNameGuiModuleNameList)):
+            return
 
-                try:
-                    ccpnModules = _getAvailableModules(mainWindow, layout, neededModules)
-                    for classNameGuiModuleName in classNameGuiModuleNameList:
-                        if len(classNameGuiModuleName) == 2:
-                            guiModuleName, className = classNameGuiModuleName
+        try:
+            ccpnModules = _getAvailableModules(mainWindow, layout, neededModules)
+            for classNameGuiModuleName in classNameGuiModuleNameList:
+                if len(classNameGuiModuleName) == 2:
+                    guiModuleName, className = classNameGuiModuleName
 
-                            # move the 'skip' to here, instead of in the saveState
-                            if className in ['SpectrumDisplay']:
-                                continue
+                    # move the 'skip' to here, instead of in the saveState
+                    if className in ['SpectrumDisplay']:
+                        continue
 
-                            neededModules.append(className)
-                            _openCcpnModule(mainWindow, ccpnModules, className, moduleName=guiModuleName)
+                    neededModules.append(className)
+                    _openCcpnModule(mainWindow, ccpnModules, className, moduleName=guiModuleName)
 
-                except Exception as e:
-                    getLogger().debug2("Failed to restore Layout %s" % str(e))
+        except Exception as e:
+            getLogger().debug2("Failed to restore Layout %s" % str(e))
 
     if LayoutState in layout:
         # Very important step:

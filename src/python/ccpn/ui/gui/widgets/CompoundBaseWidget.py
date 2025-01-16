@@ -4,9 +4,10 @@ Base class for compound widgets
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:54 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2025-01-03 18:35:02 +0000 (Fri, January 03, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,11 +27,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 # Start of code
 #=========================================================================================
 
-import contextlib
-from PyQt5 import QtCore
-
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.core.lib.Notifiers import Notifier, _makeNotifiers
 from ccpn.ui.gui.widgets.Base import SignalBlocking
 
 
@@ -100,24 +97,6 @@ class CompoundBaseWidget(Frame, SignalBlocking):
             if height is not None:
                 self._widgets[i].setFixedHeight(height)
 
-    # GWV 20/3/24: No usage found
-    # def addObjectNotifier(self, theObject, triggers, targetName, func, *args, **kwds):
-    #     """
-    #     Add and store a notifier with widget;
-    #
-    #     :param theObject: A valid V3 core or current object
-    #     :param triggers: any of the triggers, as defined in Notifier class
-    #     :param targetName: a valid target for theObject, as defined in the Notifier class
-    #     :param func: callback function on triggering
-    #     :param args: optional arguments to func
-    #     :param kwds: optional keyword arguments to func
-    #     :return: Notifier instance
-    #     """
-    #     result = _makeNotifiers(theObject, triggers=triggers, targetName=targetName, callback=func)
-    #     for notifier in result:
-    #         self.addNotifier(notifier)
-    #     return result
-
     def addNotifier(self, notifier):
         """add a notifier to the widget"""
         self._notifiers.append(notifier)
@@ -129,26 +108,11 @@ class CompoundBaseWidget(Frame, SignalBlocking):
                 notifier.unRegisterNotifier()
                 del (notifier)
 
-    def __del__(self):
-        # The project and all its things are already disassembled when closing the program;
-        # hence, the de-registering of notifiers fails and needs to be caught
-        with contextlib.suppress(Exception):
-            self.deleteNotifiers()
+    def closeEvent(self, event):
+        """Clean up notifiers on closing.
+        """
+        from ccpn.ui.gui.lib.WidgetClosingLib import CloseHandler
 
-    def setPreSelect(self, callBack=None):
-        """
-        Add a user callback to the pulldown that fires on a mouse click.
-        facilitates populating the pulldown list just before it opens
-        :param callBack: method to call on click
-        """
-        if callBack:
-            self.pulldownList.installEventFilter(self)
-            self._preSelectCallBack = callBack
-
-    def eventFilter(self, target, event):
-        """
-        call the user callback when the pulldown has been clicked
-        """
-        if target == self.pulldownList and event.type() == QtCore.QEvent.MouseButtonPress:
-            self._preSelectCallBack()
-        return False
+        self.deleteNotifiers()
+        with CloseHandler(self):
+            super().closeEvent(event)

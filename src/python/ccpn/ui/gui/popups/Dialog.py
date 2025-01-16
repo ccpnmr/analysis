@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-26 13:30:14 +0000 (Tue, November 26, 2024) $"
+__dateModified__ = "$dateModified: 2025-01-07 16:32:26 +0000 (Tue, January 07, 2025) $"
 __version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
@@ -64,18 +64,47 @@ _DONTSHOWPOPUP = 'dontShowPopup'
 _POPUPS = 'popups'
 
 _DEBUG = False
+_POSTINIT = '_postInit'
 
 
 class _DialogHook(type(QtWidgets.QDialog), type(Base)):
-    """Metaclass implementing a post-initialise hook, ALWAYS called after __init__ has finished
+    """
+    Metaclass that implements a post-initialisation hook for dialog classes.
+
+    This metaclass ensures that a `_postInit` method, if defined, is always called after the
+    `__init__` method of a class instance has finished execution.
+
+    **Post-Initialisation**:
+        The `_postInit` method of the instance is invoked after its creation, if it is defined and callable.
+        Subclasses should implement this method to define post-construction logic.
+
+    :ivar _DEBUG: Optional debug flag to enable verbose logging during instance creation.
+    :ivar _POSTINIT: Constant (or attribute) expected to define the name of the post-initialisation hook method.
     """
 
-    def __call__(self, *args, **kwargs):
-        if _DEBUG: getLogger().debug2(f'--> pre-create dialog {self}')
+    def __call__(cls, *args, **kwargs):
+        """
+        Overrides the default behavior for instance creation.
+
+        This method creates a new instance of the class, and calls the `_postInit` method,
+        if it is defined, on the instance after creation.
+
+        :param args: Positional arguments for the class constructor.
+        :param kwargs: Keyword arguments for the class constructor.
+        :return: The newly created and fully initialised instance.
+        """
+        # Log pre-creation debug information, if enabled
+        if _DEBUG: getLogger().debug2(f'--> pre-create dialog {cls}')
+        # Create the class instance
         instance = super().__call__(*args, **kwargs)
-        # call the post-__init__ hook
-        instance._postInit()
-        if _DEBUG: getLogger().debug2(f'--> post-create dialog {self}')
+        # Check if a post-initialisation method is defined and callable
+        if (_postInit := getattr(instance, _POSTINIT, None)) and callable(_postInit):
+            # Call the post-initialisation hook
+            if _DEBUG: getLogger().debug2(f'--> _postInit {instance}')
+            _postInit()
+        # Log post-creation debug information, if enabled
+        if _DEBUG: getLogger().debug2(f'--> post-create dialog {instance}')
+        # Return the newly created instance
         return instance
 
 
@@ -721,29 +750,24 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
 
         return True
 
-    def accept(self) -> None:
-        result = super(CcpnDialogMainWidget, self).accept()
+    def done(self, state) -> None:
+        from ccpn.ui.gui.guiSettings import consoleStyle
+        from ccpn.ui.gui.lib.WidgetClosingLib import CloseHandler
 
-        # store the state of any required widgets
-        self.storeWidgetState()
-
-        getLogger().debug2(f'Clean up dialog {self} on accept')
-        self._cleanupDialog()
-        self._storeDontShow()
-
-        return result
-
-    def reject(self) -> None:
-        result = super(CcpnDialogMainWidget, self).reject()
-
-        if self.storeStateOnReject:
+        # only called on Accepted or Rejected
+        if state == self.Accepted:
+            # store the state of any required widgets
+            self.storeWidgetState()
+            self._storeDontShow()
+        elif self.storeStateOnReject:
             # store the state of any required widgets
             self.storeWidgetState()
 
-        getLogger().debug2(f'Clean up dialog {self} on reject')
-        self._cleanupDialog()
-
-        return result
+        getLogger().debug(f'{consoleStyle.fg.yellow}done {self}   '
+                          f'Accepted={state == self.Accepted}{consoleStyle.reset}')
+        result = super(CcpnDialogMainWidget, self).done(state)
+        with CloseHandler(self):
+            return result
 
     def _storeDontShow(self):
         if self._dontShowEnabled:
@@ -757,16 +781,6 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
                     # should really get from a property rather than a widget
                     #  - if widget does not show then the initial state may not be set
                     popup[_DONTSHOWPOPUP] = self._dontShowCheckBox.isChecked()
-
-    def _cleanupDialog(self):
-        """Clean-up any extra widgets/data before closing
-        """
-        from ccpn.ui.gui.guiSettings import consoleStyle
-
-        getLogger().debug2(f'Cleaning-up dialog {self} - subclass as required')
-        # MUST BE SUBCLASSED
-        # raise NotImplementedError(f"{consoleStyle.fg.magenta}{self.__class__.__name__} - Code error: "
-        #                           f"function not implemented{consoleStyle.reset}")
 
     def _refreshGLItems(self):
         """emit a signal to rebuild any required GL items
@@ -1194,8 +1208,6 @@ class DetailedTextDialog(CcpnDialogMainWidget):
             # return the id of the pressed button, should match Yes, No, etc.
             return self.dialogButtons._clickedButtonId
 
-    def _cleanupDialog(self):
-        ...
 
 #=========================================================================================
 # DetailDialog popups

@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-06 18:31:53 +0000 (Wed, November 06, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2025-01-06 17:08:09 +0000 (Mon, January 06, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -97,27 +97,26 @@ class _ExperimentalAnalysisTableABC(Table):
                                sv.REDCHI, sv.AIC, sv.BIC,
                                sv.MODEL_NAME, sv.NMRRESIDUECODETYPE]
         self._internalColumns = [sv.INDEX]
-        errCols = [tt for tt in self.headerColumnMenu.columnTexts if sv._ERR in tt]
+        errCols = [tt for tt in self.columns if sv._ERR in tt]
         self._hiddenColumns += errCols
-        self.headerColumnMenu.setDefaultColumns(self._hiddenColumns)
-        self.headerColumnMenu.setInternalColumns(self._internalColumns)
+        self.setDefaultColumns(self._hiddenColumns)
         self.guiModule = guiModule
         self.moduleParent = guiModule
         self._selectionHeader = sv.COLLECTIONPID
 
+    def _postInit(self):
+        super()._postInit()
         # Initialise the notifier for processing dropped items
-        self._postInitTableCommonWidgets()
         self._navigateTrigger = _NavigateTrigger.SINGLECLICK  # Default Behaviour
         navigateTriggerName = self.guiModule.getSettings(grouped=False).get(guiNameSpaces.WidgetVarName_NavigateToOpt)
         self.setNavigateToPeakTrigger(navigateTriggerName)
         self._selectCurrentCONotifier = CurrentNotifier(targetName='collections', callback=self._currentCollectionCallback)
-
         self.sortingChanged.connect(self._tableSortingChangedCallback)
         self.tableChanged.connect(self._tableChangedCallback)
 
-    # =========================================================================================
+    #-----------------------------------------------------------------------------------------
     # dataFrame
-    # =========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def _tableSortingChangedCallback(self, *args):
         """   Fire a notifier for other widgets to refresh their ordering (if needed). """
@@ -136,21 +135,21 @@ class _ExperimentalAnalysisTableABC(Table):
         selectedRows = self.getSelectedData()
         self._dataFrame = dataFrame
         self.build(dataFrame)
-        if self._selectionHeader in self.headerColumnMenu.columnTexts and len(selectedRows) > 0:
+        if self._selectionHeader in self.columns and len(selectedRows) > 0:
             selPids = selectedRows[sv.COLLECTIONPID].values
             self.selectRowsByValues(selPids, sv.COLLECTIONPID, scrollToSelection=True, doCallback=True)
 
     def build(self, dataFrame):
         if dataFrame is not None:
             self.updateDf(df=dataFrame)
-            self.headerColumnMenu.setDefaultColumns(self._hiddenColumns)
+            self.setDefaultColumns(self._hiddenColumns)
             self._setBlankModelColumns()
             self._hideExcludedColumns()
             self._setExclusionColours()
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Selection/action callbacks
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def selectionCallback(self, selected, deselected, selection, lastItem):
         """Set the current collection and navigate to SpectrumDisplay if the trigger is enabled as singleClick. """
@@ -186,9 +185,9 @@ class _ExperimentalAnalysisTableABC(Table):
                 self._navigateTrigger = enumTrigger
                 return
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Handle drop events
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def _processDroppedItems(self, data):
         """
@@ -198,9 +197,9 @@ class _ExperimentalAnalysisTableABC(Table):
         # self._handleDroppedItems(pids, KlassTable, self.moduleParent._modulePulldown)
         getLogger().warning('Drop not yet implemented for this module.')
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Table context menu
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def _raiseTableContextMenu(self, pos):
         """
@@ -236,11 +235,13 @@ class _ExperimentalAnalysisTableABC(Table):
         from ccpn.ui.gui.popups._RefitSeriesPopup import RefitIndividualPopup, RefitGloballyPopup
 
         collections = self.getSelectedCollections()
-        if len(collections)>0:
+        if len(collections) > 0:
             if globally:
-                popup = RefitGloballyPopup(self, seriesAnalysisModule=self.guiModule, globalFit=False, collectionsData=self.getSelectedData())
+                popup = RefitGloballyPopup(self, seriesAnalysisModule=self.guiModule, globalFit=False,
+                                           collectionsData=self.getSelectedData())
             else:
-                popup = RefitIndividualPopup(self, seriesAnalysisModule=self.guiModule, globalFit=False, collectionsData=self.getSelectedData())
+                popup = RefitIndividualPopup(self, seriesAnalysisModule=self.guiModule, globalFit=False,
+                                             collectionsData=self.getSelectedData())
             popup.show()
             popup.raise_()
         else:
@@ -263,7 +264,7 @@ class _ExperimentalAnalysisTableABC(Table):
             exclusionHandler = self.guiModule.backendHandler.exclusionHandler
             outputData = self.guiModule.backendHandler.resultDataTable
             excludedNmrResidues = exclusionHandler.getExcludedNmrResidues(dataTable=outputData)
-            newExclusion = set(excludedNmrResidues+nmrResidues)
+            newExclusion = set(excludedNmrResidues + nmrResidues)
             exclusionHandler.setExcludedNmrResidues(newExclusion, dataTable=outputData)
             self.guiModule.updateAll()
 
@@ -317,7 +318,7 @@ class _ExperimentalAnalysisTableABC(Table):
     def _hideExcludedColumns(self):
         """Remove columns from table which contains the prefix excluded_ """
         headers = []
-        columnTexts = self.headerColumnMenu.columnTexts
+        columnTexts = self.columns
         for columnText in columnTexts:
             columnText = str(columnText)
             if columnText.startswith(sv.EXCLUDED_):
@@ -342,7 +343,7 @@ class _ExperimentalAnalysisTableABC(Table):
             return
 
         model = self.model()
-        columnTextIx = self.headerColumnMenu.columnTexts.index(headerName)
+        columnTextIx = self.columns.index(headerName)
         for i in model._sortIndex:
             cell = model.index(i, columnTextIx)
             if cell is None:
@@ -353,9 +354,8 @@ class _ExperimentalAnalysisTableABC(Table):
                     rowIndex = model.index(i, 0)
                     if rowIndex is None:
                         continue
-                    for columnIndex, value in enumerate(self.headerColumnMenu.columnTexts):
+                    for columnIndex, value in enumerate(self.columns):
                         self.setForeground(i, columnIndex, hexColour)
-
 
     def _setBlankModelColumns(self):
         # if a blank model: toggle the columns from table (no point in showing empty columns)
@@ -375,11 +375,11 @@ class _ExperimentalAnalysisTableABC(Table):
                 self._toggleCalculationErrorsHeaders(False)
 
     def _setVisibleColumns(self, headers, setVisible):
+        cols = self.columns
         for header in headers:
-            if setVisible:
-                self.headerColumnMenu._showColumnName(str(header))
-            else:
-                self.headerColumnMenu._hideColumnName(str(header))
+            if header not in cols:
+                continue
+            self.setColumnHidden(cols.index(str(header)), not setVisible)
 
     ## Convient Methods to toggle groups of header: toggle---Header
     ## TableGrouppingHeaders = [_Assignments, _SeriesSteps, _Calculation, _Fitting, _Stats, _Errors]
@@ -391,7 +391,7 @@ class _ExperimentalAnalysisTableABC(Table):
         # need to include also the headers which are duplicates and include an _ (underscore at the end)
         extraHeaders = []
         for header in headers:
-            for columnHeader in self.headerColumnMenu.columnTexts:
+            for columnHeader in self.columns:
                 if str(columnHeader).startswith(str(header)) and sv.SEP in columnHeader:
                     extraHeaders.append(columnHeader)
         headers += extraHeaders
@@ -404,7 +404,7 @@ class _ExperimentalAnalysisTableABC(Table):
 
     def _toggleErrorsHeaders(self, setVisible=True):
         """ Show/Hide the Fitting/Calculation error columns"""
-        headers = [tt for tt in self.headerColumnMenu.columnTexts if sv._ERR in tt]
+        headers = [tt for tt in self.columns if sv._ERR in tt]
         self._setVisibleColumns(headers, setVisible)
 
     def _toggleCalculationErrorsHeaders(self, setVisible=True):
@@ -453,6 +453,13 @@ class _ExperimentalAnalysisTableABC(Table):
         self.current.collections = []
         self.guiModule.updateAll()
 
+    def closeEvent(self, event):
+        """Clean-up and close.
+        """
+        self._selectCurrentCONotifier.unRegisterNotifier()
+        self._selectCurrentCONotifier = None
+        super().closeEvent(event)
+
 
 #=========================================================================================
 # TablePanel
@@ -484,12 +491,3 @@ class TablePanel(GuiPanel):
         # update here the X-Y selectors on the settings. Has to be done here because the mainplot has to be in sync with the table.
         appearance = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.Label_GeneralAppearance)
         appearance._setXYAxisSelectors()
-
-    def close(self):
-        if self.mainTable:
-            self.mainTable.close()
-        super().close()
-
-    # def clearData(self):
-    #     self.mainTable.dataFrame = None
-    #     self.mainTable.clearTable()

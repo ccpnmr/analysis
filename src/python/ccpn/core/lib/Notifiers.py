@@ -19,7 +19,7 @@ April 2017: First design by Geerten Vuister
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -30,9 +30,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-22 12:10:16 +0100 (Fri, November 22, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-01-13 12:41:08 +0000 (Mon, January 13, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -43,15 +43,19 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 #=========================================================================================
 
 import sys
-
+import io
+import difflib
 from functools import partial
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 from typing import Callable, Any, Optional
 from itertools import permutations
 import weakref
 from contextlib import contextmanager
 
 from ccpn.core.lib.WeakRefList import _WeakRefList
+import typing
+import re
+from ccpn.util.Logging import getLogger
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.AttributeDict import AttributeDict
@@ -59,17 +63,47 @@ from ccpn.util.Common import Sentinel
 
 from ccpn.framework.Application import getCurrent, getProject, getApplication
 
+# these could be mixed in iterables
+V3CoreType = typing.TypeVar('V3CoreType', bound=typing.Union['AbstractWrapperObject', 'V3CoreObjectABC'])
+GuiNotifierType = typing.TypeVar('GuiNotifierType', bound='GuiNotifier')
+
 DEBUG = False
 _debugIds = ()
 
 _STRICT = True  # Flag to enforce type checking; relaxed for testing ccpnv4 code
 
+class _consoleStyle():
+    """Colors class:reset all colors with colors.reset; two
+    subclasses fg for foreground
+    and bg for background; use as colors.subclass.colorname.
+    i.e. colors.fg.red or colors.bg.greenalso, the generic bold, disable,
+    underline, reverse, strike through,
+    and invisible work with the main class i.e. colors.bold
+    """
+    # Smaller version of that defined in Common to remove any non-built-in imports
+    reset = '\033[0m'
+
+
+    class fg:
+        darkred = '\033[31m'
+        darkgreen = '\033[32m'
+        darkyellow = '\033[33m'
+        lightgrey = '\033[37m'
+        darkgrey = '\033[90m'
+        red = '\033[91m'
+        green = '\033[92m'
+        yellow = '\033[93m'
+        blue = '\033[94m'
+        magenta = '\033[95m'
+        white = '\033[97m'
+
+
 # _debugIds = (75, 84, 92, 94,95,96)  # for these _id's, debug will be True. This allows for selective debugging
 
-
-def skip(*args, **kwargs):
-    """Do nothing"""
-    pass
+# ED: not sure what this if for, but pycharm complains about the arguments
+# def skip(*args, **kwargs):
+#     """Do nothing"""
+#     pass
 
 
 class NotifierABC(object):
@@ -472,7 +506,8 @@ class Notifier(NotifierABC):
         :param **kwds: optional keywords arguments passed to callback
         """
 
-        from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject  # local import to avoid cycles
+        from ccpn.core._implementation.AbstractWrapperObject import \
+            AbstractWrapperObject  # local import to avoid cycles
         from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC  # local import to avoid cycles
         from ccpn.framework.Current import Current  # local import to avoid cycles
 
@@ -564,7 +599,7 @@ class Notifier(NotifierABC):
         """
         # >>>>>>
         if self._debug:
-            sys.stderr.write('>>> un-registering %s\n' % self)
+            sys.stderr.write(f'>>> un-registering {self}\n')
 
         if not self.isRegistered:
             return
@@ -759,7 +794,7 @@ class CurrentNotifier(NotifierABC):
 
         if self._debug:
             _tmp = 'FIRED' if notifierFired else 'not-FIRED'
-            sys.stderr.write('%-9s func:%s\n' % (_tmp, self._callback))
+            sys.stderr.write(f'{_tmp:<9} func:{self._callback}\n')
 
         return
 # end class
@@ -968,7 +1003,8 @@ class NotifierBase(object):
 
         self._objectNotifiersDict.addNotifier(notifier)
 
-    def setNotifier(self, theObject, triggers: list|tuple, targetName: str|list|tuple|None, callback: Callable, **kwds) -> _NotifierList:
+    def setNotifier(self, theObject: V3CoreType, triggers: list|tuple, targetName: str|list|tuple|None,
+                    callback: Callable[..., Optional[str]], **kwds) -> _NotifierList:
         """Set Notifier for (V3/V4) theObject;
         Store for management; i.e. removal with deleteNotifier() or deleteAllNotifiers()
         methods.
@@ -1018,9 +1054,9 @@ class NotifierBase(object):
 
         return result
 
-    def setGuiNotifier(self, theObject: 'AbstractWrapperObject',
-                             triggers: list, targetNames: list,
-                             callback: Callable) -> _NotifierList:
+    def setGuiNotifier(self, theObject: V3CoreType,
+                       triggers: list, targetNames: list,
+                       callback: Callable[..., Optional[str]]) -> _NotifierList:
         """Set GuiNotifier on (V3/V4) theObject.
         Store for management; i.e. removal with deleteNotifier() or deleteAllNotifiers()
         methods.
@@ -1421,6 +1457,10 @@ class NotifierSignal(property):
 #end class -----------------------------------------------------------------------------------------
 
 
+#=========================================================================================
+# _removeDuplicatedNotifiers - notifier queue handling
+#=========================================================================================
+
 def _removeDuplicatedNotifiers(notifierQueue):
     """Remove any duplicated notifiers from the queue
 
@@ -1548,3 +1588,268 @@ def _getRegisteredNotifiers(obj, trigger) -> list | None:
         return None
 
     return _notifiers
+
+
+#=========================================================================================
+# Notifier diff-functions
+#=========================================================================================
+
+class _RedirectStdout:
+    """
+    A context manager to temporarily redirect `sys.stdout` to an internal buffer.
+
+    This can be used to capture output from print statements for further processing.
+    """
+
+    def __init__(self):
+        """
+        Initializes the context manager with a new StringIO buffer
+        and stores the original `sys.stdout`.
+        """
+        self._newStdout = io.StringIO()
+        self._oldStdout = sys.stdout
+
+    def __enter__(self):
+        """
+        Redirects `sys.stdout` to the internal StringIO buffer.
+
+        :return: The context manager instance.
+        """
+        sys.stdout = self._newStdout
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Restores the original `sys.stdout` and captures the buffer's value.
+        Closes the internal StringIO buffer.
+        """
+        sys.stdout = self._oldStdout
+        self._capturedOutput = self._newStdout.getvalue()
+        self._newStdout.close()
+
+    @property
+    def value(self):
+        """
+        Gets the captured output from the StringIO buffer.
+
+        :return: The captured output as a string.
+        """
+        return self._capturedOutput
+
+
+def _tempNotifierState() -> str:
+    """
+    Captures the current state of notifier functions in the project.
+
+    This function retrieves and sorts notifier functions from the project context,
+    then prints their details to a temporary stdout buffer.
+
+    :raises RuntimeError: If no project is found.
+    :return: The captured output from the notifier functions as a string.
+    """
+    from ccpn.framework.Application import getProject
+
+    if not (project := getProject()):
+        raise RuntimeError('_tempNotiferState: No project found')
+
+    with _RedirectStdout() as output:
+        # Extract notifier functions and their states from the project's context
+        funcs = sorted(
+                [[func.func.id, key, func, state]
+                 for key, value in sorted(project._context2Notifiers.items())
+                 for func, state in value.items() if func],
+                key=lambda val: val[0]
+                )
+        # code for OrderedWeakKeyDictionary
+        # funcs = sorted(
+        #         [[func.func_ref().id, key, func]
+        #          for key, value in sorted(project._context2Notifiers.items())
+        #          for _, func in value.items() if func and func.func_ref()],
+        #         key=lambda val: val[0])
+
+        # Print details for each notifier
+        for notifier in funcs:
+            print(' : '.join(map(lambda kk: str(kk), notifier)))
+
+    return output.value
+
+
+def _printDiff(oldState, newState, filePath=None):
+    """
+    Prints a unified diff between two notifier states with syntax highlighting.
+
+    :param oldState: The previous state as a string.
+    :param newState: The current state as a string.
+    :param filePath: Optional file path to write the diff. If None, prints to console.
+    """
+    from ccpn.ui.gui.guiSettings import consoleStyle
+
+    bufferLen = 24  # Fixed width for the leading section of the output
+    diff = difflib.unified_diff(
+            oldState.splitlines(),
+            newState.splitlines(),
+            lineterm='',  # No extra line terminator
+            n=0  # Context lines; 0 means only changes
+            )
+
+    head = ''  # Holds the current diff header line (e.g., @@ context @@)
+    first = True  # Tracks whether the current diff block is the first line
+
+    for line in diff:
+        if not line or line.startswith('+++') or line.startswith('---'):
+            # Skip metadata lines in the diff
+            continue
+        if line.startswith('@@'):
+            # Context line indicating changes
+            head = f'{consoleStyle.fg.blue}{line:{bufferLen}}'
+            first = True
+            continue
+
+        # Prepare the output line, aligning with the header
+        outline = head if first else ' ' * bufferLen
+        first = False
+        # Apply syntax highlighting based on diff line type
+        if line.startswith('+'):
+            # Lines added in the new state
+            outline += f'{consoleStyle.fg.green}' + line[1:]
+        elif line.startswith('-'):
+            # Lines removed from the old state
+            outline += f'{consoleStyle.fg.red}' + line[1:]
+        elif line.startswith(' '):
+            # Lines unchanged (if context lines were requested)
+            outline += f'{consoleStyle.fg.darkgrey}' + line[1:]
+        else:
+            # Handle unexpected lines with light grey
+            outline += f'{consoleStyle.fg.lightgrey}' + line
+        outline += f'{consoleStyle.reset}'  # Reset the style at the end of the line
+
+        # Write the output to a file if a filePath is provided, otherwise print
+        if filePath:
+            print(outline, file=filePath)
+        else:
+            print(outline)
+
+
+def _printDiffToFile(oldState, newState, filePath):
+    """
+    Writes a unified diff between two notifier states to a specified file.
+
+    :param oldState: The previous state as a string.
+    :param newState: The current state as a string.
+    :param filePath: The file path where the diff will be written.
+    :raises RuntimeError: If no file path is provided.
+    """
+    import os
+
+    if not filePath:
+        raise RuntimeError('_printDiffToFile: No file path provided')
+    # Open the file in write mode and delegate diff printing to _printDiff
+    with open(os.path.expanduser(filePath), 'w', encoding='utf-8') as fp:
+        _printDiff(oldState, newState, filePath=fp)
+
+
+def checkFinalNotifiers():
+    """
+    Check and log the final state of notifiers in the project.
+
+    This function retrieves the current project and iterates through its notifiers,
+    logging their state. If no project is found, it raises a RuntimeError.
+
+    :raises RuntimeError: If no project is found.
+    """
+    from ccpn.framework.Application import getProject
+
+    # Retrieve the current project
+    if not (project := getProject()):
+        raise RuntimeError('checkFinalNotifiers: No project found')
+
+    _notified = False
+    try:
+        # Iterate through the notifiers in the project
+        for od in project._context2Notifiers.values():
+            for notifier in od:
+                _notified = True
+                # Determine the color based on whether the notifier's object is deleted
+                _colour = _consoleStyle.fg.darkgrey if notifier.func._theObject.isDeleted else _consoleStyle.fg.red
+                # Log the notifier's function and callback
+                getLogger().debug(f'{_colour}==>  {notifier.func}:{notifier.func._callback}{_consoleStyle.reset}')
+    except Exception as es:
+        # Log any issues encountered during cleanup
+        getLogger().debug(f'issue cleaning up notifiers {es}')
+    finally:
+        if _notified:
+            # Log completion message if any notifiers were processed
+            getLogger().debug(f'{_consoleStyle.fg.darkgreen}==>  done{_consoleStyle.reset}')
+
+
+#=========================================================================================
+# main - print diff between registered and unregistered notifiers in log-file
+#=========================================================================================
+
+def main():
+    import os.path
+
+    def find_unmatched_registers(file_path) -> list[int]:
+        """
+        Reads a text file and finds all occurrences of "register (nn)"
+        that do not have a corresponding "unregister (nn)", where nn is an integer.
+
+        :param file_path: Path to the text file.
+        :return: A list of unmatched integers (nn).
+        """
+        # Pattern for register and unregister with integer inside parentheses
+        register_pattern = re.compile(r'registered\s*<(?:Notifier|GuiNotifier)\s*\((\d+)\):')
+        unregister_pattern = re.compile(r'unRegister\s*<(?:Notifier|GuiNotifier)\s*\((\d+)\):')
+        # Counters for occurrences of register and unregister
+        register_counts = Counter()
+        unregister_counts = Counter()
+
+        with open(os.path.expanduser(file_path), 'r', encoding='utf-8') as file:
+            for line in file:
+                # Find all register (nn) and unregister (nn) in the line
+                registers = register_pattern.findall(line)
+                unregisters = unregister_pattern.findall(line)
+                # Update the counters
+                register_counts.update(registers)
+                unregister_counts.update(unregisters)
+
+        # Identify integers with unmatched register calls
+        unmatched = [
+            int(key) for key in register_counts.keys()
+            if register_counts[key] > unregister_counts[key]
+            ]
+        return unmatched
+
+    def format_ranges(numbers):
+        """
+        Formats a sorted list of numbers into ranges (e.g., [1, 2, 3, 5, 6] -> ["1-3", "5-6"]).
+
+        :param numbers: A sorted list of integers.
+        :return: A list of strings representing ranges or individual numbers.
+        """
+        if not numbers:
+            return []
+
+        ranges = []
+        start = end = numbers[0]
+        for num in numbers[1:]:
+            if num == end + 1:
+                # Extend the current range
+                end = num
+            else:
+                # Close the current range and start a new one
+                ranges.append(f"{start}-{end}" if start != end else str(start))
+                start = end = num
+        # Add the last range
+        ranges.append(f"{start}-{end}" if start != end else str(start))
+        return ranges
+
+    # Example Usage
+    file_path = "~/testlog.txt"  # Replace with the path to your text file
+    unmatched = find_unmatched_registers(file_path)
+    formatted = format_ranges(unmatched)
+    print(f"Unmatched registered notifiers: [{', '.join(formatted)}]")
+
+
+if __name__ == '__main__':
+    main()

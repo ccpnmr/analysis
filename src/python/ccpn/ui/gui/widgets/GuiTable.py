@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-19 13:57:29 +0100 (Mon, August 19, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-11-15 19:34:30 +0000 (Fri, November 15, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1390,9 +1390,9 @@ class GuiTable(TableWidget, Base):
         action = self.headerContextMenumenu.exec_(self.mapToGlobal(pos))
 
         if action == columnsSettings:
-            settingsPopup = ColumnViewSettingsPopup(parent=self._parent, table=self,
+            settingsPopup = ColumnViewSettingsPopup(parent=self._parent, tableHandler=self,
                                                     dataFrameObject=self._dataFrameObject,
-                                                    hiddenColumns=self.getHiddenColumns(),
+                                                    # hiddenColumns=self.getHiddenColumns(),
                                                     )
             hiddenColumns = settingsPopup.getHiddenColumns()
             self.setHiddenColumns(texts=hiddenColumns, update=False)

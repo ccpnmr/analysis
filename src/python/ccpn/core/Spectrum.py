@@ -47,13 +47,13 @@ getByDimension(), setByDimension(), getByAxisCode(), setByAxisCode()
 See doc strings of these methods for detailed documentation
 
 """
-from __future__ import annotations  # pycharm still highlights as errors
+from __future__ import annotations
 
 
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -64,9 +64,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 12:40:33 +0000 (Mon, November 11, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-01-10 18:01:47 +0000 (Fri, January 10, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -168,6 +168,7 @@ class Spectrum(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiNmr.DataSource._metaclass.qualifiedName()
+    _wrappedData: Nmr.DataSource
 
     _ignoreNewApiObjectCallback = True
 
@@ -520,7 +521,7 @@ class Spectrum(AbstractWrapperObject):
         return tuple(range(0, self.dimensionCount))
 
     # legacy
-    axisIndices = dimensionIndices
+    axisIndices: tuple = dimensionIndices
 
     @property
     def dimensionTriples(self) -> tuple:

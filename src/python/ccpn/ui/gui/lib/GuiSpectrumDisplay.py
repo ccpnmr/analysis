@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-22 12:10:17 +0100 (Fri, November 22, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-12-12 18:31:40 +0000 (Thu, December 12, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1032,6 +1032,7 @@ class GuiSpectrumDisplay(CcpnModule):
         if data:
             trigger = data[Notifier.TRIGGER]
             if trigger == Notifier.RENAME and data[Notifier.OBJECT] == self:
+                self._name = data[Notifier.OBJECT].title
                 self.label.setText(self._name)
                 self.label.updateGeometry()
                 self.label.repaint()
@@ -2011,6 +2012,7 @@ class GuiSpectrumDisplay(CcpnModule):
         for sp in self.spectra:
             self._deleteSpectrumNotifiers(spectrum=sp)
         self.mainWindow._deleteSpectrumDisplay(self)
+        super()._closeModule()
 
     def _removeIndexStrip(self, value):
         self.deleteStrip(self.strips[value])

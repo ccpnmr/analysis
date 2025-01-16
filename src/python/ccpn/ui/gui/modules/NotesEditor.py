@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-12 11:48:51 +0100 (Thu, September 12, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-01-06 17:41:27 +0000 (Mon, January 06, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets
-
+from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Label import Label
@@ -34,6 +34,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NotePulldown
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.MainWindow import MainWindow
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Button import Button
@@ -60,36 +61,39 @@ class NotesEditorModule(CcpnModule):
     className = 'NotesEditorModule'
     attributeName = 'notes'  # self.project.notes
     _includeInLastSeen = False
-
     _labelWidth = 50
 
-    def __init__(self, mainWindow=None, name='Notes Editor',
-                 note=None, selectFirstItem=False):
+    note: Note | None = WeakRefDescriptor()
+    noWidget: NotePulldown | None = WeakRefDescriptor()
+
+    def __init__(self, mainWindow: MainWindow | None = None,
+                 name: str = 'Notes Editor',
+                 note: Note | None = None, selectFirstItem: bool = False):
         """
         Initialise the widgets for the module.
-        :param mainWindow: required
-        :param name: optional
-        :param note: leave as None to let window handle item selection
+
+        :param mainWindow: The main window instance.
+        :type mainWindow: QtWidgets.QMainWindow | None
+        :param name: The name of the module.
+        :type name: str
+        :param note: The note to be selected initially.
+        :type note: Note | None
+        :param selectFirstItem: Whether to select the first item initially.
+        :type selectFirstItem: bool
         """
         super().__init__(mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
         if mainWindow:
+            # defined as descriptor in superclass, so will default to None
             self.application = mainWindow.application
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
-        else:
-            self.application = None
-            self.project = None
-            self.current = None
         self.note = None
 
-        # set up the widgets
+        # set up the widgets/notifiers
         self._setupWidgets()
-
-        self._noteNotifier = None
-        self._droppedNotifier = None
         self._setNotifiers()
 
         if note is not None:
@@ -98,9 +102,9 @@ class NotesEditorModule(CcpnModule):
         elif selectFirstItem:
             self.noWidget.selectFirstItem()
 
-    def _setupWidgets(self):
+    def _setupWidgets(self) -> None:
         """
-        Set up the widgets in module
+        Set up the widgets in module.
         """
         self._widgetFrame = ScrollableFrame(self.mainWidget, setLayout=True, showBorder=False,
                                             scrollBarPolicies=('never', 'never'), spacing=DEFAULTSPACING,
@@ -109,9 +113,9 @@ class NotesEditorModule(CcpnModule):
         self._widgetFrameScrollArea = self._widgetFrame._scrollArea
 
         row = 0
-        self.spacer = Spacer(self._widgetFrame, 5, 5,
-                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                             grid=(row, 0), gridSpan=(1, 1))
+        Spacer(self._widgetFrame, 5, 5,
+               QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+               grid=(row, 0), gridSpan=(1, 1))
 
         row += 1
         self.noWidget = NotePulldown(parent=self._widgetFrame,
@@ -127,9 +131,9 @@ class NotesEditorModule(CcpnModule):
                                     )
 
         row += 1
-        self.spacer = Spacer(self._widgetFrame, 5, 5,
-                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                             grid=(row, 0), gridSpan=(1, 1))
+        Spacer(self._widgetFrame, 5, 5,
+               QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+               grid=(row, 0), gridSpan=(1, 1))
 
         #~~~~~~~~~~ define noteWidget box to contain main editing
 
@@ -155,34 +159,31 @@ class NotesEditorModule(CcpnModule):
         self.lineEditComment.editingFinished.connect(self._applyNote)  # *1
 
         nRow += 1
-        self.spacer = Spacer(self.noteWidget, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-                             grid=(nRow, 3), gridSpan=(1, 1))
+        Spacer(self.noteWidget, 5, 5,
+               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
+               grid=(nRow, 3), gridSpan=(1, 1))
 
         nRow += 1
         self.textBox = TextEditor(self.noteWidget, grid=(nRow, 0), gridSpan=(1, 6))
         self.textBox.editingFinished.connect(self._applyNote)  # *1
 
         # NOTE: *1 Automatically save the note when it loses the focus.
-        #       Otherwise, is very dangerous of losing all the carefully written notes if you forget to press the button apply!
+        #       Otherwise, is in danger of losing all the carefully written notes if you
+        #       forget to press an apply button!
         #~~~~~~~~~~ end of noteWidget box
 
         row += 1
         # this spacer is expanding, will fill the space when the textbox is invisible
-        self.spacer = Spacer(self._widgetFrame, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-                             grid=(row, 4), gridSpan=(1, 1))
+        Spacer(self._widgetFrame, 5, 5,
+               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+               grid=(row, 4), gridSpan=(1, 1))
 
-    def _closeModule(self):
-        """CCPN-INTERNAL: used to close the module
+    def _processDroppedItems(self, data: dict) -> None:
         """
-        if self.noWidget:
-            self.noWidget.unRegister()
-        super(NotesEditorModule, self)._closeModule()
+        CallBack for Drop events.
 
-    def _processDroppedItems(self, data):
-        """
-        CallBack for Drop events
+        :param data: The data from the drop event.
+        :type data: dict
         """
         pids = data.get('pids', [])
         from ccpn.ui.gui.lib.MenuActions import _openItemObject
@@ -194,7 +195,6 @@ class NotesEditorModule(CcpnModule):
         if len(selectableObjects) > 0:
             self.selectNote(selectableObjects[0])
             _openItemObject(self.mainWindow, selectableObjects[1:])
-
         else:
             from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 
@@ -215,10 +215,15 @@ class NotesEditorModule(CcpnModule):
         _note = self.project.newNote()
         self.selectNote(_note)
 
-    def selectNote(self, note=None):
+    def selectNote(self, note: Note | None = None) -> None:
         """
-        Manually select a Note from the pullDown
+        Manually select a Note from the pullDown.
+
+        :param note: The note to be selected.
+        :type note: Note | None
         """
+        if not self.noWidget:
+            return
         if note is None:
             # getLogger().warning('select: No Note selected')
             # raise ValueError('select: No Note selected')
@@ -232,31 +237,30 @@ class NotesEditorModule(CcpnModule):
                     self.note = note
                     self.noWidget.select(self.note.pid)
 
-    def _setNotifiers(self):
+    def _setNotifiers(self) -> None:
         """
-        Set a Notifier to call when a note is created/deleted/renamed/changed
-        rename calls on name
-        change calls on any other attribute
+        Set a Notifier to call when a note is created/deleted/renamed/changed.
+        Rename calls on name, change calls on any other attribute.
         """
-        self._noteNotifier = self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                              Note.className,
-                                              self._updateCallback)
-        self._droppedNotifier = self.setGuiNotifier(self.mainWidget, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                                    self._processDroppedItems)
+         self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                         Note.className,
+                         self._updateCallback)
+         self.setGuiNotifier(self.mainWidget, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                             self._processDroppedItems)
 
-    def _applyNote(self):
+    def _applyNote(self) -> None:
         """
-        Called by clicking the apply button in the module.
-        Temporarily disable notifiers, and define commandEchoBlock so all changes
-        are treated as a single undo/redo event
+        Apply changes to the current note.
+
+        Temporarily disables notifiers and groups changes into a single undo/redo event.
         """
         if not self.note:
             return
 
-        self.setBlankingAllNotifiers(True)  # disable my own notifiers while updating object other
-        name = self.lineEdit1.text()
-        text = self.textBox.toPlainText()
-        comment = self.lineEditComment.text()
+        self.setBlankingAllNotifiers(True)  # Disable notifiers while updating the object
+        name: str = self.lineEdit1.text()
+        text: str = self.textBox.toPlainText()
+        comment: str = self.lineEditComment.text()
 
         try:
             if name != self.note.name or text != self.note.text or comment != self.note.comment:
@@ -267,22 +271,19 @@ class NotesEditorModule(CcpnModule):
                     self.note.comment = comment
 
         except Exception as es:
-            # need to immediately set back to stop error on loseFocus which also fires editingFinished
+            # Revert changes to prevent errors on loseFocus which also fires editingFinished
             self.lineEdit1.setText(self.note.name)
             showWarning('', str(es))
 
         self.noWidget.select(self.note.pid)
         self.setBlankingAllNotifiers(False)
 
-    def _reject(self):
+    def _selectionPulldownCallback(self, item: str) -> None:
         """
-        Closes the note editor ignoring all changes.
-        """
-        self._closeModule()
+        Notifier callback for selecting a note from the dropdown menu.
 
-    def _selectionPulldownCallback(self, item):
-        """
-        Notifier Callback for selecting Note from the pull down menu
+        :param item: The identifier of the selected note.
+        :type item: str
         """
         self.note = self.project.getByPid(item)
         if self.note is not None:
@@ -290,20 +291,26 @@ class NotesEditorModule(CcpnModule):
         else:
             self.noteWidget.hide()
 
-    def _updateCallback(self, data):
+    def _updateCallback(self, data: dict) -> None:
         """
-        Notifier callback for updating module when a Note is create/delete/rename/change
+        Notifier callback for updating the module when a note is created, deleted, renamed, or changed.
+
+        :param data: The data containing the updated notes list.
+        :type data: dict
         """
-        thisNoteList = getattr(data[Notifier.THEOBJECT], self.attributeName)  # get the notesList
+        thisNoteList = getattr(data[Notifier.THEOBJECT], self.attributeName)  # Get the notes list
 
         if self.note in thisNoteList:
             self._update(self.note)
         else:
             self.noteWidget.hide()
 
-    def _update(self, note):
+    def _update(self, note: Note) -> None:
         """
-        Update the Note widgets
+        Update the note widgets with the current note's details.
+
+        :param note: The note object to update the widgets with.
+        :type note: Note
         """
         self.textBox.setText(note.text)
         self.lineEdit1.setText(note.name)
@@ -311,9 +318,9 @@ class NotesEditorModule(CcpnModule):
         self.noteWidget.show()
         self.show()
 
-    def _deleteNote(self):
+    def _deleteNote(self) -> None:
         """
-        Delete the current note with the delete button
+        Delete the current note.
         """
         if self.note:
             self.note.delete()

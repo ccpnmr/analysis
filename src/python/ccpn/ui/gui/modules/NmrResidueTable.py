@@ -10,8 +10,7 @@ Geerten 1-7/12/2016; 11/04/2017
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -23,8 +22,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-14 11:49:19 +0100 (Mon, October 14, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__dateModified__ = "$dateModified: 2025-01-06 17:46:56 +0000 (Mon, January 06, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -104,6 +103,8 @@ class NmrResidueTableModule(CcpnTableModule):
     def _setWidgets(self, settingsWidget, mainWidget, nmrChain, selectFirstItem):
         """Set up the widgets for the module
         """
+        # hack for the minute because should be called _settings for consistency :|
+        self._settings = None
         # add to settings widget
         self.nmrResidueTableSettings = StripPlot(parent=settingsWidget, mainWindow=self.mainWindow,
                                                  includeDisplaySettings=self.includeDisplaySettings,
@@ -141,9 +142,8 @@ class NmrResidueTableModule(CcpnTableModule):
         """Set the active callbacks for the module
         """
         if self.activePulldownClass:
-            self._setCurrentPulldown = CurrentNotifier(
-                                                targetName=self.activePulldownClass._pluralLinkName,
-                                                callback=self._mainFrame._selectCurrentPulldownClass)
+            self.setCurrentNotifier(targetName=self.activePulldownClass._pluralLinkName,
+                                    callback=self._mainFrame._selectCurrentPulldownClass)
 
             # set the active callback from the pulldown
             self._mainFrame.setActivePulldownClass(coreClass=self.activePulldownClass,
@@ -157,16 +157,6 @@ class NmrResidueTableModule(CcpnTableModule):
         """Select the object in the table
         """
         self._mainFrame.selectTable(table)
-
-    def _closeModule(self):
-        if self.activePulldownClass:
-            if self._setCurrentPulldown:
-                self._setCurrentPulldown.unRegisterNotifier()
-            if self.nmrResidueTableSettings:
-                self.nmrResidueTableSettings._cleanupWidget()
-        if self.tableFrame:
-            self.tableFrame._cleanupWidget()
-        super()._closeModule()
 
 
 KD = 'Kd'
@@ -605,94 +595,94 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
 # _NewCSMNmrResidueTable
 #=========================================================================================
 
-class _NewCSMNmrResidueTableWidget(_NewNmrResidueTableWidget):
-    """Custom nmrResidue Table with extra columns used in the ChemicalShiftsMapping Module
-    """
-    className = '_NewCSMNmrResidueTableWidget'
-
-    def setCheckBoxCallback(self, checkBoxCallback):
-        # enable callback on the checkboxes
-        self._checkBoxCallback = checkBoxCallback
-
-    #=========================================================================================
-    # Table functions
-    #=========================================================================================
-
-    def _getTableColumns(self, nmrChain):
-        """format of column = ( Header Name, value, tipText, editOption)
-        editOption allows the user to modify the value content by doubleclick
-        """
-        cols = ColumnClass([
-            ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None, None),
-            ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None, None),
-            ('_object', lambda nmrResidue: nmrResidue, 'Object', None, None),
-            ('Index', lambda nmrResidue: self._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
-            ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
-            ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
-            ('Selected', lambda nmrResidue: self._getSelectedNmrAtomNames(nmrResidue),
-             'NmrAtoms selected in NmrResidue', None, None),
-            ('Spectra', lambda nmrResidue: self._getNmrResidueSpectraCount(nmrResidue),
-             'Number of spectra selected for calculating the deltas', None, None),
-            (Deltas, lambda nmrResidue: nmrResidue._delta, '', None, None),
-            (KD, lambda nmrResidue: nmrResidue._estimatedKd, '', None, None),
-            ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift,
-             'Include this residue in the Mapping calculation',
-             lambda nmr, value: self._setChecked(nmr, value), None),
-            # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None, None),
-            ('Comment', lambda nmr: self._getCommentText(nmr), 'Notes', lambda nmr, value: self._setComment(nmr, value),
-             None)
-            ])  #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
-
-        return cols
-
-    #=========================================================================================
-    # object properties
-    #=========================================================================================
-
-    @staticmethod
-    def _setChecked(obj, value):
-        """CCPN-INTERNAL: Insert a comment into GuiTable
-        """
-        obj._includeInDeltaShift = value
-        obj._finaliseAction('change')
-
-    @staticmethod
-    def _getNmrResidueSpectraCount(nmrResidue):
-        """CCPN-INTERNAL: Insert an index into ObjectTable
-        """
-        try:
-            return nmrResidue.spectraCount
-        except Exception:
-            return None
-
-    @staticmethod
-    def _getSelectedNmrAtomNames(nmrResidue):
-        """CCPN-INTERNAL: Insert an index into ObjectTable
-        """
-        try:
-            return ', '.join(nmrResidue.selectedNmrAtomNames)
-        except Exception:
-            return None
-
-    def _selectPullDown(self, value):
-        """Used for automatic restoring of widgets
-        """
-        self.moduleParent._modulePulldown.select(value)
-        try:
-            if self.chemicalShiftsMappingModule is not None:
-                self.chemicalShiftsMappingModule._updateModule()
-        except Exception as es:
-            getLogger().warning(f'Impossible update chemicalShiftsMappingModule from restoring {es}')
+# class _NewCSMNmrResidueTableWidget(_NewNmrResidueTableWidget):
+#     """Custom nmrResidue Table with extra columns used in the ChemicalShiftsMapping Module
+#     """
+#     className = '_NewCSMNmrResidueTableWidget'
+#
+#     def setCheckBoxCallback(self, checkBoxCallback):
+#         # enable callback on the checkboxes
+#         self._checkBoxCallback = checkBoxCallback
+#
+#     #=========================================================================================
+#     # Table functions
+#     #=========================================================================================
+#
+#     def _getTableColumns(self, nmrChain):
+#         """format of column = ( Header Name, value, tipText, editOption)
+#         editOption allows the user to modify the value content by doubleclick
+#         """
+#         cols = ColumnClass([
+#             ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None, None),
+#             ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None, None),
+#             ('_object', lambda nmrResidue: nmrResidue, 'Object', None, None),
+#             ('Index', lambda nmrResidue: self._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
+#             ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
+#             ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
+#             ('Selected', lambda nmrResidue: self._getSelectedNmrAtomNames(nmrResidue),
+#              'NmrAtoms selected in NmrResidue', None, None),
+#             ('Spectra', lambda nmrResidue: self._getNmrResidueSpectraCount(nmrResidue),
+#              'Number of spectra selected for calculating the deltas', None, None),
+#             (Deltas, lambda nmrResidue: nmrResidue._delta, '', None, None),
+#             (KD, lambda nmrResidue: nmrResidue._estimatedKd, '', None, None),
+#             ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift,
+#              'Include this residue in the Mapping calculation',
+#              lambda nmr, value: self._setChecked(nmr, value), None),
+#             # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None, None),
+#             ('Comment', lambda nmr: self._getCommentText(nmr), 'Notes', lambda nmr, value: self._setComment(nmr, value),
+#              None)
+#             ])  #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
+#
+#         return cols
+#
+#     #=========================================================================================
+#     # object properties
+#     #=========================================================================================
+#
+#     @staticmethod
+#     def _setChecked(obj, value):
+#         """CCPN-INTERNAL: Insert a comment into GuiTable
+#         """
+#         obj._includeInDeltaShift = value
+#         obj._finaliseAction('change')
+#
+#     @staticmethod
+#     def _getNmrResidueSpectraCount(nmrResidue):
+#         """CCPN-INTERNAL: Insert an index into ObjectTable
+#         """
+#         try:
+#             return nmrResidue.spectraCount
+#         except Exception:
+#             return None
+#
+#     @staticmethod
+#     def _getSelectedNmrAtomNames(nmrResidue):
+#         """CCPN-INTERNAL: Insert an index into ObjectTable
+#         """
+#         try:
+#             return ', '.join(nmrResidue.selectedNmrAtomNames)
+#         except Exception:
+#             return None
+#
+#     def _selectPullDown(self, value):
+#         """Used for automatic restoring of widgets
+#         """
+#         self.moduleParent._modulePulldown.select(value)
+#         try:
+#             if self.chemicalShiftsMappingModule is not None:
+#                 self.chemicalShiftsMappingModule._updateModule()
+#         except Exception as es:
+#             getLogger().warning(f'Impossible update chemicalShiftsMappingModule from restoring {es}')
 
 
 #=========================================================================================
 # NmrResidueTableFrame
 #=========================================================================================
 
-class _CSMNmrResidueTableFrame(NmrResidueTableFrame):
-    """Frame containing the pulldown and the table widget
-    """
-    _TableKlass = _NewCSMNmrResidueTableWidget
+# class _CSMNmrResidueTableFrame(NmrResidueTableFrame):
+#     """Frame containing the pulldown and the table widget
+#     """
+#     _TableKlass = _NewCSMNmrResidueTableWidget
 
 
 #=========================================================================================

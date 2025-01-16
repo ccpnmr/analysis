@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-15 12:09:49 +0100 (Tue, October 15, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__dateModified__ = "$dateModified: 2025-01-03 18:35:02 +0000 (Fri, January 03, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,8 +28,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import contextlib
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import pyqtSignal as Signal, pyqtSlot as Slot
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Button import Button
@@ -38,14 +38,14 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont, getFontHeight
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER, SOFTDIVIDER, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.HLine import HLine, LabeledHLine
-from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, SpectrumDisplayPulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from functools import partial
@@ -69,7 +69,9 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.DataTable import DataTable
 from ccpn.core.ViolationTable import ViolationTable
+from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
+from ccpn.util.Logging import getLogger
 
 
 ALL = '<Use all>'
@@ -91,10 +93,10 @@ LineEditsMinimumWidth = 195
 
 class SpectrumDisplaySettings(Widget, SignalBlocking):
     # signal for parentWidgets to respond to changes in the widget
-    settingsChanged = pyqtSignal(dict)
-    symbolsChanged = pyqtSignal(dict)
-    stripArrangementChanged = pyqtSignal(int)
-    zPlaneNavigationModeChanged = pyqtSignal(int)
+    settingsChanged = Signal(dict)
+    symbolsChanged = Signal(dict)
+    stripArrangementChanged = Signal(int)
+    zPlaneNavigationModeChanged = Signal(int)
 
     def __init__(self, parent=None,
                  mainWindow=None,
@@ -680,13 +682,13 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         self._settingsChanged()
 
-    @pyqtSlot()
+    @Slot()
     def _settingsChanged(self):
         """Handle changing the X axis units
         """
         self.settingsChanged.emit(self.getValues())
 
-    @pyqtSlot(dict)
+    @Slot(dict)
     def _lockAspectRatioChangedInDisplay(self, aDict):
         """Respond to an external change in the lock status of a strip
         """
@@ -698,7 +700,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
             self.blockSignals(False)
 
-    @pyqtSlot(dict)
+    @Slot(dict)
     def _aspectRatioChangedInDisplay(self, aDict):
         """Respond to an external change in the aspect ratio of a strip
         """
@@ -716,7 +718,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         self.blockSignals(False)
 
-    @pyqtSlot()
+    @Slot()
     def _symbolsChanged(self):
         """Handle changing the symbols
         """
@@ -726,7 +728,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.aliasLabelsEnabledData.setEnabled(_enabled)
         self.aliasShadeData.setEnabled(_enabled)
 
-    @pyqtSlot(dict)
+    @Slot(dict)
     def _symbolsChangedInDisplay(self, aDict):
         """Respond to an external change in symbol settings
         """
@@ -811,7 +813,7 @@ class _commonSettings():
         if not self.application or not displays or len(displays) > 1:
             return 0, None, None, None
 
-        from ccpn.core.lib.AxisCodeLib import getAxisCodeMatch, getAxisCodeMatchIndices
+        from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 
         validSpectrumViews = {}
 
@@ -839,9 +841,6 @@ class _commonSettings():
         if not validSpectrumViews:
             return 0, None, None, None
 
-        # maxLen = 0
-        # refAxisCodes = None
-
         # need a list of all unique axisCodes in the spectra in the selected spectrumDisplays
         from ccpn.util.OrderedSet import OrderedSet
 
@@ -868,94 +867,6 @@ class _commonSettings():
             axisLabels[ii] = ', '.join(visibleAxisCodes[ii])
 
         return ll, axisLabels, spectrumIndices, validSpectrumViews
-
-        # if not validSpectrumViews:
-        # from ccpn.util.OrderedSet import OrderedSet
-        #
-        # # get list of unique axisCodes
-        # visibleAxisCodes = OrderedSet()
-        # for spectrum, visible in validSpectrumViews.items():
-        #     for axis in spectrum.axisCodes:
-        #         visibleAxisCodes.add(axis)
-        #
-        # # get mapping of each spectrum onto this list
-        # spectrumIndices = {}
-        # for spectrum, visible in validSpectrumViews.items():
-        #     indices = getAxisCodeMatchIndices(spectrum.axisCodes, visibleAxisCodes, exactMatch=False)  #True)
-        #     spectrumIndices[spectrum] = indices
-        #     maxLen = max(spectrum.dimensionCount, maxLen)
-        #
-        # # return if nothing to process
-        # if not maxLen:
-        #     return 0, None, None, None
-        #
-        # axisLabels = [', '.join(ax) for ax in visibleAxisCodes]
-        #
-        # return maxLen, tuple(visibleAxisCodes), spectrumIndices, validSpectrumViews
-
-        # for spectrum, visible in validSpectrumViews.items():
-        #
-        #     # get the max length of the axisCodes for the displayed spectra
-        #     if len(spectrum.axisCodes) > maxLen:
-        #         maxLen = len(spectrum.axisCodes)
-        #         refAxisCodes = list(spectrum.axisCodes)
-        #
-        # mappings = {}
-        # for spectrum, visible in validSpectrumViews.items():
-        #
-        #     matchAxisCodes = spectrum.axisCodes
-        #
-        #     foundMap = getAxisCodeMatch(matchAxisCodes, refAxisCodes, allMatches=True)
-        #     mappings.update(foundMap)
-        #
-        #     # for refAxisCode in refAxisCodes:
-        #     #     for matchAxisCode in matchAxisCodes:
-        #     #         mapping = getAxisCodeMatch([matchAxisCode], [refAxisCode])
-        #     #         for k, v in mapping.items():
-        #     #             if v not in mappings:
-        #     #                 mappings[v] = set([k])
-        #     #             else:
-        #     #                 mappings[v].add(k)
-        #
-        # # example of mappings dict
-        # # ('Hn', 'C', 'Nh')
-        # # {'Hn': {'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
-        # # {'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
-        # # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
-        # # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
-        #
-        # # far too complicated!
-        # axisLabels = [set() for ii in range(len(mappings))]
-        #
-        # spectrumIndex = {}
-        # # go through the spectra again
-        # for spectrum, visible in validSpectrumViews.items():
-        #
-        #     spectrumIndex[spectrum] = [0 for ii in range(len(spectrum.axisCodes))]
-        #
-        #     # get the spectrum dimension axisCode, and see if is already there
-        #     for spectrumDim, spectrumAxis in enumerate(spectrum.axisCodes):
-        #
-        #         axisTestCodes = tuple(mappings.keys())
-        #         if spectrumAxis in axisTestCodes:
-        #             spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(spectrumAxis)
-        #             axisLabels[spectrumIndex[spectrum][spectrumDim]].add(spectrumAxis)
-        #
-        #         else:
-        #             # if the axisCode is not in the reference list then find the mapping from the dict
-        #             for k, v in mappings.items():
-        #                 if spectrumAxis in v:
-        #                     # refAxisCodes[dim] = k
-        #                     spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(k)
-        #                     axisLabels[axisTestCodes.index(k)].add(spectrumAxis)
-        #
-        # axisLabels = [', '.join(ax) for ax in axisLabels]
-        #
-        # return maxLen, axisLabels, spectrumIndex, validSpectrumViews
-        # # self.axisCodeOptions.setCheckBoxes(texts=axisLabels, tipTexts=axisLabels)
-        #
-        # else:
-        #     return 0, None, None, None
 
     @staticmethod
     def _removeWidget(widget, removeTopWidget=False):
@@ -1053,7 +964,8 @@ class _commonSettings():
         """Populate all spectrumFrames into a moreLessFrame
         :param data : Required for SpectrumView notifiers.
         """
-        def _codeDictUpdate(displayKey : str = None, checkBox : CheckBox = None):
+
+        def _codeDictUpdate(displayKey: str = None, checkBox: CheckBox = None):
             """update axisCode dict when check boxes are changed.
             """
             if (display is None) or (box is None):
@@ -1079,16 +991,20 @@ class _commonSettings():
         self.spectrumIndex = []
         for num, display in enumerate(displays):
             maxLen, axisLabels, specInd, validSpectrumViews = self._getSpectraFromDisplays([display])
+            if not maxLen:
+                continue
+
             self.spectrumIndex.append(specInd)
 
-            curFrame = MoreLessFrame(self._spectraWidget, name=display.pid, showMore=True, grid=(num, 0), gridSpan=(1,4))
+            curFrame = MoreLessFrame(self._spectraWidget, name=display.pid, showMore=True, grid=(num, 0),
+                                     gridSpan=(1, 4))
 
             _frame = curFrame.contentsFrame
             f_row = 0
             Label(_frame, text='Restricted Axes', grid=(f_row, 0))
 
             axisCodeOptions = CheckBoxes(_frame, selectedInd=None, texts=[],
-                                         callback=self._changeAxisCode, grid=(f_row,1))
+                                         callback=self._changeAxisCode, grid=(f_row, 1))
             axisCodeOptions.setCheckBoxes(texts=axisLabels, tipTexts=axisLabels)
             for box in axisCodeOptions.checkBoxes:
                 box.stateChanged.connect(partial(_codeDictUpdate, f'{display}', box))
@@ -1119,7 +1035,8 @@ class _commonSettings():
                     if data is not None and data.get(Notifier.TRIGGER) == 'delete':
                         notifObj = data.get(Notifier.OBJECT)
                         # check if it is a SpectrumView and both correct spectrum display and spectrum.
-                        if isinstance(notifObj, SpectrumView) and notifObj.strip.spectrumDisplay is display and notifObj.spectrum is spectrum:
+                        if isinstance(notifObj,
+                                      SpectrumView) and notifObj.strip.spectrumDisplay is display and notifObj.spectrum is spectrum:
                             continue
 
                     f_row += 1
@@ -1463,12 +1380,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
     def _registerNotifiers(self):
         """Notifiers for responding to spectrumViews
         """
-        # # can't use setNotifier as not guaranteed a parent abstractWrapperObject
-        # GWV 20/3/24: use only one trigger per Notifier instantiation; use _makeNotifiers
-        # self._spectrumViewNotifier = Notifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],  # DELETE not registering
-        #                                       SpectrumView.className,
-        #                                       self._spectrumViewChanged,
-        #                                       onceOnly=True)
+        # can't use setNotifier as not guaranteed a parent abstractWrapperObject
         if self.project and self.includeSpectrumTable:
             # suppress is a bit of a hack :| but settings needs revisiting
             with contextlib.suppress(Exception):
@@ -1488,41 +1400,26 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                                                 callback=self._spectrumDisplaySelectionPulldownCallback)
                 return
         # if anything goes wrong unregister still works
-        self._notifierRename = None
-        self._notifierDelete = None
-        self._notifierCreate = None
+        self._notifierRename = self._notifierDelete = self._notifierCreate = None
 
     def _unRegisterNotifiers(self):
         """Unregister notifiers
         """
+        getLogger().debug2(f'==> StripPlot  _unRegisterNotifiers')
         if self._notifierRename:
             self._notifierRename.unRegister()
+            self._notifierRename = None
         if self._notifierDelete:
             self._notifierDelete.unRegister()
+            self._notifierDelete = None
         if self._notifierCreate:
             self._notifierCreate.unRegisterNotifier()
+            self._notifierCreate = None
         if self.includeNmrChainPullSelection:
             self.ncWidget.unRegister()
-        if self.includeSpectrumTable:
-            self.spectrumDisplayPulldown._close()
-
-    # not required as never called, now uses SpectrumDisplaySelectionWidget notifiers
-    # def _spectrumViewChanged(self, data):
-    #     """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
-    #     """
-    #     if self.includeSpectrumTable:
-    #         gid = self.spectrumDisplayPulldown.getText()
-    #         # self._fillSpectrumFrame([self.application.getByGid(gid)], data)
-    #         self._spectrumDisplaySelectionPulldownCallback({f'{self.application.getByGid(gid)}': data})
-    #
-    # def _spectrumViewVisibleChanged(self):
-    #     """Respond to a visibleChanged in one of the spectrumViews
-    #     """
-    #     if self.includeSpectrumTable:
-    #         # self._fillSpectrumFrame(self.displaysWidget._getDisplays())
-    #         # gid = self.spectrumDisplayPulldown.getText()
-    #         # self._fillSpectrumFrame([self.application.getByGid(gid)])
-    #         self._spectrumDisplaySelectionPulldownCallback()
+            self.ncWidget = None
+        self.spectrumDisplayPulldown = None
+        self.displaysWidget = None
 
     def doCallback(self):
         """Handle the user callback
@@ -1535,12 +1432,14 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         """
         pass
 
-    def _cleanupWidget(self):
-        """Cleanup the notifiers that are left behind after the widget is closed
+    def closeEvent(self, event):
+        """Clean-up and close.
         """
+        from ccpn.ui.gui.lib.WidgetClosingLib import CloseHandler
+
         self._unRegisterNotifiers()
-        if self.displaysWidget:
-            self.displaysWidget._close()
+        with CloseHandler(self):
+            super().closeEvent(event)
 
     def _selectionPulldownCallback(self, item):
         """Notifier Callback for selecting NmrChain
@@ -1610,6 +1509,11 @@ SETTINGSWIDGET = 'widget'
 
 class ModuleSettingsWidget(Widget):  #, _commonSettings):
 
+    mainWindow = WeakRefDescriptor()
+    application = WeakRefDescriptor()
+    project = WeakRefDescriptor()
+    current = WeakRefDescriptor()
+
     def __init__(self, parent=None,
                  mainWindow=None,
                  settingsDict=None,
@@ -1623,6 +1527,7 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
         if mainWindow:
+            # weakrefs to remove hard-links
             self.application = mainWindow.application
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
@@ -1762,17 +1667,15 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
         """
         pass
 
-    def _cleanupWidget(self):
-        """Cleanup the notifiers that are left behind after the widget is closed
+    def closeEvent(self, event):
+        """Clean-up and close.
         """
-        self._unRegisterNotifiers()
+        from ccpn.ui.gui.lib.WidgetClosingLib import CloseHandler
 
-    # def _getCheckBox(self, widgetName):
-    #     """Get the required widget from the new setting Widget class
-    #     Should be moved to a new settings class
-    #     """
-    #     if widgetName in self.checkBoxes and SETTINGSCHECKBOX in self.checkBoxes[widgetName]:
-    #         return self.checkBoxes[widgetName][SETTINGSCHECKBOX]
+        self.widgetsDict = None
+        self.checkBoxes = None
+        with CloseHandler(self):
+            super().closeEvent(event)
 
     def getWidget(self, widgetName):
         """Get the required widget from the new setting Widget class
@@ -1787,7 +1690,11 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
 
 class ObjectSelectionWidget(ListCompoundWidget):
     KLASS = None
-    listChanged = pyqtSignal()
+    listChanged = Signal()
+
+    mainWindow = WeakRefDescriptor()
+    application = WeakRefDescriptor()
+    project = WeakRefDescriptor()
 
     def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',
                  vPolicy='minimal', fixedWidths=(None, None, None), orientation='left',
@@ -1810,6 +1717,7 @@ class ObjectSelectionWidget(ListCompoundWidget):
                 else (standardListItems + displayText)
 
         if mainWindow:
+            # changed to weakrefs to remove hard-link
             self.mainWindow = mainWindow
             self.application = mainWindow.application
             self.project = mainWindow.application.project
@@ -1843,6 +1751,7 @@ class ObjectSelectionWidget(ListCompoundWidget):
 
         # Notifiers
         if self.project:
+            getLogger().debug2(f'--> notifiers {self.__class__.__name__}')
             self._notifierRename = Notifier(theObject=self.project, trigger=Notifier.RENAME,
                                             targetName=self.KLASS.className,
                                             callback=self._objRenamedCallback,
@@ -1857,16 +1766,19 @@ class ObjectSelectionWidget(ListCompoundWidget):
                                             targetName=self.KLASS.className,
                                             callback=self._objCreatedCallback,
                                             setterObject=self)
-
-        else:
-            self._notifierRename = self._notifierDelete = None
+            return
+        self._notifierRename = self._notifierDelete = self._notifierCreate = None
 
     def _passThroughListChanged(self, *args, **kwds):
         """Pass through the signal from the listWidget."""
         self.listChanged.emit()
 
-    def _close(self):
-        """Unregister notifiers and close."""
+    def deleteNotifiers(self):
+        """
+        Unregister notifiers and close.
+        """
+        # handled by base-class
+        getLogger().debug2(f'==> deleteNotifiers  {self.__class__.__name__}')
         if self._notifierRename:
             self._notifierRename.unRegisterNotifier()
             self._notifierRename = None
@@ -1876,6 +1788,7 @@ class ObjectSelectionWidget(ListCompoundWidget):
         if self._notifierCreate:
             self._notifierCreate.unRegisterNotifier()
             self._notifierCreate = None
+        super().deleteNotifiers()
 
     def select(self, item, blockSignals=False):
         """Convenience: Set item in Pulldown; works with text or item"""
@@ -2012,7 +1925,6 @@ class UniqueNmrResidueTypeSelectionWidget(ObjectSelectionWidget):
     def _fillPulldownListWidget(self):
         """Fill the pulldownList with the currently available objects
         """
-        from ccpn.util.Common import sortByPriorityList
 
         ## could add some priority list to show on top.
         ll = [SelectToAdd] + self.standardListItems
@@ -2041,7 +1953,6 @@ class _SeriesInputDataTableSelectionWidget(ObjectSelectionWidget):
         """ Override original behavior to allow only the right dataType """
 
         import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-        from ccpn.framework.lib.experimentAnalysis.SeriesTables import InputSeriesFrameBC, ALL_SERIES_DATA_TYPES
 
         pulldown = self.pulldownList
         ll = [SelectToAdd] + self.standardListItems
@@ -2113,8 +2024,9 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
         self.addText(obj.pid)
 
     def unRegister(self):
-        """Unregister the notifiers; needs to be called when disgarding a instance
+        """Unregister the notifiers; needs to be called when disgarding an instance
         """
+        getLogger().debug2(f'==> unRegister  {self.__class__.__name__}')
         self.deleteNotifiers()
 
     def _objectWidgetChanged(self, data=None):
@@ -2154,7 +2066,6 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
 
 def main():
     import os
-    import sys
 
     def myCallback(ph0, ph1, pivot, direction):
         print(ph0, ph1, pivot, direction)

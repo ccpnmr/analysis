@@ -87,12 +87,10 @@ __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
-               )
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y"
-                )
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -137,6 +135,7 @@ from traitlets import List as _List
 from traitlets import Set as _Set
 from traitlets import Dict as _Dict
 from traitlets import Tuple as _Tuple
+from traitlets import Union as _Union
 
 from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase, DictTraitJsonHandlerABC, \
     ListTraitJsonHandlerABC, CcpNmrJsonClassHandlerABC
@@ -148,7 +147,6 @@ from ccpn.util.Logging import getLogger
 
 ITEMS_CHANGED = 'itemsChanged'
 
-# _VALIDATOR = 'Validator'
 
 class _CcpNmrTrait(object):
     """A class that:
@@ -225,6 +223,14 @@ class _CcpNmrTrait(object):
 #=========================================================================================
 # Actual trait definitions
 #=========================================================================================
+
+class Union(_Union, _CcpNmrTrait):
+    def __init__(self, *args, **kwargs):
+        if not 'default_value' in kwargs:
+            raise ValueError('%s Traitlet without explicit default_value' % self.__class__.__name__)
+        _Union.__init__(self, *args, **kwargs)
+        _CcpNmrTrait.__init__(self)
+
 
 class Any(_Any, _CcpNmrTrait):
     """A trait for any object; implies no validations as all types/values are
@@ -892,7 +898,7 @@ class TList(List):
 
 class RecursiveList(List):
     """A list trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
-    DEPRICATED: use List or CList
+    DEPRECATED: use List or CList
     """
     pass
 
@@ -914,7 +920,7 @@ class Set(_Set, _CcpNmrTrait):
 
 class RecursiveSet(Set):
     """A Set trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
-    DEPRICATED: use Set
+    DEPRECATED: use Set
     """
     pass
 
@@ -1026,7 +1032,7 @@ class RecursiveDict(Dict):
 
 
 class Adict(TraitType, _CcpNmrTrait):
-    """A trait that defines a json serialisable AttributeDict; 
+    """A trait that defines a json serialisable AttributeDict;
     dicts or (key,value) iterables are automatically cast into AttributeDict
     """
     default_value = AttributeDict()
@@ -1054,6 +1060,7 @@ class Adict(TraitType, _CcpNmrTrait):
         else:
             raise TypeError(f'validate(value): invalid, got {value} but expected an AttributeDict, dict or iterable')
 
+
     # trait-specific json handler
     class jsonHandler(DictTraitJsonHandlerABC):
         klass = AttributeDict
@@ -1066,6 +1073,8 @@ class RecursiveAdict(Adict):
     Recursion is active
     DEPRICATED: use Adict instead
     """
+
+
     # trait-specific json handler
     pass
 # end class
@@ -1099,6 +1108,7 @@ class Odict(TraitType, _CcpNmrTrait):
             return  OrderedDict(value)
         else:
             raise TypeError(f'validate(value): invalid, got {value} but expected an OrderedDict, dict or iterable')
+
 
     # trait-specific json handler
     class jsonHandler(DictTraitJsonHandlerABC):
@@ -1334,6 +1344,7 @@ class CPath(TraitType, _CcpNmrTrait):
 
         return value
 
+
     # trait-specific json handler
     class jsonHandler(TraitJsonHandlerBase):
         """Serialise Path to be json compatible.
@@ -1350,6 +1361,8 @@ class CPath(TraitType, _CcpNmrTrait):
                 value = Path(value)
             return value
     # end class
+
+
 # end class
 
 

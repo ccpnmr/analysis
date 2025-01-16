@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-06 11:32:59 +0100 (Fri, September 06, 2024) $"
-__version__ = "$Revision: 3.2.6 $"
+__dateModified__ = "$dateModified: 2024-12-20 11:03:38 +0000 (Fri, December 20, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -415,16 +415,8 @@ class Base(DropBase, SignalBlocking):
 
         # Allow (Gui-)Notifiers to be registered with this widget
         from ccpn.core.lib.Notifiers import NotifierBase, _NotifiersDict
+
         setattr(self, NotifierBase.REGISTERED_NOTIFIERS_DICT, _NotifiersDict())
-
-        # connect destruction of widget to onDestroyed method,
-        # which subsequently can be subclassed
-        self.destroyed.connect(partial(self.onDestroyed, self))
-
-    @staticmethod  # has to be a static method
-    def onDestroyed(widget):
-        # print("DEBUG on destroyed:", widget)
-        pass
 
     def setGridLayout(self, margins=(0,0,0,0), spacing=(0, 0)):
         """Add a QGridlayout to self

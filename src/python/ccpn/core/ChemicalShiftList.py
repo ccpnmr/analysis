@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-04 21:48:31 +0000 (Mon, November 04, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-01-10 18:01:46 +0000 (Fri, January 10, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -143,6 +143,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.ShiftList._metaclass.qualifiedName()
+    _wrappedData: Nmr.ShiftList
 
     _ignoreNewApiObjectCallback = True
 
@@ -160,9 +161,9 @@ class ChemicalShiftList(AbstractWrapperObject):
 
         super().__init__(project, wrappedData)
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # CCPN Properties
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @property
     def _apiShiftList(self) -> Nmr.ShiftList:
@@ -437,9 +438,9 @@ class ChemicalShiftList(AbstractWrapperObject):
                 #
                 # raise ValueError(f'{self.className}.getChemicalShift: shift not found')
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # property STUBS: hot-fixed later
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @property
     def _oldChemicalShifts(self) -> list['_oldChemicalShift']:
@@ -448,9 +449,9 @@ class ChemicalShiftList(AbstractWrapperObject):
         """
         return []
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # getter STUBS: hot-fixed later
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def _getOldChemicalShift(self, relativeId: str) -> '_OldChemicalShift | None':
         """STUB: hot-fixed later
@@ -464,9 +465,9 @@ class ChemicalShiftList(AbstractWrapperObject):
     #     """
     #     return None
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Core methods
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @logCommand(get='self')
     def duplicate(self, includeSpectra=False, autoUpdate=False):
@@ -677,9 +678,9 @@ class ChemicalShiftList(AbstractWrapperObject):
         """
         return self._shifts  # ignore deleted
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # CCPN functions
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
@@ -740,10 +741,10 @@ class ChemicalShiftList(AbstractWrapperObject):
 
         return chemicalShiftList
 
-    #===========================================================================================
+    #-----------------------------------------------------------------------------------------==
     # new<Object> and other methods
     # Call appropriate routines in their respective locations
-    #===========================================================================================
+    #-----------------------------------------------------------------------------------------==
 
     @logCommand(get='self')
     def newChemicalShift(self,
@@ -815,7 +816,7 @@ class ChemicalShiftList(AbstractWrapperObject):
                            comment=comment)
         # add to dataframe - this is in undo stack and marked as modified
         # Note the "additional" tuple around _row; needed to match the shape as one row, 12 columns
-        _dfRow = pd.DataFrame(data=(_row,), columns=CS_COLUMNS)
+        _dfRow = pd.DataFrame(data=(_row,), columns=list(CS_COLUMNS))
 
         if data is None or data.empty:
             # set as the new subclassed DataFrameABC
@@ -1001,7 +1002,7 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
         raise RuntimeError('Unable to generate new ChemicalShiftList')
 
     # instantiate a new empty dataframe
-    df = pd.DataFrame(columns=CS_COLUMNS)
+    df = pd.DataFrame(columns=list(CS_COLUMNS))
     df.set_index(df[CS_UNIQUEID], inplace=True, )
 
     # set as the new subclassed DataFrameABC

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:18 +0100 (Fri, October 25, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-01-06 17:36:50 +0000 (Mon, January 06, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -72,7 +72,7 @@ class SpectrumToolBar(ToolBar):
         self._currentSpectrumNotifier = CurrentNotifier(
                                                  targetName=Spectrum._pluralLinkName,
                                                  callback=self._onCurrentSpectrumNotifier,
-                                                 ),
+                                                 )
         self._styleSheet = """
                             /*  currentField is a property on the widgetAction
                                 that can be set to True to enable a highlighted border;
@@ -696,3 +696,14 @@ class SpectrumToolBar(ToolBar):
 
     def _onCurrentSpectrumNotifier(self, data):
         self._setButtonColourScheme()
+
+    def closeEvent(self, event):
+        """Clean-up and close.
+        """
+        from ccpn.ui.gui.lib.WidgetClosingLib import CloseHandler
+
+        if self._currentSpectrumNotifier:
+            self._currentSpectrumNotifier.unRegister()
+            self._currentSpectrumNotifier = None
+        with CloseHandler(self):
+            super().closeEvent(event)

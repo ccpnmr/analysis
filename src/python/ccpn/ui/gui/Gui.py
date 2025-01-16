@@ -4,7 +4,7 @@ The top-level Gui class for all user interactions
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-01-06 17:24:27 +0000 (Mon, January 06, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1253,8 +1253,7 @@ class Gui(Ui, _Gui_V3_V4):
             self.mainWindow._closeExtraWindowModules()
             self.mainWindow._stopPythonConsole()
             _sideBar = self.mainWindow._getSideBar()
-            _sideBar.clearSideBar()
-            _sideBar.deleteLater()
+            _sideBar.close()
             self.mainWindow.deleteLater()
             self._mainWindow = None
 

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-26 13:30:14 +0000 (Tue, November 26, 2024) $"
+__dateModified__ = "$dateModified: 2025-01-03 18:56:46 +0000 (Fri, January 03, 2025) $"
 __version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
@@ -190,25 +190,13 @@ class GuiStrip1d(GuiStrip):
 
         self._setStripTiling()
 
-    def close(self):
-        """Clean up and close
+    def closeEvent(self, event):
+        """Clean-up and close.
         """
-        try:
-            self._defaultMenu = None
-            self._phasingMenu = None
-            self._peakMenu = None
-            self._integralMenu = None
-            self._multipletMenu = None
-            self._axisMenu = None
-            self._contextMenus = None
-            self.header.close()
-            self.header = None
-        except Exception as es:
-            getLogger().debug(f'there was a problem cleaning-up strip {self} {es}')
-        else:
-            getLogger().debug(f'cleaning-up strip {self}')
+        from ccpn.ui.gui.lib.WidgetClosingLib import CloseHandler
 
-        super().close()
+        with CloseHandler(self):
+            super().closeEvent(event)
 
     @property
     def symbolType(self):

@@ -4,7 +4,7 @@ This file contains the MainWindow class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-11 15:30:18 +0000 (Mon, November 11, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-01-03 18:50:58 +0000 (Fri, January 03, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,6 +37,8 @@ from PyQt5.QtCore import pyqtSlot
 
 from ccpn.util.Logging import getLogger
 
+from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
+from ccpn.util import Logging
 from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
@@ -131,6 +133,10 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
     WindowMaximiseMinimise = QtCore.pyqtSignal(bool)
 
+    # allows type-checking to recognise attributes
+    application = WeakRefDescriptor()
+    current = WeakRefDescriptor()
+
     def __init__(self, application=None):
 
         # Shortcuts only inserts methods
@@ -213,6 +219,22 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     #-----------------------------------------------------------------------------------------
 
     @property
+    def moduleArea(self):
+        return self._moduleAreaRef()
+
+    @moduleArea.setter
+    def moduleArea(self, value):
+        import weakref
+
+        def remove(wref, selfref=weakref.ref(self)):
+            getLogger().debug(f'{consoleStyle.fg.darkred}Clearing moduleArea '
+                              f'{wref}:{selfref()} {consoleStyle.reset}')
+
+        self._moduleAreaRef = weakref.ref(value, remove)
+        getLogger().debug(f'{consoleStyle.fg.darkgreen}Setting moduleArea '
+                          f'{self._moduleAreaRef()}{consoleStyle.reset}')
+
+    @property
     def spectrumDisplays(self) -> list:
         """Return list of SpectrumDisplay instances
         """
@@ -271,10 +293,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
     def _checkPalette(self, pal: QtGui.QPalette, theme: str = None, themeColour: str = None, themeSD: str = None):
         # test the stylesheet of the QTableView
-        styleSheet = """
-                        QPushButton {
-                            color: palette(text);
-                        }
+        styleSheet = """QPushButton { color: palette(text); }
                         QToolTip {
                             background-color: %(TOOLTIP_BACKGROUND)s;
                             color: %(TOOLTIP_FOREGROUND)s;
@@ -282,9 +301,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                             border: 1px solid %(TOOLTIP_FOREGROUND)s;
                             qproperty-margin: 4; 
                         }
-                        QMenu::item:disabled {
-                            color: palette(dark);
-                        }
+                        QMenu::item:disabled { color: palette(dark); }
                         QMenu::separator {
                             height: 1px;
                             background: qlineargradient(
@@ -293,16 +310,9 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                                             stop: 1 palette(text)
                                         );
                         }
-                        QMenuBar {
-                            color: palette(text);
-                        }
-                        QMenuBar::item:disabled {
-                            color: palette(dark);
-                        }
-                        QProgressBar {
-                            color: palette(text);
-                            text-align: center;
-                        }
+                        QMenuBar { color: palette(text); }
+                        QMenuBar::item:disabled { color: palette(dark); }
+                        QProgressBar { text-align: center; }
                         """
         # there is also some weird stuff with the qprogressbar text-colour:
         #   the left-edge of the text-label is its local 0%, the right-edge its local 100%,
@@ -1877,7 +1887,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             ## This shortcut should be removed from here, and enabled only on displays/tables as a localised shortcut
             popup = DeleteItemsPopup(parent=self, mainWindow=self, items=deleteItems)
             popup.exec()
-
 
     @logCommand('mainWindow.')
     def propagateAssignments(self):

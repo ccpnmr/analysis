@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-15 09:07:12 +0000 (Fri, November 15, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2024-12-20 11:03:38 +0000 (Fri, December 20, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -170,9 +170,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
         self.setContentsMargins(0, 0, 0, 0)
         self.currentModuleNames = []
         self._modulesNames = {}
-        self._ccpnModules = []
         self._modules = {}  # don't use self.docks, is not updated when removing docks
-        self._openedSpectrumDisplays = []  # keep track of the order of opened spectrumDisplays
         self._seenModuleStates = {}  # {className: {moduleName:'', state:widgetsState}}
         # self.setAcceptDrops(True) GWV not needed; handled by DropBase init
 
@@ -341,7 +339,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
     @property
     def ccpnModules(self) -> list:
         """return all current modules in area"""
-        return self._ccpnModules
+        ...
 
     @ccpnModules.getter
     def ccpnModules(self):
@@ -352,7 +350,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
     @property
     def modules(self) -> dict:
         """return all current modules in area as a dictionary. Don't use self.docks"""
-        return self._modules
+        return ...
 
     @ccpnModules.getter
     def modules(self):
@@ -367,7 +365,8 @@ class CcpnModuleArea(ModuleArea, DropBase):
         Return the list of opened spectrumDisplays in the order of their opening.
         Contrary to mainWindow.spectrumDisplays that return in alphabetical order.
         """
-        return [x for x in self._openedSpectrumDisplays if not x.isDeleted]
+        return sorted((x for x in self.mainWindow.spectrumDisplays if not x.isDeleted),
+                      key=lambda sp: sp._uniqueId)
 
     def repopulateModules(self):
         """
@@ -408,10 +407,6 @@ class CcpnModuleArea(ModuleArea, DropBase):
                     module.renameModule(nextAvailableName)
                     ## reset  widgets  as last time the module was opened
                     self._restoreAsTheLastSeenModule(module)
-
-
-            else:
-                self._openedSpectrumDisplays.append(module)
 
         # test that only one instance of the module is opened
         if hasattr(type(module), '_alreadyOpened'):
@@ -530,10 +525,6 @@ class CcpnModuleArea(ModuleArea, DropBase):
                 if module.label.nameEditor.isVisible():
                     modules.append(module)
         return modules
-
-    def _updateSpectrumDisplays(self):
-        self._openedSpectrumDisplays = [x for x in self._openedSpectrumDisplays if
-                                        x in self.mainWindow.spectrumDisplays]
 
     def _isNameEditing(self):
         """

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-06 17:08:09 +0000 (Mon, January 06, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-01-16 18:20:28 +0000 (Thu, January 16, 2025) $"
+__version__ = "$Revision: 3.2.13 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -557,6 +557,6 @@ class MainPlotPanel(GuiPanel):
         """Clean-up and close.
         """
         if self._selectCurrentCONotifier:
-            self._selectCurrentCONotifier.unRegister()
+            self._selectCurrentCONotifier.unRegisterNotifier()
             self._selectCurrentCONotifier = None
         super().closeEvent(event)

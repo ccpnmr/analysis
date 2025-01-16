@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-06 17:41:27 +0000 (Mon, January 06, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-01-16 18:20:28 +0000 (Thu, January 16, 2025) $"
+__version__ = "$Revision: 3.2.13 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -242,11 +242,11 @@ class NotesEditorModule(CcpnModule):
         Set a Notifier to call when a note is created/deleted/renamed/changed.
         Rename calls on name, change calls on any other attribute.
         """
-         self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                         Note.className,
-                         self._updateCallback)
-         self.setGuiNotifier(self.mainWidget, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                             self._processDroppedItems)
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                     Note.className,
+                     self._updateCallback)
+        self.setGuiNotifier(self.mainWidget, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                         self._processDroppedItems)
 
     def _applyNote(self) -> None:
         """

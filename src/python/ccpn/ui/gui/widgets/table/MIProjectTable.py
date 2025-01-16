@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-09 20:41:20 +0000 (Thu, January 09, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-01-16 18:20:28 +0000 (Thu, January 16, 2025) $"
+__version__ = "$Revision: 3.2.13 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -255,7 +255,7 @@ class _MIProjectTableABC(MITableABC, Base):
             self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
 
         self._droppedNotifier = GuiNotifier(self,
-                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                            GuiNotifier.DROPEVENT, DropBase.PIDS,
                                             self._processDroppedItems)
 
     def setModel(self, model: QtCore.QAbstractItemModel) -> None:
@@ -740,7 +740,7 @@ class _MIProjectTableABC(MITableABC, Base):
             self._searchNotifier.unRegisterNotifier()
             self._searchNotifier = None
         if self._droppedNotifier:
-            self._droppedNotifier.unRegister()
+            self._droppedNotifier.unRegisterNotifier()
             self._droppedNotifier = None
 
     def _preClose(self):
@@ -885,7 +885,7 @@ class _MIProjectTableABC(MITableABC, Base):
         super()._blockTableEvents(blanking, disableScroll, tableState)
         # block on first entry; increased in superclass
         if self._tableBlockingLevel == 1 and blanking and self.project:
-            self.project.blankNotification()
+            self.project._increaseNotificationBlanking()
 
     def _unblockTableEvents(self, blanking=True, disableScroll=False, tableState=None):
         """Unblock all updates/signals/notifiers in the table.
@@ -893,7 +893,7 @@ class _MIProjectTableABC(MITableABC, Base):
         """
         # unblock on last exit; decreased in superclass
         if self._tableBlockingLevel == 1 and blanking and self.project:
-            self.project.unblankNotification()
+            self.project._decreaseNotificationBlanking()
         super()._unblockTableEvents(blanking, disableScroll, tableState)
 
     #-----------------------------------------------------------------------------------------

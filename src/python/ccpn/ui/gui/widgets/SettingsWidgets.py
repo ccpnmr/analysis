@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-03 18:35:02 +0000 (Fri, January 03, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-01-16 18:16:50 +0000 (Thu, January 16, 2025) $"
+__version__ = "$Revision: 3.2.13 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1407,10 +1407,10 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         """
         getLogger().debug2(f'==> StripPlot  _unRegisterNotifiers')
         if self._notifierRename:
-            self._notifierRename.unRegister()
+            self._notifierRename.unRegisterNotifier()
             self._notifierRename = None
         if self._notifierDelete:
-            self._notifierDelete.unRegister()
+            self._notifierDelete.unRegisterNotifier()
             self._notifierDelete = None
         if self._notifierCreate:
             self._notifierCreate.unRegisterNotifier()

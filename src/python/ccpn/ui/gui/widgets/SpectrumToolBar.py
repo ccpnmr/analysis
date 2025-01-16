@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-06 17:36:50 +0000 (Mon, January 06, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-01-16 18:16:51 +0000 (Thu, January 16, 2025) $"
+__version__ = "$Revision: 3.2.13 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -703,7 +703,7 @@ class SpectrumToolBar(ToolBar):
         from ccpn.ui.gui.lib.WidgetClosingLib import CloseHandler
 
         if self._currentSpectrumNotifier:
-            self._currentSpectrumNotifier.unRegister()
+            self._currentSpectrumNotifier.unRegisterNotifier()
             self._currentSpectrumNotifier = None
         with CloseHandler(self):
             super().closeEvent(event)

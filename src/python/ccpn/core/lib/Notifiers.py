@@ -15,6 +15,8 @@ docstring of Notifier class). This idea was copied from the Traitlets package.
 April 2017: First design by Geerten Vuister
 
 """
+from __future__ import annotations
+
 
 #=========================================================================================
 # Licence, Reference and Credits
@@ -31,8 +33,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-13 12:41:08 +0000 (Mon, January 13, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-01-16 18:24:55 +0000 (Thu, January 16, 2025) $"
+__version__ = "$Revision: 3.2.13 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,17 +47,14 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 import sys
 import io
 import difflib
-from functools import partial
-from collections import OrderedDict, Counter
+from collections import Counter
 from typing import Callable, Any, Optional
-from itertools import permutations
 import weakref
 from contextlib import contextmanager
 
 from ccpn.core.lib.WeakRefList import _WeakRefList
 import typing
 import re
-from ccpn.util.Logging import getLogger
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.AttributeDict import AttributeDict
@@ -235,11 +234,12 @@ class NotifierABC(object):
     def setterObject(self):
         """:return the setterObject  of self
         """
-        return self._setterObject()  # ._setterObject is a weakRef
+        return self._setterObject and self._setterObject()  # ._setterObject is a weakRef or None
 
     @property
     def isRegistered(self) -> bool:
-        """:return True if notifier is still registered; i.e. active"""
+        """:return True if notifier is still registered; i.e. active
+        """
         return self._isRegistered
 
     @property
@@ -301,7 +301,7 @@ class NotifierABC(object):
                         oldpid=Sentinel, pid=Sentinel,
                         specifiers=None,
                         itemsChanged=Sentinel
-                        ) -> dict:
+                        ) -> CallbackDict:
         """Create and return a dict with all the callback keys.
         Both the obj en object arguments are mapped to the OBJECT key
         """
@@ -348,7 +348,10 @@ class NotifierABC(object):
 
             # return f'<{self.__class__.__name__} {self.id} (unregistered): theObject=None: {self._trigger!r}->{self._targetName!r}>'
 
-        _setter = self.setterObject.pid if hasattr(self.setterObject, 'pid') else self.setterObject.__class__.__name__
+        if self.setterObject:
+            _setter = self.setterObject.pid if hasattr(self.setterObject, 'pid') else self.setterObject.__class__.__name__
+        else:
+            _setter = '-'
         _name = self.__class__.__name__
 
         return f'<{_name} {self.id} ({_exec}): {_pid}:({self._trigger!r}->{self._targetName!r},{self._appliesToTheObject}); setter:{_setter}>'
@@ -365,10 +368,11 @@ class CallbackDict(AttributeDict):
                  oldpid=Sentinel, pid=Sentinel,
                  specifiers=None,
                  itemsChanged=Sentinel
-                 ) -> dict:
+                 ):
         """Create and return a dict with all the callback keys.
-        Both the obj en object arguments are mapped to the OBJECT key
+        Both the obj and object arguments are mapped to the OBJECT key
         """
+        super().__init__()
         _temp = {
             NotifierABC.NOTIFIER      : Sentinel,
             NotifierABC.THEOBJECT     : Sentinel,
@@ -399,7 +403,7 @@ class CallbackDict(AttributeDict):
         :raises ValueError when detected
         """
         for _key in keys:
-            if value := self.get(_key, Sentinel) == Sentinel:
+            if self.get(_key, Sentinel) is Sentinel:
                 _notifier = self.get(NotifierABC.NOTIFIER)
                 raise ValueError(f'Checking {_notifier}: expected value for key {_key!r}')
 
@@ -855,7 +859,7 @@ class _NotifiersDict(dict):
         """
         if not isinstance(notifier, NotifierABC):
             raise TypeError(f'deleteNotifier(): expected NotifierABC subclass instance, got {type(notifier)}')
-
+        _dict: dict | None
         if (_dict := self.get((notifier._trigger, notifier._targetName), None)) is None:
             raise ValueError(f'deleteNotifier(): {notifier} is not contained in self')
         if notifier.id not in _dict:
@@ -863,7 +867,7 @@ class _NotifiersDict(dict):
         del( _dict[notifier.id] )
 
     @property
-    def allNotifiers(self) -> dict:
+    def allNotifiers(self) -> list:
         """:return A list of all notifiers
         """
         _ll = [_item for _dict in self.values() for _item in _dict.values()]
@@ -947,7 +951,7 @@ class NotifierBase(object):
             # This is the case with widgets, that do get GuiNotifiers set
             # Hotfix; unelegant but....
             # This code is also in widgets.Base._init and used in DropBase to check
-            getLogger().debug2(f'_registerNotifier: {theObject} appears not to be a subclass of NotifierBase'\
+            getLogger().debug2(f'_registerNotifier: {theObject} appears not to be a subclass of NotifierBase'
                                f'; hotfixing {NotifierBase.REGISTERED_NOTIFIERS_DICT}')
             setattr(theObject, NotifierBase.REGISTERED_NOTIFIERS_DICT, _NotifiersDict())
 
@@ -1083,7 +1087,7 @@ class NotifierBase(object):
                 self._addNotifier(_notifier)
         return result
 
-    def setCurrentNotifier(self, targetName: str, callback: Callable) -> _NotifierList:
+    def setCurrentNotifier(self, targetName: str, callback: Callable[..., Optional[str]]) -> _NotifierList:
         """Set CurrentNotifier
         Store for management; i.e. removal with deleteNotifier() or deleteAllNotifiers()
         methods.
@@ -1103,7 +1107,7 @@ class NotifierBase(object):
         self._addNotifier(notifier)
         return result
 
-    def _hasNotifier(self, notifier) -> bool:
+    def _hasNotifier(self, notifier: NotifierABC) -> bool:
         """Return True if self has notifier
 
         :param notifier: a NotifierABC subclass instance
@@ -1159,6 +1163,7 @@ class NotifierBase(object):
             raise TypeError(f'deleteNotifier(): {notifier} is not a valid type')
 
         _idDict = dict((ntf.id, ntf) for ntf in self._objectNotifiersDict.allNotifiers)
+        _notifier: NotifierABC | None
         if (_notifier := _idDict.get(_id, None)) is None:
             raise ValueError(f'deleteNotifier(): {notifier} is not a (valid) notifier of {self}')
 
@@ -1180,7 +1185,8 @@ class NotifierBase(object):
         """
         return [_ntf for _ntf in self._registeredNotifiersDict.allNotifiers if _ntf.setterObject == setterObject]
 
-    def _testCallback(self, callbackDict:dict, **kwds):
+    @staticmethod
+    def _testCallback(callbackDict:dict, **kwds):
         """A method to test callbacks; print kwds, callbackDict
         """
         _ntf = callbackDict[NotifierABC.NOTIFIER]
@@ -1196,7 +1202,8 @@ class NotifierBase(object):
     # Notification firing
     #-----------------------------------------------------------------------------------------
 
-    def _fireSingleNotifier(self, notifier, callbackDict: dict):
+    @staticmethod
+    def _fireSingleNotifier(notifier: NotifierABC, callbackDict: dict):
         """Fire notifier passing callbackDict to callback function
         :param callbackDict: parameters passed to callback function as callbackDict
         """
@@ -1335,7 +1342,8 @@ class NotifierBase(object):
         NotifierBase._progressSuspension += 1
         return
 
-    def _resumeNotification(self):
+    @classmethod
+    def _resumeNotification(cls):
         """Execute accumulated notifiers and resume immediate notifier execution"""
         NotifierBase._progressSuspension -= 1
         if NotifierBase._progressSuspension < 0:
@@ -1798,8 +1806,8 @@ def main():
         :return: A list of unmatched integers (nn).
         """
         # Pattern for register and unregister with integer inside parentheses
-        register_pattern = re.compile(r'registered\s*<(?:Notifier|GuiNotifier)\s*\((\d+)\):')
-        unregister_pattern = re.compile(r'unRegister\s*<(?:Notifier|GuiNotifier)\s*\((\d+)\):')
+        register_pattern = re.compile(r'registered\s*<(?:Notifier|GuiNotifier)\s*(\d+)')
+        unregister_pattern = re.compile(r'unRegister\s*<(?:Notifier|GuiNotifier)\s*(\d+)')
         # Counters for occurrences of register and unregister
         register_counts = Counter()
         unregister_counts = Counter()

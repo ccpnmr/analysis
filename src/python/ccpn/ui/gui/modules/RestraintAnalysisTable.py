@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-06 18:26:12 +0000 (Mon, January 06, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-01-16 18:23:03 +0000 (Thu, January 16, 2025) $"
+__version__ = "$Revision: 3.2.13 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,7 +39,7 @@ from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.StructureData import StructureData
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.Collection import Collection
-from ccpn.core.lib.Notifiers import Notifier, CurrentNotifier
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
 from ccpn.ui.gui.modules.lib.RestraintAITableCommon import (_ModuleHandler,
                                                             _COLLECTION, _COLLECTIONBUTTON, _SPECTRUMDISPLAYS,
@@ -267,6 +267,7 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
         depth 2: violation-tables
         """
         allObjects = []
+        item: _StoredTreeWidgetItem
 
         for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
             if selected is None or bool(item.checkState(0)) == selected:
@@ -384,6 +385,7 @@ class _ComparisonTree(ProjectTreeCheckBoxes):
         rss.comparisonSets.remove(self)
         rss.guiFrame.setRefreshButtonEnabled(True)
         self.setVisible(False)
+        self.close()
         self.deleteLater()
         rss.guiModule.addNewComparisonSet()
 
@@ -785,9 +787,8 @@ class RestraintAnalysisTableModule(CcpnTableModule):
         rss = self.resources
 
         if self.activePulldownClass:
-            self._setCurrentPulldown = CurrentNotifier(
-                                                targetName=self.activePulldownClass._pluralLinkName,
-                                                callback=self.tableFrame._selectCurrentPulldownClass)
+            self.setCurrentNotifier(targetName=self.activePulldownClass._pluralLinkName,
+                                    callback=self.tableFrame._selectCurrentPulldownClass)
             # set the active callback from the pulldown
             self._mainFrame.setActivePulldownClass(coreClass=self.activePulldownClass,
                                                    checkBox=self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget'])

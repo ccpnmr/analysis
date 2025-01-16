@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-12-12 18:31:40 +0000 (Thu, December 12, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-01-16 18:23:03 +0000 (Thu, January 16, 2025) $"
+__version__ = "$Revision: 3.2.13 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -268,8 +268,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
         # notifier to respond to items being dropped onto the spectrumDisplay
         self.setAcceptDrops(True)
-        self._droppedNotifier = self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
-                                                    self._processDroppedItems)
+        self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+                            self._processDroppedItems)
 
         # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
         # the module to another location
@@ -2011,7 +2011,23 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         for sp in self.spectra:
             self._deleteSpectrumNotifiers(spectrum=sp)
-        self.mainWindow._deleteSpectrumDisplay(self)
+        # Do not add to undo/redo stack
+        with undoStackBlocking() as _:
+            _strips = list(self.strips)
+            # this makes it unrecoverable - okay, as strips not allowed to undo
+            for st in _strips:
+                # marks are not automatically deleted by the model when deleting strips
+                for mark in st.marks:
+                    mark.delete()
+                st.close()
+            # marks are not automatically deleted by the model when deleting strips
+            for mark in self.marks:
+                mark.delete()
+
+            # delete self from api model data
+            self.delete()
+            # delete self as a widget
+            self.deleteLater()
         super()._closeModule()
 
     def _removeIndexStrip(self, value):

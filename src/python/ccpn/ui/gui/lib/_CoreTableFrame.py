@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-10 16:43:20 +0000 (Fri, January 10, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-01-16 18:23:03 +0000 (Thu, January 16, 2025) $"
+__version__ = "$Revision: 3.2.13 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,7 +28,6 @@ __date__ = "$Date: 2022-04-29 16:52:01 +0100 (Fri, April 29, 2022) $"
 #=========================================================================================
 
 import pandas as pd
-from collections import OrderedDict
 from PyQt5 import QtWidgets, QtCore, QtGui
 from collections import OrderedDict
 from abc import ABC, abstractmethod
@@ -448,6 +447,15 @@ class _CoreTableFrameABC(Frame, NotifierBase, ABC, metaclass=_CoreTableFrameABCM
         self.setAcceptDrops(True)
         self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                             callback=self._processDroppedItems)
+
+    def closeEvent(self, event):
+        """Clean-up and close.
+        """
+        from ccpn.ui.gui.lib.WidgetClosingLib import CloseHandler
+
+        self.deleteAllNotifiers()
+        with CloseHandler(self):
+            super().closeEvent(event)
 
     def _setWidgets(self, container=None):
         """Set up the widgets for the module

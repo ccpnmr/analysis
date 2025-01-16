@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-13 12:40:11 +0000 (Mon, January 13, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-01-16 18:18:21 +0000 (Thu, January 16, 2025) $"
+__version__ = "$Revision: 3.2.13 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -973,10 +973,6 @@ class TableABC(QtWidgets.QTableView, metaclass=_TableABCMeta):
             tableState.rootBlocker = QtCore.QSignalBlocker(self)
             # tableState.enabledState = self.updatesEnabled()
             # self.setUpdatesEnabled(False)
-
-            if blanking and self.project:
-                self.project._increaseNotificationBlanking()
-
             # list to store any deferred functions until blocking has finished
             self._deferredFuncs = []
 
@@ -991,9 +987,6 @@ class TableABC(QtWidgets.QTableView, metaclass=_TableABCMeta):
         self._tableBlockingLevel -= 1
         # unblock all signals on last exit
         if self._tableBlockingLevel == 0:
-            if blanking and self.project:
-                self.project._decreaseNotificationBlanking()
-
             tableState.modelBlocker = None
             tableState.rootBlocker = None
             # self.setUpdatesEnabled(tableState.enabledState)

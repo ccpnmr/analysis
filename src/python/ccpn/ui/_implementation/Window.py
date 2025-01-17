@@ -557,32 +557,12 @@ class Window(AbstractWrapperObject):
     # deprecated
     createSpectrumDisplay = newSpectrumDisplay
 
-    # def _deleteSpectrumDisplay(self, display):
-    #     """Delete a spectrumDisplay from the moduleArea
-    #     Removes the display to a hidden moduleArea of mainWindow, deletes the _wrappedData, and disables all notifiers
-    #     Object is recovered through the deleteObject decorator
-    #     """
-    #     with undoStackBlocking() as _:  # Do not add to undo/redo stack
-    #         # disable the spectrumDisplay notifiers
-    #         # self._setBlankingSpectrumDisplayNotifiers(display, True)
-    #         display._closeModule()
-    #
-    #         _strips = list(display.strips)
-    #         # this makes it unrecoverable - okay, as strips not allowed to undo
-    #         for st in _strips:
-    #             # marks are not automatically deleted by the model when deleting strips
-    #             for mark in st.marks:
-    #                 mark.delete()
-    #             st.close()
-    #         # marks are not automatically deleted by the model when deleting strips
-    #         for mark in display.marks:
-    #             mark.delete()
-    #         # delete the spectrumDisplay
-    #         display.delete()
-    #         display.deleteLater()
-    #
-    #         # # Update the list of opened GUI SpectrumDisplays modules
-    #         # self.moduleArea._updateSpectrumDisplays()
+    def _deleteSpectrumDisplay(self, display):
+        """Delete a spectrumDisplay from the moduleArea
+        """
+        # Removes the display to a hidden moduleArea of mainWindow, deletes the _wrappedData, and disables all notifiers
+        # Object is recovered through the deleteObject decorator
+        display._closeModuleDisplay()
 
     @logCommand('mainWindow.')
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],

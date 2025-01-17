@@ -30,8 +30,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import typing
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
-from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
-from ccpn.core.NmrChain import NmrChain
+
+from ccpn.core.NmrChain import NmrChain, DEFAULT_NMRCHAINCODE
 from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -545,7 +545,7 @@ class NmrResidue(AbstractWrapperObject):
 
         apiResonanceGroup = self._wrappedData
         apiNmrChain = apiResonanceGroup.directNmrChain
-        defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
+        defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=DEFAULT_NMRCHAINCODE)
 
         if apiNmrChain is None:
             # offset residue: no-op
@@ -788,7 +788,7 @@ class NmrResidue(AbstractWrapperObject):
 
         apiResonanceGroup = self._wrappedData
         apiNmrChain = apiResonanceGroup.directNmrChain
-        defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
+        defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=DEFAULT_NMRCHAINCODE)
 
         if apiNmrChain is None:
             # offset residue: no-op
@@ -865,7 +865,7 @@ class NmrResidue(AbstractWrapperObject):
         # disconnect a single residue - return to @- chain
         # apiResonanceGroup = nmrResidue._wrappedData
         # apiNmrChain = apiResonanceGroup.directNmrChain
-        # defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
+        # defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=DEFAULT_NMRCHAINCODE)
         #
         # if apiNmrChain:
         #   apiResonanceGroup.directNmrChain = defaultChain
@@ -919,7 +919,7 @@ class NmrResidue(AbstractWrapperObject):
         if not apiNmrChain:
             raise ValueError("Offset NmrResidue %s cannot be disconnected" % self)
 
-        defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
+        defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=DEFAULT_NMRCHAINCODE)
 
         if apiNmrChain is None:
             # offset residue: no-op
@@ -1324,11 +1324,12 @@ class NmrResidue(AbstractWrapperObject):
         """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
         return parent._wrappedData.sortedResonanceGroups() if parent._wrappedData else ()
 
-    @staticmethod
-    def _reverseChainForDelete(apiNmrChain):
-        """Reverse the chain.
-        """
-        apiNmrChain.__dict__['mainResonanceGroups'].reverse()
+    # GWV 4/12/24: do not use; call _reverse() on NmrChain instance
+    # @staticmethod
+    # def _reverseChainForDelete(apiNmrChain):
+    #     """Reverse the chain.
+    #     """
+    #     apiNmrChain.__dict__['mainResonanceGroups'].reverse()
 
     def _finaliseAction(self, action: str, **actionKwds):
         """Subclassed to handle associated offsetNMrResidues
@@ -1392,6 +1393,10 @@ class NmrResidue(AbstractWrapperObject):
             # clean-up/delete the chemical-shifts
             for sh in _shs:
                 sh.delete()
+
+    # def _rename(self, value: str | None):
+    #     """ Actual rename method. Only
+    #     """
 
     def _renameChildren(self):
         """Update the chemicalShifts to the rename

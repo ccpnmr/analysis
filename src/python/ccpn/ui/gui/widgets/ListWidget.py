@@ -5,7 +5,7 @@ List widget
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:21:20 +0100 (Fri, August 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2025-01-10 16:36:44 +0000 (Fri, January 10, 2025) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -62,6 +62,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
                  copyDrop=True,
                  infiniteHeight=False,
                  minRowsVisible=4,
+                 rowsVisible=0,
                  emptyText=None,
                  **kwds):
 
@@ -101,6 +102,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.currentContextMenu = self.getContextMenu
         self.infinitleyTallVerically = infiniteHeight
         self.minRowsVisible = minRowsVisible
+        self.rowsVisible = rowsVisible # <= 0 indicates not used in sizeHint
         self._emptyText = str(emptyText)
         self._setStyle()
         self._setChangedConnections()
@@ -138,10 +140,12 @@ class ListWidget(QtWidgets.QListWidget, Base):
 
     def minimumSizeHint(self) -> QtCore.QSize:
         result = super().minimumSizeHint()
+        _nRows = min(self.rowsVisible, self.minRowsVisible) if self.rowsVisible > 0 \
+                 else self.minRowsVisible
         if self.count() > 0:
-            result.setHeight(self.sizeHintForRow(0) * self.minRowsVisible)
+            result.setHeight(self.sizeHintForRow(0) * _nRows)
         else:
-            result.setHeight(self.fontMetrics().height() * self.minRowsVisible)
+            result.setHeight(self.fontMetrics().height() * _nRows)
         return result
 
     def sizeHint(self):
@@ -149,6 +153,10 @@ class ListWidget(QtWidgets.QListWidget, Base):
 
         if self.infinitleyTallVerically:
             result.setHeight(QtWidgets.QWIDGETSIZE_MAX)
+
+        elif self.rowsVisible > 0:
+            result.setHeight(self.fontMetrics().height() * self.rowsVisible)
+
         return result
 
     def contextCallback(self, remove=True):

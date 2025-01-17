@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-24 15:41:56 +0100 (Thu, October 24, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2025-01-09 18:49:05 +0000 (Thu, January 09, 2025) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -123,18 +123,15 @@ class TraceCache():
 # GuiSpectrumView
 #=========================================================================================
 
-class GuiSpectrumView(QtWidgets.QGraphicsObject):
+class GuiSpectrumView(QtWidgets.QGraphicsItem):
 
-    #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
     def __init__(self):
         """ spectrumPane is the parent
             spectrum is the Spectrum object
             dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions
             (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
         """
-
-        #TODO: why not QGraphicsItem like in e.g. PeakListView
-        QtWidgets.QGraphicsObject.__init__(self)
+        QtWidgets.QGraphicsItem.__init__(self)
 
         self.spectrumGroupsToolBar = None
 
@@ -275,7 +272,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         """Get parameters for axisDim'th axis (zero-origin) of spectrum.
         """
         # MUST BE SUBCLASSED
-        raise NotImplementedError(f'Code error: function {repr(sys._getframe().f_code.co_name)} not implemented')
+        raise NotImplementedError(f'Code error: {self.__class__.__name__}._getVisibleSpectrumViewsParams function not implemented')
 
     def _refreshCache(self) -> Optional[Tuple]:
         """Get parameters for axisDim'th axis (zero-origin) of spectrum.
@@ -366,7 +363,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         """refresh/rebuild contour data.
         """
         # MUST BE SUBCLASSED
-        raise NotImplementedError("Code error: function not implemented")
+        raise NotImplementedError(f"Code error: {self.__class__.__name__}.refreshData function not implemented")
 
 
 def _spectrumViewHasChanged(data):

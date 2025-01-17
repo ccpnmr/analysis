@@ -4,7 +4,7 @@ This file contains the SpectrumView classes (1D and nD versions)
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2025-01-09 18:49:05 +0000 (Thu, January 09, 2025) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -78,7 +78,6 @@ def _factoryFunction(project, wrappedData):
 class SpectrumView1d(_SpectrumViewCoreClass, _GuiSpectrumView1d):
     """Class combining core-class data and 1D Gui Spectrum View
     """
-
     def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
         _SpectrumViewCoreClass.__init__(self, project, wrappedData)
         _GuiSpectrumView1d.__init__(self)

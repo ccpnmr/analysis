@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 16:23:30 +0100 (Sat, October 26, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-12-18 14:19:04 +0000 (Wed, December 18, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,10 +31,13 @@ import string
 
 import typing
 from collections import OrderedDict
+
 from ccpn.util import Common as commonUtil
 from ccpn.core.Atom import Atom
 from ccpn.core.Chain import Chain
 from ccpn.core.Project import Project
+
+from ccpn.util.Logging import getLogger
 
 
 NamingSystems = [
@@ -269,10 +272,10 @@ def expandChainAtoms(chain,
     molSystem = apiChain.molSystem
 
     if not atomNamingSystem in NamingSystems:
-        atomNamingSystem = 'PDB_REMED'
+        raise ValueError(f' Invalid atomNamingSystem: {atomNamingSystem}')
 
     if not pseudoNamingSystem in NamingSystems:
-        pseudoNamingSystem = 'AQUA'
+        raise ValueError(f' Invalid pseudoNamingSystem: {pseudoNamingSystem}')
 
     # Set elementSymbol and add missing atoms (lest something breaks lower down)
     for residue in apiChain.sortedResidues():
@@ -439,7 +442,7 @@ def expandChainAtoms(chain,
                                 newName = ''.join(ll)
                                 newNames.append(newName)
                                 if residue.findFirstAtom(name=newName) is not None:
-                                    print("WARNING, new atom already exists: %s %s %s %s"
+                                    getLogger().warning("New atom already exists: %s %s %s %s"
                                           % (residue.chain.code, residue.seqId, residue.ccpCode, newName))
                                 else:
                                     residue.newAtom(name=newName, atomType='nonstereo', elementSymbol=elementSymbol,
@@ -478,8 +481,8 @@ def expandChainAtoms(chain,
                             break
 
 
-def _nextChainCode(project):
-    """This gives a "next" available chain code.
+def _nextChainCode(project) -> str:
+    """:return: a "next" available chain code.
        First does A-Z, then A1-Z1, then A2-Z2, etc.
     """
 

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-22 12:10:17 +0100 (Fri, November 22, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2024-12-05 20:47:13 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,6 +34,7 @@ from collections import namedtuple
 from PyQt5 import QtCore, QtGui
 from numba import jit
 
+from ccpn.framework.Preferences import getPreferences
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView, SpectrumCache
 from ccpn.util import Colour
 from ccpn.util.Logging import getLogger
@@ -82,10 +83,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         dimensionCount = len(self.strip.axisCodes)
         self.previousRegion = dimensionCount * [None]
 
-        # have to have this set before _setupBorderItem called
-        self._application = self.strip.spectrumDisplay.mainWindow.application
-        #
-        # GuiSpectrumView.__init__(self)
+        # GWV 4/12/24 replaced by preferences
+        # # have to have this set before _setupBorderItem called
+        # self._application = self.strip.spectrumDisplay.mainWindow.application
+        self._preferences = getPreferences()
 
         self.setZValue(-1)  # this is so that the contours are drawn on the bottom
 
@@ -176,10 +177,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         """Build the contour arrays
         """
         if self.spectrum.positiveContourBase is None or self.spectrum.positiveContourBase == 0.0:
-            raise RuntimeError('Positive Contour Base is not defined')
+            raise RuntimeError(f'positiveContourBase of {self.spectrum} is not defined')
 
         if self.spectrum.negativeContourBase is None or self.spectrum.negativeContourBase == 0.0:
-            raise RuntimeError('Negative Contour Base is not defined')
+            raise RuntimeError(f'negativeContourBase of {self.spectrum} is not defined')
 
         if self.spectrum.includePositiveContours:  # .displayPositiveContours:
             self.posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
@@ -214,17 +215,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         glList.posColours = self.posColours = colListPos
         glList.negColours = self.negColours = colListNeg
 
-        try:
-            self._constructContours(self.posLevels, self.negLevels, glList=glList)
-        except FileNotFoundError:
-            self._project._logger.warning("No data file found for %s" % self)
-            return
+        self._constructContours(self.posLevels, self.negLevels, glList=glList)
 
     def _constructContours(self, posLevels, negLevels, glList=None):
         """Construct the contours for this spectrum using an OpenGL display list
         The way this is done here, any change in contour level needs to call this function.
         """
-
         posLevelsArray = np.array(posLevels, np.float32)
         negLevelsArray = np.array(negLevels, np.float32)
 
@@ -257,13 +253,14 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 #     dataArrays = (sum,)
 
                 # build the contours
+                flag = self._preferences.general.generateSinglePlaneContours
                 contourList = Contourer2d.contourerGLList(dataArrays,
                                                           posLevelsArray,
                                                           negLevelsArray,
                                                           np.array(_posColours, dtype=np.float32),
                                                           np.array(_negColours, dtype=np.float32),
-                                                          not self._application.preferences.general.generateSinglePlaneContours)
-
+                                                          flag
+                                                          )
         except Exception as es:
             getLogger().warning(f'Contouring error: {es}')
 

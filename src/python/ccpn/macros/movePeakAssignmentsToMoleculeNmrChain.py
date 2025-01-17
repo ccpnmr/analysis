@@ -18,6 +18,8 @@
 
 ##############################    Start of the code      #################################
 
+from ccpn.core.NmrChain import DEFAULT_NMRCHAINCODE
+
 def _reassignPeaks():
     for peak in project.peaks:
         for currentAssignmentsByDim, axCde in zip(peak.assignmentsByDimensions, peak.axisCodes):
@@ -35,7 +37,7 @@ def _reassignPeaks():
 
 def _deleteObsoleteNmrChains():
     for nmrChain in project.nmrChains:
-        if nmrChain.name != '@-' and nmrChain.name != 'molecule':
+        if nmrChain.name != DEFAULT_NMRCHAINCODE and nmrChain.name != 'molecule':
                project.deleteObjects(nmrChain)
 
 _reassignPeaks()

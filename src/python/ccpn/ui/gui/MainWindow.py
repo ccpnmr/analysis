@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-03 18:50:58 +0000 (Fri, January 03, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2025-01-12 16:40:10 +0000 (Sun, January 12, 2025) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -59,12 +59,13 @@ from ccpn.ui.gui.lib.Shortcuts import Shortcuts
 from ccpn.ui.gui.guiSettings import (getColours, GUITABLE_SELECTED_BACKGROUND, consoleStyle)
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
+from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.PlotterWidget import plotter
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
+from ccpn.ui.gui.widgets.IpythonConsoleWidget import IpythonConsoleWidget
 
 from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -94,9 +95,6 @@ _MULTIPLETS = 4
 _INTEGRAL_PEAKS = 8
 _MULTIPLET_PEAKS = 16
 
-READONLYCHANGED = 'readOnlyChanged'
-PROJECTSAVEAS = 'projectSaveAs'
-PROJECTSAVE = 'projectSave'
 _transparent = QtGui.QColor('orange')
 
 
@@ -167,20 +165,20 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.moduleArea.setContentsMargins(0, 2, 2, 0)
         self.setCentralWidget(self.moduleArea)
 
-        self._hiddenModules = CcpnModuleArea(mainWindow=self)
-        self._hiddenModules.setVisible(False)
+        # self._hiddenModules = CcpnModuleArea(mainWindow=self)
+        # self._hiddenModules.setVisible(False)
 
         # init Module layout dict
         self._moduleLayout = None
         self._initModuleLayout()
 
         # Python console module; defined upon first time Class initialisation. Either by toggleConsole or Restoring layouts
-        self.pythonConsoleModule = None
+        self._pythonConsoleModule = None
         # IPythonConsole instance; defined in _setupWindow()
-        self.pythonConsole = None
+        self._pythonConsoleWidget = None
         # IPythonConsole namespace; filled in _setupWindow() and
         self.namespace = {}
-        # can't init PythonConsoleModule, as restore from layout fails then
+        # can't init PythonConsoleModule, as restore from layout then fails
         # self._initPythonConsoleModule()
 
         setWidgetFont(widget=self )
@@ -196,22 +194,18 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._setMouseMode(SELECT)
 
         # Notifiers
+        self._screenChangedEventSet: bool = False  # flag to track setting of the screenChanged
         self._setupNotifiers()
 
         self.feedbackPopup = None
         self._previousStrip = None
         self._currentStrip = None
 
-        # blank display opened later by the _initLayout if there is nothing to show otherwise
-        self.writeStatusBar('Ready')
-
-        #TODO:ED This looks very suspicious; must be a better way with a Notifier
-        self._project._undo.undoChanged.add(self._undoChangeCallback)
-
         self._initKeyTimer()
         self._initReadOnlyIcon()
 
         # hide the window here and make visible later
+        self.writeStatusBar('Ready')
         self.hide()
 
     #-----------------------------------------------------------------------------------------
@@ -285,11 +279,15 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # self._checkPalette(self.palette())
         # self.application.ui._changeThemeInstant()
         # catch the initial palette-changed signal
+        #TODO-ED: I think this is the _qtApp of ui!?; why is it set here?
         QtWidgets.QApplication.instance().sigPaletteChanged.connect(self._checkPalette)
         super().show()
         # install handler to resize when moving between displays
         #   cannot be done in __init__ as crashes on linux/windows :O
-        self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+        # self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+        if not self._screenChangedEventSet:
+            self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+            self._screenChangedEventSet = True
 
     def _checkPalette(self, pal: QtGui.QPalette, theme: str = None, themeColour: str = None, themeSD: str = None):
         # test the stylesheet of the QTableView
@@ -332,6 +330,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.ui._qtApp.setStyleSheet(styleSheet % colours)
 
         # store the colours in the baseclass, is this the best place?
+        # TODO-DEVELOP: GWV Absolutely NOT!!
         Base._highlight = highlight
         Base._highlightMid = QtGui.QColor.fromHslF(highlight.hueF(), 0.75, 0.65)
         Base._basePalette = pal
@@ -396,6 +395,11 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._readOnlyWidget.setEnabled(True)
         self._readOnlyWidget.updateGeometry()
 
+    def _projectSaveSignalCallback(self, data):
+        """Notifier responds to triggering the Project._projectSaveSignal
+        """
+        QtCore.QTimer.singleShot(0, self._projectSaveCallback)
+
     def _projectSaveCallback(self):
         """Update the gui state from a save/saveAs notification.
         """
@@ -405,21 +409,27 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.writeStatusBar(successMessage)
         getLogger().info(successMessage)
 
-    def _projectNotifierCallback(self, data):
+    def _readOnlyCallback(self, data):
         """Notifier responds to change in the read-only state of the current project,
         and updates the read-only icon.
         """
-        if (specifiers := data.get(Notifier.SPECIFIERS)):
-            if specifiers.get(READONLYCHANGED) is not None:
-                QtCore.QTimer.singleShot(0, self._setReadOnlyIcon)
-            elif specifiers.get(PROJECTSAVEAS) is not None or specifiers.get(PROJECTSAVE) is not None:
-                QtCore.QTimer.singleShot(0, self._projectSaveCallback)
+        QtCore.QTimer.singleShot(0, self._setReadOnlyIcon)
+
+    # GWV 10/1/2025: replaced with Project._projectSaveSignal
+    # def _projectNotifierCallback(self, data):
+    #     """Notifier responds to change in the read-only state of the current project,
+    #     and updates the read-only icon.
+    #     """
+    #     if (specifiers := data.get(Notifier.SPECIFIERS)):
+    #         if specifiers.get(PROJECTSAVEAS) is not None or specifiers.get(PROJECTSAVE) is not None:
+    #             QtCore.QTimer.singleShot(0, self._projectSaveCallback)
 
     def _initKeyTimer(self):
         """
-        Create a timer to reset the keysequences by simulating an escape key if nothing pressed for a second
-        only affects this widget, runs every 0.5s
-        add a small label to the statusBar to show the last keys pressed
+        Create a timer to reset the key-sequences by simulating an escape key
+        if nothing pressed for a second.
+        Only affects this widget, runs every 0.5s.
+        Add a small label to the statusBar to show the last keys pressed.
         """
         # create timer, repeats every 500ms
         self._lastKeyTimer = QtCore.QTimer()
@@ -453,18 +463,20 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     #     """
     #     return self.application.current
 
-    def makeDisabledFileIcon(self, icon):
-        return icon
+    # GWV 12/10/2025: not used and seems pretty useless to begin with!
+    # def makeDisabledFileIcon(self, icon):
+    #     return icon
 
-    def _undoChangeCallback(self, message):
-
-        amDirty = self._project._undo.isDirty()
-        self.setWindowModified(amDirty)
-
-        if not self.project.isTemporary:
-            self.setWindowFilePath(self.application.project.path)
-        else:
-            self.setWindowFilePath("")
+    # GWV: disable as it seems dangerous and messy
+    # def _undoChangeCallback(self, message):
+    #
+    #     amDirty = self._project._undo.isDirty()
+    #     self.setWindowModified(amDirty)
+    #
+    #     if not self.project.isTemporary:
+    #         self.setWindowFilePath(self.application.project.path)
+    #     else:
+    #         self.setWindowFilePath("")
 
         ## Why do we need to set this icons? Very odd behaviour.
         # if self.project.isTemporary:
@@ -518,7 +530,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.setNotifier(self.application.project, [Notifier.CHANGE], 'SpectrumDisplay', self._spectrumDisplayChanged)
         # GWV: changed to OBSERVE notifier on Strip.pinned
         # self.setNotifier(self.application.project, [Notifier.CHANGE], 'Strip', self._stripPinnedChanged)
-        self.setNotifier(self.application.project, [Notifier.CHANGE], 'Project', self._projectNotifierCallback)
+
+        self.setNotifier(self.application.project, [Notifier.OBSERVE], '_projectSaveSignal', self._projectSaveSignalCallback)
 
     # def _activatedkeySequence(self, ev):
     #     key = ev.key()
@@ -549,14 +562,17 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         Puts relevant information from the project into the appropriate places in the main window.
         """
         self.namespace['project'] = project
-        self.namespace['runMacro'] = self.pythonConsole._runMacro
 
         path = project.path
         msg = path + (' created' if project.isNew else ' opened')
         self.writeStatusBar(msg)
 
-        self.pythonConsole.setProject(project)
+        self._pythonConsoleWidget.setProject(project)
         self._updateWindowTitle()
+
+        self.setNotifier(project, [Notifier.OBSERVE], targetName='_readOnly',
+                         callback=self._readOnlyCallback
+                         )
 
         # # GWV - in Framework._initialiseProject
         # # sets working path to current path if required
@@ -638,14 +654,12 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """Initialise a PythonConsoleModule
         """
         from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
-
-        self.pythonConsoleModule = PythonConsoleModule(mainWindow=self)
-        self._addModule(module=self.pythonConsoleModule, position='bottom')
+        self._pythonConsoleModule = PythonConsoleModule(mainWindow=self)
+        self._addModule(module=self._pythonConsoleModule, position='bottom')
 
     def _setupWindow(self):
         """
         Sets up SideBar, python console and splitters to divide up main window properly.
-
         """
 
         self.namespace = {'application'             : self.application,
@@ -660,6 +674,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                           'mainWindow'              : self,
                           'project'                 : self.application.project,
                           'loadProject'             : self.application.loadProject,
+                          'runMacro'                : self.application.runMacro,
                           # 'newProject' : self.application.newProject, this is a crash!
                           'info'                    : getLogger().info,
                           'warning'                 : getLogger().warning,
@@ -673,8 +688,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                           'plotter'                 : plotter
                           }
 
-        # Make a PythonConsole
-        self.pythonConsole = IpythonConsole(mainWindow=self, namespace=self.namespace)
+        # Make a IPythonConsole widget
+        self._pythonConsoleWidget = IpythonConsoleWidget(mainWindow=self, namespace=self.namespace)
 
         # create the sidebar
         self._sideBarFrame = Frame(self, setLayout=True)  # in this frame is inserted the search widget
@@ -715,12 +730,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._temporaryWidgetStore = Frame(parent=self, showBorder=None, setLayout=False)
         self._temporaryWidgetStore.hide()
 
-        # set the background/fontSize for the tooltips
-        # self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
-        #                    'color: {TOOLTIP_FOREGROUND}; '
-        #                    'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
-
-
     #---------------------------------------------------------------------------------------------
     # Version-3/4 compatibility functionalities
     #---------------------------------------------------------------------------------------------
@@ -747,11 +756,17 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """
         return self._sideBarFrame
 
-    def _getPythonConsoleWidget(self):
+    def _getPythonConsoleWidget(self) -> IpythonConsoleWidget:
         """Helper routine to get the Python console widget; different implementation between different version
         :return widget or None if it does not exist
         """
-        return self.pythonConsoleModule
+        return self._pythonConsoleWidget
+
+    def _getPythonConsoleModule(self) -> PythonConsoleModule:
+        """Helper routine to get the Python console Module; different implementation between different version
+        :return Module or None if it does not exist
+        """
+        return self._pythonConsoleModule
 
     #---------------------------------------------------------------------------------------------
     # Menu and shortcut's
@@ -1249,14 +1264,18 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         try:
             if key in [QtCore.Qt.Key_Tab, QtCore.Qt.Key_Backtab]:
                 self._lastKeyList.append('Tab')
+
             elif chr(key).isascii():
                 if chr(key) == ' ':
                     self._lastKeyList.append('Space')
                 else:
                     self._lastKeyList.append(chr(key))
+
             if len(self._lastKeyList) > 2:
                 self._lastKeyList.pop(0)
-        except Exception:
+
+        except Exception as es:
+            getLogger().debug(f'MainWindow._addKeyToStatusBar: {es}')
             self._lastKeyList = []
 
         self._lastKeyStatus.setText(''.join(self._lastKeyList))
@@ -1463,17 +1482,14 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.moduleArea.addModule(module, position=position, relativeTo=relativeTo)
 
     def _closeMainWindowModules(self):
-        """Close modules in main window;
+        """Close all modules in main window;
         CCPNINTERNAL: also called from Framework
         """
-        for module in self.moduleArea.ccpnModules:
-            getLogger().debug('Closing module: %s' % module)
-            try:
-                module.setVisible(False)  # GWV not sure why, but this was the effect of prior code
-                module.close()
-            except Exception as es:
-                # wrapped C/C++ object of type StripDisplay1d has been deleted
-                getLogger().debug(f'_closeMainWindowModules: {es}')
+        try:
+            self.moduleArea._closeAll()
+        except Exception as es:
+            # wrapped C/C++ object of type StripDisplay1d has been deleted
+            getLogger().debug(f'_closeMainWindowModules: {es}')
 
     def _closeExtraWindowModules(self):
         """Close modules in any extra window;
@@ -1489,12 +1505,14 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                 getLogger().debug(f'_closeExtraWindowModules: {es}')
 
     def _stopPythonConsole(self):
-        if self.pythonConsoleModule:
-            self.pythonConsoleModule.pythonConsoleWidget._stopChannels()
+        # Stop the Ipython console channels and kernel manager
+        if self._pythonConsoleWidget:
+            self._pythonConsoleWidget._stopChannels()
 
     def _closeWindowFromUpdate(self, event=None, disableCancel=True):
         # set the active window to mainWindow so that the quit popup centres correctly.
         self._closeWindow(event=event, disableCancel=disableCancel)
+        # TODO-ED: use proper method from ui
         os._exit(0)
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
@@ -1561,6 +1579,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                 self.deleteAllNotifiers()
                 self.application._closeProject()  # close if saved
                 QtWidgets.QApplication.quit()
+                # TODO-ED: use proper method from ui
                 os._exit(0)  # HARSH! actually crash issue only seems to affect newTestApplication :|
 
             else:
@@ -1576,6 +1595,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             self.deleteAllNotifiers()
             self.application._closeProject()
             QtWidgets.QApplication.quit()
+            # TODO-ED: use proper method from ui
             os._exit(0)  # HARSH! actually crash issue only seems to affect newTestApplication :|
 
         else:
@@ -1594,7 +1614,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
         editor.textBox.setText(text)
 
-    def _highlightCurrentStrip(self, data: Notifier):
+    def _highlightCurrentStrip(self, data: dict):
         """Callback on current to highlight the strip
         """
         previousStrip = data[Notifier.PREVIOUSVALUE]
@@ -1616,7 +1636,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             currentStrip._attachZPlaneWidgets()
             currentStrip.spectrumDisplay._highlightAxes(currentStrip, True)
 
-    def _spectrumDisplayChanged(self, data):
+    def _spectrumDisplayChanged(self, data: dict):
         """Callback on spectrumDisplay change
         """
         trigger = data[Notifier.TRIGGER]
@@ -1655,6 +1675,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         :param position: The cursor position in "natural" (e.g. ppm) units
         :return: None
         """
+        #TODO-ED: may as well return False; but to what purpose?
         assert 0 == 1
 
     def _scanDataLoaders(self, dataLoaders, func: callable = lambda _: True, result=None, depth=0) -> list:
@@ -1703,6 +1724,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
         _obj = data.get('theObject')
         _droppedOnSideBar = (_obj is not None and isinstance(_obj, SideBar))
+
         # dataLoaders: A list of (url, dataLoader, createsNewProject, ignore) tuples.
         # createsNewProject: to evaluate later call _loadProject; e.g. for NEF
         # ignore: user opted to skip this one; e.g. a spectrum already present
@@ -1834,7 +1856,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """Write message to the console
         :param message: A string to be displayed (\n is appended)
         """
-        console = self.pythonConsole
+        console = self._pythonConsoleWidget
         console._write(f'{message}\n')
 
     def _deleteSelectedItems(self, parent=None):
@@ -2082,7 +2104,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             getLogger().warning('Estimate Volumes: Project has no peakLists.')
             MessageDialog.showWarning('Estimate Volumes', 'Project has no peakLists.')
         else:
-            from ccpn.ui.gui.popups.EstimateVolumes import EstimatePeakListVolumes
+            from ccpn.ui.gui.popups.EstimateVolumes import EstimatePeakListVolumesPopup
 
             if self.current.strip and not self.current.strip.isDeleted:
                 spectra = [specView.spectrum for specView in self.current.strip.spectrumDisplay.spectrumViews]
@@ -2090,21 +2112,21 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                 spectra = self.project.spectra
 
             if spectra:
-                popup = EstimatePeakListVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
-                                                spectra=spectra)
+                popup = EstimatePeakListVolumesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+                                                     spectra=spectra)
                 popup.exec_()
             else:
-                getLogger().warning('Estimate Volumes: no specta selected.')
+                getLogger().warning('Estimate Volumes: no spectra selected.')
                 MessageDialog.showWarning('Estimate Volumes', 'no specta selected.')
 
     def _showEstimateCurrentVolumesPopup(self):
         """
         Calculate volumes for the currently selected peaks
         """
-        from ccpn.ui.gui.popups.EstimateVolumes import EstimateCurrentVolumes
+        from ccpn.ui.gui.popups.EstimateVolumes import EstimateCurrentVolumesPopup
 
         if self.current.peaks:
-            popup = EstimateCurrentVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup = EstimateCurrentVolumesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
             popup.exec_()
         else:
             getLogger().warning('Estimate Current Volumes: no current.peaks')
@@ -2431,6 +2453,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                 # colour = colourMarks[atomName[:min(2,len(atomName))]]
                 colour = colourMarks.get(atomName[:min(2, len(atomName))])
                 if not colour:
+                    #TODO-ED: DEFAULT is not known; FIX this
                     colour = colourMarks.get(guiSettings.DEFAULT)
 
                 # exit if mark exists
@@ -2783,29 +2806,26 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             module.setVisible(flag)
 
     def _toggleConsole(self):
-        """
-        - Show/hide the pythonConsole module .
+        """Show/hide the pythonConsole module .
         """
         # GWV: Somehow the code (Layout restore?) cannot deal with the PythonConsoleModule
         # being initialised by MainWindow, but hidden until needed. So we initialise it here
         # if there is not PythonConsoleModule
-        from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
 
         _init = False
-        if self.pythonConsoleModule is None:
+        if self._pythonConsoleModule is None:
             # No pythonConsole module detected, so create one.
             self._initPythonConsoleModule()
             _init = True
 
-        _justCreated = False
-        if self.pythonConsoleModule is None:  # No pythonConsole module detected, so create one.
-            self.moduleArea.addModule(PythonConsoleModule(self), 'bottom')
-            _justCreated = True
-        if self.pythonConsoleModule:
-            if self.pythonConsoleModule.isHidden() or _init:
-                self.pythonConsoleModule.show()
-            elif not _justCreated:
-                self.pythonConsoleModule.hide()
+        if not self._pythonConsoleModule:
+            raise RuntimeError(f'No PythonConsoleModule present')
+
+        _hidden = self._pythonConsoleModule.isHidden()
+        if _hidden or _init:
+            self._pythonConsoleModule.show()
+        else:
+            self._pythonConsoleModule.hide()
 
     def _toggleSidebar(self):
         """Toggle the visibility of the Sidebar
@@ -2892,19 +2912,15 @@ class MainWindow(_CoreClassMainWindow, GuiMainWindow):
         # this __init__ is called from Project._restoreChildren, as currently the
         # Window (and its children) is a child of the Project modeled data.
         # Hence, the convoluted way of initialising the Gui objects (MainWindow,
-        # SpectrumDisplay's, Strips, etc).
-
-        logger = getLogger()
+        # SpectrumDisplay's, Strips, etc.).
 
         _CoreClassMainWindow.__init__(self, project, wrappedData)
+        GuiMainWindow.__init__(self, application=project.application)
 
-        application = project.application
-        GuiMainWindow.__init__(self, application=application)
-
-        # patches for now; insert MainWindow back into project;
+        # patches for now; insert MainWindow instance back into project;
         # it is being picked-up by Framework for calls to the subsequent
         # initialisations.
         project._mainWindow = self
 
-        logger.debug(_styleBlue(f'MainWindow.__init__>> Initialised {self}')
-                     )
+        getLogger().debug(_styleBlue(f'MainWindow.__init__>> Initialised {self}')
+                         )

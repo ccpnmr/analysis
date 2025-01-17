@@ -266,10 +266,8 @@ class GuiSpectrumDisplay(CcpnModule):
         self._spectrumDisplaySettings.stripArrangementChanged.connect(self._stripDirectionChangedInSettings)
         self._spectrumDisplaySettings.zPlaneNavigationModeChanged.connect(self._zPlaneNavigationModeChangedInSettings)
 
-        # notifier to respond to items being dropped onto the spectrumDisplay
+        # Accepting items being dropped onto the spectrumDisplay
         self.setAcceptDrops(True)
-        self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
-                            self._processDroppedItems)
 
         # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
         # the module to another location
@@ -757,6 +755,10 @@ class GuiSpectrumDisplay(CcpnModule):
     def _setNotifiers(self):
         """Setting notifiers
         """
+        self.setGuiNotifier(self, [GuiNotifier.DROPEVENT],
+                                  [DropBase.URLS, DropBase.PIDS],
+                                   callback = self._processDroppedItems)
+
         self.setNotifier(self.project, [Notifier.RENAME, Notifier.DELETE],
                                         Spectrum.className,
                                         callback=self._spectrumChangedCallback)
@@ -790,6 +792,10 @@ class GuiSpectrumDisplay(CcpnModule):
                                         SpectrumDisplay.className,
                                         callback=self._spectrumDisplayChanged,
                                         onceOnly=True)
+
+        self.setCurrentNotifier(targetName=Spectrum._pluralLinkName,
+                                callback=self._currentSpectraChangedCallback
+                                )
 
     @property
     def _flipped(self):
@@ -1215,6 +1221,12 @@ class GuiSpectrumDisplay(CcpnModule):
         GLSignals = GLNotifier(parent=None)
         GLSignals.emitPaintEvent()
 
+    def _currentSpectraChangedCallback(self, callbackDict: dict):
+        """Callback when Current.spectra changed; update the SpectrumToolbars
+        """
+        self.spectrumToolBar._onCurrentSpectrumNotifier(callbackDict)
+        self.spectrumGroupToolBar._onCurrentNotifier(callbackDict)
+
     def getVisibleSpectra(self) -> list[Spectrum]:
         """:return a list of spectra currently visible in the spectrumDisplay
         """
@@ -1623,19 +1635,29 @@ class GuiSpectrumDisplay(CcpnModule):
         """Navigate to the peak position in the strip
         """
         from ccpn.ui.gui.lib.SpectrumDisplayLib import navigateToPeakInStrip
-
         # use the library method
         navigateToPeakInStrip(self, strip, peak, widths=None)
 
     def _handleStrip(self, moveStrip, dropStrip):
         """Move a strip within a spectrumDisplay by dragging the strip label to another strip
         """
-        if moveStrip.spectrumDisplay == self:
-            strips = self.orderedStrips
-            stripInd = strips.index(dropStrip)
+        if not isinstance(moveStrip, GuiStrip):
+            showWarning('Dropping strip', f'Invalid source {moveStrip.pid!r} to drop')
+            return
 
-            if stripInd != strips.index(moveStrip):
-                moveStrip.moveTo(stripInd)
+        if not isinstance(dropStrip, GuiStrip):
+            showWarning('Dropping strip', f'Cannot drop {moveStrip.pid!r} onto {moveStrip.pid!r}')
+            return
+
+        if not moveStrip.spectrumDisplay == self:
+            showWarning('Dropping strip', f'Cannot drop {moveStrip.pid!r} onto {self.pid!r}')
+            return
+
+        strips = self.orderedStrips
+        stripInd = strips.index(dropStrip)
+
+        if stripInd != strips.index(moveStrip):
+            moveStrip.moveTo(stripInd)
 
     def _handlePeakList(self, peakList):
         """See if peaklist can be copied
@@ -2009,10 +2031,13 @@ class GuiSpectrumDisplay(CcpnModule):
         CCPN-INTERNAL: used to close the module
         Closes spectrum display and deletes it from the project.
         """
+        super()._closeModule()
         for sp in self.spectra:
             self._deleteSpectrumNotifiers(spectrum=sp)
+
         # Do not add to undo/redo stack
         with undoStackBlocking() as _:
+
             _strips = list(self.strips)
             # this makes it unrecoverable - okay, as strips not allowed to undo
             for st in _strips:
@@ -2020,6 +2045,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 for mark in st.marks:
                     mark.delete()
                 st.close()
+
             # marks are not automatically deleted by the model when deleting strips
             for mark in self.marks:
                 mark.delete()
@@ -2444,15 +2470,23 @@ class GuiSpectrumDisplay(CcpnModule):
     def addStrip(self, strip=None) -> 'GuiStripNd':
         """Creates a new strip by cloning strip with index (default the last) in the display.
         """
-        strip = self.getByPid(strip) if isinstance(strip, str) else strip
-        indx = strip.stripIndex() if strip else -1
-        tilePosition = strip.tilePosition if strip else None
-        if tilePosition is None:
-            tilePosition = (0, 0)
-
         if self.phasingFrame.isVisible():
             showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
             return
+
+        if strip is None:
+            strip = self.orderedStrips[-1]
+        elif isinstance(strip, str):
+            strip = self.getByPid(strip)
+
+        if not isinstance(strip, GuiStrip):
+            showWarning(str(self.windowTitle()), 'Please provide a Strip instance or a Strip-Pid')
+            return
+
+        indx = strip.stripIndex()
+        tilePosition = strip.tilePosition if strip else None
+        if tilePosition is None:
+            tilePosition = (0, 0)
 
         with undoStackBlocking():  # Do not add to undo/redo stack
             with undoStackBlocking() as addUndoItem:
@@ -2462,11 +2496,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
                     with notificationBlanking():
                         # get the visibility of strip to be copied
-                        copyVisible = self.strips[indx].header.headerVisible
+                        copyVisible = strip.header.headerVisible
 
                         # inserts the strip into the stripFrame here
                         self._stripAddMode = (self.strips[0]._CcpnGLWidget.pixelX, self.strips[0]._CcpnGLWidget.pixelY)
-                        result = self.strips[indx]._clone()
+                        result = strip._clone()
 
                         if not isinstance(result, GuiStrip):
                             raise RuntimeError('Expected an object of class %s, obtained %s' % (GuiStrip, result.__class__))

@@ -15,7 +15,7 @@ Note for Actions:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -27,8 +27,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-13 11:48:04 +0000 (Wed, November 13, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2025-01-10 16:38:47 +0000 (Fri, January 10, 2025) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -215,7 +215,7 @@ class MenusDefs(Menu, FrameworkProperties):
          DynamicMenu('Show/hide Modules', callback=_fillViewShowModulesCallback, checkEnabled=_updateShowHideModules),
          Action("Show/hide Sidebar", self._toggleSidebarCallback, shortcut=' s', checkable=True, checked=True),
          Action("Show/hide Python Console", self._toggleConsoleCallback, shortcut='  ', checkable=True, checked=True,
-                                            checkEnabled=_updatePythonConsole
+                                            checkEnabled=_updatePythonConsoleModule
          ),
 
          ), # end Menu View
@@ -248,7 +248,7 @@ class MenusDefs(Menu, FrameworkProperties):
         Action("Copy Peaks...", self._copyPeaksCallback, shortcut='cp', checkEnabled=_projectHasPeaks),
         Action("Peak Collections...", self._peakCollectionsCallback, shortcut='sc', checkEnabled=_projectHasPeaks),
         Action("Estimate Peak Volumes...", self._estimateVolumesCallback, shortcut='ev', checkEnabled=_projectHasPeaks),
-        Action("Estimate Current Peak Volumes", self._estimateCurrentVolumesCallback, shortcut='ec', checkEnabled=_projectHasPeaks),
+        Action("Estimate Currently Selected Peak Volumes", self._estimateCurrentVolumesCallback, shortcut='ec', checkEnabled=_projectHasCurrentPeaks),
         Action("Reorder PeakList Axes...", self._reorderPeakListAxesCallback, shortcut='rl', checkEnabled=_projectHasSpectra),
 
         Separator(),
@@ -332,8 +332,9 @@ class MenusDefs(Menu, FrameworkProperties):
     #-----------------------------------------------------------------------------------------
     # Development Menu
     #-----------------------------------------------------------------------------------------
-        _devMenu = Menu(DEVELOPMENT_MENU,
-                        DynamicMenu('Debug', callback=_fillDevelopmentDebugCallback),
+        _devMenu = Menu( DEVELOPMENT_MENU,
+            DynamicMenu('Debug', callback=_fillDevelopmentDebugCallback),
+            Action('Print Undo Stack', callback=self._printUndoStackCallback),
         )
         # optionally add development menu before Help menu
         if app._isInDebugMode:
@@ -584,7 +585,7 @@ class MenusDefs(Menu, FrameworkProperties):
         """
         Displays Estimate Volumes Popup.
         """
-        self.mainWindow._showEstimateVolumesPopup()
+        self.ui.estimateVolumes()
 
     def _estimateCurrentVolumesCallback(self):
         """Calculate volumes for the currently selected peaks
@@ -859,7 +860,7 @@ class MenusDefs(Menu, FrameworkProperties):
         dialog._show()
         path = dialog.selectedFile()
         if path is not None:
-            self.ui.newMacroEditor(path=path)
+            self.ui.showMacroEditor(path=path)
 
     def _runMacroCallback(self):
         """Callback for running macro
@@ -966,6 +967,14 @@ class MenusDefs(Menu, FrameworkProperties):
         else:
             MessageDialog.showWarning('Submit Feedback',
                                       'Could not connect to the server, please check your internet connection.')
+    #-----------------------------------------------------------------------------------------
+    # development
+    #-----------------------------------------------------------------------------------------
+
+    def _printUndoStackCallback(self):
+        """Callback for Development-->Print Undo Stack
+        """
+        self.application._getUndo().print()
 
     #-----------------------------------------------------------------------------------------
     # Implementation methods
@@ -1297,6 +1306,13 @@ def _projectHasPeaks(node) -> bool:
     return bool(project and project.peaks)
 
 
+def _projectHasCurrentPeaks(node) -> bool:
+    """callback to test if project has peaks selected
+    """
+    app = getApplication()
+    return bool(app.current.peaks)
+
+
 def _projectHasSpectra(node) -> bool:
     """callback to test if project has spectra
     """
@@ -1392,7 +1408,7 @@ def _hasActiveDisplay(node) -> bool:
         return False
 
 
-def _updatePythonConsole(node) -> bool:
+def _updatePythonConsoleModule(node) -> bool:
     """callback to check and update the Show/hide Python Console action
     """
     app = getApplication()

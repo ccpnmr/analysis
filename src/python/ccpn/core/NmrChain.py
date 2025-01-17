@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:49:48 +0100 (Thu, September 19, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-13 12:42:05 +0000 (Fri, December 13, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,37 +30,50 @@ import typing
 from functools import partial
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
-from ccpnmodel.ccpncore.lib import Constants
+
+from ccpn.core._implementation.updates.update_3_2_11 import _updateOldDefaultNmrChain
+from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
+
 from ccpn.core.lib import MoleculeLib
 from ccpn.core.Chain import Chain
 from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject, \
+from ccpn.core.lib.ContextManagers import newObject, undoStack, renameObject, \
     undoBlock, ccpNmrV3CoreUndoBlock
+from ccpn.core.lib.forceAttribute import forceSetattr, forceGetattr
+
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 from ccpn.util import Common as commonUtil
 
 
-DEFAULT_NMRCHAINCODE = '@-'
+DEFAULT_NMRCHAINCODE = '@0'
 
 
+@updateObject(
+        fromVersion=None,
+        toVersion=None,  # always to this update: '3.3.0',
+        updateFunction=_updateOldDefaultNmrChain,
+        updateMethod=UPDATE_POST_OBJECT_INITIALISATION
+)
 class NmrChain(AbstractWrapperObject):
-    """NmrChains are used for NMR assignment. An NmrChain is by definition assigned to the
-    Chain with the same shortName (if any).
+    """NmrChains are used for NMR assignment.
+    An NmrChain is deemed 'assigned' if the NmrChain's id corresponds to
+    a Chain with the same id.
 
     An NmrChain created without a name will be given the name
     '@ij', where ij is the serial number of the NmrChain. Names of this form are reserved.
     Setting the NmrChain shortName to None will revert to this default name.
+    '@0' denotes the immutable default NmrChain that is always present.
 
-    The order of NmrResidues within an NmrChain is not significant (they are given in sorted order).
+    The order of NmrResidues within an NmrChain is arbitrary.
     NmrChains with isConnected==True are used to describe connected but as yet unassigned
     stretches of NmrResidues, and here the NmrResidues are given in sequential order
     (N-terminal to C-terminal for proteins). Connected NmrChains have names of the form '#ij'
-    where ij is the serial number of the NmrChain, and cannot be renamed.  Names of this form are
-    reserved.
+    where ij is the serial number of the NmrChain, and cannot be renamed.
+    Names of this form are reserved.
     """
 
     #: Short class name, for PID.
@@ -84,9 +97,12 @@ class NmrChain(AbstractWrapperObject):
 
     _ignoreNewApiObjectCallback = True
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # CCPN properties
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
+
+    # def __init__(self, project: 'Project', wrappedData):
+    #     super().__init__(project=project, wrappedData=wrappedData)
 
     @property
     def _apiNmrChain(self) -> ApiNmrChain:
@@ -95,8 +111,10 @@ class NmrChain(AbstractWrapperObject):
 
     @property
     def _key(self) -> str:
-        """short form of name, as used for id with illegal characters replaced by Pid.altCharacter"""
-        return self._wrappedData.code.translate(Pid.remapSeparators)
+        """short form of name, as used for id with illegal characters
+        replaced by Pid.altCharacter
+        """
+        return self.name.translate(Pid.remapSeparators)
 
     @property
     def _localCcpnSortKey(self) -> typing.Tuple:
@@ -104,29 +122,33 @@ class NmrChain(AbstractWrapperObject):
         return (self._wrappedData.code,)
 
     @property
-    def shortName(self) -> str:
-        """short form of name, used in Pid and to identify the NmrChain
-        Names of the form '@ijk' and '#ijk' (where ijk is an integers)
-        are reserved and cannot be set. They can be obtained by the deassign command.
-        Connected NmrChains (isConnected == True) always have canonical names of the form '#ijk'"""
-        return self._wrappedData.code
-
-    name = shortName
-
-    @property
-    def label(self) -> str:
-        """Identifying label of NmrChain. Defaults to '?'"""
-        return self._wrappedData.label
-
-    @label.setter
-    def label(self, value: str):
-        """Set label of NmrChain."""
-        self._wrappedData.label = value
+    def name(self) -> str:
+        """Name of the NmrChain, used in Pid.
+        Names of the form '@ijk' and '#ijk' (where ijk is an integers) are
+        reserved and cannot be set. They can be obtained by the deassign command.
+        Connected NmrChains (isConnected == True) always have canonical names of
+        the form '#ijk'
+        """
+        return str(self._wrappedData.code).strip()
 
     @name.setter
     def name(self, value: str):
-        """set name of nmrResidue."""
+        """set name of nmrChain."""
         self.rename(value)
+
+    # backward compatibility
+    shortName = name
+
+    # GWV 12/12/24: disabled
+    # @property
+    # def label(self) -> str:
+    #     """Identifying label of NmrChain. Defaults to '?'"""
+    #     return self._wrappedData.label
+    #
+    # @label.setter
+    # def label(self, value: str):
+    #     """Set label of NmrChain."""
+    #     self._wrappedData.label = value
 
     @property
     def _parent(self) -> Project:
@@ -135,18 +157,22 @@ class NmrChain(AbstractWrapperObject):
 
     @property
     def serial(self) -> int:
-        """NmrChain serial number - set at creation and unchangeable"""
+        """NmrChain serial number - set at creation and immutable
+        """
         return self._wrappedData.serial
 
     @property
     def isConnected(self) -> bool:
-        """True if this NmrChain is a connected stretch
-        (in which case the mainNmrResidues are sequentially connected)."""
+        """:return: True if this NmrChain is a connected stretch
+        (in which case the mainNmrResidues are sequentially connected).
+        """
         return self._wrappedData.isConnected
 
     @property
-    def chain(self) -> Chain:
-        """Chain to which NmrChain is assigned"""
+    def chain(self) -> Chain | None:
+        """Chain to which NmrChain is assigned
+        :return a Chain instance or None
+        """
         return self._project.getChain(self._id)
 
     @property
@@ -166,9 +192,9 @@ class NmrChain(AbstractWrapperObject):
     def mainNmrResidues(self, value):
         self._wrappedData.mainResonanceGroups = [x._wrappedData for x in value]
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # property STUBS: hot-fixed later
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @property
     def nmrAtoms(self) -> list['NmrAtom']:
@@ -184,9 +210,9 @@ class NmrChain(AbstractWrapperObject):
         """
         return []
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # getter STUBS: hot-fixed later
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def getNmrAtom(self, relativeId: str) -> 'NmrAtom | None':
         """STUB: hot-fixed later
@@ -200,16 +226,16 @@ class NmrChain(AbstractWrapperObject):
         """
         return None
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Core methods
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @logCommand(get='self')
     @ccpNmrV3CoreUndoBlock(action='rename')
     def deassign(self):
         """Reset NmrChain back to its originalName, cutting all assignment links
         """
-        self._wrappedData.code = None
+        self._wrappedData.code = self._wrappedData.label
 
     @logCommand(get='self')
     def assignSingleResidue(self, thisNmrResidue: typing.Union['NmrResidue'],
@@ -290,25 +316,24 @@ class NmrChain(AbstractWrapperObject):
             # need the V3 operator here for the undo/redo to fire correctly
             V3nmrChain = self.project._data2Obj[apiNmrChain]
             # only delete if it is not the default chain:
-            if not V3nmrChain.id.startswith('@-'):
+            if not V3nmrChain.id.startswith(DEFAULT_NMRCHAINCODE):
                 V3nmrChain.delete()
 
-    @logCommand(get='self')
-    def reverse(self, _force=False):
+    # @logCommand(get='self')
+    # GWV 4/12/24: changed into a private method
+    def _reverse(self):
         """Reverse order of NmrResidues within NmrChain
 
         Illegal for assigned NmrChains, and only relevant for connected NmrChains.
-        Serves mainly as building block to make disconnections easier to undo"""
+        Serves mainly as building block to make disconnections easier to undo
+        """
 
-        if self.chain is not None:  # and _force is False:
-            raise ValueError("NmrChain is assigned (to %s) and cannot be reversed"
-                             % self.chain.longPid)
+        if self.chain is not None:
+            raise ValueError(f"NmrChain is assigned to {self.chain} and cannot be reversed")
 
-        with undoBlock():
-            with undoStackBlocking() as addUndoItem:
-                self._wrappedData.__dict__['mainResonanceGroups'].reverse()
-
-                addUndoItem(undo=partial(self.reverse), redo=partial(self.reverse))
+        with undoStack() as addUndoItem:
+            forceGetattr(self._wrappedData, 'mainResonanceGroups').reverse()
+            addUndoItem(undo=self._reverse, redo=self.reverse)
 
     @logCommand(get='self')
     def renumberNmrResidues(self, offset: int, start: int = None, stop: int = None):
@@ -320,9 +345,10 @@ class NmrChain(AbstractWrapperObject):
 
         if start (stop) is None, there is no lower (upper) limit
 
-        NB Will rename nmrResidues one by one, and stop on error."""
+        NB Will rename nmrResidues one by one, and stop on error.
+        """
 
-        nmrResidues = self.nmrResidues
+        nmrResidues = list(self.nmrResidues)
         if offset > 0:
             nmrResidues.reverse()
 
@@ -346,8 +372,9 @@ class NmrChain(AbstractWrapperObject):
 
         if start is not None and stop is not None:
             if len(changedNmrResidues) != stop + 1 - start:
-                self._project._logger.warning("Only %s nmrResidues found in range %s to %s"
-                                              % (len(changedNmrResidues), start, stop))
+                getLogger().warning(
+                        f"Only {len(changedNmrResidues)} nmrResidues found in range {start} to {stop}"
+                )
 
     @logCommand(get='self')
     def setupNmrResiduesFromPeaks(self, peakList, keepAssignments=True):
@@ -357,8 +384,28 @@ class NmrChain(AbstractWrapperObject):
         :param keepAssignments: flag to keep or not-keep existing assignments
         """
         from ccpn.core.lib.AssignmentLib import _fetchNewPeakAssignments
-
         _fetchNewPeakAssignments(peakList=peakList, nmrChain=self, keepAssignments=keepAssignments)
+
+    def _rename(self, value: str) -> tuple:
+        """The actual rename, without checks and decorators
+        :return (oldName, newName) tuple
+        """
+        oldName = self.name
+        newName = self._uniqueName(parent=self.project, name=value)
+
+        # GWV: bypassing the sodding api-checks
+        # implCode and code are linked; cannot set one without the other.
+        # Hack: Adding space that will be stripped by the name property.
+        _code = f' {newName}'
+        forceSetattr(self._wrappedData, 'label', newName)
+        forceSetattr(self._wrappedData, 'implCode', _code)
+        forceSetattr(self._wrappedData, 'code', _code)
+
+        self._resetIds(recursive=True)
+        for nmrRes in self.nmrResidues:
+            nmrRes._renameChildren()
+
+        return oldName, newName
 
     @renameObject(blockSidebar=True)
     @logCommand(get='self')
@@ -366,27 +413,22 @@ class NmrChain(AbstractWrapperObject):
         """Rename NmrChain, changing its shortName and Pid.
         Use the 'deassign' function if you want to revert to the canonical name
         """
-        if self.chain:
-            getLogger().warning(f'{self.__class__.__name__}.rename will lose or change the assigned chain')
-
-        wrappedData = self._apiNmrChain
-
-        if self._wrappedData.isConnected:
-            raise ValueError("Connected NmrChain cannot be renamed")
-        elif value == wrappedData.code:
+        if value == self.name:
             return
-        elif wrappedData.code == Constants.defaultNmrChainCode:
-            raise ValueError("NmrChain:%s cannot be renamed" % Constants.defaultNmrChainCode)
+
+        if self.name == DEFAULT_NMRCHAINCODE:
+            raise ValueError("NmrChain:%s cannot be renamed" % DEFAULT_NMRCHAINCODE)
+
+        if self.isConnected:
+            raise ValueError("Connected NmrChain cannot be renamed")
+
+        if self.chain:
+            getLogger().warning(f'NmrChain.rename will lose or change the assigned chain')
 
         value = self._uniqueName(parent=self.project, name=value)
 
         # rename functions from here
-        oldName = self.shortName
-        # self._oldPid = self.pid
-
-        wrappedData.code = value
-        for nmrRes in self.nmrResidues:
-            nmrRes._renameChildren()
+        oldName, newName = self._rename(value)
 
         return (oldName,)
 
@@ -405,9 +447,20 @@ class NmrChain(AbstractWrapperObject):
             for sh in _shs:
                 sh.delete()
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Implementation methods
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
+
+    # GWV: code that can be uncommented for debugging purposes
+    # @classmethod
+    # def _restoreObject(cls, project, apiObj):
+    #     """Restores object from apiObj;
+    #     checks for _factoryFunction through _newInstanceFromApiData call
+    #     Restores the children
+    #
+    #     :return Restored object
+    #     """
+    #     super()._restoreObject(project=project, apiObj=apiObj)
 
     @classmethod
     def _getAllWrappedData(cls, parent: Project) -> list:
@@ -438,10 +491,10 @@ class NmrChain(AbstractWrapperObject):
                     updatingNmrChain = currentItem.connectNext(nextItem, )
         return updatingNmrChain
 
-    #===========================================================================================
+    #-----------------------------------------------------------------------------------------
     # new<Object> and other methods
     # Call appropriate routines in their respective locations
-    #===========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @logCommand(get='self')
     def newNmrResidue(self, sequenceCode: typing.Union[int, str] = None, residueType: str = None,
@@ -456,7 +509,6 @@ class NmrChain(AbstractWrapperObject):
         :return: a new NmrResidue instance.
         """
         from ccpn.core.NmrResidue import _newNmrResidue
-
         return _newNmrResidue(self, sequenceCode=sequenceCode, residueType=residueType,
                               comment=comment)
 
@@ -475,7 +527,6 @@ class NmrChain(AbstractWrapperObject):
         :return: an NmrResidue instance.
         """
         from ccpn.core.NmrResidue import _fetchNmrResidue
-
         return _fetchNmrResidue(self, sequenceCode=sequenceCode, residueType=residueType)
 
 
@@ -498,71 +549,105 @@ class NmrChain(AbstractWrapperObject):
 
 
 #=========================================================================================
-# Connections to parents:
+# New and fetch methods
 #=========================================================================================
 
 @newObject(NmrChain)
-def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False, label: str = '?',
+def _newNmrChain(project: Project, name: str = None, isConnected: bool = False,
                  comment: str = None) -> NmrChain:
     """Create new NmrChain. Setting isConnected=True produces a connected NmrChain.
 
     See the NmrChain class for details.
 
-    :param str shortName: shortName for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer
+    :param str name: name for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer
     :param bool isConnected: (default to False) If true the NmrChain is a connected stretch. This can NOT be changed later
-    :param str label: Modifiable NmrChain identifier that does not change with reassignment. Defaults to '@ijk'/'#ijk'
     :param str comment: comment for new nmrChain (optional)
     :return: a new nmrChain instance.
     """
+    from ccpn.core.lib.forceAttribute import forceSetattr
 
-    nmrProject = self._apiNmrProject
-    serial = None
-
-    # if isinstance(shortName, str) and shortName.startswith(DEFAULT_NMRCHAINCODE):
-    #     raise ValueError(f"Cannot create NmrChain beginning with {DEFAULT_NMRCHAINCODE}")
-
-    if shortName is not None:
-        if shortName and isinstance(shortName, str) and shortName[0] in '#@':
-            if shortName[:2] == DEFAULT_NMRCHAINCODE:
-                raise ValueError(f"Cannot create NmrChain beginning with {DEFAULT_NMRCHAINCODE}")
-
-        else:
-            shortName = NmrChain._uniqueName(parent=self, name=shortName)
-
-    if shortName:
-        previous = self.getNmrChain(shortName.translate(Pid.remapSeparators))
-        if previous is not None:
-            raise ValueError(f"{previous.longPid} already exists")
-        if shortName[0] in '#@':
-            try:
-                serial = int(shortName[1:])
-            except ValueError:
-                # the rest of the name is not an int. We are OK
-                pass
-            else:
-                if serial is not None and serial > 0:
-                    if nmrProject.findFirstNmrChain(serial=serial) is not None:
-                        raise ValueError(f"Cannot create NmrChain with reserved name {shortName}")
-
-                    # We are setting a shortName that matches the passed-in serial. OK.
-                    # Set isConnected to match - this overrides the isConnected parameter.
-                    isConnected = (shortName[0] == '#')
-                    shortName = None
-
+    # old projects have funny serials, so just find the highest value
+    if project.nmrChains:
+        serial = max([_nc.serial for _nc in project.nmrChains]) + 1
     else:
-        shortName = None
+        serial = 0
 
-    dd = {'code': shortName, 'isConnected': isConnected, 'label': label, 'details': comment}
+    apiNmrProject = project._apiNmrProject
 
-    newApiNmrChain = nmrProject.newNmrChain(**dd)
-    if (result := NmrChain._newInstanceFromApiData(apiObj=newApiNmrChain, project=self)) is None:
-        raise RuntimeError('Unable to generate new NmrChain item')
+    if name is None:
+        if isConnected:
+            _name = f'#{serial}'
+        else:
+            _name = f'@{serial}'
+    else:
+        _name = NmrChain._uniqueName(parent=project, name=name)
 
-    if serial is not None:
-        try:
-            result._resetSerial(serial)
-        except ValueError:
-            self.project._logger.warning(f"Could not set shortName of {result} to {shortName} - keeping default value")
+    # some sanity checks
+    _ids = [nc.id for nc in project.nmrChains]
+    if _name in _ids:
+        raise ValueError(f"NmrChain {name} already used")
+
+    if _name[0:0] == "@" and isConnected:
+        raise ValueError(f'Connected NmrChain should not start with "@"; got {_name}')
+
+    if _name[0:0] == "#" and not isConnected:
+        raise ValueError(f'Un-connected NmrChain should not start with "#"; got {shortName}')
+
+    # serial = None
+    #
+    # # if isinstance(shortName, str) and shortName.startswith(DEFAULT_NMRCHAINCODE):
+    # #     raise ValueError(f"Cannot create NmrChain beginning with {DEFAULT_NMRCHAINCODE}")
+    #
+    # if shortName is not None:
+    #     if shortName and isinstance(shortName, str) and shortName[0] in '#@':
+    #         if shortName[:2] == DEFAULT_NMRCHAINCODE:
+    #             raise ValueError(f"Cannot create NmrChain beginning with {DEFAULT_NMRCHAINCODE}")
+    #
+    #     else:
+    #         shortName = NmrChain._uniqueName(parent=project, name=shortName)
+    #
+    # if shortName:
+    #     previous = project.getNmrChain(shortName.translate(Pid.remapSeparators))
+    #     if previous is not None:
+    #         raise ValueError(f"{previous.longPid} already exists")
+    #     if shortName[0] in '#@':
+    #         try:
+    #             serial = int(shortName[1:])
+    #         except ValueError:
+    #             # the rest of the name is not an int. We are OK
+    #             pass
+    #         else:
+    #             if serial is not None and serial > 0:
+    #                 if apiNmrProject.findFirstNmrChain(serial=serial) is not None:
+    #                     raise ValueError(f"Cannot create NmrChain with reserved name {shortName}")
+    #
+    #                 # We are setting a shortName that matches the passed-in serial. OK.
+    #                 # Set isConnected to match - this overrides the isConnected parameter.
+    #                 isConnected = (shortName[0] == '#')
+    #                 shortName = None
+    #
+    # else:
+    #     shortName = None
+
+    # GWV 3/12/24: cannot add serial to initiating parameters
+    #              cannot set # or @ shortnames!!!
+    # Hence: bypass and force it;
+    # also add a space to name that will be stripped by the name property
+    _code = f' {_name}'
+    dd = {'code': _code, 'isConnected': isConnected, 'label': _name, 'details': comment}
+    newApiNmrChain = apiNmrProject.newNmrChain(**dd)
+    forceSetattr(newApiNmrChain, 'code', _code)
+    forceSetattr(newApiNmrChain, 'implCode', _code)
+
+    if (result := NmrChain._newInstanceFromApiData(apiObj=newApiNmrChain, project=project)) is None:
+        raise RuntimeError('Unable to generate new NmrChain')
+    result._resetSerial(serial)
+    #
+    # if serial is not None:
+    #     try:
+    #         result._resetSerial(serial)
+    #     except ValueError:
+    #         getLogger().warning(f"Could not set shortName of {result} to {shortName} - keeping default value")
 
     return result
 

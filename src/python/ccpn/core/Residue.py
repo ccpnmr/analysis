@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 16:23:29 +0100 (Sat, October 26, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__dateModified__ = "$dateModified: 2024-12-18 14:19:04 +0000 (Wed, December 18, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,22 +28,27 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 from functools import partial
+
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
+
 from ccpn.core.Chain import Chain
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import undoStackBlocking, renameObject, undoBlock, \
-    undoBlockWithoutSideBar, notificationEchoBlocking
+    undoBlockWithoutSideBar, notificationEchoBlocking, newObject, apiNotificationBlanking, undoStack
+from ccpn.core.lib.forceAttribute import forceSetattr
+
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoStackBlocking, renameObject, undoBlock, \
-    undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.util.Logging import getLogger
+
 
 
 class Residue(AbstractWrapperObject):
     """A molecular Residue, contained in a Chain, and containing Atoms.
     Crucial attributes: residueType (e.g. 'ALA'), residueVariant (NEF-based), sequenceCode (e.g. '123')
     """
+    #-----------------------------------------------------------------------------------------
 
     #: Short class name, for PID.
     shortClassName = 'MR'
@@ -63,32 +68,45 @@ class Residue(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiResidue._metaclass.qualifiedName()
+    _ignoreNewApiObjectCallback = True
 
     # Number of fields that comprise the object's pid; Used to get parent id's
     _numberOfIdFields = 2
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # CCPN properties
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
+
+    # GWV 15/12/24: moved downwards
+    # @property
+    # def _apiResidue(self) -> ApiResidue:
+    #     """ API residue matching Residue"""
+    #     return self._wrappedData
+
+    # GWV: temp in internal space until model is adjusted
+    _SEQUENCE_CODE_OFFSET = 'seqCodeOffset'
 
     @property
-    def _apiResidue(self) -> ApiResidue:
-        """ API residue matching Residue"""
-        return self._wrappedData
+    def _intSequenceCode(self) -> int:
+        """:return the numeric part of the sequence code of the residue
+        including any offset as an integer.
+        """
+        _offset = self._setDefaultInternalParameter(self._SEQUENCE_CODE_OFFSET, 0)
+        return self._wrappedData.seqCode + _offset
 
     @property
     def sequenceCode(self) -> str:
-        """Residue sequence code and id (e.g. '1', '127B') """
-        obj = self._wrappedData
-        objSeqCode = obj.seqCode
-        result = (obj.seqInsertCode or '').strip()
-        if objSeqCode is not None:
-            result = str(objSeqCode) + result
-        return result
+        """Residue sequence code (e.g. '1', '127B')
+        """
+        apiResidue = self._wrappedData
+        result = f'{self._intSequenceCode}{apiResidue.seqInsertCode or ""}'
+        return result.strip()
 
     @property
     def _key(self) -> str:
-        """Residue ID. Identical to sequenceCode.residueType. Characters translated for pid"""
+        """Residue ID. Identical to sequenceCode.residueType.
+        Characters translated for pid
+        """
         return Pid.createId(self.sequenceCode, self.residueType)
 
     @property
@@ -98,26 +116,52 @@ class Residue(AbstractWrapperObject):
 
     @property
     def _parent(self) -> Chain:
-        """Chain containing residue."""
+        """:return the Chain instance containing self.
+        """
         return self._project._data2Obj[self._wrappedData.chain]
 
     chain = _parent
 
     @property
     def residueType(self) -> str:
-        """Residue type name string (e.g. 'ALA')"""
-        return self._wrappedData.code3Letter or ''
+        """Residue type name string (e.g. 'ALA') or '' if not defined.
+        """
+        return self.threeLetterCode or ''
+
+    @property
+    def threeLetterCode(self) -> str | None:
+        """:return the three-letter of self as defined by its chemComp definition
+                   or None in case of error.
+        """
+        try:
+            return self._chemComp.code3Letter
+        except Exception as es:
+            getLogger().debug(f'getting threeLetterCode encountered an error: {es}')
+            return None
+
+    @property
+    def oneLetterCode(self) -> str | None:
+        """:return the one-letter of self as defined by its chemComp definition.
+                   or None in case of error.
+        """
+        try:
+            return self._chemComp.code1Letter
+        except Exception as es:
+            getLogger().debug(f'getting oneLetterCode encountered an error: {es}')
+            return None
 
     @property
     def shortName(self) -> str:
-        return self._wrappedData.chemCompVar.chemComp.code1Letter or '?'
+        """:return one-letter of self as defined by its chemComp definition or '?'
+        """
+        return self._chemComp.code1Letter or '?'
 
     @property
     def ccpCode(self) -> str:
-        """Residue sequence ccpcode (e.g. 'Ala', 'Aba') retrieved from the ChemComp"""
-        obj = self._wrappedData
-        ccpCode = obj.ccpCode
-        return ccpCode
+        """Residue sequence ccpcode (e.g. 'Ala', 'Aba') retrieved from
+        the ChemComp
+        """
+        return self._chemComp.ccpCode
 
     @property
     def linking(self) -> str:
@@ -210,8 +254,8 @@ class Residue(AbstractWrapperObject):
 
     @property
     def descriptor(self) -> str:
-        """variant descriptor (protonation state etc.) for residue, as defined in the CCPN V2 ChemComp
-        description."""
+        """variant descriptor (protonation state etc.) for residue, as defined in the
+        CCPN V2 ChemComp description."""
         return self._wrappedData.descriptor
 
     @descriptor.setter
@@ -234,9 +278,9 @@ class Residue(AbstractWrapperObject):
         else:
             raise ValueError("%s configuration must be one of %s" % (self, allowedValues))
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # property STUBS: hot-fixed later
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @property
     def atoms(self) -> list['Atom']:
@@ -245,9 +289,9 @@ class Residue(AbstractWrapperObject):
         """
         return []
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # getter STUBS: hot-fixed later
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def getAtom(self, relativeId: str) -> 'Atom | None':
         """STUB: hot-fixed later
@@ -255,9 +299,9 @@ class Residue(AbstractWrapperObject):
         """
         return None
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Core methods
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @property
     def nextResidue(self) -> typing.Optional['Residue']:
@@ -267,7 +311,7 @@ class Residue(AbstractWrapperObject):
         molResidue = apiResidue.molResidue.nextMolResidue
         if molResidue is None:
             result = None
-            self._project._logger.debug("No next residue - API ")
+            getLogger().debug("No next residue - API ")
         else:
             result = self._project._data2Obj.get(
                     apiResidue.chain.findFirstResidue(seqId=molResidue.serial))
@@ -288,19 +332,36 @@ class Residue(AbstractWrapperObject):
 
         return result
 
-    def resetVariantToDefault(self):
-        """Reset Residue.residueVariant to the default variant"""
-        atomNamesMissing, extraAtomNames = self._wrappedData.getAtomNameDifferences()
-        # No need for testing - the names returned are guaranteed to be missing/superfluous
-        for atomName in atomNamesMissing:
-            self.newAtom(name=atomName)
-        for atomName in extraAtomNames:
-            self.getAtom(atomName).delete()
+    # GWV 11/12/24: superseeded by _newResidue implementation
+    # def resetVariantToDefault(self):
+    #     """Reset Residue.residueVariant to the default variant
+    #     """
+    #     atomNamesMissing, extraAtomNames = self._wrappedData.getAtomNameDifferences()
+    #     # No need for testing - the names returned are guaranteed to be missing/superfluous
+    #     for atomName in atomNamesMissing:
+    #         self.newAtom(name=atomName)
+    #     for atomName in extraAtomNames:
+    #         self.getAtom(atomName).delete()
+
+    # GWV: piggy-back onto the rename decorator here, as this
+    # effectively puts renumber method on the undo stack
+    # using the tuple of two returned arguments and triggers
+    # RENAME notifiers
+    @renameObject()
+    def renumber(self, offset: int):
+        """Renumber self by adding offset to integer part of
+        sequenceCode; e.g. for offset 1, sequenceCode "12B" becomes "13B"
+        """
+        _currentOffset = self._setDefaultInternalParameter(self._SEQUENCE_CODE_OFFSET, 0)
+        _newOffset = _currentOffset + offset
+        self._setInternalParameter(self._SEQUENCE_CODE_OFFSET, _newOffset)
+        self._resetIds(recursive=True)
+        return(-offset, offset)
 
     @staticmethod
     def _setFragmentResidues(chainFragment, residues):
         """set the residues connected to the chainFragment
-        CCPN Internal - ussed to handle removing reside link from the api
+        CCPN Internal - used to handle removing residue link from the api
         """
         chainFragment.__dict__['residues'] = tuple(residues)
 
@@ -342,12 +403,13 @@ class Residue(AbstractWrapperObject):
         So no notifiers on the link - notify on the NmrResidue rename instead.
         """
         try:
-            return self._project.getNmrResidue(self._id)
-        except:
+            return self.project.getNmrResidue(self._id)
+        except Exception as es:
+            getLogger().debug(f'Residue.nmrResidue encountered an error: {es}')
             return None
 
     @property
-    def allNmrResidues(self) -> tuple['NmrResidue']:
+    def allNmrResidues(self) -> typing.Tuple['NmrResidue']:
         """AllNmrResidues corresponding to Residue - E.g. (for MR:A.87)
         NmrResidues NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.
         """
@@ -378,6 +440,7 @@ class Residue(AbstractWrapperObject):
                         ll = [x for x in nmrChain.nmrResidues if x.sequenceCode == sequenceCode]
                         if ll:
                             result.extend(ll)
+
         return tuple(sorted(result))
 
     @property
@@ -387,9 +450,66 @@ class Residue(AbstractWrapperObject):
         """
         return any([a.isAssigned for a in self.atoms])
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Implementation methods
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
+
+    # For debugging purposes
+    def __init__(self, project: 'Project', wrappedData):
+
+        # link to _MolecularTemplate MolResidue for self as the linkage is lost;
+        # set in PostRestore and _newResidue;
+        # needs to be defined before super call, as the _key property needs it to
+        # make an _id.
+        self._apiMolResidue_ = None
+
+        super().__init__(project, wrappedData)
+
+    def _postRestore(self):
+        """Post-restore actions
+        """
+        self._apiMolResidue_ = self._getApiMolResidueFromMolecularTemplate()
+        super()._postRestore()
+
+    @property
+    def _apiResidue(self) -> ApiResidue:
+        """ API residue matching Residue"""
+        return self._wrappedData
+
+    @property
+    def _apiMolResidue(self) -> ApiResidue:
+        """ API MolResidue defined for self; needs to be part of _wrappedData,
+        but also hold on by self.
+        """
+        return self._apiMolResidue_ or self._wrappedData.molResidue
+
+    def _getApiMolResidueFromMolecularTemplate(self):
+        """:return The API MolResidue instance as derived from the
+                   _molecularTemplate associated with self.chain and self.sequenceCode,
+                   or None if not defined
+        Used in _postRestore to define_apiMolResidue
+        """
+        if (_molecularTemplate := self.chain._molecularTemplate) is None:
+            raise AttributeError(f'MolecularTemplate not defined in {self.chain}')
+        return _molecularTemplate._getApiMolResidue(self.sequenceCode)
+
+    @property
+    def _chemComp(self) -> str:
+        """:return the chemComp instance or None if not defined
+        """
+        if (apiMolResidue := self._apiMolResidue) is None:
+            getLogger().debug(f'Undefined apiMolResidue for {self}; returning None for chempComp')
+            return None
+        return apiMolResidue.chemComp
+
+    @property
+    def _chemCompVar(self):
+        """:return the chemCompVar instance or None if not defined
+        """
+        if (apiMolResidue := self._apiMolResidue) is None:
+            getLogger().debug(f'Undefined apiMolResidue for {self}; returning None for chempComp')
+            return None
+        return apiMolResidue.chemCompVar
 
     @classmethod
     def _getAllWrappedData(cls, parent: Chain) -> list:
@@ -403,39 +523,40 @@ class Residue(AbstractWrapperObject):
     @renameObject()
     @logCommand(get='self')
     def rename(self, sequenceCode: str = None):
-        """Reset Residue.sequenceCode (residueType is immutable).
-        Renaming to None sets the sequence code to the seqId (serial number equivalent)
+        """Set Residue.sequenceCode (residueType is immutable).
+        :param sequenceCode: the new sequenceCode
+                             SequenceCode == None resets to current value,
+                             but still triggers the RENAME notifiers
         """
         # rename functions from here
         apiResidue = self._wrappedData
 
+        _currentSequenceCode = self.sequenceCode
         if sequenceCode is None:
-            seqCode = apiResidue.seqId
-            seqInsertCode = ' '
+            self._resetIds(recursive=True)
+            return (_currentSequenceCode, _currentSequenceCode)
 
-        else:
-            # Parse values from sequenceCode
-            code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
-            if code is None or offset is not None:
-                raise ValueError("Illegal value for Residue.sequenceCode: %s" % sequenceCode)
-            seqCode = code
-            seqInsertCode = ss or ' '
+        # Parse values from sequenceCode
+        code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
+        if code is None or offset is not None:
+            raise ValueError(f"Illegal value for Residue.sequenceCode:{sequenceCode}")
+
+        seqCodeOffset = self._getInternalParameter(self._SEQUENCE_CODE_OFFSET, 0)
+        seqCode = code - seqCodeOffset
+        seqInsertCode = ss or ' '
 
         previous = apiResidue.chain.findFirstResidue(seqCode=seqCode, seqInsertCode=seqInsertCode)
         if (previous not in (None, apiResidue)):
             raise ValueError("New sequenceCode %s clashes with existing Residue %s"
                              % (sequenceCode, self._project._data2Obj.get(previous)))
 
-        if apiResidue.seqInsertCode and apiResidue.seqInsertCode != ' ':
-            oldSequenceCode = '.'.join((str(apiResidue.seqCode), apiResidue.seqInsertCode))
-        else:
-            oldSequenceCode = str(apiResidue.seqCode)
-        # self._oldPid = self.pid
-
+        # update the modelValues
         apiResidue.seqCode = seqCode
         apiResidue.seqInsertCode = seqInsertCode
 
-        return (oldSequenceCode,)
+        self._resetIds(recursive=True)
+
+        return (_currentSequenceCode, self.sequenceCode)
 
     def _finaliseAction(self, action: str, **actionKwds):
         """Subclassed to handle delete/create
@@ -451,25 +572,23 @@ class Residue(AbstractWrapperObject):
         if not super()._finaliseAction(action):
             return
 
-    #===========================================================================================
+    #-----------------------------------------------------------------------------------------
     # new<Object> and other methods
     # Call appropriate routines in their respective locations
-    #===========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @logCommand(get='self')
     def newAtom(self, name: str, elementSymbol: str = None, **kwds) -> 'Atom':
         """Create new Atom within Residue. If elementSymbol is None, it is derived from the name
 
+        Optional keyword arguments can be passed in;
         See the Atom class for details.
-
-        Optional keyword arguments can be passed in; see Atom._newAtom for details.
 
         :param name:
         :param elementSymbol:
         :return: a new Atom instance.
         """
         from ccpn.core.Atom import _newAtom
-
         return _newAtom(self, name=name, elementSymbol=elementSymbol, **kwds)
 
     def _removeNonChemAtoms(self):
@@ -482,18 +601,13 @@ class Residue(AbstractWrapperObject):
             with notificationEchoBlocking():
                 self.project.deleteObjects(*pseudoAtoms)
 
-    @property
-    def _chemCompVar(self):
+    def _getChemCompAtomGroups(self) -> set:
         """
-        :return:
         """
-        return self._wrappedData.chemCompVar
+        if not self._chemCompVar:
+            return {}
 
-    def _getChemCompAtomGroups(self):
-        """
-        """
         atomGroups = {}
-        if not self._chemCompVar: return
         atomSets = self._chemCompVar.chemAtomSets
         for atomSet in atomSets:
             if not atomSet.chemAtomSets:
@@ -503,23 +617,92 @@ class Residue(AbstractWrapperObject):
 
         return atomGroups
 
-    def _addAtomsFromChemSets(self):
-        if not self._chemCompVar:
-            return
-        atomSets = self._chemCompVar.chemAtomSets
+    # GWV 10/12/24: not used and routine does nothing
+    # def _addAtomsFromChemSets(self):
+    #     if not self._chemCompVar:
+    #         return
+    #     atomSets = self._chemCompVar.chemAtomSets
 
-    def _getChemAtomNames(self):
+    def _getChemAtomNames(self) -> list:
+        """:return: the list of atom names from the chemCompVar obj.
+        It uses chemCompVar instead of chemCompVar.chemComp.chemAtoms because
+        the latter includes LinkAtom like 'next_1'
         """
-        :return: gets the atom names from the chemCompVar obj.
-        It uses chemCompVar instead of chemCompVar.chemComp.chemAtoms because the latter includes LinkAtom like 'next_1'
-        """
-        chemCompVar = self._wrappedData.chemCompVar
         chemAtomNames = []
-        if chemCompVar:
-            chemAtoms = self._wrappedData.chemCompVar.chemAtoms
+        if self._chemCompVar is not None:
+            chemAtoms = self._chemCompVar.sortedChemAtoms()
             chemAtomNames = [atom.name for atom in chemAtoms]
         return chemAtomNames
 
+
 #=========================================================================================
-# Connections to parents:
+# new<Object> and other methods
 #=========================================================================================
+
+@newObject(klass=Residue)
+def _newResidue(chain: Chain, apiMolResidue, useNefAtomNomenclature: bool) -> Residue:
+    """Create a new Residue instance and its encompassing atoms
+    :param chain: A Chain instance
+    :param apiMolResidue: A API MolResidue instance containing the definitions for the new residue
+    :param useNefAtomNomenclature: flag to define NEF atom nomenclature to be used, rather than only IUPAC
+    :return: A Residue instance.
+    """
+    # local import to avoid cycles
+    from ccpn.core.Atom import _newAtom
+
+    apiChain = chain._wrappedData
+    apiResidue = apiChain.newResidue(
+        seqId = apiMolResidue.serial,
+        seqCode = apiMolResidue.seqCode,
+        seqInsertCode = apiMolResidue.seqInsertCode,
+        linking = apiMolResidue.linking,
+        descriptor = apiMolResidue.descriptor,
+    )
+    # set the linkage, so it is present during the V3 init
+    # forceSetattr(apiResidue, 'molResidue', apiMolResidue)
+
+    if (result := Residue._newInstanceFromApiData(apiObj=apiResidue, project=chain.project)) is None:
+        raise RuntimeError('Unable to generate new Residue')
+
+    # We need to hang on to apiMolResidue as it is lost later on;
+    # _apiMolResidue is the corresponding property
+    result._apiMolResidue_ = apiMolResidue
+
+    # # set the linka
+    # result._apiMolResidue = apiMolResidue
+    # result._resetIds(recursive=True)
+
+    # Add the atoms
+    with apiNotificationBlanking():
+
+        _atoms = []
+
+        # TODO DEVELOP: implement this, getting a proper list of valid names in case of True
+        useNefAtomNomenclature = False
+
+        if useNefAtomNomenclature:
+            # Use NEF atom nomenclature
+            _validNames = 'N CA C H'.split()
+            for apiAtom in apiResidue.atoms:
+                if apiAtom.name in _validNames:
+                    _atom = _newAtom(result, name=apiAtom.name, apiAtom=apiAtom)
+                    _atoms.append(_atom)
+                else:
+                    with undoStack() as _:
+                        apiAtom.delete()
+
+                _missed = set(_validNames) - set(at.name for at in _atoms)
+                for _atomName in _missed:
+                    _atom = _newAtom(result, name=_atomName)
+                    _atoms.append(_atom)
+
+        else:
+            # Just use the IUPAC as derived from the CcpNmr machinery
+            for apiAtom in apiResidue.atoms:
+                _atom = _newAtom(result, name=apiAtom.name, apiAtom=apiAtom)
+                _atoms.append(_atom)
+
+            # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
+            # result.resetVariantToDefault()
+
+    return result

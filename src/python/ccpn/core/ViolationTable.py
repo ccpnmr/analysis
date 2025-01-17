@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:49:49 +0100 (Thu, September 19, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-06 14:47:44 +0000 (Fri, December 06, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -256,20 +256,21 @@ class ViolationTable(AbstractWrapperObject):
         """Rename ViolationTable, changing its name and Pid."""
         return self._rename(value)
 
-    def _rename(self, value: str):
-        """Generic rename method that individual classes can use for implementation
-        of their rename method to minimises code duplication
+    def _rename(self, value: str) -> tuple:
+        """The actual rename, without checks and decorators
+        :return (oldName, newName) tuple
         """
         # validate the name from the parent structureData
-        name = self._uniqueName(parent=self.structureData, name=value)
+        newName = self._uniqueName(parent=self.structureData, name=value)
 
         # rename functions from here
         oldName = self.name
         # self._oldPid = self.pid
 
-        self._wrappedData.name = name
+        self._wrappedData.name = newName
+        self._resetIds(recursive=True)
 
-        return (oldName,)
+        return (oldName, newName)
 
     @classmethod
     def _restoreObject(cls, project, apiObj):

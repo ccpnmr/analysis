@@ -69,10 +69,11 @@ class SpectrumToolBar(ToolBar):
         # self.project = getProject()
         # self.current = getCurrent()
         self._firstButton = 0
-        self._currentSpectrumNotifier = CurrentNotifier(
-                                                 targetName=Spectrum._pluralLinkName,
-                                                 callback=self._onCurrentSpectrumNotifier,
-                                                 )
+        # GWV 10/1/2025: Notifier now set by GuiSpectrumDisplay, but still calls _onCurrentSpectrumNotifier()!
+        # self._currentSpectrumNotifier = CurrentNotifier(
+        #                                          targetName=Spectrum._pluralLinkName,
+        #                                          callback=self._onCurrentSpectrumNotifier,
+        #                                          ),
         self._styleSheet = """
                             /*  currentField is a property on the widgetAction
                                 that can be set to True to enable a highlighted border;
@@ -284,7 +285,7 @@ class SpectrumToolBar(ToolBar):
             _SCMitem(name='Properties...',
                      typeItem=ItemTypes.get(ITEM), icon='icons/null',
                      callback=partial(self._showSpectrumProperties, button)),
-            _SCMitem(name='Remove Spectrum',
+            _SCMitem(name='Remove Spectrum from SpectrumDisplay',
                      typeItem=ItemTypes.get(ITEM), icon='icons/null',
                      callback=partial(self._removeSpectrum, button)),
             ]
@@ -694,7 +695,10 @@ class SpectrumToolBar(ToolBar):
                 widget.style().unpolish(widget)
                 widget.style().polish(widget)
 
+    # GWV 10/1/2025: moved Notifier to GuiSpectrumDisplay
     def _onCurrentSpectrumNotifier(self, data):
+        """CCPNINTERNAL: called from Notifier set by GuiSpectrumDisplay
+        """
         self._setButtonColourScheme()
 
     def closeEvent(self, event):

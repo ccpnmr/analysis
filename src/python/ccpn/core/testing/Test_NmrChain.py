@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-18 13:19:03 +0000 (Mon, November 18, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-13 12:42:05 +0000 (Fri, December 13, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,22 +30,26 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from ccpn.core.testing.WrapperTesting import WrapperTesting, getProperties
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
+from ccpn.core.NmrChain import DEFAULT_NMRCHAINCODE
 
 class NmrChainTest(WrapperTesting):
     projectPath = None
 
     def test_NmrChain_naming(self):
-        nchain0 = self.project.getByPid('NC:@-')
-        self.assertEqual(nchain0._wrappedData.serial, 1)
-
-        ncx = self.project.getNmrChain('@-')
+        nchain0 = self.project.getByPid(DEFAULT_NMRCHAINCODE)
+        ncx = self.project.getNmrChain(DEFAULT_NMRCHAINCODE)
         self.assertIs(nchain0, ncx)
-        nchain1 = self.project.newNmrChain()
-        self.assertEqual(nchain1.shortName, '@2')
-        nchain2 = self.project.newNmrChain(isConnected=True)
-        self.assertEqual(nchain2.shortName, '#3')
+
+        nchain1 = self.project.newNmrChain(name='@1')
+        self.assertEqual(nchain1.name, '@1')
+        self.assertEqual(nchain1.shortName, '@1')
+
+        nchain2 = self.project.newNmrChain(name='#2', isConnected=True)
+        self.assertEqual(nchain2.shortName, '#2')
+
         nchain3 = self.project.newNmrChain('#5')
-        self.assertEqual(nchain3.shortName, '#5')
+        self.assertEqual(nchain3.name, '#5')
+
         nchain4 = self.project.newNmrChain('@4')
         self.assertEqual(nchain4.shortName, '@4')
 

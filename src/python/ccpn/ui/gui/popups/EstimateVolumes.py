@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-07 16:32:27 +0000 (Tue, January 07, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2025-01-10 16:38:48 +0000 (Fri, January 10, 2025) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -58,6 +58,10 @@ class EstimateVolumesABC(CcpnDialogMainWidget):
     TITLE = 'Estimate Volumes'
 
     def __init__(self, parent=None, mainWindow=None, title=None, spectra=None, **kwds):
+
+        if title is None:
+            title = 'Estimate Volumes'
+
         super().__init__(parent, setLayout=True, windowTitle=title or self.TITLE, **kwds)
 
         if mainWindow:
@@ -105,11 +109,11 @@ class EstimateVolumesABC(CcpnDialogMainWidget):
 # EstimatePeakListVolumes
 #=========================================================================================
 
-class EstimatePeakListVolumes(EstimateVolumesABC):
+class EstimatePeakListVolumesPopup(EstimateVolumesABC):
     """
     Popup to estimate volumes of peaks in peakList from selected spectrum.
     Spectra are all those in the project.
-    A spectrum is selected from the spectra in the current.strip if current.strip exists.
+    A spectrum is selected from the spectra in the current.strip if current.strip is not None.
     """
     FIXEDWIDTH = True
     FIXEDHEIGHT = True
@@ -131,17 +135,31 @@ class EstimatePeakListVolumes(EstimateVolumesABC):
         self.peakListFrame = Frame(self.mainWidget, setLayout=True, grid=(row, 0))
 
         pRow = 0
-        self.spectrumPullDown = SpectrumPulldown(self.peakListFrame, self.mainWindow, grid=(pRow, 0), gridSpan=(1, 3),
+        self.spectrumPullDown = SpectrumPulldown(self.peakListFrame, self.mainWindow,
+                                                 grid=(pRow, 0), gridSpan=(1, 2),
                                                  callback=self._changePeakLists,
-                                                 filterFunction=self._filterToStrip)
+                                                 filterFunction=self._filterToStrip
+                                                 )
 
         pRow += 1
-        self._label = Label(self.peakListFrame, grid=(pRow, 0), gridSpan=(1, 3), text='Select PeakLists:')
+        self.peakListFrame.addSpacer(10,10, grid=(pRow, 0))
 
         pRow += 1
-        self.peakListWidget = ListWidget(self.peakListFrame, multiSelect=True, callback=self._selectPeakLists, tipText='Select PeakLists',
-                                         grid=(pRow, 0), gridSpan=(1, 3))
+        self._label = Label(self.peakListFrame, grid=(pRow, 0), gridSpan=(1, 1),
+                            text='Select PeakList(s):')
+
+        pRow += 1
+        self.peakListWidget = ListWidget(self.peakListFrame,
+                                         multiSelect=True,
+                                         callback=self._selectPeakLists,
+                                         tipText='Select one or more PeakLists',
+                                         rowsVisible=5,
+                                         grid=(pRow, 0), gridSpan=(1, 3)
+                                         )
         self.peakListWidget.selectionModel().selectionChanged.connect(self._selectionChanged)
+
+        pRow += 1
+        self.peakListFrame.addSpacer(10,10, grid=(pRow, 0))
 
         pRow += 1
         self.peakSelectionRefit = CheckBoxCompoundWidget(self.peakListFrame,
@@ -242,11 +260,9 @@ class EstimatePeakListVolumes(EstimateVolumesABC):
 # EstimatePeakListVolumes
 #=========================================================================================
 
-class EstimateCurrentVolumes(EstimateVolumesABC):
+class EstimateCurrentVolumesPopup(EstimateVolumesABC):
     """
-    Popup to estimate volumes of peaks in peakList from selected spectrum.
-    Spectra are all those in the project.
-    A spectrum is selected from the spectra in the current.strip if current.strip exists.
+    Popup to estimate volumes of currently selected peaks
     """
     FIXEDWIDTH = True
     FIXEDHEIGHT = True
@@ -260,7 +276,12 @@ class EstimateCurrentVolumes(EstimateVolumesABC):
         self.peakSelectionFrame = Frame(self.mainWidget, setLayout=True, grid=(row, 0))
 
         pRow = 0
-        self.peakSelectionLabel = Label(self.peakSelectionFrame, grid=(pRow, 0), gridSpan=(1, 3), text='Selected Peaks: <None>          ', tipText='Selected Peaks: <None>')
+        self.peakSelectionLabel = Label(self.peakSelectionFrame, grid=(pRow, 0), gridSpan=(1, 3),
+                                        text='Selected Peaks: <None>          ',
+                                        tipText='Selected Peaks: <None>')
+
+        pRow += 1
+        self.peakSelectionFrame.addSpacer(10,10, grid=(pRow, 0))
 
         pRow += 1
         self.peakSelectionRefit = CheckBoxCompoundWidget(self.peakSelectionFrame,
@@ -275,13 +296,13 @@ class EstimateCurrentVolumes(EstimateVolumesABC):
         """Populate the tipTexts and peakList
         """
         with self.blockWidgetSignals():
-            peakTexts = [pk.pid for pk in self.current.peaks]
+            peakTexts = [pk.id for pk in self.current.peaks]
             if len(peakTexts) > 15:
                 peakTexts = peakTexts[:12] + ['...', '...'] + peakTexts[-1:]
             tipText = 'Selected Peaks:\n' + '\n'.join(pk for pk in peakTexts)
             text = 'Selected Peaks: ' + \
                    (peakTexts[0] if peakTexts else '') + \
-                   ('...' if len(peakTexts) > 1 else '')
+                   (' ... (hoover to see more)' if len(peakTexts) > 1 else '')
             self.peakSelectionLabel.setText(text)
             self.peakSelectionLabel.setToolTip(tipText)
 

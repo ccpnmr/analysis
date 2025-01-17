@@ -1081,19 +1081,26 @@ class CcpnModuleLabel(DockLabel):
 
         contextMenu = Menu('', self, isFloatWidget=True)
         contextMenu.setToolTipsVisible(True)
-        renameAction = contextMenu.addAction('Rename', self._showNameEditor)
-        detachAction = contextMenu.addAction('Detach from Drop Area', self.module._detach)
+
+        # renameAction = contextMenu.addAction('Rename', self._showNameEditor)
+        # renameAction.setEnabled(self.module._allowRename)
+        contextMenu.addItem('Rename', enabled=self.module._allowRename,
+                            callback=self._showNameEditor
+                           )
+        contextMenu.addItem('Detach from Drop Area', callback=self.module._detach)
+
         contextMenu.addSeparator()
-        contextMenu.addAction('Close', self.module.close)
+
+        contextMenu.addItem('Close', callback=self.module.close)
         if len(self.module.area.ccpnModules) > 1:
-            contextMenu.addAction('Close Others', partial(self.module.area._closeOthers, self.module))
-            contextMenu.addAction('Close All', self.module.area._closeAll)
+            contextMenu.addItem('Close Others', callback=partial(self.module.area._closeOthers, self.module))
+            contextMenu.addItem('Close All', callback=self.module.area._closeAll)
+
         contextMenu.addSeparator()
 
-        gidAction = contextMenu.addAction('Copy Gid to clipboard', self._copyPidToClipboard)
-        gidAction.setToolTip('Usage, On Python Console type: get(<pasted-pid>) to get this module as an object')
-        renameAction.setEnabled(self.module._allowRename)
-
+        contextMenu.addItem('Copy pid to clipboard', callback=self._copyPidToClipboard,
+                             toolTip='Usage, On Python Console type: get(<pasted-pid>) to get this module as an object'
+                            )
         return contextMenu
 
     def _modulesMenu(self, menuName, module):

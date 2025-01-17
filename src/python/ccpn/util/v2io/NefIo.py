@@ -35,8 +35,9 @@ from __future__ import unicode_literals
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -44,9 +45,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-02-22 15:58:36 +0000 (Thu, February 22, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-05 17:31:18 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -67,7 +68,7 @@ from ccpn.util.isotopes import name2IsotopeCode, isotopeCode2Nucleus
 from ..nef import StarIo
 from . import Constants
 from .. import Common as commonUtil
-from .. import Constants as genConstants
+# from .. import Constants as genConstants
 
 from ccp.general import Io as generalIo
 from ccp.util import Spectrum as spectrumLib
@@ -82,7 +83,8 @@ from ccpnmr.analysis.core import ExperimentBasic
 from ccpnmr.analysis.core import ConstraintBasic
 
 
-defaultNmrChainCode = '@-'
+# defaultNmrChainCode = '@-'
+from ccpn.core.NmrChain import DEFAULT_NMRCHAINCODE
 defaultNmrResidueCode = '@'
 
 # # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
@@ -1434,7 +1436,7 @@ class CcpnNefReader:
                         serial=None):
         """Return _chainMapping entry (if necessary)"""
 
-        chainCode = chainCode or defaultNmrChainCode
+        chainCode = chainCode or DEFAULT_NMRCHAINCODE
         sequenceCode = sequenceCode or defaultNmrResidueCode
 
         nmrProject = self.memopsRoot.currentNmrProject
@@ -1449,7 +1451,7 @@ class CcpnNefReader:
         resonanceGroup = result.get('resonanceGroup')
 
         if resonanceGroup is None:
-            if chainCode == defaultNmrChainCode:
+            if chainCode == DEFAULT_NMRCHAINCODE:
                 # default chain
                 name = sequenceCode
             else:
@@ -1524,7 +1526,7 @@ class CcpnNefReader:
                 self._chainMapping[chainCode] = OD()
                 if isConnected:
                     nmrChainTypes[chainCode] = 'connected'
-                elif chainCode == defaultNmrChainCode:
+                elif chainCode == DEFAULT_NMRCHAINCODE:
                     nmrChainTypes[chainCode] = 'default'
                 else:
                     nmrChainTypes[chainCode] = 'unassigned'

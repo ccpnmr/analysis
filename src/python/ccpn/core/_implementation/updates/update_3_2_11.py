@@ -1,5 +1,5 @@
 """
-resetSerial function
+update 3.2.11 to 3.3.0 routines
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -24,53 +24,25 @@ __version__ = "$Revision: 3.3.0.develop $"
 # Created
 #=========================================================================================
 __author__ = "$Author: geertenv $"
-__date__ = "$Date: 2021-01-13 10:28:41 +0000 (Wed, Jan 13, 2021) $"
+__date__ = "$Date: 2024-12-04 9:42:30 +0100 (Wed, December 4, 2024) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+#
+# from ccpn.core.lib.ContextManagers import undoStack
+from ccpn.core.lib.forceAttribute import forceSetattr
 
-from ccpn.framework.Application import getApplication, getProject
+OLD_NMRCHAINCODE = "@-"
 
-
-def resetSerial(apiObject, newSerial):
-    """ADVANCED Reset serial of object to newSerial, resetting parent link
-    and the nextSerial of the parent.
-
-    Raises ValueError for objects that do not have a serial
-    (or, more precisely, where the _wrappedData does not have a serial).
+def _updateOldDefaultNmrChain(nmrChain):
+    """Update the old default nmrChain name to the new default one
+    Set the default chain serial to 0
     """
+    # NB all updates executed with inactivity
+    from ccpn.core.NmrChain import DEFAULT_NMRCHAINCODE
 
-    # NB, needed both from V2 NefIo and V3
-
-    if not hasattr(apiObject, 'serial'):
-        raise ValueError("Cannot reset serial, %s does not have a 'serial' attribute"
-                         % apiObject)
-    downlink = apiObject.__class__._metaclass.parentRole.otherRole.name
-
-    parentDict = apiObject.parent.__dict__
-    downdict = parentDict[downlink]
-    oldSerial = apiObject.serial
-    serialDict = parentDict['_serialDict']
-
-    if newSerial == oldSerial:
-        return
-
-    elif newSerial in downdict:
-        # newSerial is in use;
-        # get the identifier of the v3 object to report the error
-
-        project = getProject()
-        v3obj = None
-        if project and apiObject in project._data2Obj:
-            v3obj = project._data2Obj[apiObject]
-        raise ValueError("Cannot reset serial to %s - value already in use (%s)" % (newSerial, v3obj or apiObject))
-
-    else:
-        maxSerial = serialDict[downlink]
-        apiObject.__dict__['serial'] = newSerial
-        downdict[newSerial] = apiObject
-        del downdict[oldSerial]
-        if newSerial > maxSerial:
-            serialDict[downlink] = newSerial
-        elif oldSerial == maxSerial:
-            serialDict[downlink] = max(downdict)
+    if nmrChain.name == OLD_NMRCHAINCODE:
+        _serials = [nc.serial for nc in nmrChain.project.nmrChains]
+        if 0 not in _serials:
+            nmrChain._resetSerial(0)
+        nmrChain._rename(DEFAULT_NMRCHAINCODE)

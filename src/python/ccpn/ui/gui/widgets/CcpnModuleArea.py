@@ -168,11 +168,17 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         self.moveModule = self.moveDock
         self.setContentsMargins(0, 0, 0, 0)
-        self.currentModuleNames = []
-        self._modulesNames = {}
-        self._modules = {}  # don't use self.docks, is not updated when removing docks
+
+        # self.currentModuleNames = []
+        # self._modulesNames = {}
+        # self._ccpnModules = []
+        # self._modules = {}  # don't use self.docks, is not updated when removing docks
+
+        # keep track of the order of opened spectrumDisplays
+        # GWV: this seems necessary for restoring layouts
+        self._openedSpectrumDisplays = []
+
         self._seenModuleStates = {}  # {className: {moduleName:'', state:widgetsState}}
-        # self.setAcceptDrops(True) GWV not needed; handled by DropBase init
 
         self.textLabel = DropAreaLabel
         self.fontLabel = getFont(size='MAXIMUM')
@@ -338,26 +344,17 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
     @property
     def ccpnModules(self) -> list:
-        """return all current modules in area"""
-        ...
-
-    @ccpnModules.getter
-    def ccpnModules(self):
-        if self is not None:
-            ccpnModules = list(self.findAll()[1].values())
-            return ccpnModules
+        """return all current modules of self as a list
+        """
+        return list(self.modules.values())
 
     @property
     def modules(self) -> dict:
-        """return all current modules in area as a dictionary. Don't use self.docks"""
-        return ...
-
-    @ccpnModules.getter
-    def modules(self):
-        if self is not None:
-            modules = self.findAll()[1]
-            return modules
-        return {}
+        """return all current modules of self as a dictionary of (name, module) pairs.
+        Don't use self.docks  GWV: why??
+        """
+        # return self._modules
+        return self.findAll()[1]
 
     @property
     def spectrumDisplays(self):
@@ -571,13 +568,22 @@ class CcpnModuleArea(ModuleArea, DropBase):
             if self.temporary and self.home:
                 self.home.removeTempArea(self)
 
-    def _closeOthers(self, moduleToClose):
-        modules = [module for module in self.ccpnModules if module != moduleToClose]
+    def _closeOthers(self, moduleToKeep):
+        """Close all modules except moduleToKeep
+        CCPNMRINTERNAL: used in context menu of CcpnModule
+        """
+        modules = [module for module in self.ccpnModules if module != moduleToKeep]
         for module in modules:
+            self._openedSpectrumDisplays.remove(module)
             module._closeModule()
 
     def _closeAll(self):
-        for module in self.ccpnModules:
+        """Close all modules of the module area
+        """
+        # _modules = list(self.docks.values()) # instant crash on loading test_formats2
+        _modules = self.ccpnModules
+        for module in _modules:
+            self._openedSpectrumDisplays.remove(module)
             module._closeModule()
 
     ## docksOnly is used for in memory save and restore for the module maximise save and restore system

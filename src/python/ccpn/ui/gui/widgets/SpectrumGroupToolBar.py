@@ -84,10 +84,11 @@ class SpectrumGroupToolBar(ToolBar):
                                                     );
                             }
                             """
-        self._currentSpectrumNotifier = CurrentNotifier(
-                                                 targetName=SpectrumGroup._pluralLinkName,
-                                                 callback=self._onCurrentNotifier,
-                                                 )
+        # GWV 10/1/2025: Notifier now set by GuiSpectrumDisplay, but still calls _onCurrentNotifier()!
+        # self._currentSpectrumNotifier = CurrentNotifier(
+        #                           targetName=SpectrumGroup._pluralLinkName,
+        #                           callback=self._onCurrentNotifier,
+        #                           ),
 
         # self._spectrumGroups = []
 
@@ -175,7 +176,10 @@ class SpectrumGroupToolBar(ToolBar):
         # widget.setFixedSize(75, 30)
         _addActionIcon(action, spectrumGroup, self.spectrumDisplay)
 
+    # GWV 10/1/2025: moved Notifier to GuiSpectrumDisplay
     def _onCurrentNotifier(self, data):
+        """CCPNINTERNAL: called from notifier set by GuiSPectrumDisplay
+        """
         current = getCurrent()
         for action in self.actions():
             if widget := self.widgetForAction(action):

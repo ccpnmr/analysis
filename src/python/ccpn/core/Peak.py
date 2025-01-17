@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-27 18:52:02 +0000 (Wed, November 27, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2024-12-05 17:31:16 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -393,7 +393,7 @@ class Peak(AbstractWrapperObject):
     def positionError(self, value: Sequence):
         # GWV 21/11/24: bypassing setter function in Nmr.py to resolve missing dataDimRef
         # for the PeakDim object.
-        from ccpn.core.lib.XmlLoader import forceSetattr
+        from ccpn.core.lib.forceAttribute import forceSetattr
         _valuePerPoint = [specDim._valuePerPoint for specDim in self.spectrum.spectrumDimensions]
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             forceSetattr(peakDim, 'valueError', value[ii] / _valuePerPoint[ii])

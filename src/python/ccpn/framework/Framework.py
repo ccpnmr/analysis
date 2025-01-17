@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-12-12 13:43:34 +0000 (Thu, December 12, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2025-01-10 17:40:27 +0000 (Fri, January 10, 2025) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -235,8 +235,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
         # Resources
         sys.stderr.write('==> Loading resources... ')
-        self.resources = None
-        # self.resources = Resources(self)
+        self._resources = Resources(self)
         sys.stderr.write('Done!\n')
 
         # get a user interface; nb. ui.start() is called by the application
@@ -297,19 +296,32 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         """
         return self._applicationReadOnlyMode
 
-    def setApplicationReadOnly(self, value):
+    def setApplicationReadOnly(self, value: bool):
         """Set the global application readOnly state.
+        :param bool value: True/False flag for the readOnly state
         """
         if not isinstance(value, bool):
             raise TypeError(f'{self.__class__.__name__}.setApplicationReadOnly must be a bool')
-        if value == self._applicationReadOnlyMode:
-            return
+
         self._applicationReadOnlyMode = value
-        if self.project:
-            self.project._updateReadOnlyState()
-            self.project._updateLoggerState()
-            if self.mainWindow:
-                self.mainWindow._setReadOnlyIcon()
+        # trigger the project status updates by getting its current status and setting it again
+        _projectReadonly = self.project._readOnly
+        self.project.setReadOnly(_projectReadonly)
+
+        #
+        # if value:
+        #     self.project.setReadOnly(value)
+            # self.project._updateReadOnlyState()
+            # self.project._updateLoggerState()
+            # if self.mainWindow:
+            #     self.mainWindow._setReadOnlyIcon()
+
+    @property
+    def resources(self) -> Resources:
+        """:return the Resources object with access to reference chemical
+        shifts, reference molecule definitions, isotope records, etc.
+        """
+        return self._resources
 
     def getRegistrationDetails(self):
         """Get the Registration details for the current User as a dict """
@@ -603,7 +615,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         Previous project should have been closed by _closeProject()
         """
         if self._project is not None:
-            raise RuntimeError(f'Cannot initialise {newProject} withoout closing {self._project} first')
+            raise RuntimeError(f'Cannot initialise {newProject} without closing {self._project} first')
 
         # Linkages; need to be here as downstream code depends on it
         self._project = newProject
@@ -614,16 +626,13 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
         # newProject._initialise() wraps the underlying data, including the wrapped graphics data;
         # i.e. it obtains a new MainWindow instance and returns this for further initialisations
-        self._project, _mainWindow = newProject._initialise(application=self, debugLevel=self._debugLevel)
+        _, _mainWindow = newProject._initialise(application=self, debugLevel=self._debugLevel)
 
         if self.hasGui:
-            self.ui._initialise(mainWindow=_mainWindow, project=newProject)
+            self.ui._initialise(mainWindow=_mainWindow)
         else:
-            # The No
-            #
-            #
-            # Ui version has no mainWindow
-            self.ui._initialise(mainWindow=None, project=newProject)
+            # The NoUi version has no mainWindow
+            self.ui._initialise(mainWindow=None)
 
         # GWV 24/2/24: moved to Project._initialise()
         # newProject._resetUndo(debug=self._debugLevel <= Logging.DEBUG2,
@@ -1089,13 +1098,6 @@ class Framework(HasCcpNmrProperties, NotifierBase):
             self._initialiseProject(_project)  # This also set the linkages
 
         getLogger().debug(f'Opened project "{name}" at {_project.path}')
-
-        # update the logger read-only state
-        _project._updateReadOnlyState()
-        _project._updateLoggerState(readOnly=_project.isReadOnly)
-        if self.mainWindow:
-            self.mainWindow._setReadOnlyIcon()
-
         return _project
 
     # @logCommand('application.')  # decorated in ui class
@@ -1331,8 +1333,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         # update the logger read-only state
         self.project._updateReadOnlyState()
         self.project._updateLoggerState(readOnly=self.project.isReadOnly)
-        if self.mainWindow:
-            self.mainWindow._setReadOnlyIcon()
+        # if self.mainWindow:
+        #     self.mainWindow._setReadOnlyIcon()
 
         return objs
 
@@ -1421,13 +1423,14 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         from ccpn.core.lib.ProjectLib import _finaliseV2Upgrade
 
         try:
+            # always close old project BEFORE valid load
+            self._closeProject()
             project = _loadV2Project(application=self, path=path)
         except (ValueError, RuntimeError) as es:
             getLogger().warning(f'Error loading {str(path)!r}: {es}')
         else:
-            self._closeProject()  # always close old project AFTER valid load
             self._initialiseProject(project)  # This also sets the linkages
-            #TODO:GWV/EB Should this go into _loadV2Project
+            #TODO:GWV/EB Should/could this go into _loadV2Project
             _finaliseV2Upgrade(project)
             return [project]
         return []
@@ -1441,11 +1444,12 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         from ccpn.core.Project import _loadV3Project
 
         try:
+            # always close old project BEFORE valid load
+            self._closeProject()
             project = _loadV3Project(application=self, path=path)
         except (ValueError, RuntimeError, FileNotFoundError) as es:
             getLogger().warning(f'Error loading {str(path)!r}: {es}')
         else:
-            self._closeProject()  # always close old project AFTER valid load
             self._initialiseProject(project)  # This also sets the linkages
             return [project]
         return []
@@ -1817,7 +1821,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     # GWV 6/2/24: to gui.py
     @deprecated('ui.editSpectrumGroup')
     def showSpectrumGroupsPopup(self):
-        """Deprecated method: Use Gui.editSpectrumGroup instead"""
+        """Deprecated method: Use Gui.editSpectrumGroup instead
+        """
         editMode = len(self.project.spectrumGroups) > 0
         return self.ui.editSpectrumGroup(editMode=editMode)
 
@@ -1850,8 +1855,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #
     @deprecated('ui.newSpectrumGroupFromPseudoSpectrum')
     def showPseudoSpectrumPopup(self):
-        """Deprecated method:
-        Use ui.newSpectrumGroupFromPseudoSpectrum instead
+        """Deprecated method: Use ui.newSpectrumGroupFromPseudoSpectrum instead
         """
         self.ui.newSpectrumGroupFromPseudoSpectrum()
 
@@ -1868,7 +1872,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     @deprecated('ui.makeProjection')
     def showProjectionPopup(self):
-        """This method is deprecated; use Gui.makeProjection instead"""
+        """This method is deprecated; use Gui.makeProjection instead
+        """
         self.ui.makeProjection()
 
     #     if not self.project.spectra:
@@ -1882,7 +1887,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     @deprecated('ui.setExperimentTypes')
     def showExperimentTypePopup(self):
-        """This method is deprecated; use Gui.setExperimentTypes instead"""
+        """This method is deprecated; use Gui.setExperimentTypes instead
+        """
         self.ui.setExperimentTypes()
 
     # GWV 6/2/24: moved to Gui
@@ -1901,7 +1907,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     @deprecated('ui.validateSpectra')
     def showValidateSpectraPopup(self, spectra=None, defaultSelected=None):
-        """This method is deprecated; use Gui.validateSpectra instead"""
+        """This method is deprecated; use Gui.validateSpectra instead
+        """
         self.ui.validatePaths(spectra=spectra)
 
     #     """
@@ -1919,7 +1926,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     deprecated('ui.pick1DPeaks')
     def showPeakPick1DPopup(self):
-        """This method is deprecated; use Gui.pick1DPeaks instead"""
+        """This method is deprecated; use Gui.pick1DPeaks instead
+        """
         self.ui.pick1DPeaks()
 
     #     """
@@ -1942,7 +1950,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     @deprecated('ui.pickNDPeaks')
     def showPeakPickNDPopup(self):
-        """This method is deprecated; use Gui.pickNDPeaks instead"""
+        """This method is deprecated; use Gui.pickNDPeaks instead
+        """
         self.ui.pickNDPeaks()
 
     #     """
@@ -1965,7 +1974,8 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     @deprecated('ui.copyPeakList')
     def showCopyPeakListPopup(self):
-        """This method is deprecated; use Gui.copyPeakList instead"""
+        """This method is deprecated; use Gui.copyPeakList instead
+        """
         self.ui.copyPeakList()
 
     #     if not self.project.peakLists:
@@ -1993,11 +2003,14 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         popup.exec()
     #         popup.raise_()
     #
-    # GWV 6/2/24: to MainWindow
-    # def showEstimateVolumesPopup(self):
-    #     """
-    #     Displays Estimate Volumes Popup.
-    #     """
+
+    # GWV 6/2/24 and 10/1/2025: to ui
+    @deprecated('ui.copyPeakList')
+    def showEstimateVolumesPopup(self):
+        """This method is deprecated; use Gui.estimateVolumes instead
+        """
+        self.ui.estimateVolumes()
+
     #     if not self.project.peakLists:
     #         getLogger().warning('Estimate Volumes: Project has no peakLists.')
     #         MessageDialog.showWarning('Estimate Volumes', 'Project has no peakLists.')
@@ -2032,7 +2045,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         getLogger().warning('Estimate Current Volumes: no current.peaks')
     #         MessageDialog.showWarning('Estimate Current Volumes', 'no current.peaks')
     #
-    # GWV 27/324: copied to _Gui_V3_V4
+    # GWV 27/3/24: copied to _Gui_V3_V4
     # @logCommand('application.')
     # def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
     #     """Make a strip plot from peaks or nmrChains
@@ -2279,7 +2292,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         restraintTableModule.selectRestraintTable(restraintTable)
     #     return restraintTableModule
 
-    # GWV 11/9/20245: moved to Gui
+    # GWV 11/9/2024: moved to Gui
     # @logCommand('application.')
     # def showStructureTable(self, position='bottom', relativeTo=None,
     #                        structureEnsemble=None, selectFirstItem=False):
@@ -2585,7 +2598,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
             self.preferences._addRecentMacro(_path)
 
         with undoBlock():
-            self.ui.mainWindow.pythonConsole._runMacro(_path, extraCommands=extraCommands)
+            self.ui.mainWindow._pythonConsoleWidget._runMacro(_path, extraCommands=extraCommands)
 
     #################################################################################################
 
@@ -2624,17 +2637,14 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
     __repr__ = __str__
 
+#end class
 # register CcpNmrProperties
 Framework._registerCcpNmrProperties()
 
-#-----------------------------------------------------------------------------------------
-#end class
-#-----------------------------------------------------------------------------------------
 
-
-#-----------------------------------------------------------------------------------------
+#=========================================================================================
 # code for testing purposes
-#-----------------------------------------------------------------------------------------
+#=========================================================================================
 
 def createFramework(projectPath=None, **kwds):
     # stop circular import when run from main entry point

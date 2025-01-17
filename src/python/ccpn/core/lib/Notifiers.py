@@ -67,6 +67,7 @@ V3CoreType = typing.TypeVar('V3CoreType', bound=typing.Union['AbstractWrapperObj
 GuiNotifierType = typing.TypeVar('GuiNotifierType', bound='GuiNotifier')
 
 DEBUG = False
+# _debugIds = (75, 84, 92, 94,95,96)  # for these _id's, debug will be True. This allows for selective debugging
 _debugIds = ()
 
 _STRICT = True  # Flag to enforce type checking; relaxed for testing ccpnv4 code
@@ -95,14 +96,6 @@ class _consoleStyle():
         blue = '\033[94m'
         magenta = '\033[95m'
         white = '\033[97m'
-
-
-# _debugIds = (75, 84, 92, 94,95,96)  # for these _id's, debug will be True. This allows for selective debugging
-
-# ED: not sure what this if for, but pycharm complains about the arguments
-# def skip(*args, **kwargs):
-#     """Do nothing"""
-#     pass
 
 
 class NotifierABC(object):
@@ -232,7 +225,7 @@ class NotifierABC(object):
 
     @property
     def setterObject(self):
-        """:return the setterObject  of self
+        """:return the setterObject of self
         """
         return self._setterObject and self._setterObject()  # ._setterObject is a weakRef or None
 
@@ -336,22 +329,25 @@ class NotifierABC(object):
                 _exec = 'executing'
             else:
                 _exec = 'silent'
-
-            _pid = self._theObject.pid if hasattr(self._theObject, 'pid') else self._theObject.__class__.__name__
-
-            # return f'<{self.__class__.__name__} {self.id} ({_exec}): theObject={_pid!r}: {self._trigger!r}->{self._targetName!r}>'
-
         else:
             _exec = 'unregistered'
-            _pid = self._theObject.pid if (self._theObject and hasattr(self._theObject, 'pid'))\
-                                           else 'None'
 
-            # return f'<{self.__class__.__name__} {self.id} (unregistered): theObject=None: {self._trigger!r}->{self._targetName!r}>'
-
-        if self.setterObject:
-            _setter = self.setterObject.pid if hasattr(self.setterObject, 'pid') else self.setterObject.__class__.__name__
+        _obj = self.theObject
+        if _obj is None:
+            _pid = 'None'
+        elif hasattr(_obj, 'pid'):
+            _pid = _obj.pid
         else:
-            _setter = '-'
+            _pid = _obj.__class__.__name__
+
+        _setterObj = self.setterObject
+        if _setterObj is None:
+            _setter = 'None'
+        elif hasattr(_setterObj, 'pid'):
+            _setter = _setterObj.pid
+        else:
+            _setter = _setterObj.__class__.__name__
+
         _name = self.__class__.__name__
 
         return f'<{_name} {self.id} ({_exec}): {_pid}:({self._trigger!r}->{self._targetName!r},{self._appliesToTheObject}); setter:{_setter}>'
@@ -1176,9 +1172,10 @@ class NotifierBase(object):
         """
         objNotifiers = self._objectNotifiersDict
         # allNotifiers returns a list, as contents are being changed this is crucial
-        for notifier in objNotifiers.allNotifiers:
-            notifier.unRegisterNotifier()
-            del(notifier)
+        _allNotifiers = _WeakRefList(objNotifiers.allNotifiers)
+        while (_notifier := _allNotifiers.pop()) is not None:
+            _notifier.unRegisterNotifier()
+            del(_notifier)
 
     def _getRegisteredNotifiersBySetter(self, setterObject) -> list[NotifierABC]:
         """:return a list of the registered notifier with ntf.setterObject == setterObject

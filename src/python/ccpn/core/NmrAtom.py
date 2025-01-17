@@ -27,7 +27,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import math
+from collections import defaultdict
 from typing import Union, Tuple, Sequence
+
+from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+
+from ccpn.core.NmrChain import DEFAULT_NMRCHAINCODE
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
@@ -36,14 +41,12 @@ from ccpn.core._implementation.AbsorbResonance import absorbResonance
 from ccpn.core.lib import Pid
 from ccpn.core.lib.CcpNmrProperties import CcpNmrUnicodeProperty
 from ccpn.core.lib.Util import AtomIdTuple
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpnmodel.ccpncore.lib import Constants
+from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, ccpNmrV3CoreSetter
+
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
 from ccpn.util.isotopes import isotopeCode2Nucleus, getIsotopeRecords
-from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
-from collections import defaultdict
 
 
 UnknownIsotopeCode = '?'
@@ -729,7 +732,7 @@ def _produceNmrAtom(self: Project, atomId: str = None, chainCode: str = None,
                     )
 
         # Produce chain
-        nmrChain = self.fetchNmrChain(shortName=chainCode or Constants.defaultNmrChainCode)
+        nmrChain = self.fetchNmrChain(shortName=chainCode or DEFAULT_NMRCHAINCODE)
         nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
         result = nmrResidue.fetchNmrAtom(name)
 

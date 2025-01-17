@@ -31,6 +31,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import functools
+import sys
 # import os
 import typing
 import operator
@@ -48,20 +49,25 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
 from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 
+from ccpn.core.lib.CcpNmrProperties import CcpNmrProperty, CcpNmrCoreObjectProperty, \
+    CcpNmrIntProperty, CcpNmrFloatProperty, CcpNmrUnicodeProperty, CcpNmrBoolProperty, \
+    CcpNmrTypedListProperty
+
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
-from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.core.lib.Notifiers import NotifierBase, NotifierSignal
 from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
 from ccpn.core.lib.ProjectLib import createLogger
 from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
-    inactivity, logCommandManager, ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSimple, notificationEchoBlocking, undoStack
+    inactivity, logCommandManager, ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSimple, notificationEchoBlocking, \
+    undoStack
 from ccpn.core.lib.XmlLoader import XmlLoader
 
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger, updateLogger
-from ccpn.util.decorators import logCommand
+from ccpn.util.decorators import logCommand, deprecated
 from ccpn.ui.gui.guiSettings import _styleRed, consoleStyle
 
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
@@ -94,6 +100,7 @@ class Project(AbstractWrapperObject):
     navigating between them. All objects are organised in an hiarchical tree-like manner,
     as children, grandchildren, etc.
     """
+    #-----------------------------------------------------------------------------------------
 
     #: Short class name, for PID.
     shortClassName = 'PR'
@@ -142,9 +149,14 @@ class Project(AbstractWrapperObject):
 
     _LOWEST_COMPATIBLE_VERSION = '3.1.0'
 
+    #-----------------------------------------------------------------------------------------
+
     # set to positive to override the read-only status of a project
     #   required to use save/saveAs but keep the project.readOnly status until the next load
     _saveOverrideState = 0
+
+    # Signal triggered on save/saveAs
+    _projectSaveSignal = NotifierSignal()
 
     #-----------------------------------------------------------------------------------------
     # Property Attributes of the data structure
@@ -1215,8 +1227,9 @@ class Project(AbstractWrapperObject):
         :param debugLevel: the current debug level, used for settng the logger and undo
         :return (self, mainWindow)
         """
+        # local import to avoid cycles
         from ccpn.core.ChemicalShiftList import DEFAULT_CHEMICALSHIFTLIST
-        from ccpn.ui.gui.guiSettings import _styleBlue
+        from ccpn.core.NmrChain import DEFAULT_NMRCHAINCODE
 
         self._application = application
 
@@ -1251,18 +1264,23 @@ class Project(AbstractWrapperObject):
                 self._makeCollections()
                 self._makeCrossReferences()
 
-                # Call any updates
-                self._update()
-
                 # finalise restoration of project
                 self._postRestore()
+
+                # Call any post-init updates
+                self._updatePostProjectInit()
+
             # end restoring objects
 
-            # we always have the default chemicalShift list, so nothing on undo stack
-            if not self.chemicalShiftLists:
-                with undoStack():
+            with undoStack() as _:
+                # we always want the default ChemicalShiftList
+                if (_csl := self.getChemicalShiftList(DEFAULT_CHEMICALSHIFTLIST)) is None:
                     getLogger().debug(f'Project.initialise: creating ChemicalShiftList {DEFAULT_CHEMICALSHIFTLIST!r}')
-                    self.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
+                    _csl = self.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
+                # we always want the default NmrChain
+                if (_nc := self.getNmrChain(DEFAULT_NMRCHAINCODE)) is None:
+                    getLogger().debug(f'Project.initialise: creating NmrChain {DEFAULT_NMRCHAINCODE!r}')
+                    _nc = self.newNmrChain(DEFAULT_NMRCHAINCODE)
 
             # check directories for possible read-only
             _projectPath = aPath(self.path)
@@ -1276,6 +1294,7 @@ class Project(AbstractWrapperObject):
                 self.setReadOnly(True)
             else:
                 self.setReadOnly(self.isReadOnly)
+
         self._setUnmodified()
 
         # remove mainWindow from Project instance, and to be returned+
@@ -1467,8 +1486,9 @@ class Project(AbstractWrapperObject):
                                         # hierarchy may still delete bottom-level items
                                         apiObj.delete()
 
-                                except Exception:
+                                except Exception as es:
                                     # there might still be an issue with the removal order
+                                    getLogger().debug2(f'Delete of {apiObj} failed: {es}')
                                     retries.append(apiObj)
 
                             # perform a second pass to catch all the lowest-level items
@@ -1487,7 +1507,7 @@ class Project(AbstractWrapperObject):
                                     # only log anything weird
                                     getLogger().debug2(f'issue purging {apiHint}  -->  {es}')
 
-        getLogger().debug('Done purge')
+        getLogger().debug('Done API purge')
 
     def close(self):
         raise RuntimeError('Please use application.closeProject()')
@@ -1535,7 +1555,7 @@ class Project(AbstractWrapperObject):
         finally:
             logger._loggingCommandBlock -= 1
             if logger._loggingCommandBlock < 0:
-                print(f'--> logger blocking already at 0')
+                sys.stderr.write(f'--> logger blocking already at 0\n')
 
     @logCommand('project.')
     def saveAs(self, newPath: str, overwrite: bool = False, copySubDirectories: bool = True):
@@ -1615,7 +1635,8 @@ class Project(AbstractWrapperObject):
             try:
                 with self._xmlLoader.blockReading():
                     # only need to check what is already there
-                    apiStatus = self._getAPIObjectsStatus()
+                    # completeScan = False skips attribute value validation
+                    apiStatus = self._getAPIObjectsStatus(completeScan=False)
                 if apiStatus.invalidObjects:
                     # if deleteInvalidObjects:
                     # delete here ...
@@ -1649,8 +1670,8 @@ class Project(AbstractWrapperObject):
             self._isTemporary = False
             self._isNew = False
 
-        # fire a notifier to respond to the save-action
-        self._finaliseAction('change', projectSave=True)
+        # fire the notifierSignal to signal to the save-action
+        self._projectSaveSignal = True
 
     def _autoBackup(self):
         """Auto-backup project
@@ -1748,6 +1769,18 @@ class Project(AbstractWrapperObject):
     # readOnly handling
     #-----------------------------------------------------------------------------------------
 
+    @CcpNmrBoolProperty(default=True)
+    def _readOnly(self) -> bool:
+        """Read-only flag of the project (default=True)
+        """
+        return  (self._getInternalParameter(self._READONLYPARAMETER) or False)
+
+    @_readOnly.setter
+    def _readOnly(self, value: bool):
+        self._setInternalParameter(self._READONLYPARAMETER, value)
+        self._updateReadOnlyState()
+        self._updateLoggerState(readOnly=self.isReadOnly)
+
     @property
     def isReadOnly(self) -> bool:
         """:return the read-only state of the project.
@@ -1759,20 +1792,19 @@ class Project(AbstractWrapperObject):
         from ccpn.framework.Application import getApplication
 
         _app = getApplication()
-        return ((self._getInternalParameter(self._READONLYPARAMETER) or False) or _app._applicationReadOnlyMode) \
-            and not self._saveOverrideState
+        # _readOnly = (self._getInternalParameter(self._READONLYPARAMETER) or False)
+        result = (self._readOnly or _app._applicationReadOnlyMode
+                  ) and not self._saveOverrideState
+        return result
 
     @logCommand('project.')
-    @ccpNmrV3CoreUndoBlock(readOnlyChanged=True)
-    def setReadOnly(self, readOnly):
+    def setReadOnly(self, readOnly: bool):
         """Set the read-only state of the project.
         """
         if not isinstance(readOnly, bool):
             raise TypeError(f'{self.__class__.__name__}.setReadOnly must be a bool')
 
-        self._setInternalParameter(self._READONLYPARAMETER, readOnly)
-        self._updateReadOnlyState()
-        self._updateLoggerState(readOnly=self.isReadOnly)
+        self._readOnly = readOnly
 
     def _updateReadOnlyState(self):
         """Update the state of the xmlLoader from the current read-only state
@@ -2001,7 +2033,7 @@ class Project(AbstractWrapperObject):
         return self._activateApiNotifier(*tt)
 
     def _unregisterApiNotifier(self, notifierTuple):
-        """Remove acxtive notifier from project. ADVANVED but free to use.
+        """Remove active notifier from project. ADVANCED but free to use.
         Use return value of _registerApiNotifier to identify the relevant notiifier"""
         self._activeNotifiers.remove(notifierTuple)
         Notifiers.unregisterNotify(*notifierTuple)
@@ -2242,16 +2274,18 @@ class Project(AbstractWrapperObject):
         This method is called from the api upon creation of a corresponding api object
         See AbstractWrapperObject._linkWrapperClasses where the apiNotifier is set for this callback
         """
-        if self._apiBlocking != 0:
+        if cls._ignoreNewApiObjectCallback:
+            return
+
+        if self._apiBlocking != 0 or NotifierBase._apiNotificationBlanking != 0:
             getLogger().debug(_styleRed(f'blocking _newApiObject '
                               f'{self} {wrappedData} {cls}'))
             return
+
         if (result := self._data2Obj.get(wrappedData)) is not None:
+            # print(traceback.print_stack())  # useful for tracking the exact error
             raise RuntimeError(
                     f'Project._newApiObject: {result} already exists; Cannot create again and this should not happen!')
-        if cls._ignoreNewApiObjectCallback:
-            return
-        # print(traceback.print_stack())  # useful for tracking the exact error
 
         obj = cls._newInstanceFromApiData(project=self, apiObj=wrappedData)
         if _DEBUG:
@@ -2279,8 +2313,9 @@ class Project(AbstractWrapperObject):
     def _finaliseApiDelete(self, wrappedData):
         """Clean up after object deletion
         """
-        if self._apiBlocking != 0:
+        if self._apiBlocking != 0 or NotifierBase._apiNotificationBlanking != 0:
             return
+
         if not wrappedData.isDeleted:
             raise ValueError(f"_finaliseApiDelete called before wrapped data are deleted: {wrappedData}")
         # get object
@@ -2302,8 +2337,9 @@ class Project(AbstractWrapperObject):
         """restore undeleted wrapper object, and call creation notifiers,
         same as _newObject.
         """
-        if self._apiBlocking != 0:
+        if self._apiBlocking != 0 or NotifierBase._apiNotificationBlanking != 0:
             return
+
         if wrappedData.isDeleted:
             raise ValueError(f"_finaliseApiUnDelete called before wrapped data are deleted: {wrappedData}")
         try:
@@ -2330,6 +2366,7 @@ class Project(AbstractWrapperObject):
 
         if NotifierBase._apiNotificationBlanking != 0 or self._apiBlocking != 0:
             return
+
         if not (target := operator.attrgetter(pathToObject)(wrappedData)):
             return
         elif hasattr(target, '_metaclass'):
@@ -2402,8 +2439,8 @@ class Project(AbstractWrapperObject):
         Parameters:
         completeScan: bool, True to perform a complete validity check of all found API objects
         includeDefaultChildren: bool, False to exclude default objects for inspection such as
-                                ChemComps and associated, nmrExpPrototypes etc.See _APIStatus._excludedChildren
-                                for the full list of exclusions.
+                                ChemComps and associated, nmrExpPrototypes etc.
+                                See _APIStatus._excludedChildren for the full list of exclusions.
         checkValidity: bool, default True, check the validity of each API object
                        set to False if only the list is required, note that this overrides completeScan
         Return: the API Status object. See _APIStatus for full description
@@ -2417,7 +2454,7 @@ class Project(AbstractWrapperObject):
                               includeDefaultChildren=includeDefaultChildren, checkValidity=checkValidity)
         return apiStatus
 
-    def _update(self):
+    def _updatePostProjectInit(self):
         """Call the _updateObject(UPDATE_POST_PROJECT_INITIALISATION) method on
         all objects, including self
         """
@@ -2917,20 +2954,16 @@ class Project(AbstractWrapperObject):
         return _newHdf5Spectrum(self, isotopeCodes=isotopeCodes, name=name, path=path, **parameters)
 
     @logCommand('project.')
-    def newNmrChain(self, shortName: str = None, isConnected: bool = False, label: str = '?',
-                    comment: str = None):
+    def newNmrChain(self, name: str = None, isConnected: bool = False, comment: str = None):
         """Create new NmrChain. Setting isConnected=True produces a connected NmrChain.
 
-        :param str shortName: shortName for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer
+        :param str name: name for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer)
         :param bool isConnected: (default to False) If true the NmrChain is a connected stretch. This can NOT be changed later
-        :param str label: Modifiable NmrChain identifier that does not change with reassignment. Defaults to '@ijk'/'#ijk'
         :param str comment: comment for new nmrChain (optional)
         :return: a new NmrChain instance.
         """
         from ccpn.core.NmrChain import _newNmrChain
-
-        return _newNmrChain(self, shortName=shortName, isConnected=isConnected,
-                            label=label, comment=comment)
+        return _newNmrChain(self, name=name, isConnected=isConnected, comment=comment)
 
     @logCommand('project.')
     def fetchNmrChain(self, shortName: str = None):
@@ -2942,7 +2975,6 @@ class Project(AbstractWrapperObject):
         :return: an NmrChain instance.
         """
         from ccpn.core.NmrChain import _fetchNmrChain
-
         return _fetchNmrChain(self, shortName=shortName)
 
     @logCommand('project.')
@@ -3162,65 +3194,76 @@ class Project(AbstractWrapperObject):
 
         return _newSpectrumGroup(self, name=name, spectra=spectra, **kwds)
 
-    @logCommand('project.')
+    @deprecated('project.newChain')
     def createChain(self,
                     sequence: Union[str, Sequence[str]] = None,
                     compoundName: str = None,
                     startNumber: int = 1, molType: str = None, isCyclic: bool = False,
                     shortName: str = None, role: str = None, comment: str = None,
-                    expandFromAtomSets: bool = True,
-                    addPseudoAtoms: bool = True, addNonstereoAtoms: bool = True,
                     **kwds):
-        """Create new chain from sequence of residue codes, using default variants.
-        Automatically creates the corresponding polymer Substance if the compoundName is not already taken
-        See the Chain class for details.
-        Optional keyword arguments can be passed in; see Chain._createChain for details.
-        :param sequence: str or list of str.
-            allowed sequence formats:
-                - 1-Letter-Code (only standards)
-                    sequence =  'AAAAAA'
-                    sequence =  'A A A A A A'
-                    sequence =  'A, A, A, A, A, A'
-                    sequence =  ['A', 'A', 'A', 'A', 'A']
-                - 3-Letter-Code  (standards and non-standards)
-                    sequence =  'ALA ALA ALA ALA'
-                    sequence =  'ALA, ALA, ALA, ALA'
-                    sequence =  ['ALA', 'ALA', 'ALA']
-                - ccpCodes:  (standards and non-standards)
-                    - sequence containing Standard residue(s) CcpCodes e.g.::
-                        sequence = 'Ala Leu Ala'
-                        sequence = 'Ala, Leu, Ala'
-                        sequence = ['Ala', 'Leu', 'Ala']
-                    - sequence containing Non-Standard residue(s) CcpCodes e.g.:
-                        sequence = ['Ala', 'Aba', Orn]
-                    - sequence of a small-molecule CcpCodes: (Note you need to import the ChemComp first if not available in the Project. see docs)
-                        sequence = ['Atp']  # if only one code Must be in a list
-                        sequence = ['MySmallMolecule'] # if only one code Must be in a list
+        result= self.newChain(
+                name=shortName,
+                sequence=sequence,
+                startNumber=startNumber,
+                moleculeType=molType,
+                isCyclic=isCyclic,
+                comment=comment
+        )
+        result.role = role
+        return result
 
-
-        :param str compoundName: name of new Substance (e.g. 'Lysozyme') Defaults to 'Molecule_n
-        :param str molType: molType ('protein','DNA', 'RNA'). Needed only if sequence is a string.
+    @logCommand('project.')
+    def newChain(self,
+                 name: str | None = None,
+                 sequence: list = (),
+                 startNumber: int = 1,
+                 moleculeType: str | None = None,
+                 isCyclic: bool = False,
+                 useNefAtomNomenclature: bool = True,
+                 comment: str | None = None
+                 ):
+        """Create a new Chain instance as defined by the sequence of residue codes, using default variants
+        :param str name: name for new chain (optional; defaults to next available from (A, B, C, ...)
+        :param sequence: a Sequence[str] or str of one-letter codes defining the chain (see below)
         :param int startNumber: number of first residue in sequence
-        :param str shortName: shortName for new chain (optional)
-        :param str role: role for new chain (optional)
+        :param str moleculeType: molecule type; i.e. ('protein','DNA', 'RNA' or other).
+        :param useNefAtomNomenclature: flag to define NEF atom nomenclature to be used,
+                                       rather than only IUPAC-defined atoms (default=True)
         :param str comment: comment for new chain (optional)
-        :param bool expandFromAtomSets: Create new Atoms corresponding to the ChemComp AtomSets definitions.
-                Eg. H1, H2, H3 equivalent atoms will add a new H% atom. This will facilitate assignments workflows.
-                See ccpn.core.lib.MoleculeLib.expandChainAtoms for details.
         :return: a new Chain instance.
+
+        Sequence: str or list of str. Allowed sequence formats:
+        - 1-Letter-Code (only standards)
+            sequence =  'AAAAAA'
+            sequence =  'A A A A A A'
+            sequence =  'A, A, A, A, A, A'
+            sequence =  ['A', 'A', 'A', 'A', 'A']
+        - 3-Letter-Code  (standard and non-standard)
+            sequence =  'ALA ALA ALA ALA'
+            sequence =  'ALA, ALA, ALA, ALA'
+            sequence =  ['ALA', 'ALA', 'ALA']
+        - ccpCodes:  (standard and non-standard)
+            - sequence containing Standard residue(s) CcpCodes e.g.::
+                sequence = 'Ala Leu Ala'
+                sequence = 'Ala, Leu, Ala'
+                sequence = ['Ala', 'Leu', 'Ala']
+            - sequence containing Non-Standard residue(s) CcpCodes e.g.:
+                sequence = ['Ala', 'Aba', Orn]
+            - sequence of a small-molecule CcpCodes: (Note you need to import the ChemComp first
+                                                      if not available in the Project. see docs)
+                sequence = ['Atp']  # if only one code Must be in a list
+                sequence = ['MySmallMolecule'] # if only one code Must be in a list
         """
-        from ccpn.core.Chain import _createChain
-
-        return _createChain(self,
-                            sequence=sequence,
-                            compoundName=compoundName,
-                            startNumber=startNumber, molType=molType, isCyclic=isCyclic,
-                            shortName=shortName, role=role, comment=comment,
-                            expandFromAtomSets=expandFromAtomSets, addPseudoAtoms=addPseudoAtoms,
-                            addNonstereoAtoms=addNonstereoAtoms, **kwds)
-
-    # GWV: why not newChain to be consistent???
-    newChain = createChain
+        from ccpn.core.Chain import _newChain
+        return _newChain(self,
+                         name=name,
+                         sequence=sequence,
+                         startNumber=startNumber,
+                         moleculeType=moleculeType,
+                         isCyclic=isCyclic,
+                         useNefAtomNomenclature=useNefAtomNomenclature,
+                         comment=comment,
+                         )
 
     @logCommand('project.')
     def newSubstance(self, name: str = None, labelling: str = None, substanceType: str = 'Molecule',
@@ -3406,7 +3449,6 @@ class Project(AbstractWrapperObject):
         """Return the collection from the supplied name
         """
         from ccpn.core.Collection import _getCollection
-
         return _getCollection(self, name=name)
 
     @logCommand('project.')
@@ -3418,7 +3460,6 @@ class Project(AbstractWrapperObject):
         :return: a new Collection instance.
         """
         from ccpn.core.Collection import _fetchCollection
-
         return _fetchCollection(self, name=name)
 
     @logCommand('project.')
@@ -3430,7 +3471,6 @@ class Project(AbstractWrapperObject):
         :return: a new Bond instance.
         """
         from ccpn.core.Bond import _newBond
-
         return _newBond(self, **kwds)
 
     def __repr__(self):
@@ -3479,7 +3519,7 @@ def _newProject(application, name: str, path: Path, isTemporary: bool = False) -
     # writes the project version-history
     project._saveHistory = newProjectSaveHistory(project.path)
 
-    # GWV: Create ChemicalShiftList; Cannot do this here, as the undo machineryis not
+    # GWV: Create ChemicalShiftList; Cannot do this here, as the undo machinery is not
     # yet inplace, as currently (14/11/2024) no way to bypass
     # getLogger().debug(f'Project.initialise: creating ChemicalShiftList {DEFAULT_CHEMICALSHIFTLIST!r}')
     # project.newChemicalShiftList(name=DEFAULT_CHEMICALSHIFTLIST)
@@ -3487,7 +3527,7 @@ def _newProject(application, name: str, path: Path, isTemporary: bool = False) -
     # project._updateReadOnlyState()
     # project._updateLoggerState()  # these should always be together
 
-    # the Project initialisation is completed by Project._initialiseProject(), which is called from
+    # the Project initialisation is completed by Project._initialise(), which is called from
     # Framework._initialiseProject when it has done its things.
     # This also checks for the writing of the directories and sets the linkages between
     # application and project.

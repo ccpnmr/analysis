@@ -42,11 +42,12 @@ import ccpn.core._implementation.resetSerial
 from ccpn.core._implementation.CoreModel import CoreModel
 from ccpn.core._implementation.Updater import Updater, \
     UPDATE_POST_OBJECT_INITIALISATION, UPDATE_POST_PROJECT_INITIALISATION, \
-    UPDATE_PRE_OBJECT_INITIALISATION
+    UPDATE_PRE_OBJECT_INITIALISATION, UPDATE_OPTIONS
 from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
     apiNotificationBlanking, ccpNmrV3CoreSetter
 from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.core.lib.forceAttribute import forceSetattr
 
 from ccpn.framework.Version import VersionString
 from ccpn.framework.Application import getApplication
@@ -246,22 +247,33 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         """
         return self._wrappedData._uniqueId
 
-    def _resetIds(self):
-        # reset id
+    def _resetIds(self, recursive: bool = False):
+        """Make the id of self and update project's pid to object dict
+        Optionally recurse to all decendant objects
+        """
         oldId = self._id
         project = self._project
         parent = self._parent
         className = self.className
+
+        # make an id
         if parent is None:
-            # This is the project
+            # Level-0: This is the project
             _id = self.name
             sortKey = ('',)
+
         elif parent is project:
+            # Level-1 objects whose parent is Project
+            # these ids do not derive from their parent object
             _id = str(self._key)
             sortKey = self._localCcpnSortKey
+
         else:
+            # Level-2 and higher objects;
+            # these ids derive (also) from their parent project
             _id = '%s%s%s' % (parent._id, Pid.IDSEP, self._key)
             sortKey = parent._ccpnSortKey[2:] + self._localCcpnSortKey
+
         self._id = _id
 
         # A bit inelegant, but Nmrresidue is handled specially,
@@ -280,6 +292,12 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         if oldId in dd:
             del dd[oldId]
         dd[_id] = self
+
+        if recursive:
+            for obj in self._getAllDecendants():
+                # we are looping over all decendants of self, so no need to recurse for
+                # the individual objs, as their children are already included
+                obj._resetIds(recursive=False)
 
     @classmethod
     def _nextKey(cls):
@@ -421,6 +439,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         :param parent: container for self (usually of type Project)
         :param name (str | None): target name (as required)
         :return str: new unique name
+
+        NB this is a classmethod as it is used for object instantiation,
+           ie. needs to be called without an instance present.
         """
         if name is None:
             name = cls._defaultName()
@@ -534,17 +555,13 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
     @property
     def _ccpnInternalData(self) -> dict:
-        """Dictionary containing arbitrary type data for internal use.
-
-        Data can be nested strings, numbers, lists, tuples, (ordered) dicts,
-        numpy arrays, pandas structures, CCPN Tensor objects, and any
-        object that can be serialised to JSON. This does NOT include CCPN or
-        CCPN API objects.
-
+        """Dict of (nameSpace, dict) key,value pairs containing arbitrary
+        type data for internal use.
+        Only to be accessed via the getParameter() and setParameter() methods.
         NB This returns the INTERNAL dictionary. There is NO encapsulation
-
         Data are kept on save and reload, but there is NO guarantee against
-        trampling by other code"""
+        trampling by other code
+        """
         result = self._wrappedData.ccpnInternalData
         if result is None:
             result = {}
@@ -599,23 +616,43 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     _CCPNMR_NAMESPACE = '_ccpNmrV3internal'
 
     def _setInternalParameter(self, parameterName: str, value):
-        """Sets parameterName for CCPNINTERNAL namespace to value; value must be json seriliasable"""
+        """Sets parameterName for CCPNINTERNAL namespace to value; value must be json seriliasable
+        """
         self.setParameter(self._CCPNMR_NAMESPACE, parameterName, value)
 
-    def _getInternalParameter(self, parameterName: str):
-        """Gets parameterName for CCPNINTERNAL namespace"""
-        return self.getParameter(self._CCPNMR_NAMESPACE, parameterName)
+    def _setDefaultInternalParameter(self, parameterName: str, defaultValue):
+        """Sets parameterName for CCPNINTERNAL with defaultValue if parameterName is not present.
+        Returns value of parameterName for nameSpace, i.e. the value if it was present, or
+        defaultValue if it was not. Akin to dict.setdefault().
+        """
+        return self.setDefaultParameter(self._CCPNMR_NAMESPACE, parameterName, defaultValue=defaultValue)
+
+    def _getInternalParameter(self, parameterName: str, defaultValue=None):
+        """Gets parameterName for CCPNINTERNAL namespace
+        """
+        return self.getParameter(self._CCPNMR_NAMESPACE, parameterName, defaultValue=defaultValue)
 
     def _hasInternalParameter(self, parameterName: str):
-        """Returns true if parameterName for CCPNINTERNAL namespace exists"""
+        """Returns true if parameterName for CCPNINTERNAL namespace exists
+        """
         return self.hasParameter(self._CCPNMR_NAMESPACE, parameterName)
 
     def _deleteInternalParameter(self, parameterName: str):
-        """Delete the parameter from CCPNINTERNAL namespace if exists and remove namespace if empty"""
+        """Delete the parameter from CCPNINTERNAL namespace if exists and remove namespace
+        if empty"""
         self.deleteParameter(self._CCPNMR_NAMESPACE, parameterName)
 
     def setParameter(self, namespace: str, parameterName: str, value):
-        """Sets parameterName for namespace to value; value must be json serialisable"""
+        """Sets parameterName for namespace to value.
+        :param namespace: The namespace identifier
+        :param parameterName: The parameter name
+        :param value: The value to be set
+                      Value can be nested strings, numbers, lists, tuples, (ordered) dicts,
+                      numpy arrays, pandas structures, CCPN Tensor objects, and any
+                      object that can be serialised to JSON.
+                      This does NOT include CcpNmr V3 Core objects or anything with XML incompatible
+                      characters.
+        """
         checkXml = str(value)
         # check that the value does not contains characters incompatible with xml
         pos = re.search('[<>]', checkXml, re.MULTILINE)
@@ -623,17 +660,35 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
             raise RuntimeError("data cannot contain xml tags '{}' at pos {}".format(pos.group(), pos.span()))
         space = self._ccpnInternalData.setdefault(namespace, {})
         space[parameterName] = value
-        # Explicit flag assignment to enforce saving
-        self._wrappedData.__dict__['isModified'] = True
+        # Explicit flag assignment to enforce saving the API object
+        forceSetattr(self._wrappedData,'isModified', True)
 
-    def getParameter(self, namespace: str, parameterName: str):
-        """:returns value of parameterName for namespace or None if not present
+    def setDefaultParameter(self, namespace: str, parameterName: str, defaultValue):
+        """Sets parameterName for namespace with defaultValue if parameterName is not present.
+        Returns value of parameterName for nameSpace, i.e. the value if it was present, or
+        defaultValue if it was not. Akin to dict.setdefault().
+        :param namespace: The namespace identifier
+        :param parameterName: The parameter name
+        :param defaultValue: The value to set if parameterName is not present
+                             Value can be nested strings, numbers, lists, tuples, (ordered) dicts,
+                             numpy arrays, pandas structures, CCPN Tensor objects, and any
+                             object that can be serialised to JSON.
+                             This does NOT include CcpNmr V3 Core objects or anything with XML incompatible
+                             characters.
+        :return the value of parameterName for nameSpace
+        """
+        if not self.hasParameter(namespace=namespace, parameterName=parameterName):
+            self.setParameter(namespace=namespace, parameterName=parameterName, value=defaultValue)
+        return self.getParameter(namespace=namespace, parameterName=parameterName)
+
+    def getParameter(self, namespace: str, parameterName: str, defaultValue=None):
+        """:returns value of parameterName for namespace or defaultValue if not present
         """
         space = self._ccpnInternalData.get(namespace)
         if space is not None:
-            return space.get(parameterName)
+            return space.get(parameterName, defaultValue)
         else:
-            return None
+            return defaultValue
 
     def hasParameter(self, namespace: str, parameterName: str):
         """Returns true if parameterName for namespace exists"""
@@ -643,18 +698,20 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         return parameterName in space
 
     def deleteParameter(self, namespace: str, parameterName: str):
-        """Delete the parameter from namespace if exists and remove namespace if empty
+        """Delete the parameter from namespace if exists and remove namespace if empty.
+        :return value of deleted parameter or None
         """
         data = self._ccpnInternalData
-        space = data.get(namespace)
-        if space is None:
-            return False
-        # remove the parameterName and namespace
-        space.pop(parameterName, None)
+        if (space := data.get(namespace, None)) is None:
+            return None
+        # remove the parameterName from the namespace
+        value = space.pop(parameterName, None)
+        # remove the namespace if empty
         if not space:
             data.pop(namespace, None)
         # Explicit flag assignment to enforce saving
-        self._wrappedData.__dict__['isModified'] = True
+        forceSetattr(self._wrappedData,'isModified', True)
+        return value
 
     def _setNonApiAttributes(self, attribs):
         """Set the non-api attributes that are stored in ccpnInternal
@@ -731,8 +788,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     @property
     def _key(self) -> str:
         """Object local identifier, unique for a given type with a given parent.
-
-        Set automatically from other (immutable) object attributes."""
+        Set automatically from other (immutable) object attributes.
+        """
         raise NotImplementedError("Code error: function not implemented")
 
     @property
@@ -886,6 +943,20 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         result = [getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self)]
         return result
 
+    @contextmanager
+    def _apiOverride(self):
+        """Context manager to set override of API root
+        """
+        _apiRoot = self._wrappedData.root
+        try:
+            forceSetattr(_apiRoot, 'override', True)
+            yield
+        except Exception as es:
+            getLogger().debug(_styleRed(f'While override encountered: {es}'))
+            raise es
+        finally:
+            forceSetattr(_apiRoot, 'override', False)
+
     def _getApiObjectTree(self) -> tuple:
         """Retrieve the apiObject tree contained by this object
 
@@ -911,8 +982,11 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         while len(objsToBeChecked) > 0:
             obj = objsToBeChecked.pop()
             if obj:
-                obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter,
-                                 topObjectsToCheck)  # This builds the list/set
+                obj._checkDelete(apiObjectlist,
+                                 objsToBeChecked,
+                                 linkCounter,
+                                 topObjectsToCheck
+                )  # This builds the list/set
 
         for topObjectToCheck in topObjectsToCheck:
             if (not (topObjectToCheck.__dict__.get('isModifiable'))):
@@ -933,34 +1007,32 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
         """
         if cls not in parent._childClasses:
-            raise RuntimeError('Code error: cls not in child classes')
+            raise RuntimeError(f'Code error: {cls.__name__} not in child classes of {parent.__class__.__name__}')
 
-        raise NotImplementedError('Code error: function not implemented')
+        raise NotImplementedError(f'Code error: {cls.__name__}._getAllWrappedData function not implemented')
 
-    def _rename(self, value: str):
+    def _rename(self, value: str) -> tuple:
         """Generic rename method that individual classes can use for implementation
         of their rename method to minimises code duplication
+        Recursively sets id's
+        :return (oldName, newName) tuple
         """
         # validate the name
-        name = self._uniqueName(parent=self.project, name=value)
+        newName = self._uniqueName(parent=self._parent, name=value)
 
         # rename functions from here
         oldName = self.name
-        # self._oldPid = self.pid
+        self._wrappedData.name = newName
+        self._resetIds(recursive=True)
 
-        self._wrappedData.name = name
-
-        return (oldName,)
+        return (oldName, newName)
 
     def rename(self, value: str):
         """Change the object name or other key attribute(s), changing the object pid,
            and all internal references to maintain consistency.
-           Some Objects (Chain, Residue, Atom) cannot be renamed"""
+           Some Objects (Chain, Residue, Atom) cannot be renamed
+        """
         raise ValueError(f'{self.__class__.__name__} objects cannot be renamed')
-
-    # In addition, each class (except for Project) must define a  newClass method
-    # The function (e.g. Project.newMolecule), ... must create a new child object
-    # AND ALL UNDERLYING DATA, taking in all parameters necessary to do so.
 
     @property
     def collections(self) -> tuple:
@@ -1006,12 +1078,12 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         """Use post-object or post-project updateMethod (as defined in Updater)
         to update the project
         """
-        if updateMethod not in (UPDATE_POST_OBJECT_INITIALISATION, UPDATE_POST_PROJECT_INITIALISATION):
+        if updateMethod not in UPDATE_OPTIONS:
             raise ValueError('Invalid updateMethod "%s"' % updateMethod)
         self._updater.update(updateMethod, obj=self)
 
-    # A class attribute to track depath of object restoring;
-    # root (i.e. Project would become level 0)
+    # A class attribute to track depth of object restoring;
+    # root (i.e. Project) would become level 0
     _objectRestoreLevel = -1
 
     @contextmanager
@@ -1092,7 +1164,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         :return A list of objects created
         """
         project = self._project
-        data2Obj = project._data2Obj
+        # data2Obj = project._data2Obj
         app = getApplication()
 
         result = []
@@ -1106,25 +1178,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                 continue
 
             # self._indentedDebug2(f'getting apiData for {childClass.className}', enter=True, dots=True)
-
             # recursively create children
             apiObjs = childClass._getAllWrappedData(self)
             for apiObj in apiObjs:
-                # obj = data2Obj.get(apiObj)
-                # if obj is None:
-                #     # obj does not exist; restore it from apiObj
-                #
-                #     # GWV 13 Feb 24:
-                #     # Catching  errors on _restoreObject() here at such a low level is a bad idea
-                #     # as the project and its window is in an undefined state. Better raise a hard
-                #     # error
-                #
-                #     obj = childClass._restoreObject(project=project, apiObj=apiObj)
-                #
-                # # obj should exist now
-                # if obj is None:
-                #     raise RuntimeError(f'Error restoring api-child {self._apiObjectString(apiObj)} of {self}')
-
                 if obj := childClass._restoreObject(project=project, apiObj=apiObj):
                     result.append(obj)
 
@@ -1134,38 +1190,9 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
         """Handle post-initialising children after all children have been restored
         #CCPNNMR-Internal - subclass and call this at the end
         """
-
         # indented debugging just to be sure is running in the correct order
         # used in conjunction with _restoreObject at the start
         self._indentedDebug2(text=f'_postRestore:   Restored {self.className} {self}', enter=False)
-
-    #  For restore 3.2 branch
-    # def _restoreChildren(self, classes=['all']):
-    #     """GWV: A method to restore the children of self
-    #     classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
-    #     """
-    #     _classMap = dict([(cls.className, cls) for cls in self._childClasses])
-    #
-    #     # loop over all the child-classses
-    #     for clsName, apiChildren in self._getApiChildren(classes=classes).items():
-    #
-    #         cls = _classMap.get(clsName)
-    #         if cls is None:
-    #             raise RuntimeError('Undefined class "%s"' % clsName)
-    #
-    #         for apiChild in apiChildren:
-    #
-    #             newInstance = self._newInstanceWithApiData(cls=cls, apiData=apiChild)
-    #             if newInstance is None:
-    #                 raise RuntimeError('Error creating new instance of class "%s"' % clsName)
-    #
-    #             # add the newInstance to the appropriate mapping dictionaries
-    #             self._project._data2Obj[apiChild] = newInstance
-    #             _d = self._project._pid2Obj.setdefault(clsName, {})
-    #             _d[newInstance.pid] = newInstance
-    #
-    #             # recursively do the children of newInstance
-    #             newInstance._restoreChildren(classes=classes)
 
     @classmethod
     def _newInstanceFromApiData(cls, apiObj, project=None):
@@ -1276,7 +1303,8 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
     def _linkWrapperClasses(cls, ancestors: list = None, Project: 'Project' = None, _allGetters=None):
         """Recursively set up links and functions involving children for wrapper classes
 
-        NB classes that have already been linked are ignored, but their children are still processed"""
+        NB classes that have already been linked are ignored, but their children are still processed
+        """
 
         if Project:
             assert ancestors, "Code errors, _linkWrapperClasses called with Project but no ancestors"
@@ -1298,7 +1326,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
                     if not hasattr(ancestor, funcName):
                         if _DEBUG:
                             # getLogger is not initialised yet
-                            sys.stderr.write(f'--> missing getter stub {ancestor}:{funcName}\n')
+                            sys.stderr.write(f'--> _linkWrapperClasses: missing getter stub {ancestor}:{funcName}\n')
                         if funcName in _DISCARD_METHODS:
                             continue
                     setattr(ancestor, funcName, func)
@@ -1354,7 +1382,7 @@ class AbstractWrapperObject(CoreModel, NotifierBase):
 
                     if not hasattr(ancestor, linkName):
                         if _DEBUG:
-                            sys.stderr.write(f'--> missing property stub {ancestor}:{linkName}\n')
+                            sys.stderr.write(f'--> _linkWrapperClasses: missing property stub {ancestor}:{linkName}\n')
                         if linkName in _DISCARD_METHODS:
                             continue
                     setattr(ancestor, linkName, prop)

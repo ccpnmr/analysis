@@ -227,6 +227,7 @@ from ccpnmodel.v_3_0_2.upgrade import correctFinalResult
 # from ccpn.core.Project import Project
 from ccpn.core.lib.ProjectLib import checkProjectName, isV2project
 from ccpn.core.lib.ContextManagers import _apiBlocking
+from ccpn.core.lib.forceAttribute import forceSetattr, forceGetattr
 
 from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Unicode, Bool, CPath, Any, Int, Dict, List, Tuple
@@ -1741,17 +1742,21 @@ class XmlLoader(XmlLoaderABC):
         forceSetattr(self.memopsRoot, 'name', newName)
         self.name = newName
 
+    # GWV: Import of ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.NmrProject
+    # --> inserts
+    # NmrProject.initialiseData() and NmrProject.initialiseGraphicsData()
+
     # @debug3Enter()
     def _initApiData(self):
+        # GWV: This seems to restore all the data stores
         if self.apiNmrProject is None:
-            raise RuntimeError('undefined Api data repository')
-        #GWV: This seems to restore all the data stores
+            raise RuntimeError('undefined Api NmrProject object')
         self.apiNmrProject.initialiseData()
 
     def _initApiGraphicsData(self):
-        if self.apiNmrProject is None:
-            raise RuntimeError('undefined Api data repository')
         # GWV: This seems to restore all the data stores for the graphics elements
+        if self.apiNmrProject is None:
+            raise RuntimeError('undefined Api NmrProject object')
         self.apiNmrProject.initialiseGraphicsData()
 
     def setUnmodified(self):
@@ -1897,7 +1902,7 @@ def _getIdFromTopObject(topObj) -> tuple:
 
 
 def _getXmlPathFromApiTopObject(package, apiTopObject) -> Path:
-    """:return xml-path of api topObject as a Path instance
+    """Return the xml-path of api topObject as a Path instance
     :param package: Package instance
     :param apiTopObject: the api TopObject instance
     :return the xml path
@@ -1921,21 +1926,29 @@ def _getXmlPathFromApiTopObject(package, apiTopObject) -> Path:
 
     return _xmlPath
 
-
-def forceSetattr(obj, attributeName, value):
-    """Force setting of attributeName
-    """
-    obj.__dict__[attributeName] = value
-
-
-def forceGetattr(obj, attributeName):
-    """Force getting of attributeName
-    """
-    if not attributeName in obj.__dict__.keys():
-        raise AttributeError('Object "%s" does not have attribute "%s"' % (obj, attributeName))
-
-    value = obj.__dict__[attributeName]
-    return value
+# GWV 04/12/2024: now in ccpn.core.lib.forceAttribute.py
+# def forceSetattr(obj, attributeName: str, value):
+#     """Force setting of attributeName of obj to value;
+#     bypasses __setitem__
+#     :param obj: the object to set the attribute to
+#     :param attributeName: the attribute name to get
+#     :param value: the value to set
+#     """
+#     obj.__dict__[attributeName] = value
+#
+#
+# def forceGetattr(obj, attributeName: str):
+#     """Force getting of attributeName from obj;
+#     bypasses __getitem__
+#     :param obj: the object to get the attribute from
+#     :param attributeName: the attribute name to get
+#     :raises AttributeError: if attributeName is not found
+#     """
+#     if attributeName not in obj.__dict__:
+#         raise AttributeError(f'{obj} does not have attribute {attributeName!r}')
+#
+#     value = obj.__dict__[attributeName]
+#     return value
 
 
 #=========================================================================================

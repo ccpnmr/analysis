@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-21 18:22:23 +0100 (Thu, November 21, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__dateModified__ = "$dateModified: 2024-12-18 14:17:37 +0000 (Wed, December 18, 2024) $"
+__version__ = "$Revision: 3.3.0.develop $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -46,7 +46,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
 
-from ccpn.ui.gui.guiSettings import _styleMagenta
+from ccpn.ui.gui.guiSettings import _styleMagenta, _styleRed
 
 #--------------------------------------------------------------------------------------------
 
@@ -237,10 +237,13 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
         yield
 
     except Exception as es:
+        getLogger().debug(_styleRed(f'Caught exception: {es}'))
+
         if errorStringTemplate is None or errorStringTemplate.count('%s') != 1:
             errorStringTemplate = f'%s\n[malformed template]'
 
         getLogger().warning(errorStringTemplate % str(es))
+
         if printTraceBack or application._isInDebugMode:
             traceback.print_exc()  # please give more info about the error!
 
@@ -344,45 +347,48 @@ def notificationSuspend(application=None):
         application.project._resumeNotification()
 
 
-@contextmanager
+# @contextmanager
 def notificationBlanking():
+    """Block all notifiers, re-enable at the end of the function block.
     """
-    Block all notifiers, re-enable at the end of the function block.
-    """
-    # local import to avoid cycles
-    from ccpn.core.lib.Notifiers import NotifierBase
+    return doBlock(notification=True)
 
-    NotifierBase._increaseNotificationBlanking()
-    try:
-        # transfer control to the calling function
-        yield
+    # # local import to avoid cycles
+    # from ccpn.core.lib.Notifiers import NotifierBase
+    #
+    # NotifierBase._increaseNotificationBlanking()
+    # try:
+    #     # transfer control to the calling function
+    #     yield
+    #
+    # except AttributeError as es:
+    #     raise es
+    #
+    # finally:
+    #     # clean up after blocking notifications
+    #     NotifierBase._decreaseNotificationBlanking()
 
-    except AttributeError as es:
-        raise es
 
-    finally:
-        # clean up after blocking notifications
-        NotifierBase._decreaseNotificationBlanking()
-
-
-@contextmanager
+# @contextmanager
 def apiNotificationBlanking(application=None):
     """Block api new/create/change/delete notifiers, re-enable at the end of the function block.
     """
-    # get the application
-    if not application and not (application := getApplication()):
-        raise RuntimeError('Error getting application')
-    application.project._increaseApiNotificationBlanking()
-    try:
-        # transfer control to the calling function
-        yield
-    except AttributeError as es:
-        raise es
-    finally:
-        # clean up after blocking notifications
-        application.project._decreaseApiNotificationBlanking()
-        if application.project._apiNotificationBlanking < 0:
-            raise RuntimeError('*** Code Error: _apiNotificationBlanking below zero')
+    return doBlock(apiNotification=True)
+
+    # # get the application
+    # if not application and not (application := getApplication()):
+    #     raise RuntimeError('Error getting application')
+    # application.project._increaseApiNotificationBlanking()
+    # try:
+    #     # transfer control to the calling function
+    #     yield
+    # except AttributeError as es:
+    #     raise es
+    # finally:
+    #     # clean up after blocking notifications
+    #     application.project._decreaseApiNotificationBlanking()
+    #     if application.project._apiNotificationBlanking < 0:
+    #         raise RuntimeError('*** Code Error: _apiNotificationBlanking below zero')
 
 
 @contextmanager
@@ -407,29 +413,30 @@ def _apiBlocking(application=None):
             raise RuntimeError('*** Code Error: _apiBlocking below zero')
 
 
-@contextmanager
+# @contextmanager
 def notificationEchoBlocking(application=None):
+    """Disable echoing of commands to the terminal, re-enable at the end
+    of the function block.
     """
-    Disable echoing of commands to the terminal, re-enable at the end of the function block.
-    """
+    return doBlock(echoing=True)
 
-    # get the application
-    if not application:
-        application = getApplication()
-    if application is None:
-        raise RuntimeError('Error getting application')
-
-    application._increaseEchoBlocking()
-    try:
-        # transfer control to the calling function
-        yield
-
-    except AttributeError as es:
-        raise es
-
-    finally:
-        # clean up after disabling echo blocking
-        application._decreaseEchoBlocking()
+    # # get the application
+    # if not application:
+    #     application = getApplication()
+    # if application is None:
+    #     raise RuntimeError('Error getting application')
+    #
+    # application._increaseEchoBlocking()
+    # try:
+    #     # transfer control to the calling function
+    #     yield
+    #
+    # except AttributeError as es:
+    #     raise es
+    #
+    # finally:
+    #     # clean up after disabling echo blocking
+    #     application._decreaseEchoBlocking()
 
 
 @contextmanager
@@ -464,69 +471,85 @@ def logCommandManager(prefix, funcName, *args, **kwds):
 
 
 @contextmanager
-def inactivity(application=None, project=None, debugText='Inactivity'):
+def doBlock(
+        echoing: bool = False,  # commandline echoing blocking
+        sideBar: bool = False,  # sidebar update blanking
+        notification: bool = False, # notification blanking
+        apiNotification: bool = False,  # API notification blanking
+        undoAddition: bool = False,  # Undo adding to stack blocking
+        undoWaypoint: bool = False, # Undo waypoint blocking
+    ):
+    """Context manager to set a variety of blocking behavior.
     """
-    Block all notifiers, apiNotifiers, undo and echo-ing
+    # local import to avoid cycles
+    from ccpn.core.lib.Notifiers import NotifierBase
+
+    _app = getApplication()
+    _undo = _app._getUndo() if _app and _app.project else None
+    _sideBarObj = _app.ui.mainWindow._getSideBar() \
+                  if _app.hasGui and _app.ui.mainWindow is not None \
+                  else None
+
+    if echoing:
+        _app._increaseEchoBlocking()
+
+    if sideBar and _sideBarObj:
+        _sideBarObj.increaseSidebarBlocking(withSideBarUpdate=True)
+
+    if notification:
+        NotifierBase._increaseNotificationBlanking()
+
+    if apiNotification:
+        NotifierBase._increaseApiNotificationBlanking()
+
+    if _undo and undoAddition:
+        _undo.increaseBlocking()
+
+    if _undo and undoWaypoint:
+        _undo.increaseWaypointBlocking()
+
+    try:
+        yield
+
+    except Exception as es:
+        getLogger().debug(f'doBalock return with exception: {es}')
+        raise es
+
+    finally:
+        if echoing:
+            _app._decreaseEchoBlocking()
+
+        if sideBar and _sideBarObj:
+            _sideBarObj.decreaseSidebarBlocking(withSideBarUpdate=True)
+
+        if notification:
+            NotifierBase._decreaseNotificationBlanking()
+
+        if apiNotification:
+            NotifierBase._decreaseApiNotificationBlanking()
+
+        if _undo and undoAddition:
+            _undo.decreaseBlocking()
+
+        if _undo and undoWaypoint:
+            _undo.decreaseWaypointBlocking()
+
+
+def inactivity(project=None, debugText=''):
+    """
+    Block all notifiers, apiNotifiers, undo, sidebar and echo-ing
     re-enable at the end of the function block.
     We allow passing in of application and project, as this is used in the
     initialisation when not all is proper yet.
     """
-
-    # get the application
-    if not application:
-        application = getApplication()
-    if application is None:
-        raise RuntimeError('Error getting application')
-
-    if project is None:
-        project = application.project
-    if project is None:
-        raise RuntimeError('Error getting project')
-
-    if (_undo := project._undo) is None:
-        raise RuntimeError('Error getting undo')
-
-
-    try:
-        application._increaseEchoBlocking()
-        project._increaseNotificationBlanking()
-        project._increaseApiNotificationBlanking()
-        _undo.increaseBlocking()
-        # transfer control to the calling function
-        yield
-
-    except AttributeError as es:
-        raise es
-
-    finally:
-        # clean up after blocking notifications
-        _undo.decreaseBlocking()
-        project._decreaseNotificationBlanking()
-        project._decreaseApiNotificationBlanking()
-        application._decreaseEchoBlocking()
-
-
-# @contextmanager
-# def notificationUnblanking():
-#     """
-#     Unblock all notifiers, disable at the end of the function block.
-#     Used inside notificationBlanking if a notifier is required for a single event
-#     """
-#
-#     # get the current application
-#     application = getApplication()
-#
-#     application.project._decreaseNotificationBlanking()
-#     try:
-#         # transfer control to the calling function
-#         yield
-#
-#     except AttributeError as es:
-#         raise es
-#
-#     finally:
-#         # clean up after blocking notifications
-#         application.project._increaseNotificationBlanking()
+    getLogger().debug2(f'> Enter Inactivity: {debugText}')
+    return doBlock(echoing=True,
+                   sideBar=True,
+                   notification=True,
+                   apiNotification=True,
+                   undoAddition=True,
+                   undoWaypoint=True,
+                  )
 
 
 @contextmanager
@@ -643,7 +666,8 @@ def undoStackBlocking(application=None, project=None, debugText=''):
         # transfer control to the calling function, and pass the addUndoItems function
         yield addUndoItem
 
-    except AttributeError as es:
+    except Exception as es:
+        getLogger().debug(_styleRed(f'UndoStack encountered an error: {es}'))
         raise es
 
     finally:
@@ -779,14 +803,14 @@ class _ObjectStore(object):
 
 
 def _storeNewObjectCurrent(result, thisAddUndoItem):
-    if hasattr(result, CURRENT_ATTRIBUTE_NAME):
+    if getattr(result, CURRENT_ATTRIBUTE_NAME, None) is not None:
         try:
             storeObj = _ObjectStore(result)
             thisAddUndoItem(undo=storeObj._storeCurrentSelectedObject,
                             redo=storeObj._restoreCurrentSelectedObject,
                             )
         except Exception:
-            getLogger().debug(f'Current does not have attribute {result.__class__.__name__}')
+            getLogger().debug(_styleRed(f'Current does not have attribute {result.__class__.__name__}'))
 
 
 def _storeDeleteObjectCurrent(self, thisAddUndoItem):
@@ -817,65 +841,25 @@ def newObject(klass):
 
         application = getApplication()  # pass it in to reduce overhead
 
-        with notificationBlanking():
-            with undoStackBlocking(application=application, debugText=f'newObject: {func}') as addUndoItem:
-                result = func(*args, **kwds)
-                if result is None:
-                    return None
 
-                if not isinstance(result, klass):
-                    raise RuntimeError(f'Expected an object of class {klass}, obtained {result.__class__}')
+        # sidebar needs to be silent;
+        # make an undo black with sidebar suspended while creating
+        # the new objects
+        with undoBlockWithSideBar():
+            # notification done after the creation
+            with notificationBlanking():
+                # undo/redo added explicitly
+                with undoStackBlocking(application=application, debugText=f'newObject: {func}') as addUndoItem:
 
-                # retrieve list of created api objects from the result
-                apiObjectsCreated = result._getApiObjectTree()
-                addUndoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
-                                                obj=result, trigger='delete', preExecution=True,
-                                                objsToBeDeleted=apiObjectsCreated),
-                            redo=BlankedPartial(result._wrappedData.root._unDelete,
-                                                topObjectsToCheck=(result._wrappedData.topObject,),
-                                                obj=result, trigger='create', preExecution=False,
-                                                objsToBeUnDeleted=apiObjectsCreated)
-                            )
+                    result = func(*args, **kwds)
+                    if result is None:
+                        return None
 
-                if application.project._undo.storageBlockingLevel < 1:
-                    # only add current if required
-                    _storeNewObjectCurrent(result, addUndoItem)
+                    if not isinstance(result, klass):
+                        raise RuntimeError(f'Expected an object of class {klass}, obtained {result.__class__}')
 
-        # set the _objectVersion
-        result._objectVersion = application.applicationVersion
-
-        result._finaliseAction('create')
-
-        return result
-
-    return theDecorator
-
-
-def newObjectList(klasses):
-    """A decorator wrap a newObject method's of the various classes in an undo block and calls
-    result._finalise('create') for each object in the results list
-    klasses is a list of strings of type klass.__class__.__name__ to remove restriction on circular imports
-    The primary object (first in the list) is returned and must be the first type in klasses list
-    """
-    from ccpn.core.lib import Undo
-
-    @decorator.decorator
-    def theDecorator(*args, **kwds):
-        func = args[0]
-        args = args[1:]  # Optional 'self' is now args[0]
-
-        application = getApplication()  # pass it in to reduce overhead
-
-        with notificationBlanking():
-            with undoStackBlocking(application=application) as addUndoItem:
-                results = func(*args, **kwds)
-                if not results or results[0].__class__.__name__ != klasses[0]:
-                    raise RuntimeError(
-                            f'Expected an object of class {repr(klasses[0])}, obtained {results[0].__class__}')
-
-                for result in results:
-                    if result.__class__.__name__ not in klasses:
-                        raise RuntimeError(f'Expected an object in class types {klasses}, obtained {result.__class__}')
+                    # set the _objectVersion
+                    result._objectVersion = application.applicationVersion
 
                     # retrieve list of created api objects from the result
                     apiObjectsCreated = result._getApiObjectTree()
@@ -892,11 +876,67 @@ def newObjectList(klasses):
                         # only add current if required
                         _storeNewObjectCurrent(result, addUndoItem)
 
-        # handle notifying all objects in the list - e.g. sampleComponent also makes a substance
-        for result in results:
             result._finaliseAction('create')
-            # set the _objectVersion
-            result._objectVersion = application.applicationVersion
+
+        return result
+
+    return theDecorator
+
+
+# TODO-DEVEL: combine into one with newObject
+def newObjectList(klasses):
+    """A decorator wrap a newObject method's of the various classes in an undo block and calls
+    result._finalise('create') for each object in the results list
+    klasses is a list of strings of type klass.__class__.__name__ to remove restriction on circular imports
+    The primary object (first in the list) is returned and must be the first type in klasses list
+    """
+    from ccpn.core.lib import Undo
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+
+        application = getApplication()  # pass it in to reduce overhead
+
+        # sidebar needs to be silent;
+        # make an undo black with sidebar suspended while creating
+        # the new objects
+        with undoBlockWithSideBar():
+            # notification done after the creation
+            with notificationBlanking():
+                # undo/redo added explicitly
+                with undoStackBlocking(application=application) as addUndoItem:
+                    results = func(*args, **kwds)
+                    if not results or results[0].__class__.__name__ != klasses[0]:
+                        raise RuntimeError(f'No new objects were created')
+
+                    for result in results:
+                        if result.__class__.__name__ not in klasses:
+                            raise RuntimeError(f'Expected an object in class types {klasses}, obtained {result.__class__}')
+
+                        # set the _objectVersion
+                        result._objectVersion = application.applicationVersion
+
+                        # retrieve list of created api objects from the result
+                        apiObjectsCreated = result._getApiObjectTree()
+                        addUndoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
+                                                        obj=result, trigger='delete', preExecution=True,
+                                                        objsToBeDeleted=apiObjectsCreated),
+                                    redo=BlankedPartial(result._wrappedData.root._unDelete,
+                                                        topObjectsToCheck=(result._wrappedData.topObject,),
+                                                        obj=result, trigger='create', preExecution=False,
+                                                        objsToBeUnDeleted=apiObjectsCreated)
+                                    )
+
+                        if application.project._undo.storageBlockingLevel < 1:
+                            # only add current if required
+                            _storeNewObjectCurrent(result, addUndoItem)
+
+
+            # handle notifying all objects in the list - e.g. sampleComponent also makes a substance
+            for result in results:
+                result._finaliseAction('create')
 
         # return the primary object
         return results[0] if results else None
@@ -1020,10 +1060,10 @@ def newV3Object():
                     addUndoItem(undo=partial(result._finaliseAction, 'delete'),
                                 redo=partial(result._finaliseAction, 'create'))
 
-        result._finaliseAction('create')
+                    # set the _objectVersion
+                    result._objectVersion = application.applicationVersion
 
-        # set the _objectVersion
-        result._objectVersion = application.applicationVersion
+        result._finaliseAction('create')
 
         return result
 
@@ -1102,11 +1142,18 @@ def renameObject(blockSidebar=False):
                 if result is None:
                     return False
 
-                addUndoItem(undo=BlankedPartial(func, self, 'rename', False, self, *result),
-                            redo=BlankedPartial(func, self, 'rename', False, *args, **kwds)
+                if isinstance(result, tuple) and len(result) == 2:
+                    oldName, newName = result
+                else:
+                    raise RuntimeError(f'Rename function should return (oldName, newName) tuple; got {result}')
+
+                addUndoItem(undo=partial(func, self, oldName),
+                            redo=partial(func, self, newName)
                             )
 
-        self._finaliseAction('rename')
+        # trigger RENAME notifier on project, self and the whole tree down from self
+        for obj in [self.project, self] + self._getAllDecendants():
+            obj._finaliseAction('rename')
 
         return True
 
@@ -1187,7 +1234,7 @@ def progressHandler(parent=None, *, title: str = 'Progress',
         getLogger().debug('progressHandler: cancelled')
     except Exception as es:
         # handle other errors
-        getLogger().debug(f'progressHandler: {es}')
+        getLogger().debug(_styleRed(f'progressHandler: {es}'))
         progress.error = es
         if raiseErrors:
             raise es
@@ -1230,7 +1277,7 @@ def busyHandler(parent=None, *, title: str = 'Busy',
         getLogger().debug('busyHandler: cancelled')
     except Exception as es:
         # handle other errors
-        getLogger().debug(f'busyHandler: {es}')
+        getLogger().debug(_styleRed(f'busyHandler: {es}'))
         progress.error = es
         if raiseErrors:
             raise es
@@ -1312,7 +1359,8 @@ def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
                 try:
                     # call the wrapped function
                     result = func(*args, **kwds)
-                except Exception:
+                except Exception as es:
+                    getLogger().debug(_styleRed(f'ccpNmrV3CoreSetter: {es}'))
                     raise
 
                 finally:
@@ -1352,7 +1400,8 @@ def ccpNmrV3CoreUndoBlock(action='change', **actionKwds):
                 try:
                     # call the wrapped function
                     result = func(*args, **kwds)
-                except Exception:
+                except Exception as es:
+                    getLogger().debug(_styleRed(f'ccpNmrV3CoreUndoBlock: {es}'))
                     raise
 
                 finally:
@@ -1394,6 +1443,7 @@ def ccpNmrV3CoreSimple():
                     # call the wrapped function
                     result = func(*args, **kwds)
                 except Exception as es:
+                    getLogger().debug(_styleRed(f'ccpNmrV3CoreSimple: {es}'))
                     raise
 
                 finally:

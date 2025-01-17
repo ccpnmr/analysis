@@ -1,27 +1,35 @@
 import importlib
+import importlib.util
 from abc import ABC
-from ccpn.framework.Application import getProject, getApplication, getMainWindow, getCurrent
+import sys
+from ccpn.framework.Application import getProject, getApplication, getCurrent
 from ccpn.util.Path import aPath, joinPath
+from ccpn.util.pptx.PPTxTemplateSettings import PPTxTemplateSettingsHandler
 
 TEMPLATE_DIR_NAME = 'pptx_templates'
 
 class PPTxTemplateMapperABC(ABC):
 
-    templateName = 'PresentationTemplateABC' # the name that will appear in the GUI selections
+    templateMapperName = 'PresentationTemplateABC' # the name that will appear in the GUI selections
     templateEntryOrder = -1 # the order in which will appear in the GUI selections
     templateResourcesFileName = '' # the template file name .pptx . The file must be in one of the resources' directory. See getAbsoluteResourcesTemplatePath
+    templateSettingsFileName = '' # the path for the Settings File, .json. The file must be in one of the resources' directory. See getAbsoluteResourcesTemplatePath
     slideMapping = {}
 
     def __init__(self, *args, **kwargs):
         self.project = getProject()
         self.application = getApplication()
-        self.mainWindow = getMainWindow()
         self.current = getCurrent()
         self._data = None
+        self.settingsHandler = PPTxTemplateSettingsHandler(self.getAbsoluteResourcesTemplateSettingsPath())
 
     @property
     def data(self):
         return self._data
+
+    @property
+    def settingsData(self):
+        return self.settingsHandler.data
 
     def setData(self, **kwargs):
         self._data = {**kwargs}
@@ -29,6 +37,20 @@ class PPTxTemplateMapperABC(ABC):
     def getAbsoluteResourcesTemplatePath(self):
         """The templates  should live in the resources' folder. The default template is in distribution folder.
          However, users can override it in their local resources folders, either at project level or .ccpn/
+        Searching hierarchy levels: 1) project, 2) internal .ccpn, 3) distribution
+        """
+        return self._getAbsoluteResourcesFilePath(self.templateResourcesFileName)
+
+    def getAbsoluteResourcesTemplateSettingsPath(self):
+        """The default configuration settings  is in distribution folder.
+         However, users can override it in their local resources folders, either at project level or .ccpn/
+        Searching hierarchy levels: 1) project, 2) internal .ccpn, 3) distribution
+        """
+        return self._getAbsoluteResourcesFilePath(self.templateSettingsFileName)
+
+    @staticmethod
+    def _getAbsoluteResourcesFilePath(fileName):
+        """_internal. Get the absolute file path for a resources file associated with the template
         Searching hierarchy levels:
         1) Search the template first in the project resources directory if it exists.
         2) Search in the internal user resources path.
@@ -53,13 +75,12 @@ class PPTxTemplateMapperABC(ABC):
 
         # Check each path in the hierarchy and return accordingly
         for directory in searchPaths:
-            absTemplateFilePath = directory / self.templateResourcesFileName
+            absTemplateFilePath = directory / fileName
             if absTemplateFilePath.exists():
                 return absTemplateFilePath
 
         # Raise error if the template is not found
-        raise FileNotFoundError( f"Template file '{self.templateResourcesFileName}' not found in any of the resources directories." )
-
+        raise FileNotFoundError( f"File '{fileName}' not found in any of the resources directories." )
 
     @staticmethod
     def formatNestedDictToText(data, indentLevel=0):
@@ -78,3 +99,32 @@ class PPTxTemplateMapperABC(ABC):
             else:
                 formattedText += f"{indent}{key}: {value}\n"
         return formattedText
+
+
+def loadPPTxTemplateMapperObjects(filePath):
+    """
+    Dynamically loads all PPTxTemplateMapperABC subclasses from a  given .py filePath
+    :param filePath: The full path to the .py file.
+    :return: List of objects that are subclasses of the PPTxTemplateMapperABC.
+    """
+    # Extract module name from file path
+    moduleName = aPath(filePath).basename
+    parentClass = PPTxTemplateMapperABC
+    # Check if the module is already imported
+    if moduleName in sys.modules:
+        module = sys.modules[moduleName]
+    else:
+        # If the module is not already imported, load it dynamically
+        spec = importlib.util.spec_from_file_location(moduleName, filePath)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[moduleName] = module
+        spec.loader.exec_module(module)
+
+    # Find all classes in the module that are subclasses of the parentClass
+    subclassObjects = [
+        getattr(module, name)
+        for name in dir(module)
+        if isinstance(getattr(module, name), type) and issubclass(getattr(module, name), parentClass) and getattr(module, name) is not parentClass
+        ]
+
+    return subclassObjects

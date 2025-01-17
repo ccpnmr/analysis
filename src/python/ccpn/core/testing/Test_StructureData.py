@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-01-05 15:28:42 +0000 (Thu, January 05, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2024-12-05 10:35:15 +0000 (Thu, December 05, 2024) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -88,7 +89,7 @@ class TestPandasData(WrapperTesting):
                           self.undo.maxOperations,  # = maxOperations
                           self.undo.nextIndex,  # = 0   # points to next free slot (or first slot to redo)
                           self.undo.waypoints,  # = []  # array of last item in each waypoint
-                          self.undo._blocked,  # = False # Block/unblock switch - internal use only
+                          # self.undo._blocked,  # = False # Block/unblock switch - internal use only
                           self.undo.undoItemBlocking,
                           len(self.undo),
                           self.undo[0])  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
@@ -99,7 +100,7 @@ class TestPandasData(WrapperTesting):
                           self.undo.maxOperations,  # = maxOperations
                           self.undo.nextIndex,  # = 0   # points to next free slot (or first slot to redo)
                           self.undo.waypoints,  # = []  # array of last item in each waypoint
-                          self.undo._blocked,  # = False # Block/unblock switch - internal use only
+                          # self.undo._blocked,  # = False # Block/unblock switch - internal use only
                           self.undo.undoItemBlocking,  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
                           len(self.undo),
                           self.undo[0])  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
@@ -116,7 +117,7 @@ class TestPandasData(WrapperTesting):
                           self.undo.maxOperations,  # = maxOperations
                           self.undo.nextIndex,  # = 0   # points to next free slot (or first slot to redo)
                           self.undo.waypoints,  # = []  # array of last item in each waypoint
-                          self.undo._blocked,  # = False # Block/unblock switch - internal use only
+                          # self.undo._blocked,  # = False # Block/unblock switch - internal use only
                           self.undo.undoItemBlocking,  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only
                           len(self.undo),
                           self.undo[0])  # = 0 # Blocking level - modify with increaseBlocking/decreaseBlocking only

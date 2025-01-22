@@ -17,6 +17,8 @@ The first , PresentationWriter, is the general handler, and wraps/interacts to t
 The second, PPTxTemplateMapper,  translates the actual .pptx file template to the final user .pptx report. So it will have methods to fetch the placeholder names
  and fill the new .pptx  file  with elements from ccpn.
 
+Python-pptx does not provide direct API support for setting footers globally through the PowerPoint “Insert Footer” feature. You need to create normal placeholders
+
 """
 
 import pandas as pd
@@ -31,7 +33,8 @@ from ccpn.util.Path import aPath, checkFilePath
 from ccpn.util.Logging import getLogger
 from ccpn.util.pptx.PPTxStyleManager import PPTStyleManager
 
-
+LAYOUT_GETTER = 'layout_getter'
+PLACEHOLDER_DEFS = 'placeholder_defs'
 PLACEHOLDER_NAME = 'placeholder_name'
 PLACEHOLDER_TYPE = 'placeholder_type'
 PLACEHOLDER_GETTER = 'placeholder_getter'
@@ -53,8 +56,8 @@ class PPTxPresentationWriter():
         :param pptxPath: The path to an existing PPTx presentation containing a single slide master and layout(s) with appropriately
                                      named placeholders to use as a template for a new presentation.
         """
-        self._presentationTemplate = presentationTemplate
-        self._pptxPath = self._presentationTemplate.getAbsoluteResourcesTemplatePath()
+        self.presentationTemplate = presentationTemplate
+        self._pptxPath = self.presentationTemplate.getAbsoluteResourcesTemplatePath()
         self._presentation = _presentation(self._pptxPath)
         self._placeholderErrorPolicy = placeholderErrorPolicy
         self._data = None
@@ -63,12 +66,6 @@ class PPTxPresentationWriter():
             raise RuntimeWarning('Multiple slide masters are not supported. This  Presentation will use only the first slide master')
         self.styleManager = PPTStyleManager(self)
 
-    @property
-    def data(self):
-        return self._data
-
-    def setData(self, **kwargs):
-        self._data = {**kwargs} # This creates a shallow copy of the kwargs dictionary instead of data = kwargs (that points to the same passed in dict)
 
     @abstractmethod
     def buildFromTemplate(self):
@@ -76,21 +73,8 @@ class PPTxPresentationWriter():
         Builds a new presentation based on the template, dynamically applying content to placeholders
         as defined in the slide mapping.
         """
-        self._presentationTemplate.setData(**self.data)
-        isValidTemplate, templateErrors = self._validateTemplate()
-        if not isValidTemplate and self._placeholderErrorPolicy == 'raise':
-            raise RuntimeError(f'Detected errors while building a new Presentation from Template \n{self._formatDefaultDict(templateErrors)}')
-        else:
+        self.presentationTemplate.buildLayouts(writer=self)
 
-            slideMapping = self._presentationTemplate.slideMapping
-            for slideLayoutName, placeholderDefs in slideMapping.items():
-                layout = self.getLayout(slideLayoutName)
-                newSlide = self.newSlide(layout, removePlaceholders=True)
-                for placeholderDef in placeholderDefs:
-                    try:
-                        self._handlePlaceholder(newSlide, layout, placeholderDef)
-                    except Exception as ex:
-                        print(f'Some Error in filling the placeholder occurred: {ex}')
 
     def save(self, filePath):
         self._presentation.save(filePath)
@@ -126,6 +110,12 @@ class PPTxPresentationWriter():
         sldIdLst = self._presentation._element.get_or_add_sldIdLst()
         self._presentation.part.rename_slide_parts([cast("CT_SlideId", sldId).rId for sldId in sldIdLst])
         return tuple([slide for slide in Slides(sldIdLst, self._presentation)])
+
+    def getSlideIndex(self, slide):
+        for idx, s in enumerate(self.getSlides()):
+            if s == slide:
+                return idx+1
+        return None  # Return None if slide is not found
 
     def getLayout(self, identifier: int | str = 0) -> SlideLayout:
         """
@@ -211,6 +201,7 @@ class PPTxPresentationWriter():
                 table.cell(rowIndex, colIndex).text = str(val)
         # Set style for all cells
         self.styleManager.applyTableStyle(table)
+        return tableShape
 
     def insertImage(self, targetSlide, templateLayout, placeholderName, imagePath):
 
@@ -240,13 +231,14 @@ class PPTxPresentationWriter():
         centeredTop = top + (height - scaledHeight) // 2
 
         # Add the scaled and centered image to the slide
-        targetSlide.shapes.add_picture(
+        shape = targetSlide.shapes.add_picture(
                 imagePath,
                 centeredLeft,
                 centeredTop,
                 width=scaledWidth,
                 height=scaledHeight,
                 )
+        return shape
 
     @staticmethod
     def _getImageSize(filePath):
@@ -268,14 +260,15 @@ class PPTxPresentationWriter():
         Examine the template SlideMapping and ensure names are properly defined and any getter/setter exists
         """
         errorMsgDict = defaultdict(list)
-        slideMapping = self._presentationTemplate.slideMapping
-        for slideLayoutName, placeholderDefs in slideMapping.items():
+        slideMapping = self.presentationTemplate.slideMapping
+        for slideLayoutName in slideMapping:
             layout = None
             try:
                 layout = self.getLayout(slideLayoutName)
             except ValueError as err:
                 errorMsgDict[slideLayoutName].append(err)
             if layout is not None:
+                placeholderDefs =slideMapping[slideLayoutName].get(PLACEHOLDER_DEFS)
                 for placeholderDef in placeholderDefs:
                     placeholderName = placeholderDef.get(PLACEHOLDER_NAME)
                     placeholderType = placeholderDef.get(PLACEHOLDER_TYPE)
@@ -287,7 +280,7 @@ class PPTxPresentationWriter():
                         errorMsgDict[(slideLayoutName, placeholderName)].append(phErr)
 
                     if ph:
-                        getterFunc = getattr(self._presentationTemplate, placeholderGetter, None)
+                        getterFunc = getattr(self.presentationTemplate, placeholderGetter, None)
                         if getterFunc is None:
                             errorMsgDict[(slideLayoutName, placeholderName)].append(f'Could not find a valid getter: {placeholderGetter} is not defined in the template Class')
                         #  we have getter  in the class . now er need to check  the value returned is the same type from the one defined in the mapping
@@ -361,72 +354,35 @@ class PPTxPresentationWriter():
         placeholderType = placeholderDef.get(PLACEHOLDER_TYPE)
         placeholderGetter = placeholderDef.get(PLACEHOLDER_GETTER)
         # Dynamically retrieve the content for the placeholder
-        getterFunc = getattr(self._presentationTemplate, placeholderGetter, None)
+        shape = None
+        getterFunc = getattr(self.presentationTemplate, placeholderGetter, None)
         if getterFunc is None:
-            return
+            return shape
         value = getterFunc(**getterKwargs)
-        if placeholderType == 'Text':
-            self.insertText(slide, layout, placeholderName, value or '')
+        if placeholderType == PLACEHOLDER_TYPE_TEXT:
+            shape = self.insertText(slide, layout, placeholderName, value or '')
         elif placeholderType == PLACEHOLDER_TYPE_IMAGE:
             isPathOk, msgErr = checkFilePath(aPath(value))
             if isPathOk:
-                self.insertImage(slide, layout, placeholderName, value)
+                shape = self.insertImage(slide, layout, placeholderName, value)
         elif placeholderType == PLACEHOLDER_TYPE_TABLE:
             try:
-                self.insertDataFrame(slide, layout, placeholderName, value)
+                shape = self.insertDataFrame(slide, layout, placeholderName, value)
             except Exception as err:
-                print('Cannot add table', err)
+                getLogger().warn(f'PPTX writer. Cannot add table. {err}')
+        return shape
 
-
-
-
-
-
-class ScreeningPresentationWriter(PPTxPresentationWriter):
-    """The top layer  object to create presentations from a PPTX template.  This subclass  allows to write slides using its specialised
-    slide writer and additionally add a custom first page summary. """
-
-    WRITER_NAME = 'SCREENING'
-
-    def buildFromTemplate(self):
-        import ccpn.AnalysisScreen.lib.experimentAnalysis.matching.MatchingVariables as mv
-        self._presentationTemplate.setData(**self.data)
-        isValidTemplate, templateErrors = self._validateTemplate()
-        if not isValidTemplate and self._placeholderErrorPolicy == 'raise':
-            raise RuntimeError(f'Detected errors while building a new Presentation from Template \n{self._formatDefaultDict(templateErrors)}')
-        else:
-            slideMapping = self._presentationTemplate.slideMapping
-            # build the title (first slide)
-            if not slideMapping:
-                raise RuntimeError(f'Detected errors while building a new Presentation from Template \n{self._formatDefaultDict(templateErrors)}')
-            titleLayoutName = list(slideMapping.keys())[0]
-            titlePlaceholderDefs = slideMapping[titleLayoutName]
-            layout = self.getLayout(titleLayoutName)
-            newSlide = self.newSlide(layout, removePlaceholders=True)
-            for placeholderDef in titlePlaceholderDefs:
-                try:
-                    self._handlePlaceholder(newSlide, layout, placeholderDef)
-                except Exception as ex:
-                    print(f'Some Error in filling the placeholder occurred: {ex}')
-
-            # build the substances Slides
-            substanceTable = self.data.get('substanceTable')
-            matchingTable = self.data.get('matchingTable')
-            if substanceTable is None:
-                return
-
-            for i, (tableIndex, substanceTableRow) in enumerate(substanceTable.iterrows()):
-                substancePid = substanceTableRow[mv.Reference_SubstancePid]
-                matchingTableForSubstance = matchingTable[matchingTable[mv.Reference_SubstancePid]==substancePid]
-                titleLayoutName = list(slideMapping.keys())[1]
-                titlePlaceholderDefs = slideMapping[titleLayoutName]
-                layout = self.getLayout(titleLayoutName)
-                newSlide = self.newSlide(layout, removePlaceholders=True)
-                for placeholderDef in titlePlaceholderDefs:
-                    self._handlePlaceholder(newSlide, layout, placeholderDef,
-                                            substanceTableIndex = i+1,
-                                            substanceTableRow=substanceTableRow,
-                                            matchingTableForSubstance=matchingTableForSubstance)
-
-
-
+    def _buildPlaceholdersForLayout(self, slideLayoutName, **placeholderKwargs):
+        """ Internal. Helper method to build the placeholders from the slideMapping definitions"""
+        shapesDict = {}
+        placeholderDefs = self.presentationTemplate.slideMapping[slideLayoutName].get(PLACEHOLDER_DEFS)
+        layout = self.getLayout(slideLayoutName)
+        newSlide = self.newSlide(layout, removePlaceholders=True)
+        for placeholderDef in placeholderDefs:
+            # try:
+                shape = self._handlePlaceholder(newSlide, layout, placeholderDef, **placeholderKwargs)
+                shapeName = placeholderDef.get(PLACEHOLDER_NAME)
+                shapesDict[shapeName] = shape
+            # except Exception as ex:
+            #     getLogger().warn(f'An error occurred while filling the placeholder in the slide layout "{slideLayoutName}" for the placeholder "{placeholderDef}". Error details: {ex}')
+        return newSlide, shapesDict

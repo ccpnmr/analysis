@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-24 14:53:27 +0000 (Fri, January 24, 2025) $"
+__dateModified__ = "$dateModified: 2025-01-24 15:49:36 +0000 (Fri, January 24, 2025) $"
 __version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
@@ -134,7 +134,7 @@ class IpythonConsoleWidget(Widget):
         km.start_kernel()
         # GWV: InProcessKernel instance expected any of ['tk', 'gtk', 'wx', 'qt', 'qt4', 'inline']
         km.kernel.gui = 'qt4'
-        km.kernel.shell.push(namespace)
+        km.kernel.shell.push(dict(namespace))
         self.ipythonWidget.kernel_manager = km
 
         self.setMinimumHeight(100)

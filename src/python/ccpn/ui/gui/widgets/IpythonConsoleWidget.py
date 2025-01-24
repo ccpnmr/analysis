@@ -5,7 +5,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-18 13:31:01 +0000 (Wed, December 18, 2024) $"
-__version__ = "$Revision: 3.3.0.develop $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-01-24 14:53:27 +0000 (Fri, January 24, 2025) $"
+__version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,8 +28,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
-# import contextlib
+from PyQt5 import QtGui, QtCore
+import weakref
+from traitlets import Instance
 from qtconsole.inprocess import QtInProcessKernelManager
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from ipykernel.inprocess.ipkernel import InProcessKernel
@@ -49,6 +50,17 @@ from ccpn.util.Common import isWindowsOS
 #     # Temporarily disable IPython history. Suspected to be the source of threading issues
 #     from IPython.core.history import HistoryManager
 #     HistoryManager.enabled = False
+
+
+class WeakRefKernel(InProcessKernel):
+    """
+    Re-implementation  of the InProcessKernel to replace the user_ns with a WeakValueDictionary.
+    Hopefully this will clean up any seg faults
+
+    """
+
+    # replace the existing dict with a WeakValueDictionary
+    user_ns = Instance(weakref.WeakValueDictionary, allow_none=True)
 
 
 class SilentKernel(InProcessKernel):
@@ -72,10 +84,11 @@ class SilentKernel(InProcessKernel):
 class _ProcessKernelManager(QtInProcessKernelManager):
 
     def start_kernel(self, **kwds):
-        self.kernel = SilentKernel(parent=self, session=self.session)
+        # replace teh existing kernel
+        self.kernel = WeakRefKernel(parent=self, session=self.session)
 
     def shutdown_kernel(self):
-        # close  the history thread
+        # close the history thread
         inProcessInteractiveShell = self.kernel.shell
         if inProcessInteractiveShell is not None:
             history_manager = inProcessInteractiveShell.history_manager
@@ -83,8 +96,7 @@ class _ProcessKernelManager(QtInProcessKernelManager):
             history_manager.save_thread.stop()
 
         # Closing down the kernel and threads
-        self.kernel.iopub_thread.stop()
-        self._kill_kernel()
+        super().shutdown_kernel()
 
 
 class IpythonConsoleWidget(Widget):
@@ -109,14 +121,15 @@ class IpythonConsoleWidget(Widget):
 
         self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
 
-        ## Removed the ccpn kernel until found the cause of threading issues.
-        # import warnings
-        # with warnings.catch_warnings():
-        #     # temporarily suppress the warnings from the incompatible pydevd - not sure how else to solve this :|
-        #     warnings.simplefilter('ignore')
-        #     km = _ProcessKernelManager()
+        # Removed the ccpn kernel until found the cause of threading issues.
+        import warnings
 
-        km = QtInProcessKernelManager()
+        with warnings.catch_warnings():
+            # temporarily suppress the warnings from the incompatible pydevd - not sure how else to solve this :|
+            warnings.simplefilter('ignore')
+            km = _ProcessKernelManager()
+        #km = QtInProcessKernelManager()
+
         # GWV: need to start kernel to be able to set other attributes
         km.start_kernel()
         # GWV: InProcessKernel instance expected any of ['tk', 'gtk', 'wx', 'qt', 'qt4', 'inline']
@@ -143,7 +156,7 @@ class IpythonConsoleWidget(Widget):
         # self.consoleFrame.addLayout(consoleLayout, 1, 0)
         # self.consoleFrame.addLayout(buttonLayout, 2, 0)
 
-        self.consoleFrame.layout().addWidget(self.ipythonWidget, 0, 0)
+        self.consoleFrame.getLayout().addWidget(self.ipythonWidget, 0, 0)
         self.splitter.setStretchFactor(1, 1)
         self.splitter.setChildrenCollapsible(False)
         # self.splitter.setStyleSheet("QSplitter::handle { background-color: gray }")

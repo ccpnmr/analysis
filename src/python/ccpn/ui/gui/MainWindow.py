@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-12 16:40:10 +0000 (Sun, January 12, 2025) $"
-__version__ = "$Revision: 3.3.0.develop $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-01-24 14:54:17 +0000 (Fri, January 24, 2025) $"
+__version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +30,7 @@ __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
 import os
 import time
 from functools import partial, partialmethod
+import weakref
 from copy import deepcopy
 
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -134,6 +135,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     # allows type-checking to recognise attributes
     application = WeakRefDescriptor()
     current = WeakRefDescriptor()
+    namespace: weakref.WeakValueDictionary = None
 
     def __init__(self, application=None):
 
@@ -662,31 +664,30 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         Sets up SideBar, python console and splitters to divide up main window properly.
         """
 
-        self.namespace = {'application'             : self.application,
-                          'current'                 : self.application.current,
-                          'preferences'             : self.application.preferences,
-                          'redo'                    : self.application.redo,
-                          'undo'                    : self.application.undo,
-                          'get'                     : self.application.get,
-                          'getByPid'                : self.application.get,
-                          'getByGid'                : self.application.ui.getByGid,
-                          'ui'                      : self.application.ui,
-                          'mainWindow'              : self,
-                          'project'                 : self.application.project,
-                          'loadProject'             : self.application.loadProject,
-                          'runMacro'                : self.application.runMacro,
-                          # 'newProject' : self.application.newProject, this is a crash!
-                          'info'                    : getLogger().info,
-                          'warning'                 : getLogger().warning,
-                          'showWarning'             : showWarning,
-                          'showInfo'                : showInfo,
-                          'showError'               : showError,
-
-                          #### context managers
-                          'undoBlock'               : undoBlockWithoutSideBar,
-                          'notificationEchoBlocking': notificationEchoBlocking,
-                          'plotter'                 : plotter
-                          }
+        self.namespace = weakref.WeakValueDictionary({'application'             : self.application,
+                                                      'current'                 : self.application.current,
+                                                      'preferences'             : self.application.preferences,
+                                                      'redo'                    : self.application.redo,
+                                                      'undo'                    : self.application.undo,
+                                                      'get'                     : self.application.get,
+                                                      'getByPid'                : self.application.get,
+                                                      'getByGid'                : self.application.ui.getByGid,
+                                                      'ui'                      : self.application.ui,
+                                                      'mainWindow'              : self,
+                                                      'project'                 : self.application.project,
+                                                      'loadProject'             : self.application.loadProject,
+                                                      'runMacro'                : self.application.runMacro,
+                                                      # 'newProject' : self.application.newProject, this is a crash!
+                                                      'info'                    : getLogger().info,
+                                                      'warning'                 : getLogger().warning,
+                                                      'showWarning'             : showWarning,
+                                                      'showInfo'                : showInfo,
+                                                      'showError'               : showError,
+                                                      #### context managers
+                                                      'undoBlock'               : undoBlockWithoutSideBar,
+                                                      'notificationEchoBlocking': notificationEchoBlocking,
+                                                      'plotter'                 : plotter
+                                                      })
 
         # Make a IPythonConsole widget
         self._pythonConsoleWidget = IpythonConsoleWidget(mainWindow=self, namespace=self.namespace)

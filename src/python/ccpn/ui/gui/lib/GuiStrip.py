@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-09 18:49:05 +0000 (Thu, January 09, 2025) $"
-__version__ = "$Revision: 3.3.0.develop $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-01-28 16:31:42 +0000 (Tue, January 28, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1860,6 +1860,16 @@ class GuiStrip(Frame):
         """set the peak symbol type.
         """
         self.symbolType = value
+
+    def togglePeakSymbolVisibility(self):
+        """Toggle the peak symbol visibility.
+        """
+        self.peakSymbolsEnabled = not self.peakSymbolsEnabled
+
+    def togglePeakLabelVisibility(self):
+        """Toggle the peak symbol visibility.
+        """
+        self.peakLabelsEnabled = not self.peakLabelsEnabled
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # multipletLabelling

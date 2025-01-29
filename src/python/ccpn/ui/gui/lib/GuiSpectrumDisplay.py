@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-16 18:23:03 +0000 (Thu, January 16, 2025) $"
-__version__ = "$Revision: 3.2.13 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-01-28 16:31:42 +0000 (Tue, January 28, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2806,7 +2806,7 @@ class GuiSpectrumDisplay(CcpnModule):
             strip._toggleCrosshair()
 
     def _cycleSymbolLabelling(self):
-        """Toggles peak labelling of current strip.
+        """Cycles peak symbols of current strip.
         """
         try:
             if not self.current.strip:
@@ -2816,11 +2816,11 @@ class GuiSpectrumDisplay(CcpnModule):
             for strip in self.strips:
                 strip.cycleSymbolLabelling()
 
-        except:
+        except Exception:
             getLogger().warning('Error cycling peak labelling')
 
     def _cyclePeakSymbols(self):
-        """toggles peak labelling of current strip.
+        """Cycles peak labelling of current strip.
         """
         try:
             if not self.current.strip:
@@ -2829,8 +2829,35 @@ class GuiSpectrumDisplay(CcpnModule):
 
             for strip in self.strips:
                 strip.cyclePeakSymbols()
-        except:
+        except Exception:
             getLogger().warning('Error cycling peak symbols')
+
+    def _togglePeakSymbolVisibility(self):
+        """Shortcut callback for toggling Peak Symbol visibility
+        """
+        try:
+            if not self.current.strip:
+                showWarning('Toggle Peak Symbols', 'No strip selected')
+                return
+
+            for strip in self.strips:
+                strip.togglePeakSymbolVisibility()
+        except Exception:
+            getLogger().warning('Error toggling peak symbols')
+
+
+    def _togglePeakLabelVisibility(self):
+        """Shortcut callback for toggling Peak Label visibility
+        """
+        try:
+            if not self.current.strip:
+                showWarning('Toggle Peak Labels', 'No strip selected')
+                return
+
+            for strip in self.strips:
+                strip.togglePeakLabelVisibility()
+        except Exception:
+            getLogger().warning('Error toggling peak Labels')
 
     @logCommand(get='self')
     def displaySpectrum(self, spectrum: Spectrum | Pid):

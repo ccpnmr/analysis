@@ -4,7 +4,7 @@ Module Documentation Here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-08-14 17:58:19 +0100 (Wed, August 14, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-01-29 18:54:45 +0000 (Wed, January 29, 2025) $"
+__version__ = "$Revision: 3.2.12 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -128,15 +128,15 @@ class UpdatePopup(CcpnDialogMainWidget):
         self.setDefaultButton(None)
 
     def _postInit(self):
+        self._lock = QtCore.QMutex()
+
         super()._postInit()
 
         self._defaultHeight = self.minimumSizeHint().height()
         self.resetFromServer()
         self._downloadButton.setEnabled(self._updateCount > 0)
-
         # set the popup constraints
         QtCore.QTimer().singleShot(0, self._finalise)
-        self._lock = QtCore.QMutex()
 
     def _finalise(self):
         """Set the minimum/maximum height of the popup based on which text-boxes are visible.

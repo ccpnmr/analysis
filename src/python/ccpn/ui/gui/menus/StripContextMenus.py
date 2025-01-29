@@ -19,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-10 16:38:48 +0000 (Fri, January 10, 2025) $"
-__version__ = "$Revision: 3.3.0.develop $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-01-28 16:31:42 +0000 (Tue, January 28, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -170,6 +170,20 @@ def _cyclePeakSymbolsItem(strip):
                     typeItem=ItemTypes.get(ITEM), icon='icons/peak-symbols',
                     toolTip='Cycle Peak Symbol Types',
                     callback=strip.cyclePeakSymbols, shortcut='PS', stripMethodName='')
+
+
+def _togglePeakSymbolsItem(strip):
+    return _SCMitem(name='Peak Symbols',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle Peak Symbols On/Off',
+                    callback=strip.togglePeakSymbolVisibility,
+                    checkable=True, checked=strip.peakSymbolsEnabled, shortcut='SX', stripMethodName='')
+
+
+def _togglePeakLabelsItem(strip):
+    return _SCMitem(name='Peak Labels',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle Peak Labels On/Off',
+                    callback=strip.togglePeakLabelVisibility,
+                    checkable=True, checked=strip.peakLabelsEnabled, shortcut='LX', stripMethodName='')
 
 
 def _shareYAxisItem(strip):
@@ -1007,6 +1021,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _gridItem(guiStrip1d),
         _shareYAxisItem(guiStrip1d),
         _cyclePeakLabelsItem(guiStrip1d),
+        _togglePeakLabelsItem(guiStrip1d),
         # _cyclePeakSymbolsItem(guiStrip1d),
         ]
     items = [itm for itm in items if itm is not None]
@@ -1202,6 +1217,8 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _gridItem(guiStripNd),
         _sideBandsItem(guiStripNd),
         _shareYAxisItem(guiStripNd),
+        _togglePeakLabelsItem(guiStripNd),
+        _togglePeakSymbolsItem(guiStripNd),
         _cyclePeakLabelsItem(guiStripNd),
         _cyclePeakSymbolsItem(guiStripNd),
         ]

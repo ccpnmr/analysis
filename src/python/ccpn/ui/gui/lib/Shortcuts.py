@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-12 16:40:10 +0000 (Sun, January 12, 2025) $"
-__version__ = "$Revision: 3.3.0.develop $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-01-28 16:31:43 +0000 (Tue, January 28, 2025) $"
+__version__ = "$Revision: 3.2.11 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -50,7 +50,7 @@ class Shortcuts:
     def _setShortcuts(self, mainWindow):
         """
         Sets shortcuts for functions not specified in the main window menubar
-        :param mainWindow: the MainWindow instance (couod be self, but not always (i.e. for TempAreaWindow)
+        :param mainWindow: the MainWindow instance (could be self, but not always (i.e. for TempAreaWindow)
         """
         # avoiding circular imports
         from ccpn.core.lib import AssignmentLib
@@ -142,6 +142,10 @@ class Shortcuts:
 
         addShortCut("p, l", self, mainWindow.cycleSymbolLabelling, context=context)
         addShortCut("p, s", self, mainWindow.cyclePeakSymbols, context=context)
+
+        addShortCut("s, x", self, mainWindow.togglePeakSymbolVisibility, context=context)
+        addShortCut("l, x", self, mainWindow.togglePeakLabelVisibility, context=context)
+
         # addShortCut("Space, Space", self, mainWindow.toggleConsole, context=context) # this is not needed here, already set on Menus!!
         # addShortCut("CTRL+a", self, mainWindow.selectAllPeaks, context=context)
 

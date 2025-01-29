@@ -1261,7 +1261,7 @@ class Spectrum(AbstractWrapperObject):
                     )
 
     def _openFile(self, path: str, dataFormat: str, checkParameters: bool = True,
-                  dataSource=None, update=True) -> bool:
+                  dataSource=None, update=True, requireValid: bool = True) -> bool:
         """Open the spectrum as defined by path and dataFormat, creating a dataSource object.
 
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
@@ -1269,6 +1269,7 @@ class Spectrum(AbstractWrapperObject):
         :param checkParameters: flag to check a set of (limited) parameters
         :param dataSource: a SpectrumDataSource instance, overriding _getDataSource call
         :param update: set the _openFile flag (potentially triggering callbacks)
+        :param requireValid: a bool to allow the saving of invalid filepaths.
         :return True if opened successfully
 
         CCPNMRINTERNAL: also used in nef loader; ValidateSpectraPopup
@@ -1283,17 +1284,28 @@ class Spectrum(AbstractWrapperObject):
         newDataStore = DataStore.newFromPath(path=path, dataFormat=dataFormat)
         newDataStore.spectrum = self
 
-        if dataSource is None:
-            if (newDataSource := self._getDataSource(dataStore=newDataStore)) is None:
-                getLogger().warning('Spectrum._openFile: unable to open "%s"' % path)
-                return False
-        else:
-            newDataSource = dataSource
+        try :
+            if dataSource is None:
+                if (newDataSource := self._getDataSource(dataStore=newDataStore)) is None:
+                    getLogger().warning('Spectrum._openFile: unable to open "%s"' % path)
+                    return False
+            else:
+                newDataSource = dataSource
 
-        # optionally check the parameters
-        if checkParameters and not newDataSource.checkParameters(self):
-            getLogger().warning(f'{newDataSource.errorString}')
-            return False
+            # optionally check the parameters
+            if checkParameters and not newDataSource.checkParameters(self):
+                getLogger().warning(f'{newDataSource.errorString}')
+                return False
+        except RuntimeError as e:
+            # Allows filepaths for spectras to be saved
+            # without them being valid. As per issue #474.
+            if not requireValid:
+                self._spectrumTraits.dataStore = newDataStore
+                self._dataStore._saveInternal()
+                return False
+            else:
+                getLogger().error(f'Spectrum._openFile error: {e}')
+                return False
 
         # we defined dataStore and dataSource defining a new file
         self._openFileHelper(newDataStore, newDataSource)

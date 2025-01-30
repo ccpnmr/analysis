@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-29 12:42:31 +0000 (Wed, January 29, 2025) $"
+__dateModified__ = "$dateModified: 2025-01-30 13:25:24 +0000 (Thu, January 30, 2025) $"
 __version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
@@ -29,9 +29,9 @@ __date__ = "$Date: 2023-01-24 10:28:48 +0000 (Tue, January 24, 2023) $"
 
 import os
 import time
-from functools import partial, partialmethod
 import weakref
 from typing import TypeVar
+from copy import deepcopy
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import pyqtSlot
@@ -39,36 +39,30 @@ from PyQt5.QtCore import pyqtSlot
 from ccpn.util.Logging import getLogger
 
 from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
-from ccpn.util import Logging
 from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.core.lib.Pid import Pid
 
-## MainWindow class
+# MainWindow class
 from ccpn.ui._implementation.Window import Window as _CoreClassMainWindow
 
-from ccpn.ui.gui import guiSettings
-from ccpn.ui.gui.guiSettings import getColours, _styleBlue
-from ccpn.ui.gui import Layout
+from ccpn.ui.gui import guiSettings, Layout
 
 from ccpn.ui.gui.lib.mouseEvents import \
     SELECT, PICK, MouseModes, setCurrentMouseMode, getCurrentMouseMode
 from ccpn.ui.gui.lib import GuiStrip
 from ccpn.ui.gui.lib.Shortcuts import Shortcuts
-from ccpn.ui.gui.guiSettings import (getColours, GUITABLE_SELECTED_BACKGROUND, consoleStyle)
+from ccpn.ui.gui.guiSettings import (getColours, GUITABLE_SELECTED_BACKGROUND, consoleStyle, _styleBlue)
 
-from ccpn.ui.gui.modules.MacroEditor import MacroEditor
+# from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.PlotterWidget import plotter
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.Action import Action
-from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
-from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, \
-    USERMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU, HOWTOSMENU
+from ccpn.ui.gui.widgets.IpythonConsoleWidget import IpythonConsoleWidget
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
@@ -77,16 +71,16 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager, showInfo, showError
 
-from ccpn.util.Common import camelCaseToString
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
-from ccpn.util.Path import Path, aPath
+from ccpn.util.Path import Path  # , aPath
 
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
 
 from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 from ccpn.framework.Application import getApplication
+from ccpn.framework.Preferences import getPreferences, USE_NATIVE_MENUS
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 
@@ -129,7 +123,8 @@ _transparent = QtGui.QColor('orange')
 # _pp = QtWidgets.QToolButton.paintEvent
 # QtWidgets.QToolButton.paintEvent = partialmethod(_paintEvent, func=_pp)
 
-
+ApiWindowInstance = TypeVar('ApiWindowInstance', bound='ccpnmodel.ccpncore.api.ccpnmr.gui.Window')
+GuiWindowInstance = TypeVar('GuiWindowInstance', bound='ccpn.ui.gui.lib.GuiWindow')
 V3CoreInstance = TypeVar('V3CoreInstance', bound=AbstractWrapperObject | V3CoreObjectABC)  # could be mixed
 TypeV3Core = V3CoreInstance.__bound__
 
@@ -295,7 +290,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self.setGeometry(200, 40, 1100, 900)
 
         self.application = application
-        # self.current : defined as a property derived from self.application
+        if application:
+            self.current = application.current
         # self._project set by model; and there is a property self.project
 
         # Module area
@@ -321,7 +317,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # can't init PythonConsoleModule, as restore from layout then fails
         # self._initPythonConsoleModule()
 
-        setWidgetFont(widget=self )
+        setWidgetFont(widget=self)
 
         self._setupWindow()
         self._setupMenus()
@@ -407,11 +403,11 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         #NB this linkage is set by the model (for now)
         return self._project
 
-    @property
-    def current(self):
-        """:return the Current instance
-        """
-        return self.application.current
+    # @property
+    # def current(self):
+    #     """:return the Current instance
+    #     """
+    #     return self.application.current
 
     #-----------------------------------------------------------------------------------------
 
@@ -663,7 +659,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # GWV: changed to OBSERVE notifier on Strip.pinned
         # self.setNotifier(self.application.project, [Notifier.CHANGE], 'Strip', self._stripPinnedChanged)
 
-        self.setNotifier(self.application.project, [Notifier.OBSERVE], '_projectSaveSignal', self._projectSaveSignalCallback)
+        self.setNotifier(self.application.project, [Notifier.OBSERVE], '_projectSaveSignal',
+                         self._projectSaveSignalCallback)
 
     # def _activatedkeySequence(self, ev):
     #     key = ev.key()
@@ -786,6 +783,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """Initialise a PythonConsoleModule
         """
         from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+
         self._pythonConsoleModule = PythonConsoleModule(mainWindow=self)
         self._addModule(module=self._pythonConsoleModule, position='bottom')
 
@@ -983,9 +981,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                 self._shortcutsDict[twoLetters] = thecallable
             else:
                 alreadyUsed = self._shortcutsDict.get(twoLetters)
-                getLogger().warning(
-                    " Ambiguous shortcut overload: %s. \n Assigning to: %s. \nAlready in use for: \n %s." %
-                    (twoLetters, thecallable, alreadyUsed))
+                getLogger().warning(f"Ambiguous shortcut overload: {twoLetters}. \n Assigning to: "
+                                    f"{thecallable}. \nAlready in use for: \n {alreadyUsed}.")
 
     def _storeMainMenuShortcuts(self, actions):
         for action in actions:
@@ -1977,14 +1974,14 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     #                 peak.dimensionNmrAtoms = assignedDims
 
     # GWV added 27/10/2024; also in V4
-    def writeStatusBar(self, message:str):
+    def writeStatusBar(self, message: str):
         """Write message to the statusBar
         :param message: A string to be displayed (\n is appended)
         """
         self.statusBar().showMessage(f'{message}\n')
 
     # GWV added 27/10/2024; also in V4
-    def writeConsole(self, message:str):
+    def writeConsole(self, message: str):
         """Write message to the console
         :param message: A string to be displayed (\n is appended)
         """
@@ -2402,7 +2399,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                 collection = self.application.project.newCollection(items=list(set(peaks)), name=name)
                 self.application.current.collection = collection
 
-    def traceScaleScale(self, window: 'GuiWindow', scale: float):
+    def traceScaleScale(self, window: GuiWindowInstance, scale: float):
         """
         Changes the scale of a trace in all spectrum displays of the window.
         """
@@ -2424,40 +2421,40 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                         # spawn a redraw of the strip
                         strip._updatePivot()
 
-    def traceScaleUp(self, window: 'GuiWindow', scale=1.4):
+    def traceScaleUp(self, window: GuiWindowInstance, scale=1.4):
         """
         Doubles the scale for all traces in the specified window.
         """
         self.traceScaleScale(window, scale=scale)
 
-    def traceScaleDown(self, window: 'GuiWindow', scale=(1.0 / 1.4)):
+    def traceScaleDown(self, window: GuiWindowInstance, scale=(1.0 / 1.4)):
         """
         Halves the scale for all traces in the specified window.
         """
         self.traceScaleScale(window, scale=scale)
 
-    def toggleHTrace(self, window: 'GuiWindow'):
+    def toggleHTrace(self, window: GuiWindowInstance):
         """
         Toggles whether horizontal traces are displayed in the specified window.
         """
         if self.application.current.strip:
             self.application.current.strip.spectrumDisplay.toggleHTrace()
 
-    def toggleVTrace(self, window: 'GuiWindow'):
+    def toggleVTrace(self, window: GuiWindowInstance):
         """
         Toggles whether vertical traces are displayed in the specified window.
         """
         if self.application.current.strip:
             self.application.current.strip.spectrumDisplay.toggleVTrace()
 
-    def toggleLastAxisOnly(self, window: 'GuiWindow'):
+    def toggleLastAxisOnly(self, window: GuiWindowInstance):
         """
         Toggles whether the axis is displayed in the last strip of the display
         """
         if self.application.current.strip:
             self.application.current.strip.toggleLastAxisOnly()
 
-    def togglePhaseConsole(self, window: 'GuiWindow'):
+    def togglePhaseConsole(self, window: GuiWindowInstance):
         """
         Toggles whether the phasing console is displayed in the specified window.
         """
@@ -2578,24 +2575,18 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             for chemicalShift in chemicalShifts[ii]:
                 atomId = chemicalShift.nmrAtom.id
                 atomName = chemicalShift.nmrAtom.name
-                # TODO:EB the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
 
-                # colour = colourDict.get(atomName[:min(2,len(atomName))])
                 colourMarks = guiSettings.getColours().get(guiSettings.MARKS_COLOURS)
-                # colour = colourMarks[atomName[:min(2,len(atomName))]]
-                colour = colourMarks.get(atomName[:min(2, len(atomName))])
-                if not colour:
-                    #TODO-ED: DEFAULT is not known; FIX this
-                    colour = colourMarks.get(guiSettings.DEFAULT)
+                if not (colour := colourMarks.get(atomName[:min(2, len(atomName))])):
+                    colour = colourMarks.get(guiSettings.DEFAULT_COLOR)
 
                 # exit if mark exists
-                found = any(
+                if found := any(
                         atomName in mm.labels
                         and colour == mm.colour
                         and abs(chemicalShift.value - mm.positions[0]) < 1e-6
                         for mm in project.marks
-                        )
-                if found:
+                        ):
                     continue
 
                 # with logCommandBlock(get='self') as log:
@@ -2906,7 +2897,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         else:
             getLogger().warning('No current strip. Select a strip first.')
 
-
     def _setMouseMode(self, mode):
         if mode in MouseModes:
             # self.mouseMode = mode
@@ -3055,11 +3045,15 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             showWarning('Make Strip Plot', 'No selected spectrumDisplay')
 
 
+#=========================================================================================
+# MainWindow
+#=========================================================================================
+
 class MainWindow(_CoreClassMainWindow, GuiMainWindow):
     """GUI main window, corresponds to OS window
     """
 
-    def __init__(self, project: Project, wrappedData: 'ApiWindow'):
+    def __init__(self, project: Project, wrappedData: ApiWindowInstance):
         # this __init__ is called from Project._restoreChildren, as currently the
         # Window (and its children) is a child of the Project modeled data.
         # Hence, the convoluted way of initialising the Gui objects (MainWindow,
@@ -3074,4 +3068,4 @@ class MainWindow(_CoreClassMainWindow, GuiMainWindow):
         project._mainWindow = self
 
         getLogger().debug(_styleBlue(f'MainWindow.__init__>> Initialised {self}')
-                         )
+                          )

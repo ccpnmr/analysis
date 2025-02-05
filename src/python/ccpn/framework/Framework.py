@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-10 17:40:27 +0000 (Fri, January 10, 2025) $"
-__version__ = "$Revision: 3.3.0.develop $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-02-05 11:30:46 +0000 (Wed, February 05, 2025) $"
+__version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -56,6 +56,11 @@ except Exception:
 
 faulthandler.enable()
 
+from typing import List
+
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QTimer, QEvent
 
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
@@ -86,7 +91,7 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.util.decorators import deprecated
 from ccpn.util import Logging
 from ccpn.util.Logging import getLogger
-from ccpn.util.Path import Path, aPath, fetchDir
+from ccpn.util.Path import Path, aPath
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable, getProcess
 from ccpn.util.decorators import logCommand
@@ -211,6 +216,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
         # set by _updateAutoBackup(), called from  _startApplication()
         self._autoBackupThread = None
+        self._undoRedoHandlerBlocked = False
 
         # initialised in _startApplication
         self._registrationDict = {}
@@ -326,9 +332,10 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     def getRegistrationDetails(self):
         """Get the Registration details for the current User as a dict """
         from ccpn.util import Register
+
         registrationDict = Register.loadDict()
         skipValues = ['termsConditions', 'hashcode']
-        return {k:v for k,v in registrationDict.items() if k not in skipValues}
+        return {k: v for k, v in registrationDict.items() if k not in skipValues}
 
     #-----------------------------------------------------------------------------------------
     # Useful (?) directories as Path instances
@@ -1626,30 +1633,87 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     # undo/redo
     #-----------------------------------------------------------------------------------------
 
-    @logCommand('application.')
-    def undo(self):
+    @contextlib.contextmanager
+    def _undoRedoHandler(self, text='INSERT MESSAGE'):
+        """
+        Context manager to handle undo/redo operations with a busy handler.
+
+        This context manager blocks the handler, displays a busy message, and pauses
+        auto-backups to prevent clashes with the current save operation. It also removes
+        specific posted events from the QApplication instance.
+
+        :param text: The message to display in the busy handler.
+        :type text: str
+        """
         from ccpn.core.lib.ContextManagers import busyHandler
 
-        _undo = self._getUndo()
-        if _undo.canUndo():
-            if not _undo.locked:
-                # may need to put some more information in this busy popup
-                with busyHandler(title='Busy', text='Undo ...', raiseErrors=True):
-                    _undo.undo()
-        else:
-            getLogger().warning('nothing to undo')
+        # Define a set of event-types to remove at exit
+        eventTypes = {QEvent.KeyPress,
+                      QEvent.KeyRelease,
+                      QEvent.Shortcut,
+                      QEvent.ShortcutOverride,
+                      QEvent.MouseButtonPress,
+                      QEvent.MouseButtonRelease,
+                      QEvent.MouseButtonDblClick,
+                      }
+
+        self._undoRedoHandlerBlocked = True
+        qtApp = QApplication.instance()
+        try:
+            if self.hasGui:
+                # Create a busy-popup for long events
+                with busyHandler(title='Busy', text=text, raiseErrors=True):
+                    # Stop the auto-backups so they don't clash with current save
+                    with self.pauseAutoBackups():
+                        yield
+            else:
+                yield
+        finally:
+            if qtApp:
+                # Remove all keypress/key-release/shortcut/shortcut-override events
+                # to prevent multiple undo/redo events accumulating on the event-stack
+                for eventType in eventTypes:
+                    # Remove each event-type in the set
+                    qtApp.removePostedEvents(qtApp, eventType)
+            self._undoRedoHandlerBlocked = False
+
+    @logCommand('application.')
+    def undo(self):
+        """
+        Undo the last action.
+
+        This method attempts to undo the last action in the undo stack. If there is nothing
+        to undo, it logs a warning message. It also ensures that the undo/redo handler is not
+        blocked before proceeding with the undo operation.
+
+        :raises: Logs a warning if there is nothing to undo.
+        """
+        if undoStack := self._getUndo():
+            if not undoStack.canUndo():
+                getLogger().warning('nothing to undo')
+            if self._undoRedoHandlerBlocked:
+                return
+            with self._undoRedoHandler('Undo ...'):
+                undoStack.undo()
 
     @logCommand('application.')
     def redo(self):
-        from ccpn.core.lib.ContextManagers import busyHandler
+        """
+        Redo the last undone action.
 
-        _undo = self._getUndo()
-        if _undo.canRedo():
-            if not _undo.locked:
-                with busyHandler(title='Busy', text='Redo...', raiseErrors=True):
-                    _undo.redo()
-        else:
-            getLogger().warning('nothing to redo.')
+        This method attempts to redo the last undone action in the undo stack. If there is nothing
+        to redo, it logs a warning message. It also ensures that the undo/redo handler is not
+        blocked before proceeding with the redo operation.
+
+        :raises: Logs a warning if there is nothing to redo.
+        """
+        if undoStack := self._getUndo():
+            if not undoStack.canRedo():
+                getLogger().warning('nothing to redo')
+            if self._undoRedoHandlerBlocked:
+                return
+            with self._undoRedoHandler('Redo ...'):
+                undoStack.redo()
 
     def _getUndo(self):
         """Return the undo object for the project

@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-02-05 11:27:56 +0000 (Wed, February 05, 2025) $"
+__dateModified__ = "$dateModified: 2025-02-05 14:48:09 +0000 (Wed, February 05, 2025) $"
 __version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
@@ -341,8 +341,8 @@ class Undo(deque):
         if self._debug:
             _undoPartial = str(undoPartial)
             getLogger().debug2(
-                    f'undo._newItem: itemBlockingLevel={self.undoItemBlockingLevel}; '\
-                    f'undo={reduceText(str(undoPartial), 100)}; '\
+                    f'undo._newItem: itemBlockingLevel={self.undoItemBlockingLevel}; '
+                    f'undo={reduceText(str(undoPartial), 100)}; '
                     f'redo={reduceText(str(redoPartial), 100)}'
             )
 
@@ -489,7 +489,7 @@ class Undo(deque):
 
         For now errors are handled by printing a warning and clearing the undo object
         """
-        if self.nextIndex == 0 or self._blocked:
+        if self.nextIndex == 0 or self._blockedForUndoRedo:
             return
         elif self.maxWaypoints:
             undoTo = -1
@@ -578,7 +578,7 @@ class Undo(deque):
 
         For now errors are handled by printing a warning and clearing the undo object
         """
-        if self.nextIndex >= len(self) or self._blocked:
+        if self.nextIndex >= len(self) or self._blockedForUndoRedo:
             return
         elif self.maxWaypoints:
             redoTo = len(self) - 1

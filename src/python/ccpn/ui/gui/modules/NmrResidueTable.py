@@ -22,8 +22,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-06 17:46:56 +0000 (Mon, January 06, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-02-25 15:04:59 +0000 (Tue, February 25, 2025) $"
+__version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -195,9 +195,11 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
     # set the queue handling parameters
     _maximumQueueLength = 25
 
-    #=========================================================================================
+    _autoClearMarksCheckBox = None
+
+    #-----------------------------------------------------------------------------------------
     # Properties
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @property
     def _sourceObjects(self):
@@ -223,9 +225,9 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
         else:
             self.current.clearNmrResidues()
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Selection/Action callbacks
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def _updateTableCallback(self, data):
         pass
@@ -247,7 +249,7 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
         if self.current.strip is not None:
             self.application.ui.mainWindow.clearMarks()
             strip = self.current.strip
-            newWidths = getZoomRatio(strip.viewRange())
+            # newWidths = getZoomRatio(strip.viewRange())
             navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
                                           widths=None)
             # widths=['default'] * len(strip.axisCodes))
@@ -255,9 +257,9 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
         else:
             logger.warning('Impossible to navigate to position. Set a current strip first')
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Create table and row methods
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def getCellToRows(self, cellItem, attribute=None):
         """Get the list of objects which cellItem maps to for this table
@@ -272,9 +274,9 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
             #   shouldn't be an issue as the nmrResidue should already have been removed from the table
             return [], Notifier.CHANGE
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Table context menu
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def addTableMenuOptions(self, menu):
         """Add options to the right-mouse menu
@@ -381,9 +383,9 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
 
         return result
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Table functions
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def _getTableColumns(self, nmrChain=None):
         """format of column = ( Header Name, value, tipText, editOption)
@@ -411,13 +413,13 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
 
         return cols
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Updates
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # object properties
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     # @staticmethod
     def _nmrIndex(self, nmrRes):
@@ -474,6 +476,8 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
     _TableKlass = _NewNmrResidueTableWidget
     _PulldownKlass = NmrChainPulldown
 
+    nmrResidueTableSettings = None
+
     def __init__(self, parent, mainWindow=None, moduleParent=None,
                  nmrChain=None, selectFirstItem=False, **kwds):
         super().__init__(parent, mainWindow=mainWindow, moduleParent=moduleParent,
@@ -481,9 +485,9 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
 
         self._tableWidget.setActionCallback(self.navigateToNmrResidueCallBack)
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Properties
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     @property
     def _tableCurrent(self):
@@ -505,7 +509,7 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
             getLogger().debug2(f'{self.__class__.__name__}.navigateToNmrResidueCallBack: No selection\n{es}')
             return
 
-        nmrResidue = objs[0] if isinstance(objs, (tuple, list)) else objs
+        nmrResidue: NmrResidue = objs[0] if isinstance(objs, (tuple, list)) else objs
         if nmrResidue is None or nmrResidue.isDeleted:
             return
 
@@ -604,9 +608,9 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
 #         # enable callback on the checkboxes
 #         self._checkBoxCallback = checkBoxCallback
 #
-#     #=========================================================================================
+#     #-----------------------------------------------------------------------------------------
 #     # Table functions
-#     #=========================================================================================
+#     #-----------------------------------------------------------------------------------------
 #
 #     def _getTableColumns(self, nmrChain):
 #         """format of column = ( Header Name, value, tipText, editOption)
@@ -635,9 +639,9 @@ class NmrResidueTableFrame(_CoreTableFrameABC):
 #
 #         return cols
 #
-#     #=========================================================================================
+#     #-----------------------------------------------------------------------------------------
 #     # object properties
-#     #=========================================================================================
+#     #-----------------------------------------------------------------------------------------
 #
 #     @staticmethod
 #     def _setChecked(obj, value):

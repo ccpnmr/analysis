@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-10 18:01:47 +0000 (Fri, January 10, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-02-13 11:57:10 +0000 (Thu, February 13, 2025) $"
+__version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1248,6 +1248,10 @@ class NmrResidue(AbstractWrapperObject):
                         # move resonance
                         resonance = nmrAtom._wrappedData
                         resonance.resonanceGroup = apiResonanceGroup
+                        # hotfix to ensure correct pid
+                        oldName = nmrAtom.name
+                        nmrAtom.rename(None)
+                        nmrAtom.rename(oldName)
                     else:
                         absorbResonance(existingNmrAtom, nmrAtom)
 

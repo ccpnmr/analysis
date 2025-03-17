@@ -65,8 +65,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-10 18:01:47 +0000 (Fri, January 10, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-03-13 18:50:05 +0000 (Thu, March 13, 2025) $"
+__version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1500,8 +1500,12 @@ class Spectrum(AbstractWrapperObject):
 
     @spectralWidthsHz.setter
     @checkSpectrumPropertyValue(iterable=True, types=(float, int))
+    @ccpNmrV3CoreSetter(allChanged=True)
     def spectralWidthsHz(self, value: Sequence):
         self._setDimensionalAttributes('spectralWidthHz', value)
+        self.chemicalShiftList.recalculatePeakShifts()
+        if self.dimensionCount == 1 and not self.isEmptySpectrum():  # make sure the spectrum will shift correctly on the next redraw.
+            self.positions = self.getPpmArray(dimension=1)
 
     @property
     @_includeInDimensionalCopy
@@ -1511,8 +1515,12 @@ class Spectrum(AbstractWrapperObject):
 
     @spectralWidths.setter
     @checkSpectrumPropertyValue(iterable=True, types=(float, int))
+    @ccpNmrV3CoreSetter(allChanged=True)
     def spectralWidths(self, value):
         self._setDimensionalAttributes('spectralWidth', value)
+        self.chemicalShiftList.recalculatePeakShifts()
+        if self.dimensionCount == 1 and not self.isEmptySpectrum():  # make sure the spectrum will shift correctly on the next redraw.
+            self.positions = self.getPpmArray(dimension=1)
 
     @property
     def ppmPerPoints(self) -> List[float]:
@@ -1607,8 +1615,12 @@ class Spectrum(AbstractWrapperObject):
 
     @spectrometerFrequencies.setter
     @checkSpectrumPropertyValue(iterable=True, types=(float, int))
+    @ccpNmrV3CoreSetter(allChanged=True)
     def spectrometerFrequencies(self, value):
         self._setDimensionalAttributes('spectrometerFrequency', value)
+        self.chemicalShiftList.recalculatePeakShifts()
+        if self.dimensionCount == 1 and not self.isEmptySpectrum():  # make sure the spectrum will shift correctly on the next redraw.
+            self.positions = self.getPpmArray(dimension=1)
 
     @property
     @_includeInDimensionalCopy
@@ -1786,6 +1798,7 @@ class Spectrum(AbstractWrapperObject):
 
     @referencePoints.setter
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(float, int))
+    @ccpNmrV3CoreSetter()
     def referencePoints(self, value):
         self._setDimensionalAttributes('referencePoint', value)
         self.chemicalShiftList.recalculatePeakShifts()
@@ -1805,7 +1818,6 @@ class Spectrum(AbstractWrapperObject):
     def referenceValues(self, value):
         self._setDimensionalAttributes('referenceValue', value)
         self.chemicalShiftList.recalculatePeakShifts()
-
         if self.dimensionCount == 1 and not self.isEmptySpectrum():  # make sure the spectrum will shift correctly on the next redraw.
             self.positions = self.getPpmArray(dimension=1)
 
@@ -1957,6 +1969,7 @@ class Spectrum(AbstractWrapperObject):
     @aliasingLimits.setter
     @logCommand(get='self', isProperty=True)
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(tuple, list))
+    @ccpNmrV3CoreSetter(allChanged=True)
     def aliasingLimits(self, value):
         self._setDimensionalAttributes('aliasingLimits', value)
 
@@ -1977,6 +1990,7 @@ class Spectrum(AbstractWrapperObject):
 
     @aliasingIndexes.setter
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(tuple, list))
+    @ccpNmrV3CoreSetter(allChanged=True)
     def aliasingIndexes(self, value):
         self._setDimensionalAttributes('aliasingIndexes', value)
 
@@ -2519,16 +2533,13 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError('Spectrum.getPpmArray: either axisCode or dimension needs to be defined')
         if dimension is not None and axisCode is not None:
             raise ValueError('Spectrum.getPpmArray: axisCode and dimension cannot be both defined')
-
         if axisCode is not None:
             dimension = self.getByAxisCodes('dimensions', [axisCode], exactMatch=False)[0]
-
         if dimension is None or dimension < 1 or dimension > self.dimensionCount:
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
         spectrumLimits = self.spectrumLimits[dimension - 1]
         result = np.linspace(spectrumLimits[0], spectrumLimits[1], self.pointCounts[dimension - 1])
-
         return result
 
     # def _verifyAxisCodeDimension(self, axisCode, dimension):

@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-10 09:18:02 +0000 (Sun, November 10, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-03-13 18:50:06 +0000 (Thu, March 13, 2025) $"
+__version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,21 +27,22 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
+# NOTE:ED - do not remove occurrences of `  # type: ignore`
+#   for the minute, they are suppressing the pyqtSignal warning in pycharm
 import re
 import numpy as np
 from functools import partial
 from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import permutations
 from collections.abc import Iterable
-import typing
 import pandas as pd
 from contextlib import contextmanager
 
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.lib.ContextManagers import undoStackBlocking
-from ccpn.core.lib.SpectrumLib import MAXALIASINGRANGE, CoherenceOrder, \
-    MagnetisationTransferParameters, _getApiExpTransfers
+from ccpn.core.lib.SpectrumLib import (MAXALIASINGRANGE, CoherenceOrder,
+                                       MagnetisationTransferParameters, _getApiExpTransfers)
 from ccpn.core.lib.ContextManagers import queueStateChange
 
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
@@ -72,8 +73,8 @@ from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 from ccpn.ui.gui.lib.DynamicSizeAdjust import dynamicSizeAdjust
 
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, \
-    colourNameNoSpace, _setColourPulldown, getSpectrumColour
+from ccpn.util.Colour import (spectrumColours, addNewColour, fillColourPulldown,
+                              colourNameNoSpace, _setColourPulldown, getSpectrumColour)
 from ccpn.util.isotopes import isotopeRecords
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import getAttributeTipText
@@ -174,7 +175,8 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
 
-    def _keyPressEvent(self, event):
+    @staticmethod
+    def _keyPressEvent(event):
         if event.key() == QtCore.Qt.Key_Enter:
             pass
 
@@ -306,7 +308,7 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         QtCore.QTimer.singleShot(0, partial(dynamicSizeAdjust, self, sizeFunction=self._targetSize,
                                             adjustWidth=True, adjustHeight=False))
 
-    def _targetSize(self) -> typing.Optional[tuple]:
+    def _targetSize(self) -> tuple | None:
         """Get the size of the widget to match the popup to.
 
         Returns the size of the clicked tab, or None if there is an error.
@@ -529,7 +531,7 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
                 for aTab in [tab for tab in self.tabs if tab != fromSpectrumTab and tab.spectrum in toSpectra]:
                     try:
                         aTab._copySpectrumAttributes(fromSpectrumTab)
-                    except Exception as es:
+                    except Exception:
                         pass
 
     def getActiveTabList(self):
@@ -604,7 +606,7 @@ class SpectrumDisplayPropertiesPopup1d(SpectrumPropertiesPopupABC):
                 for aTab in [tab for tab in self.tabs if tab != fromSpectrumTab and tab.spectrum in toSpectra]:
                     try:
                         aTab._copySpectrumAttributes(fromSpectrumTab)
-                    except Exception as es:
+                    except Exception:
                         pass
 
     def getActiveTabList(self):
@@ -663,7 +665,7 @@ class GeneralTab(Widget):
         Label(self, text="Comment", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'comment'), **_alignLabel)
         self.commentData = LineEdit(self, textAlignment='left', grid=(row, 1), backgroundText='> Optional <', **_align2)
         self.commentData.textChanged.connect(
-            partial(self._queueSpectrumCommentChange, spectrum))  # ejb - was editingFinished
+                partial(self._queueSpectrumCommentChange, spectrum))  # ejb - was editingFinished
 
         #======= HLine ======
         row += 1
@@ -751,7 +753,7 @@ class GeneralTab(Widget):
             self.peakFittingMethod = RadioButtons(self, texts=PEAKFITTINGDEFAULTS,
                                                   callback=self._queueSetPeakFittingMethod,
                                                   direction='h',
-                                                  grid=(row, 1), hAlign='l', #gridSpan=(1, 2),
+                                                  grid=(row, 1), hAlign='l',  #gridSpan=(1, 2),
                                                   tipTexts=None,
                                                   )
             self.peakFittingMethodLabel.setEnabled(False)
@@ -774,7 +776,7 @@ class GeneralTab(Widget):
             self.peakFittingMethod = RadioButtons(self, texts=PEAKFITTINGDEFAULTS,
                                                   callback=self._queueSetPeakFittingMethod,
                                                   direction='h',
-                                                  grid=(row, 1), hAlign='l', #gridSpan=(1, 2),
+                                                  grid=(row, 1), hAlign='l',  #gridSpan=(1, 2),
                                                   tipTexts=None,
                                                   )
             self.peakFittingMethodLabel.setEnabled(False)
@@ -914,7 +916,8 @@ class GeneralTab(Widget):
         if value != spectrum.name:
             return partial(self._changeSpectrumName, spectrum, value)
 
-    def _changeSpectrumName(self, spectrum, name):
+    @staticmethod
+    def _changeSpectrumName(spectrum, name):
         spectrum.rename(name)
 
     @queueStateChange(_verifyPopupApply)
@@ -934,7 +937,8 @@ class GeneralTab(Widget):
         if value != spectrum.comment:
             return partial(self._changeSpectrumComment, spectrum, value)
 
-    def _changeSpectrumComment(self, spectrum, comment):
+    @staticmethod
+    def _changeSpectrumComment(spectrum, comment):
         spectrum.comment = comment
 
     @queueStateChange(_verifyPopupApply)
@@ -943,7 +947,8 @@ class GeneralTab(Widget):
         if value >= 0 and textFromValue(value) != specValue:
             return partial(self._setSpectrumScale, spectrum, value)
 
-    def _setSpectrumScale(self, spectrum, scale):
+    @staticmethod
+    def _setSpectrumScale(spectrum, scale):
         spectrum.scale = float(scale)
 
     @queueStateChange(_verifyPopupApply)
@@ -952,7 +957,8 @@ class GeneralTab(Widget):
         if textFromValue(value) != specValue:
             return partial(self._setNoiseLevelData, spectrum, value)
 
-    def _setNoiseLevelData(self, spectrum, noise):
+    @staticmethod
+    def _setNoiseLevelData(spectrum, noise):
         spectrum.noiseLevel = float(noise)
 
     @queueStateChange(_verifyPopupApply)
@@ -1089,7 +1095,8 @@ class GeneralTab(Widget):
         if value >= 0 and textFromValue(value) != specValue:
             return partial(self._setSpinningRate, spectrum, value)
 
-    def _setSpinningRate(self, spectrum, value):
+    @staticmethod
+    def _setSpinningRate(spectrum, value):
         spectrum.spinningRate = float(value)
 
     @queueStateChange(_verifyPopupApply)
@@ -1098,7 +1105,8 @@ class GeneralTab(Widget):
         if value >= 0 and textFromValue(value) != specValue:
             return partial(self._setTemperature, spectrum, value)
 
-    def _setTemperature(self, spectrum, value):
+    @staticmethod
+    def _setTemperature(spectrum, value):
         spectrum.temperature = float(value)
 
 
@@ -1107,6 +1115,7 @@ class GeneralTab(Widget):
 #=========================================================================================
 
 class DimensionsTab(Widget):
+
     def __init__(self, parent=None, container=None, mainWindow=None, spectrum=None, dimensions=None):
         super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING)
 
@@ -1180,6 +1189,7 @@ class DimensionsTab(Widget):
                     partial(self._queueSetIsotopeCodes, spectrum, self.isotopeCodePullDowns[i, dd].getText, i, dd))
         row += 1
         Label(self, text="Spectrum Widths (ppm)", grid=(row, 0),
+
               tipText=getAttributeTipText(Spectrum, 'spectralWidths'), **_alignLabel)
         self.spectralWidthsData = [ScientificDoubleSpinBox(self, grid=(row, i + 1), decimals=3, step=0.1, **_align2) for
                                    i in _dimIndices]
@@ -1189,6 +1199,7 @@ class DimensionsTab(Widget):
 
         row += 1
         Label(self, text="Spectral Widths (Hz)", grid=(row, 0),
+
               tipText=getAttributeTipText(Spectrum, 'spectralWidthsHz'), **_alignLabel)
         self.spectralWidthsHzData = [ScientificDoubleSpinBox(self, grid=(row, i + 1), decimals=1, step=0.1, **_align2)
                                      for i in _dimIndices]
@@ -1198,6 +1209,7 @@ class DimensionsTab(Widget):
 
         row += 1
         Label(self, text="Spectrometer Frequencies (MHz) ", grid=(row, 0),
+
               tipText=getAttributeTipText(Spectrum, 'spectrometerFrequencies'), **_alignLabel)
         self.spectrometerFrequenciesData = [
             ScientificDoubleSpinBox(self, grid=(row, i + 1), decimals=6, step=0.1, **_align2) for i in _dimIndices]
@@ -1218,6 +1230,7 @@ class DimensionsTab(Widget):
 
         row += 1
         Label(self, text="Referencing (points)", grid=(row, 0),
+
               tipText=getAttributeTipText(Spectrum, 'referencePoints'), **_alignLabel)
         self.spectralReferencingDataPoints = [
             ScientificDoubleSpinBox(self, grid=(row, i + 1), decimals=1, step=0.1, **_align2) for i in _dimIndices]
@@ -1228,6 +1241,7 @@ class DimensionsTab(Widget):
 
         row += 1
         Label(self, text="Assignment Tolerances", grid=(row, 0),
+
               tipText=getAttributeTipText(Spectrum, 'assignmentTolerances'), **_alignLabel)
         self.spectralAssignmentToleranceData = [
             ScientificDoubleSpinBox(self, grid=(row, i + 1), decimals=2, step=0.1, **_align2) for i in _dimIndices]
@@ -1256,7 +1270,8 @@ class DimensionsTab(Widget):
         # disabled until getRegion correctly fetches mirrored/inverted regions
         _visible = False
         _FoldingModeLabel = Label(self, text="Dimension is Circular", grid=(row, 0),
-                                  tipText=getAttributeTipText(Spectrum, 'foldingModes'), **_alignLabel)
+
+              tipText=getAttributeTipText(Spectrum, 'foldingModes'), **_alignLabel)
         _FoldingModeLabel.setVisible(_visible)
         self.foldingModesCheckBox = [CheckBox(self, grid=(row, i + 1), **_align2) for i in _dimIndices]
         for i in _dimIndices:
@@ -1292,7 +1307,8 @@ class DimensionsTab(Widget):
         self.axisCodeEdits = [LineEdit(self, grid=(row, i + 1), textAlignment='left', hPolicy='expanding', **_align2)
                               for i in _dimIndices]
         for i in _dimIndices:
-            self.axisCodeEdits[i].textChanged.connect(partial(self._queueSetAxisCodes, spectrum, ))
+            self.axisCodeEdits[i].textChanged.connect(partial(self._queueSetAxisCodes,  # type: ignore
+                                                              spectrum, ))
 
         row += 1
         _dimOrderLabel = Label(self, text="Preferred Dimension Order", grid=(row, 0),
@@ -1331,7 +1347,7 @@ class DimensionsTab(Widget):
               tipText=getAttributeTipText(Spectrum, 'referenceExperimentDimensions'), **_alignLabel)
         self.referenceDimensionPullDowns = [PulldownList(self, grid=(row, i + 1), **_align2) for i in _dimIndices]
         for i in _dimIndices:
-            self.referenceDimensionPullDowns[i].currentIndexChanged.connect(partial(self._queueSetReferenceDimensions,
+            self.referenceDimensionPullDowns[i].currentIndexChanged.connect(  # type: ignorepartial(self._queueSetReferenceDimensions,
                                                                                     spectrum, ))  #self.referenceDimensionPullDowns[i].getText, i))
         row += 1
         # button to copy to axis Codes
@@ -1386,7 +1402,8 @@ class DimensionsTab(Widget):
     def _populatePreferredOrder(self):
         """Fill the pullDown with the currently available permutations of the axis codes
         """
-        specOrder = tuple(self.spectrum._preferredAxisOrdering[:self.spectrum.dimensionCount]) \
+        specOrder = tuple(
+                self.spectrum._preferredAxisOrdering[:self.spectrum.dimensionCount]) \
             if self.spectrum._preferredAxisOrdering is not None else None
 
         axisCodeTexts = tuple(ss.text() for ss in self.axisCodeEdits)
@@ -1397,7 +1414,7 @@ class DimensionsTab(Widget):
             #   but is changed to (0, 1) or (1, 0) for the popup
             axisCodeTexts += ('intensity',)
             if len(specOrder) == 1:
-                specOrder += (1-specOrder[0],)
+                specOrder += (1 - specOrder[0],)
 
         # add permutations for the axes
         axisPerms = permutations([axisCode for axisCode in axisCodeTexts])
@@ -1583,14 +1600,16 @@ class DimensionsTab(Widget):
                 cohCount = CoherenceOrder.get(cohOrders[i]).dataValue
                 dimIsoCodes = isoCodes[i]
                 for cc in range(cohCount):
-                    self.isotopeCodePullDowns[i, cc].setVisible(True)
+                    icPulldown: PulldownList = self.isotopeCodePullDowns[i][cc]
+                    icPulldown.setVisible(True)
                     if cc < len(dimIsoCodes) and dimIsoCodes[cc] in self._isotopeList:
-                        self.isotopeCodePullDowns[i, cc].setIndex(self._isotopeList.index(dimIsoCodes[cc]))
+                        icPulldown.setIndex(self._isotopeList.index(dimIsoCodes[cc]))
                     else:
                         # maybe too small
-                        self.isotopeCodePullDowns[i, cc].setIndex(0)
+                        icPulldown.setIndex(0)
                 for cc in range(cohCount, max(CoherenceOrder.dataValues())):
-                    self.isotopeCodePullDowns[i, cc].setVisible(False)
+                    icPulldown: PulldownList = self.isotopeCodePullDowns[i][cc]
+                    icPulldown.setVisible(False)
 
                 if self.spectrum.coherenceOrders[i] in self._coherenceOrderList:
                     self.coherenceOrderPullDowns[i].setIndex(
@@ -1633,9 +1652,11 @@ class DimensionsTab(Widget):
 
                 # pullDown for min/max aliasing
                 aliasMaxRange = list(
-                        max(self.foldLim[i]) + rr * self.deltaLim[i] for rr in range(MAXALIASINGRANGE, -1, -1))
+                        max(self.foldLim[i]) + rr * self.deltaLim[i]
+                                     for rr in range(MAXALIASINGRANGE, -1, -1))
                 aliasMinRange = list(
-                        min(self.foldLim[i]) + rr * self.deltaLim[i] for rr in range(0, -MAXALIASINGRANGE - 1, -1))
+                        min(self.foldLim[i]) + rr * self.deltaLim[i]
+                                     for rr in range(0, -MAXALIASINGRANGE - 1, -1))
                 aliasMaxText = [f'{MAXALIASINGRANGE - ii}   ({aa:.3f} ppm)' for ii, aa in enumerate(aliasMaxRange)]
                 aliasMinText = [f'{-ii}   ({aa:.3f} ppm)' for ii, aa in enumerate(aliasMinRange)]
 
@@ -1668,7 +1689,8 @@ class DimensionsTab(Widget):
         if textFromValue(value) != specValue:
             return partial(self._setAssignmentTolerances, spectrum, dim, value)
 
-    def _setAssignmentTolerances(self, spectrum, dim, value):
+    @staticmethod
+    def _setAssignmentTolerances(spectrum, dim, value):
         assignmentTolerances = list(spectrum.assignmentTolerances)
         assignmentTolerances[dim] = float(value)
         spectrum.assignmentTolerances = assignmentTolerances
@@ -1679,7 +1701,8 @@ class DimensionsTab(Widget):
         if textFromValue(value) != specValue:
             return partial(self._setDoubleCursorOffset, spectrum, dim, value)
 
-    def _setDoubleCursorOffset(self, spectrum, dim, value):
+    @staticmethod
+    def _setDoubleCursorOffset(spectrum, dim, value):
         doubleCrosshairOffsets = list(spectrum.doubleCrosshairOffsets)
         doubleCrosshairOffsets[dim] = float(value)
         spectrum.doubleCrosshairOffsets = doubleCrosshairOffsets
@@ -1732,7 +1755,8 @@ class DimensionsTab(Widget):
     def _updateIsotopeCodes(self, spectrum, dim):
         mqIsotopeCodes = list(spectrum.mqIsotopeCodes)
         cohOrders = spectrum.coherenceOrders
-        mqIsotopeCodes[dim] = [self.isotopeCodePullDowns[dim, cc].get() for cc in
+        mqIsotopeCodes[dim] = [self.isotopeCodePullDowns[dim][cc].get()
+                               for cc in
                                range(CoherenceOrder.get(cohOrders[dim]).dataValue)]
         spectrum.mqIsotopeCodes = mqIsotopeCodes
 
@@ -1744,9 +1768,9 @@ class DimensionsTab(Widget):
         cohOrders = self.coherenceOrderPullDowns[dim].get()
         cohCount = CoherenceOrder.get(cohOrders).dataValue
         for cc in range(cohCount):
-            self.isotopeCodePullDowns[dim, cc].setVisible(True)
+            self.isotopeCodePullDowns[dim][cc].setVisible(True)
         for cc in range(cohCount, max(CoherenceOrder.dataValues())):
-            self.isotopeCodePullDowns[dim, cc].setVisible(False)
+            self.isotopeCodePullDowns[dim][cc].setVisible(False)
 
         if value != spectrum.coherenceOrders[dim]:
             return partial(self._setCoherenceOrders, spectrum, dim, value)
@@ -1793,7 +1817,8 @@ class DimensionsTab(Widget):
 
         return result
 
-    def _setSpectrumType(self, spectrum, expType):
+    @staticmethod
+    def _setSpectrumType(spectrum, expType):
         spectrum.experimentType = expType or None
 
     @queueStateChange(_verifyPopupApply)
@@ -1831,7 +1856,8 @@ class DimensionsTab(Widget):
 
         return result
 
-    def _setReferenceDimensions(self, spectrum, value):  #, dim, value):
+    @staticmethod
+    def _setReferenceDimensions(spectrum, value):  #, dim, value):
         """Set the value for a single referenceDimension
         - this can lead to non-unique values
         """
@@ -1871,13 +1897,48 @@ class DimensionsTab(Widget):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def _setAliasingPulldowns(self, dim, spectrum):
+        """Update aliasing pulldowns to reflect changes to spectrum proeprties."""
+        newSw = self.spectralWidthsData[dim].value()
+        _refPoint = self.spectralReferencingDataPoints[dim].value()
+        _refPpm = self.spectralReferencingData[dim].value()
+        _pointCount = spectrum.pointCounts[dim]
+        _rev = spectrum.axesReversed[dim]
+        _vpp = abs(newSw / _pointCount) * (-1.0 if _rev else 1.0)
+        # 0.5 -> pointCount + 0.5
+        _foldLim = sorted([_refPpm + (0.5 - _refPoint) * _vpp,
+                           _refPpm + ((_pointCount + 0.5) - _refPoint) * _vpp])
+        _deltaLim = newSw
+        # pullDown for min/max aliasing
+        aliasMaxRange = list(max(_foldLim) + rr * _deltaLim
+                             for rr in range(MAXALIASINGRANGE, -1, -1))
+        aliasMinRange = list(min(_foldLim) + rr * _deltaLim
+                             for rr in range(0, -MAXALIASINGRANGE - 1, -1))
+        aliasMaxText = [f'{MAXALIASINGRANGE - ii}   ({aa:.3f} ppm)' for ii, aa in enumerate(aliasMaxRange)]
+        aliasMinText = [f'{-ii}   ({aa:.3f} ppm)' for ii, aa in enumerate(aliasMinRange)]
+        ind = self.maxAliasingPullDowns[dim].currentIndex()
+        self.maxAliasingPullDowns[dim].setData(aliasMaxText)
+        self.maxAliasingPullDowns[dim].setIndex(ind)
+        ind = self.minAliasingPullDowns[dim].currentIndex()
+        self.minAliasingPullDowns[dim].setData(aliasMinText)
+        self.minAliasingPullDowns[dim].setIndex(ind)
+
     @queueStateChange(_verifyPopupApply)
     def _queueSetSpectralWidths(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.spectralWidths[dim])
         if textFromValue(value) != specValue:
+            # CHECK:ED - change _queueSetSpectralWidthsHz - watch out for cycle!
+            with self.blockWidgetSignals(root=self):
+                newSw = (value or 0.0)
+                swhz = newSw * self.spectrometerFrequenciesData[dim].value()
+                # update hz spinbox
+                self.spectralWidthsHzData[dim].setValue(swhz)
+                # update aliasing pulldowns
+                self._setAliasingPulldowns(dim, spectrum)
             return partial(self._setSpectralWidths, spectrum, dim, value)
 
-    def _setSpectralWidths(self, spectrum, dim, value):
+    @staticmethod
+    def _setSpectralWidths(spectrum, dim, value):
         spectralWidths = list(spectrum.spectralWidths)
         spectralWidths[dim] = float(value)
         spectrum.spectralWidths = spectralWidths
@@ -1886,9 +1947,17 @@ class DimensionsTab(Widget):
     def _queueSetSpectralWidthsHz(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.spectralWidthsHz[dim])
         if textFromValue(value) != specValue:
+            # CHECK:ED - change _queueSetSpectralWidths - watch out for cycle!
+            with self.blockWidgetSignals(root=self):
+                newSw = (value or 0.0) / self.spectrometerFrequenciesData[dim].value()
+                # update ppm spinbox
+                self.spectralWidthsData[dim].setValue(newSw)
+                # update aliasing pulldowns
+                self._setAliasingPulldowns(dim, spectrum)
             return partial(self._setSpectralWidthsHz, spectrum, dim, value)
 
-    def _setSpectralWidthsHz(self, spectrum, dim, value):
+    @staticmethod
+    def _setSpectralWidthsHz(spectrum, dim, value):
         spectralWidthsHz = list(spectrum.spectralWidthsHz)
         spectralWidthsHz[dim] = float(value)
         spectrum.spectralWidthsHz = spectralWidthsHz
@@ -1897,9 +1966,13 @@ class DimensionsTab(Widget):
     def _queueSetSpectrometerFrequencies(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.spectrometerFrequencies[dim])
         if textFromValue(value) != specValue:
+            # CHECK:ED - change _queueSetSpectralWidths - watch out for cycle!
+            with self.blockWidgetSignals(root=self):
+                self.spectralWidthsHzData[dim].setValue((value or 0.0) * self.spectralWidthsData[dim].value())
             return partial(self._setSpectrometerFrequencies, spectrum, dim, value)
 
-    def _setSpectrometerFrequencies(self, spectrum, dim, value):
+    @staticmethod
+    def _setSpectrometerFrequencies(spectrum, dim, value):
         spectrometerFrequencies = list(spectrum.spectrometerFrequencies)
         spectrometerFrequencies[dim] = float(value)
         spectrum.spectrometerFrequencies = spectrometerFrequencies
@@ -1910,9 +1983,12 @@ class DimensionsTab(Widget):
     def _queueSetDimensionReferencing(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.referenceValues[dim])
         if textFromValue(value) != specValue:
+            # update aliasing pulldowns
+            self._setAliasingPulldowns(dim, spectrum)
             return partial(self._setDimensionReferencing, spectrum, dim, value)
 
-    def _setDimensionReferencing(self, spectrum, dim, value):
+    @staticmethod
+    def _setDimensionReferencing(spectrum, dim, value):
         spectrumReferencing = list(spectrum.referenceValues)
         spectrumReferencing[dim] = float(value)
         spectrum.referenceValues = spectrumReferencing
@@ -1921,9 +1997,12 @@ class DimensionsTab(Widget):
     def _queueSetPointDimensionReferencing(self, spectrum, dim, textFromValue, value):
         specValue = textFromValue(spectrum.referencePoints[dim] or 0.0)
         if textFromValue(value) != specValue:
+            # update aliasing pulldowns
+            self._setAliasingPulldowns(dim, spectrum)
             return partial(self._setPointDimensionReferencing, spectrum, dim, value)
 
-    def _setPointDimensionReferencing(self, spectrum, dim, value):
+    @staticmethod
+    def _setPointDimensionReferencing(spectrum, dim, value):
         spectrumReferencing = list(spectrum.referencePoints)
         spectrumReferencing[dim] = float(value)
         spectrum.referencePoints = spectrumReferencing
@@ -1936,7 +2015,8 @@ class DimensionsTab(Widget):
             returnVal = partial(self._setMinAliasing, self.spectrum, dim, minValue)
             return returnVal
 
-    def _setMinAliasing(self, spectrum, dim, value):
+    @staticmethod
+    def _setMinAliasing(spectrum, dim, value):
         alias = list(spectrum.aliasingLimits)
         value = float(value)
         alias[dim] = (value, max(alias[dim][1], value))
@@ -1950,7 +2030,8 @@ class DimensionsTab(Widget):
             returnVal = partial(self._setMaxAliasing, spectrum, dim, maxValue)
             return returnVal
 
-    def _setMaxAliasing(self, spectrum, dim, value):
+    @staticmethod
+    def _setMaxAliasing(spectrum, dim, value):
         alias = list(spectrum.aliasingLimits)
         value = float(value)
         alias[dim] = (min(alias[dim][0], value), value)
@@ -1963,7 +2044,8 @@ class DimensionsTab(Widget):
         if value != spectrum.foldingModes[dim]:
             return partial(self._setFoldingModes, spectrum, dim, value)
 
-    def _setFoldingModes(self, spectrum, dim, value):
+    @staticmethod
+    def _setFoldingModes(spectrum, dim, value):
         folding = list(spectrum.foldingModes)
         folding[dim] = value
         spectrum.foldingModes = tuple(folding)
@@ -1983,7 +2065,8 @@ class DimensionsTab(Widget):
         if value != spectrum.displayFoldedContours:
             return partial(self._setDisplayFoldedContours, spectrum, value)
 
-    def _setDisplayFoldedContours(self, spectrum, value):
+    @staticmethod
+    def _setDisplayFoldedContours(spectrum, value):
         spectrum.displayFoldedContours = bool(value)
 
 
@@ -2191,7 +2274,8 @@ class ContoursTab(Widget):
         _row = ContourTabRow(self, row, text="Multiplier", attrName='positiveContourFactor',
                              widget=ScientificDoubleSpinBox, min=0.0, decimals=2, step=0.1
                              )
-        _row.setCallback(partial(self._queueChangePositiveContourFactor, _row))
+        _row.setCallback(
+                partial(self._queueChangePositiveContourFactor, _row))
         # retain old name (for now)
         self.positiveMultiplierData = _row.widget
         self._rows.append(_row)
@@ -2244,18 +2328,22 @@ class ContoursTab(Widget):
 
         row += 1
         _row = ContourTabNegativeBaseRow(self, row, text="Base Level", attrName='negativeContourBase',
-                                         widget=ContourBaseSpinBox, min=-1e12, max=-0.1,
+                                         widget=ContourBaseSpinBox, min=-1e12,
+                                                               max=-0.1,
                                          )
-        _row.setCallback(partial(self._queueChangeRow, _row))
+        _row.setCallback(
+                partial(self._queueChangeRow, _row))
         # retain old name (for now)
         self.negativeContourBaseData = _row.widget
         self._rows.append(_row)
 
         row += 1
         _row = ContourTabRow(self, row, text="Multiplier", attrName='negativeContourFactor',
-                             widget=ScientificDoubleSpinBox, min=0.0, decimals=2, step=0.1
+                             widget=ScientificDoubleSpinBox, min=0.0,
+                                                              decimals=2, step=0.1
                              )
-        _row.setCallback(partial(self._queueChangeRow, _row))
+        _row.setCallback(
+                partial(self._queueChangeRow, _row))
         # retain old name (for now)
         self.negativeMultiplierData = _row.widget
         self._rows.append(_row)
@@ -3046,6 +3134,8 @@ class ColourFrameABC(Frame):
     NEGATIVECOLOUR = False
     SLICECOLOUR = False
     EDITMODE = True
+
+    spectrumGroup: SpectrumGroup | AttrDict
 
     def __init__(self, parent=None, mainWindow=None, container=None, editMode=False, spectrumGroup=None, item=None,
                  **kwds):

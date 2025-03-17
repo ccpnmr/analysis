@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-09 18:49:05 +0000 (Thu, January 09, 2025) $"
-__version__ = "$Revision: 3.3.0.develop $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-03-13 18:50:05 +0000 (Thu, March 13, 2025) $"
+__version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -51,6 +51,7 @@ TraceParameters = collections.namedtuple('TraceParameters', 'inRange pointPositi
 class SpectrumCache():
     # matrix: np.array = None
     matrix: QtGui.QMatrix4x4 = None
+    pointMatrix: QtGui.QMatrix4x4 = None
     stackedMatrix: np.array = None
     spinningRate: float = None
 
@@ -85,6 +86,9 @@ class SpectrumCache():
     delta: list = field(default_factory=list)
     stackedMatrixOffset: list = field(default_factory=list)
     mvMatrices: list[QtGui.QMatrix4x4] = field(default_factory=list)
+    mvPointMatrices: list[QtGui.QMatrix4x4] = field(default_factory=list)
+    pixelScales: list[QtGui.QVector4D] = field(default_factory=list)
+    aliasPositions: list[tuple] = field(default_factory=list)
 
 
 @dataclass
@@ -268,8 +272,10 @@ class GuiSpectrumView(QtWidgets.QGraphicsItem):
                                       minFoldingFrequency, maxFoldingFrequency,
                                       isTimeDomain, spectrometerFrequency, ppmToPoint)
 
-    def _getVisibleSpectrumViewParams(self, dimRange=None, delta=None, stacking=None) -> SpectrumCache:
+    def _getVisibleSpectrumViewParams(self, dimRange=None, delta=None, stacking=None,
+                                      flipped: bool = False, pixelX: float = 0.0, pixelY: float = 0.0) -> SpectrumCache:
         """Get parameters for axisDim'th axis (zero-origin) of spectrum.
+        :param flipped:
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError(f'Code error: {self.__class__.__name__}._getVisibleSpectrumViewsParams function not implemented')

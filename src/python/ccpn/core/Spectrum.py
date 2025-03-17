@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-13 18:50:05 +0000 (Thu, March 13, 2025) $"
+__dateModified__ = "$dateModified: 2025-03-17 11:01:18 +0000 (Mon, March 17, 2025) $"
 __version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
@@ -1798,7 +1798,7 @@ class Spectrum(AbstractWrapperObject):
 
     @referencePoints.setter
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(float, int))
-    @ccpNmrV3CoreSetter()
+    @ccpNmrV3CoreSetter(allChanged=True)
     def referencePoints(self, value):
         self._setDimensionalAttributes('referencePoint', value)
         self.chemicalShiftList.recalculatePeakShifts()
@@ -1814,7 +1814,7 @@ class Spectrum(AbstractWrapperObject):
 
     @referenceValues.setter
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(float, int))
-    @ccpNmrV3CoreSetter()
+    @ccpNmrV3CoreSetter(allChanged=True)
     def referenceValues(self, value):
         self._setDimensionalAttributes('referenceValue', value)
         self.chemicalShiftList.recalculatePeakShifts()
@@ -1833,7 +1833,7 @@ class Spectrum(AbstractWrapperObject):
     @referenceSubstances.setter
     @ccpNmrV3CoreSetter()
     def referenceSubstances(self, substances):
-        """Add substances to the spectrum.referenceSubstances list
+        """Add substances to the spectrum.referenceSubstances list.
         :param substances: list of objects, as core objects or pid strings
         """
         from ccpn.core.Substance import Substance

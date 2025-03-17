@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-13 18:50:06 +0000 (Thu, March 13, 2025) $"
+__dateModified__ = "$dateModified: 2025-03-17 11:01:18 +0000 (Mon, March 17, 2025) $"
 __version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,6 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # NOTE:ED - do not remove occurrences of `  # type: ignore`
 #   for the minute, they are suppressing the pyqtSignal warning in pycharm
 import re
-import numpy as np
 from functools import partial
 from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import permutations
@@ -50,7 +49,6 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox, VariableScientificSpinBox, fexp
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -242,7 +240,6 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
 
         # handle clicking of the Apply/OK button
         with handleDialogApply(self) as error:
-
             # get the list of spectra that have changed - for refreshing the displays
             spectrumList = []
             for t in _tabs:
@@ -375,7 +372,7 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
         super().__init__(parent=parent, mainWindow=mainWindow,
                          spectrum=spectrum, title=title, **kwds)
 
-        # define first, as calling routines are dependant on existence of attributes
+        # define first, as calling routines are dependent on existence of attributes
         self._generalTab = None
         self._dimensionsTab = None
         self._contoursTab = None
@@ -528,9 +525,9 @@ class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):
         for aTab in self.tabs:
             if aTab.spectrum == fromSpectrum:
                 fromSpectrumTab = aTab
-                for aTab in [tab for tab in self.tabs if tab != fromSpectrumTab and tab.spectrum in toSpectra]:
+                for inTab in [tab for tab in self.tabs if tab != fromSpectrumTab and tab.spectrum in toSpectra]:
                     try:
-                        aTab._copySpectrumAttributes(fromSpectrumTab)
+                        inTab._copySpectrumAttributes(fromSpectrumTab)
                     except Exception:
                         pass
 
@@ -1178,15 +1175,16 @@ class DimensionsTab(Widget):
         row += 1
         Label(self, text="Isotope Codes", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'isotopeCodes'),
               **_alignLabel)
-        self.isotopeCodePullDowns = np.empty((dimensions, len(CoherenceOrder)), dtype=object)
-        row -= 1  # Temporarily lower as it it increased again in the loop
+        self.isotopeCodePullDowns: list[list[PulldownList | None]] = [[None for _ in range(len(CoherenceOrder))]
+                                                                      for _ in range(dimensions)]
+        row -= 1  # Temporarily lower as it is increased again in the loop
         for dd in range(numCohOrders):
             row += 1
             for i in _dimIndices:
-                self.isotopeCodePullDowns[i, dd] = PulldownList(self, grid=(row, i + 1), **_align2)
-                self.isotopeCodePullDowns[i, dd].setData(self._isotopeList)
-                self.isotopeCodePullDowns[i, dd].currentIndexChanged.connect(
-                    partial(self._queueSetIsotopeCodes, spectrum, self.isotopeCodePullDowns[i, dd].getText, i, dd))
+                self.isotopeCodePullDowns[i][dd] = PulldownList(self, grid=(row, i + 1), **_align2)
+                self.isotopeCodePullDowns[i][dd].setData(self._isotopeList)
+                self.isotopeCodePullDowns[i][dd].currentIndexChanged.connect(
+                    partial(self._queueSetIsotopeCodes, spectrum, self.isotopeCodePullDowns[i][dd].getText, i, dd))
         row += 1
         Label(self, text="Spectrum Widths (ppm)", grid=(row, 0),
 
@@ -1335,10 +1333,10 @@ class DimensionsTab(Widget):
         _specLabel = Label(self, text="Type", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'experimentType'),
                            **_alignLabel)
         # reference experiment type - editable because has a search-completer
-        self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, 1), gridSpan=(1, 1))
+        self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, 1), gridSpan=(1, dimensions + 1))
         # Added to account for renaming of experiments
         self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
-        _specButton = Button(self, grid=(row, 1 + 1),
+        _specButton = Button(self, grid=(row, 1 + dimensions + 1),
                              callback=partial(self._raiseExperimentFilterPopup, spectrum),
                              hPolicy='fixed', icon='icons/applications-system')
 
@@ -1347,8 +1345,9 @@ class DimensionsTab(Widget):
               tipText=getAttributeTipText(Spectrum, 'referenceExperimentDimensions'), **_alignLabel)
         self.referenceDimensionPullDowns = [PulldownList(self, grid=(row, i + 1), **_align2) for i in _dimIndices]
         for i in _dimIndices:
-            self.referenceDimensionPullDowns[i].currentIndexChanged.connect(  # type: ignorepartial(self._queueSetReferenceDimensions,
-                                                                                    spectrum, ))  #self.referenceDimensionPullDowns[i].getText, i))
+            self.referenceDimensionPullDowns[i].currentIndexChanged.connect(  # type: ignore
+                                                                            partial(self._queueSetReferenceDimensions,
+                                                                            spectrum, ))  #self.referenceDimensionPullDowns[i].getText, i))
         row += 1
         # button to copy to axis Codes
         _copyBox = Frame(self, setLayout=True, grid=(row, 1), gridSpan=(1, dimensions))
@@ -1391,7 +1390,7 @@ class DimensionsTab(Widget):
 
         # End; add spacer to fill empty space
         row += 1
-        self.addSpacer(10, 10, grid=(row, 0), expandX=True, expandY=True)
+        self.addSpacer(10, 10, grid=(row, 1), expandX=True, expandY=True)
 
     def _fillPreferredWidgetFromAxisTexts(self):
         """Fill the pullDown during preSelect

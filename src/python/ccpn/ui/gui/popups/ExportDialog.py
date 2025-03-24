@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-24 14:55:32 +0000 (Fri, January 24, 2025) $"
+__dateModified__ = "$dateModified: 2025-03-21 18:56:22 +0000 (Fri, March 21, 2025) $"
 __version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
@@ -190,7 +190,7 @@ class ExportDialogABC(CcpnDialogMainWidget):
             getLogger().warning(f'{self.title}.setSave: no file dialog')
             return
         if not fileName:
-            getLogger().warning(f'{self.title}: no filename specified')
+            getLogger().debug(f'{self.title}: no filename specified')
             return
 
         if not isinstance(fileName, (str, Path)):
@@ -221,7 +221,10 @@ class ExportDialogABC(CcpnDialogMainWidget):
         """Create the dialog for the file button
         To be subclassed as required.
         """
-        self.fileSaveDialog = ExportFileDialog(self,
+        if self.fileSaveDialog:
+            # clear the old dialog, should really use the existing one
+            self.fileSaveDialog.close()
+        self.fileSaveDialog = ExportFileDialog(self,  # parented to 'self' so deleted on 'done'
                                                acceptMode='export',
                                                selectFile=self._dialogSelectFile,
                                                fileFilter=self._dialogFilter,

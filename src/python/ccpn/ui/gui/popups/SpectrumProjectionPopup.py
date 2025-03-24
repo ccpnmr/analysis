@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-09-11 14:34:52 +0100 (Wed, September 11, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-03-20 17:23:41 +0000 (Thu, March 20, 2025) $"
+__version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -41,23 +41,23 @@ from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
 from ccpn.util.Path import aPath, Path
 
 
-class SpectrumProjectionPopup(CcpnDialogWithOutputPathPopupABC):  # ExportDialogABC):
+class SpectrumProjectionPopup(CcpnDialogWithOutputPathPopupABC):
     FIXEDHEIGHT = True
     FIXEDWIDTH = False
 
     def __init__(self, parent=None, mainWindow=None, title='Spectrum Projection', **kwds):
 
-        # for CcpnDialogMainWidget:
-        super().__init__(parent=parent, mainWindow=mainWindow, title=title, **kwds)
-
         if self.project:
             # Only select 3D's for now
             self.validSpectra = [s for s in self.project.spectra if s.dimensionCount == 3]
-
         if not self.validSpectra:  # not None or len==0
             showWarning('No valid spectra', 'No 3D spectra in current dataset')
             self.errorFlag = True
+            # Discard popup: can exit before calling super-class initialisation
             return
+
+        # can now create the proper dialog
+        super().__init__(parent=parent, mainWindow=mainWindow, title=title, **kwds)
 
         # select a spectrum from current or validSpectra
         if self.application.current and self.application.current.strip is not None and \
@@ -74,7 +74,8 @@ class SpectrumProjectionPopup(CcpnDialogWithOutputPathPopupABC):  # ExportDialog
         self.actionButtons()
 
     def actionButtons(self):
-        self.setOkButton(callback=self.makeProjection, text='Make Projection', tipText='Export the projection to file and close dialog')
+        self.setOkButton(callback=self.makeProjection, text='Make Projection',
+                         tipText='Export the projection to file and close dialog')
         self.setCloseButton(callback=self._rejectDialog, text='Close', tipText='Close')
         self.setDefaultButton(ExportDialogABC.CLOSEBUTTON)
 
@@ -208,11 +209,10 @@ class SpectrumProjectionPopup(CcpnDialogWithOutputPathPopupABC):  # ExportDialog
 
         self.accept()
 
-
 def main():
     from ccpn.ui.gui.widgets.Application import newTestApplication
 
-    app = newTestApplication()
+    app = newTestApplication()  # noqa: handle must be kept to prevent immediate garbage-collection
     dialog = SpectrumProjectionPopup()
     dialog.exec_()
 

@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-13 12:41:07 +0000 (Mon, January 13, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-03-21 16:10:08 +0000 (Fri, March 21, 2025) $"
+__version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,7 +32,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import functools
 import sys
-# import os
+import os
 import typing
 import operator
 from typing import Sequence, Union, Optional, List, Any
@@ -58,9 +58,8 @@ from ccpn.core.lib import Undo
 from ccpn.core.lib.Notifiers import NotifierBase, NotifierSignal
 from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
 from ccpn.core.lib.ProjectLib import createLogger
-from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
-    inactivity, logCommandManager, ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSimple, notificationEchoBlocking, \
-    undoStack
+from ccpn.core.lib.ContextManagers import (notificationBlanking, undoBlock, undoBlockWithoutSideBar,
+                                           inactivity, logCommandManager, ccpNmrV3CoreUndoBlock, undoStackBlocking)
 from ccpn.core.lib.XmlLoader import XmlLoader
 
 from ccpn.util import Logging
@@ -139,6 +138,7 @@ class Project(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiNmrProject._metaclass.qualifiedName()
+    _wrappedData = ApiNmrProject
 
     # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
     _isNew = None
@@ -1171,7 +1171,7 @@ class Project(AbstractWrapperObject):
                 getLogger().info('Folder may be read-only')
 
     # GWV 24/2/24: replaced with Project._initialise()
-    # def _initialiseProject(self):
+    # def _initialiseProject(self, application, debugLevel):
     #     """Complete initialisation of project,
     #     set up logger and notifiers, and wrap underlying data
     #     This routine is called from Framework, as some other machinery first needs to set up
@@ -1602,10 +1602,12 @@ class Project(AbstractWrapperObject):
 
             # Optionally copy and check subdirectories
             if copySubDirectories:
+                getLogger().debug(f'copying subDirs')
                 for _subdir in CCPN_SAVEAS_SUB_DIRECTORIES:
                     _source = _oldPath / _subdir
                     _dest = _newPath / _subdir
                     if _source.exists():
+                        getLogger().debug(f'  subDir: {_dest}')
                         _source.copyDir(_dest, overwrite=False)
             self._checkProjectSubDirectories()
 
@@ -1823,6 +1825,30 @@ class Project(AbstractWrapperObject):
                      level=self.application._loggingLevel,
                      now=self.application._created,
                      )
+
+    @contextmanager
+    def _setSaveOverride(self):
+        """Handle the temporary override for saving the project if user wants to saveAs
+        without changing project/application save-states.
+        """
+        self._saveOverrideState += 1
+        self._updateReadOnlyState()
+        # self._updateLoggerState()  # these should always be together
+        try:
+            yield  # transfer control to the saving function
+        finally:
+            # reset override-state
+            self._saveOverrideState -= 1
+            if self._saveOverrideState < 0:
+                raise RuntimeError('_saveOverrideState already at 0')
+            self._updateReadOnlyState()
+            # self._updateLoggerState()  # these should always be together
+
+    def _clearOverride(self):
+        """Set the override-state to 0.
+        """
+        # is this required?
+        self._saveOverrideState = 0
 
     @contextmanager
     def _setSaveOverride(self):

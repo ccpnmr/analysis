@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-10 16:38:46 +0000 (Fri, January 10, 2025) $"
-__version__ = "$Revision: 3.3.0.develop $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-03-21 16:10:08 +0000 (Fri, March 21, 2025) $"
+__version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -54,6 +54,7 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application as PyQtApplication
+# from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets import FileDialog
 from ccpn.ui.gui.widgets.Font import getSystemFonts
@@ -1061,19 +1062,18 @@ class Gui(Ui, _Gui_V3_V4):
                                                 parent=self.mainWindow)
                 if reply == _CANCEL:
                     # cancel the new-operation
-                    return
+                    return None
                 elif reply == _SAVE:
                     # save first
                     if not self.saveProject():
                         # cancel the new-operation if there was an issue saving
-                        return
+                        return None
 
         if (_name := checkProjectName(name, correctName=True)) != name:
             MessageDialog.showInfo('New Project',
                                    f'Project name changed from "{name}" to "{_name}"\nSee console/log for details',
                                    parent=self)
-
-        newProject = None
+        newProject = None  # noqa - pycharm misses this
         with catchExceptions(errorStringTemplate='Error creating new project: %s'):
             # if self.mainWindow:
             #     self.mainWindow.moduleArea._closeAll()
@@ -1139,6 +1139,7 @@ class Gui(Ui, _Gui_V3_V4):
             oldProjectIsTemporary = self.project.isTemporary
 
         error = False
+        newProject = None
         try:
             if self.project:
                 # NOTE:ED - getting a strange QT bug disabling the menu-bar from here
@@ -1271,6 +1272,7 @@ class Gui(Ui, _Gui_V3_V4):
         :return True if successful
         """
         from ccpn.core.lib.ProjectLib import checkProjectName
+        from ccpn.util.SafeFilename import getSafeFilename
 
         title = 'Project SaveAs'
         oldPath = aPath(self.project.path)
@@ -1280,9 +1282,23 @@ class Gui(Ui, _Gui_V3_V4):
             if self.project.isTemporary:
                 _newName = self.project.name
                 _newPath = (aPath('~') / _newName).assureSuffix(CCPN_DIRECTORY_SUFFIX)
+                endswith = ''
             else:
-                _newName = f'{self.project.name}_new'
+                endswith = '_new'
+                _newName = f'{self.project.name}'
                 _newPath = oldPath.with_name(_newName).assureSuffix(CCPN_DIRECTORY_SUFFIX)
+            try:
+                # check whether a safe filename can be found
+                _newPath = aPath(getSafeFilename(_newPath, endswith=endswith, brackets=False))
+            except (PermissionError, FileNotFoundError):
+                msg = f'Folder {_newPath} may be read-only'
+                MessageDialog.showWarning('Save project', msg)
+                return False
+            except RuntimeError as es:
+                msg = f'Folder {_newPath}: {es}'
+                MessageDialog.showWarning('Save project', msg)
+                return False
+
             # query for this path
             dialog = FileDialog.ProjectSaveFileDialog(parent=self.mainWindow,
                                                       directory=_newPath.parent.asString(),
@@ -1327,7 +1343,11 @@ class Gui(Ui, _Gui_V3_V4):
         if self.project.isTemporary:
             copySubDirs = True
         else:
-            if (copySubDirs := MessageDialog.showYesNoCancel(title, msg)) is None:
+            if (copySubDirs := MessageDialog.showYesNoCancel(title, msg,
+                                                             dontShowEnabled=True,
+                                                             defaultResponse=True,
+                                                             popupId='_saveProjectAsSubDirs',
+                                                             )) is None:
                 # pressed "cancel"
                 return False
 

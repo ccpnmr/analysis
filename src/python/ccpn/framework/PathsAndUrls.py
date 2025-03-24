@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-01-15 12:22:08 +0000 (Wed, January 15, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-03-21 16:10:08 +0000 (Fri, March 21, 2025) $"
+__version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -122,7 +122,7 @@ licensePath                     = ccpnCodePath / 'LICENSE.txt'
 
 # Resources Path
 ccpnResourcesChemicalShifts     = ccpnResourcesPath / 'referenceChemicalShifts'
-ccpnResourcesPPTxTemplates     = ccpnResourcesPath / 'pptx_templates'
+ccpnResourcesPPTxTemplates      = ccpnResourcesPath / 'pptx_templates'
 
 
 # User settings

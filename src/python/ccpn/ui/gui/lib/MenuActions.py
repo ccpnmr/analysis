@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-02-04 15:33:47 +0000 (Tue, February 04, 2025) $"
+__dateModified__ = "$dateModified: 2025-04-14 15:32:09 +0100 (Mon, April 14, 2025) $"
 __version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
@@ -673,6 +673,12 @@ class OpenItemABC:
             # splitPseudo3DSpectrumIntoPlanes(obj)
             _app = getApplication()
             _app.ui.newSpectrumGroupFromPseudoSpectrum(spectrum=obj)
+
+    @staticmethod
+    def _reloadSpectra(objs):
+        for obj in set(objs):
+            if isinstance(obj, Spectrum):
+                obj.reload()
 
     @staticmethod
     def _createNewCollection(pulldown, popup, items=None):

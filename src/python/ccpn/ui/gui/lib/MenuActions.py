@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-04-14 15:32:09 +0100 (Mon, April 14, 2025) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-04-14 17:20:12 +0100 (Mon, April 14, 2025) $"
 __version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
@@ -1337,10 +1337,10 @@ class _openItemSpectrumDisplay(OpenItemABC):
             contextMenu.addAction(self.contextMenuText, self.openAction)
         contextMenu.addAction('Edit Properties...', partial(self.sideBar._raiseObjectProperties, self.node.widget))
         contextMenu.addAction('Copy Pid to Clipboard', partial(self._copyPidsToClipboard, objs))
-
         contextMenu.addSeparator()
 
-        contextMenu.addAction('Reload', partial(self._reloadSpectra, objs))
+        spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
+        specStr = 'Spectrum' if len(spectra) == 1 else 'Spectra'
         if len(objs) > 0:
             contextMenu.addAction('New SpectrumGroup from Selected...',
                                   partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False, defaultItems=objs),
@@ -1352,17 +1352,17 @@ class _openItemSpectrumDisplay(OpenItemABC):
         _enable = any(any(sp.isTimeDomains) for sp in objs)  # 3.1.0 alpha feature from macro.
         _action.setDisabled(not _enable)
 
-        contextMenu.addSeparator()
-
-        self._addCollectionMenu(contextMenu, objs)
-
-        contextMenu.addSeparator()
-
+        if any(any(sp.isTimeDomains) for sp in spectra):  # 3.1.0 alpha feature from macro.
+            contextMenu.addAction('Split Planes to SpectrumGroup', partial(self._splitPlanesToSpectrumGroup, objs))
+        contextMenu.addAction(f'Reload {specStr}', partial(self._reloadSpectra, spectra))
         canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
         if canBeCloned:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
-        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
+        contextMenu.addSeparator()
 
+        self._addCollectionMenu(contextMenu, objs)
+        contextMenu.addSeparator()
+        contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
         contextMenu.move(position)
 
         if not deferExec:
@@ -1467,16 +1467,24 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
 
         contextMenu.addSeparator()
 
-        contextMenu.addAction('Remove from SpectrumGroup', partial(self._removeSpectrumObject, objs))
+        if spectra := [obj for obj in objs if isinstance(obj, Spectrum)]:
+            contextMenu.addAction('New SpectrumGroup From Selected',
+                                  partial(_raiseSpectrumGroupEditorPopup(useNone=True, editMode=False,
+                                                                         defaultItems=spectra),
+                                          self.mainWindow, self.getObj(), self.node))
+            contextMenu.addAction('Remove from SpectrumGroup', partial(self._removeSpectrumObject, objs))
 
+            specStr = 'Spectrum' if len(spectra) == 1 else 'Spectra'
+            contextMenu.addAction(f'Reload {specStr}', partial(self._reloadSpectra, spectra))
+
+        canBeCloned = all(hasattr(obj, 'clone') for obj in objs)
+        if canBeCloned:
+            contextMenu.addAction('Clone', partial(self._cloneObject, objs))
         contextMenu.addSeparator()
 
         self._addCollectionMenu(contextMenu, objs)
-
         contextMenu.addSeparator()
-
         contextMenu.addAction('Delete', partial(self._deleteItemObject, thisObj, objs))
-
         contextMenu.move(position)
         contextMenu.exec()
 

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-02-26 16:23:31 +0000 (Wed, February 26, 2025) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-04-14 15:59:37 +0100 (Mon, April 14, 2025) $"
 __version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
@@ -1044,7 +1044,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                                 project=self.project,
                                 dataLoader=dataLoader,
                                 )
-        if dialog.exec_():
+        # dialog could now be None for bad instantiation
+        if dialog and dialog.exec_():
             _nefReader = dialog.getActiveNefReader()
             dataLoader.createNewProject = False
             dataLoader._nefReader = _nefReader
@@ -1864,7 +1865,9 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             # try finding a data loader, catch any errors for recognised but
             # incomplete/invalid url's (i.e. incomplete spectral data)
             try:
-                dataLoader, createsNewProject, ignore = self.ui._getDataLoader(url, droppedOnSideBar=_droppedOnSideBar)
+                if not (gotLoader := self.ui._getDataLoader(url, droppedOnSideBar=_droppedOnSideBar)):
+                    continue
+                dataLoader, createsNewProject, ignore = gotLoader
                 dataLoaders.append((url, dataLoader, createsNewProject, ignore))
                 # NOTE:ED - hack to get recursive dataLoaders to check valid new-projects first
                 _loaders.append(dataLoader)

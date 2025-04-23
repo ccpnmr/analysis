@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-23 14:49:29 +0100 (Wed, April 23, 2025) $"
-__version__ = "$Revision: 3.2.12 $"
+__dateModified__ = "$dateModified: 2025-04-23 16:19:29 +0100 (Wed, April 23, 2025) $"
+__version__ = "$Revision: 3.3.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -136,12 +136,13 @@ This needs to be done once on every computer you use the programme on.
     @staticmethod
     def _showLicense():
         from ccpn.framework.Application import getApplication
+        from ccpn.framework.PathsAndUrls import licensePath
 
         if not (app := getApplication()):
             sys.stderr.write('No application found\n')
             return
 
-        app._showLicense()
+        app.ui._showHtmlFile("CCPN Licence", licensePath)
 
     def _register(self):
 

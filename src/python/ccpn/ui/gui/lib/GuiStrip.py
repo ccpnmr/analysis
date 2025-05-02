@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-06 18:17:32 +0000 (Thu, March 06, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-05-02 17:07:59 +0100 (Fri, May 02, 2025) $"
+__version__ = "$Revision: 3.3.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -426,7 +426,7 @@ class GuiStrip(Frame):
         self._CcpnGLWidget._applyXLimit = self._preferences.zoomXLimitApply
         self._CcpnGLWidget._applyYLimit = self._preferences.zoomYLimitApply
 
-        self.showSpectraOnPhasing = False
+        # self.showSpectraOnPhasing = False
 
         self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
         self.showActivePhaseTrace = True
@@ -745,6 +745,7 @@ class GuiStrip(Frame):
     def _toggleLastAxisOnly(self):
         self.spectrumDisplay.setLastAxisOnly(lastAxisOnly=self.lastAxisOnlyCheckBox.isChecked())
         self.spectrumDisplay.showAxes()
+        self.spectrumDisplay.showAxesRedraw()
 
     def toggleLastAxisOnly(self):
         """
@@ -769,10 +770,11 @@ class GuiStrip(Frame):
             peak = peaks[-1]
             peakTableModule = self.application.showPeakTable(peakList=peak.peakList)
 
-    def setStackingMode(self, value):
+    @property
+    def stackingMode(self):
         pass
 
-    def getStackingMode(self):
+    def setStackingMode(self, value):
         pass
 
     def _updateStripLabel(self, callbackDict):
@@ -1387,24 +1389,21 @@ class GuiStrip(Frame):
     def _newPhasingTrace(self):
         self._CcpnGLWidget.newTrace()
 
-    def _setPhasingPivot(self):
+    def _setPhasingPivotCallback(self):
 
         phasingFrame = self.spectrumDisplay.phasingFrame
         direction = phasingFrame.getDirection()
-        # position = self.current.cursorPosition[0] if direction == 0 else self.current.cursorPosition[1]
-        # position = self.current.positions[0] if direction == 0 else self.current.positions[1]
-
-        position = None  #GWV; not sure what it should be
+        position = None
         mouseMovedDict = self.current.mouseMovedDict
         if direction == 0:
-            for mm in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
-                if mm[0] == self.axisCodes[0][0]:
-                    positions = mouseMovedDict[AXIS_MATCHATOMTYPE][mm]
+            for mm in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+                if mm[0] == self.axisCodes[0][0]:  # check the first letter?
+                    positions = mouseMovedDict[AXIS_FULLATOMNAME][mm]
                     position = positions[0] if positions else None
         else:
-            for mm in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
+            for mm in mouseMovedDict[AXIS_FULLATOMNAME].keys():
                 if mm[0] == self.axisCodes[1][0]:
-                    positions = mouseMovedDict[AXIS_MATCHATOMTYPE][mm]
+                    positions = mouseMovedDict[AXIS_FULLATOMNAME][mm]
                     position = positions[0] if positions else None
 
         if position is not None:
@@ -1620,25 +1619,24 @@ class GuiStrip(Frame):
         self.showActivePhaseTrace = not self.showActivePhaseTrace
         self._CcpnGLWidget.showActivePhaseTrace = self.showActivePhaseTrace
 
-    def _toggleShowSpectraOnPhasing(self):
+    def _toggleShowSpectraOnPhasingCallback(self):
         """Toggles whether spectraOnPhasing is visible.
         """
-        self.showSpectraOnPhasing = not self.showSpectraOnPhasing
-        self._CcpnGLWidget.showSpectraOnPhasing = self.showSpectraOnPhasing
+        pass
 
-    def _showSpectraOnPhasing(self):
-        """Displays spectraOnPhasing in strip.
-        """
-        self.showSpectraOnPhasing = True
-        self._CcpnGLWidget.showSpectraOnPhasing = True
+    @property
+    def showSpectraOnPhasing(self):
+        return False
 
-    def _hideSpectraOnPhasing(self):
-        """Hides spectraOnPhasing in strip.
-        """
-        self.showSpectraOnPhasing = False
-        self._CcpnGLWidget.showSpectraOnPhasing = False
+    @showSpectraOnPhasing.setter
+    def showSpectraOnPhasing(self, value):
+        pass
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    def updateMouseMode(self, state):
+        self.mouseModeAction.setChecked(state)
+        self._CcpnGLWidget.update()  # spawns update from bottom-up
+
+    #-----------------------------------------------------------------------------------------
     # symbolLabelling
 
     def _setSymbolLabelling(self):
@@ -1707,7 +1705,7 @@ class GuiStrip(Frame):
                                                                      ARROWMINIMUM           : self.arrowMinimum,
                                                                      })
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # symbolTypes
 
     def _setSymbolType(self):
@@ -1773,7 +1771,7 @@ class GuiStrip(Frame):
         """
         self.peakLabelsEnabled = not self.peakLabelsEnabled
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # multipletLabelling
 
     def _setMultipletLabelling(self):
@@ -1955,7 +1953,7 @@ class GuiStrip(Frame):
                 self.arrowMinimum = _arrowMinimum
                 self._setSymbolsPaintEvent()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # symbolSize
 
     @property
@@ -1979,7 +1977,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # symbolThickness
 
     @property
@@ -2003,7 +2001,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # arrowTypes
 
     @property
@@ -2043,7 +2041,7 @@ class GuiStrip(Frame):
                                                          self._CcpnGLWidget.GLSignals.GLALLMULTIPLETS,
                                                          ])
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # arrowSize
 
     @property
@@ -2067,7 +2065,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # arrowMinimum
 
     @property
@@ -2091,7 +2089,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # contourThickness
 
     @property
@@ -2114,7 +2112,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # aliasEnabled
 
     @property
@@ -2137,7 +2135,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # aliasShade
 
     @property
@@ -2160,7 +2158,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # aliasLabelsEnabled
 
     @property
@@ -2183,7 +2181,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # peakSymbolsEnabled
 
     @property
@@ -2206,7 +2204,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # peakLabelsEnabled
 
     @property
@@ -2229,7 +2227,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # peakArrowsEnabled
 
     @property
@@ -2252,7 +2250,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # multipletSymbolsEnabled
 
     @property
@@ -2275,7 +2273,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # multipletLabelsEnabled
 
     @property
@@ -2298,7 +2296,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # multipletArrowsEnabled
 
     @property
@@ -2321,7 +2319,7 @@ class GuiStrip(Frame):
             if self.spectrumViews:
                 self._emitSymbolChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
 
     def updateAxisRatios(self):
         # notify strips to update fixed/locked state
@@ -2868,6 +2866,7 @@ class GuiStrip(Frame):
 
         # rebuild the axes for strips
         spectrumDisplay.showAxes(stretchValue=True, widths=False)
+        spectrumDisplay.showAxesRedraw()
 
     def navigateToPosition(self, positions: List[float],
                            axisCodes: List[str] = None,
@@ -2917,7 +2916,7 @@ class GuiStrip(Frame):
         """
         return self._CcpnGLWidget._firstVisible
 
-    def _toggleStackPhaseFromShortCut(self):
+    def _toggleStackingFromShortCut(self):
         """Not implemented, to be overwritten by subclasses
         """
         pass

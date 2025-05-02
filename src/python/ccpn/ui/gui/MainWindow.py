@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-14 15:59:37 +0100 (Mon, April 14, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-05-02 17:07:58 +0100 (Fri, May 02, 2025) $"
+__version__ = "$Revision: 3.3.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -49,8 +49,8 @@ from ccpn.ui._implementation.Window import Window as _CoreClassMainWindow
 
 from ccpn.ui.gui import guiSettings, Layout
 
-from ccpn.ui.gui.lib.mouseEvents import \
-    SELECT, PICK, MouseModes, setCurrentMouseMode, getCurrentMouseMode
+from ccpn.ui.gui.lib.mouseEvents import (SELECT, PICK, MouseModes,
+                                         setCurrentMouseMode, getCurrentMouseMode)
 from ccpn.ui.gui.lib import GuiStrip
 from ccpn.ui.gui.lib.Shortcuts import Shortcuts
 from ccpn.ui.gui.guiSettings import (getColours, GUITABLE_SELECTED_BACKGROUND, consoleStyle, _styleBlue)
@@ -623,14 +623,18 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         getLogger().debug2('mainWindow screenchanged')
         project = self.application.project
         for spectrumDisplay in project.spectrumDisplays:
+            if spectrumDisplay.isDeleted:
+                continue
             for strip in spectrumDisplay.strips:
-                strip.refreshDevicePixelRatio()
-
-            # NOTE:ED - set pixelratio for extra axes
+                if not strip.isDeleted:
+                    strip.refreshDevicePixelRatio()
+            # NOTE:ED - set pixel-ratio for extra axes
             if hasattr(spectrumDisplay, '_rightGLAxis'):
                 spectrumDisplay._rightGLAxis.refreshDevicePixelRatio()
             if hasattr(spectrumDisplay, '_bottomGLAxis'):
                 spectrumDisplay._bottomGLAxis.refreshDevicePixelRatio()
+            # force the spectrumDisplay to repaint
+            QtCore.QTimer().singleShot(0, spectrumDisplay.update)
 
     # GWV moved upward
     # @property
@@ -2472,13 +2476,13 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     def stackSpectra(self):
         strip = self.application.current.strip
         if strip:  # and (strip.spectrumDisplay.window is self):
-            strip._toggleStackPhaseFromShortCut()
+            strip._toggleStackingFromShortCut()
 
     def setPhasingPivot(self):
 
         strip = self.application.current.strip
         if strip:  # and (strip.spectrumDisplay.window is self):
-            strip._setPhasingPivot()
+            strip._setPhasingPivotCallback()
 
     def removePhasingTraces(self):
         """
@@ -2906,7 +2910,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             setCurrentMouseMode(mode)
             for sd in self.project.spectrumDisplays:
                 for strp in sd.strips:
-                    strp.mouseModeAction.setChecked(mode == PICK)
+                    strp.updateMouseMode(mode == PICK)
+                QtCore.QTimer().singleShot(0, sd.update)
             mouseModeText = ' Mouse Mode: '
             self.writeStatusBar(mouseModeText + mode)
 

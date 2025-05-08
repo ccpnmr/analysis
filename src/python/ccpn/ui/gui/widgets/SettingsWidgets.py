@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-04-08 11:56:01 +0100 (Tue, April 08, 2025) $"
+__dateModified__ = "$dateModified: 2025-05-08 14:13:30 +0100 (Thu, May 08, 2025) $"
 __version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
@@ -50,8 +50,10 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont, getFontHeight
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import (CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget,
+                                                 SpinBoxCompoundWidget)
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER, SOFTDIVIDER, ZPlaneNavigationModes
@@ -106,6 +108,166 @@ NO_STRIP = 'noStrip'
 LineEditsMinimumWidth = 195
 TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
 ZEROMARGINS = (0, 0, 0, 0) # l, t, r, b
+
+class AssignmentInspectorSettings(Widget):
+    """Settings widget for the assignment inspector module."""
+
+    def __init__(self, parent=None, mainWindow=None, **kwds):
+        super().__init__(parent, setLayout=True, **kwds)
+
+        # Derive application, project, and current from mainWindow
+        self.mainWindow = mainWindow
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = self.project = self.current = None
+
+        self.parent = parent
+
+        self._setWidgets(parent)
+        self._initSettings()
+
+    def _setWidgets(self, parent):
+        self._initNhTab(parent)
+        self._initChTab(parent)
+        self._initGenTab(parent)
+
+        self.tabWidget = Tabs(parent=parent, grid=(0, 0))
+        self.tabWidget.setContentsMargins(*ZEROMARGINS)
+
+        self.tabWidget.addTab(self.nhTab, 'nhTab')
+        self.tabWidget.addTab(self.chTab, 'chTab')
+        self.tabWidget.addTab(self.genTab, 'General')
+
+
+    def _initSettings(self):
+        pass
+
+    def _initNhTab(self, parent):
+        self.nhTab = ScrollableFrame(parent=parent, setLayout=True, grid=(0, 0))
+        addButton = Button(parent=self.nhTab, grid=(0,0), text='Add Display Group',
+                              callback=self.addNhDisplayGroup)
+
+        self.nhGroups = []
+        self.addNhDisplayGroup()
+
+
+    def _initChTab(self, parent):
+        self.chTab = ScrollableFrame(parent=parent, setLayout=True, grid=(0, 0))
+        addButton = Button(parent=self.chTab, grid=(0,0), text='Add Display Group',
+                              callback=self.addChDisplayGroup)
+        self.chGroups = []
+        self.addChDisplayGroup()
+
+    def _initGenTab(self, parent):
+        colwidth = 140
+
+        self.genTab = ScrollableFrame(parent=parent, setLayout=True, grid=(0, 0))
+
+        self.sequentialStripsWidget = CheckBoxCompoundWidget(
+                self.genTab,
+                grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                #minimumWidths=(colwidth, 0),
+                fixedWidths=(colwidth, 30),
+                orientation='left',
+                labelText='Show sequential strips',
+                checked=False
+                )
+
+        self.markPositionsWidget = CheckBoxCompoundWidget(
+                self.genTab,
+                grid=(1, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                #minimumWidths=(colwidth, 0),
+                fixedWidths=(colwidth, 30),
+                orientation='left',
+                labelText='Mark positions',
+                checked=True
+                )
+        self.autoClearMarksWidget = CheckBoxCompoundWidget(
+                self.genTab,
+                grid=(2, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                #minimumWidths=(colwidth, 0),
+                fixedWidths=(colwidth, 30),
+                orientation='left',
+                labelText='Auto clear marks',
+                checked=True
+                )
+        self.showNmrAtomListWidget = CheckBoxCompoundWidget(
+                self.genTab,
+                grid=(3, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                #minimumWidths=(colwidth, 0),
+                fixedWidths=(colwidth, 30),
+                orientation='left',
+                labelText='Show nmrAtom list',
+                checked=True,
+                # callback=self._setNmrAtomListVisible,
+                )
+
+
+    def addNhDisplayGroup(self):
+
+        filter = {'allowlist': ['N', 'H'], 'blocklist': ['C']}
+
+        if group := self.nhGroups:
+            row = len(group) + 2
+        else:
+            row = 2
+
+        moreLessFrame = MoreLessFrame(self.nhTab, name='Group 3:3', showMore=True,
+                                      grid=(row, 0), gridSpan=(1, 1))
+
+        frame = moreLessFrame.contentsFrame
+
+        display = SpectrumDisplaySelectionWidget(parent=frame, mainWindow=self.mainWindow,
+                                                 grid=(0, 0), gridSpan=(1, 1),
+                                                 labelText='Display(s)',
+                                                 texts=[self.getNhDisplays],
+                                                 fixedWidths=[100, 200, 200],
+                                                 axisCodeFilter=filter)
+
+        negSpin = SpinBoxCompoundWidget(parent=frame, grid=(1, 0), gridSpan=(1, 0),
+                                       hAlign='left', labelText='i-1 strips to show',
+                                       value=3, step=1, minimum=0
+                                       )
+
+        posSpin = SpinBoxCompoundWidget(parent=frame, grid=(2, 0), gridSpan=(1, 0),
+                                        hAlign='left', labelText='i+1 strips to show',
+                                        value=3, step=1, minimum=0,
+                                        )
+
+        widgets = {'moreLessFrame': moreLessFrame, 'display': display, 'negSpin': negSpin, 'posSpin': posSpin}
+        group.append(widgets)
+
+        removeButton = Button(parent=frame, grid=(3,0), hAlign='left', text='Remove Display Group',
+                              callback=partial(self.removeMoreLess, widgets))
+
+        posSpin.spinBox.valueChanged.connect(partial(self.renameMoreLessFrame, widgets))
+        negSpin.spinBox.valueChanged.connect(partial(self.renameMoreLessFrame, widgets))
+
+
+    def addChDisplayGroup(self):
+        pass
+
+    def getNhDisplays(self):
+        print([display for display in self.project.spectrumDisplays
+                if (['N'] in display.axisCodes and not ['C'] in display.axisCodes)])
+        return [display for display in self.project.spectrumDisplays
+                if (['N'] in display.axisCodes and not ['C'] in display.axisCodes)]
+
+    def removeMoreLess(self, widgetList):
+        for widget in widgetList.values():
+            widget.deleteLater()
+
+    def renameMoreLessFrame(self, widgetList):
+        pos = widgetList.get('posSpin')
+        neg = widgetList.get('negSpin')
+        frame = widgetList.get('moreLessFrame')
+
+        if pos and neg and frame:
+            frame.name = f'Group {pos.getValue()}:{neg.getValue()}'
+
 
 
 class PickAndAssignSettings(Widget):
@@ -1088,8 +1250,6 @@ class _commonSettings():
                 self.axisCodeOptionsDict[displayKey] = {}
             self.axisCodeOptionsDict[displayKey] = checkBox.parent().getSelectedIndexes()
 
-        from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
-
         if self._spectraWidget:
             self._spectraWidget.hide()
             self._spectraWidget.setParent(None)
@@ -1176,8 +1336,6 @@ class _commonSettings():
             if not self.axisCodeOptionsDict.get(displayKey):
                 self.axisCodeOptionsDict[displayKey] = {}
             self.axisCodeOptionsDict[displayKey] = checkBox.parent().getSelectedIndexes()
-
-        from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 
         if self._spectraWidget:
             self._spectraWidget.hide()
@@ -2383,6 +2541,10 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
     .. Note:: Method for callback requires a data argument.
     """
     KLASS = SpectrumDisplay
+    def __init__(self, axisCodeFilter=None, **kwds):
+        super().__init__(**kwds)
+
+        self.axisCodeFilter = axisCodeFilter
 
     def getDisplays(self):
         """
@@ -2414,6 +2576,36 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
 
         return displays
 
+    def _fillPulldownListWidget(self):
+        """Fill the pulldownList with the currently available objects
+        """
+        ll = [SelectToAdd] + self.standardListItems
+        pulldownObjs = [None] * len(ll)
+        if self.project:
+            objects = list(getattr(self.project, self.KLASS._pluralLinkName, []))
+
+            ll += self.filterByAxisCode([obj.pid for obj in objects])
+            pulldownObjs += objects
+
+        self.pulldownList.setData(texts=ll, )  # objects=pulldownObjs)
+
+
+    def filterByAxisCode(self, displayList):
+        def filterList(allowlist, blocklist, display):
+            if not (display := self.application.getByGid(display)):
+                return
+
+            return (set(allowlist).issubset(set(display.axisCodes))
+                and not set(blocklist).issubset(set(display.axisCodes)))
+
+        if filter := self.axisCodeFilter:
+            # allowlist = self.axisCodeFilter.get('allowlist')
+            # blocklist = self.axisCodeFilter.get('blocklist')
+
+            displayList = [display for display in displayList if filterList(['N', 'H'], ['C'], display)]
+
+        return displayList
+
     def _objRenamedCallback(self, data):
         self._spectrumDisplayRenamed(data)
 
@@ -2421,6 +2613,9 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
         # This method has been implemented only because
         # oldPid argument in data is not yet available for SpectrumDisplay
         obj = dataDict.get(Notifier.OBJECT)
+        if self.axisCodeFilter and not self.filterByAxisCode([obj]):
+            return
+
         currentTexts = self.getTexts()
         toRemoveTexts = []
         for i in currentTexts:
@@ -2449,6 +2644,9 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
         Data will be passed to _objectWidgetChanged method
         """
         obj = data.get(Notifier.OBJECT)
+        if self.axisCodeFilter and not self.filterByAxisCode([obj]):
+            return
+
         if obj:
             if ALL in self.getTexts():
                 self._objectWidgetChanged(data)
@@ -2459,6 +2657,10 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
         Data will be passed to _objectWidgetChanged method
         """
         obj = data.get(Notifier.OBJECT)
+
+        if self.axisCodeFilter and not self.filterByAxisCode([obj]):
+            return
+
         if obj:
             # when <Use All> in texts
             if ALL in (tt := self.getTexts()):

@@ -16,13 +16,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-11 14:46:40 +0100 (Fri, April 11, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-05-09 15:55:47 +0100 (Fri, May 09, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -68,7 +69,6 @@ _POSTINIT = '_postInit'
 _INITCALLED = '_init_called'
 _INITFINALISED = '_init_finalised'
 
-
 _MetaQDialog = type(QtWidgets.QDialog)
 _MetaBase = type(Base)
 
@@ -84,13 +84,13 @@ class _DialogHook(_MetaQDialog, _MetaBase):
         The `_postInit` method of the instance is invoked after its creation, if it is defined and callable.
         Subclasses should implement this method to define post-construction logic.
 
-    :ivar _DEBUG: Optional debug flag to enable verbose logging during instance creation.
-    :ivar _POSTINIT: Constant (or attribute) expected to define the name of the post-initialisation hook method.
+    :ivar `_DEBUG`: Optional debug flag to enable verbose logging during instance creation.
+    :ivar `_POSTINIT`: Constant (or attribute) expected to define the name of the post-initialisation hook method.
     """
 
     def __call__(metacls, *args, **kwargs):
         """
-        Overrides the default behavior for instance creation.
+        Overrides the default behaviour for instance creation.
 
         This method creates a new instance of the class, and calls the `_postInit` method,
         if it is defined, on the instance after creation.
@@ -149,7 +149,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
     APPLYBUTTONTEXT = 'Apply'
     OKBUTTONTEXT = 'OK'
 
-    # ok button is disabled on __init__ if the revert button has been enabled, requires call to _postInit
+    # OK button is disabled on __init__ if the revert button has been enabled, requires call to _postInit
     DISABLEOK = False
 
     USESCROLLWIDGET = False
@@ -171,13 +171,12 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
     _init_called = False
     _init_finalised = False
 
-    def __init__(self, parent=None, windowTitle:str='', setLayout:bool=False,
-                 orientation: str | int=HORIZONTAL,
-                 size: QtCore.QSize | tuple[int, int] | list[int, int] | None=None,
-                 minimumSize: QtCore.QSize | tuple[int, int] | list[int, int] | None=None,
+    def __init__(self, parent=None, windowTitle: str = '', setLayout: bool = False,
+                 orientation: str | int = HORIZONTAL,
+                 size: QtCore.QSize | tuple[int, int] | list[int] | None = None,
+                 minimumSize: QtCore.QSize | tuple[int, int] | list[int] | None = None,
                  **kwds):
         if _DEBUG: getLogger().debug2(f'--> pre __init__ {self}')
-
         # error-flag to disable exec_ if there is an error during initialising
         self.errorFlag = False
 
@@ -190,7 +189,6 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
         self.setWindowTitle(windowTitle)
         self.setContentsMargins(*self.DEFAULTMARGINS)
         self.getLayout().setSpacing(0)
-
         self._orientation = orientation
         # get the initial size as a QSize
         try:
@@ -213,49 +211,24 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
         self.mainWidget.setAutoFillBackground(False)
 
         if self.USESCROLLWIDGET:
-            # not resizing correctly on first show
-
-            # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-            # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-
             # set up a scroll area
             self._scrollArea = ScrollArea(self, setLayout=True, grid=(0, 0))
             self._scrollArea.setWidgetResizable(True)
             self._scrollArea.setWidget(self.mainWidget)
             self._scrollArea.setStyleSheet("""ScrollArea { border: 0px; background: transparent; }""")
 
-        # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-        # self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-        # self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        # Spacer(self, 2, 2, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-        #        grid=(1, 1))
-
-        # self._frameOptionsNested.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
-        # self.mainWidget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
-
         self.mainWidget.setContentsMargins(0, 0, 0, 0)
         self.mainWidget.getLayout().setSpacing(DEFAULTSPACING)
 
         self._buttonOptions = {}
         self.dialogButtons = None
-
         # keep a record of how many times the apply button has been pressed
         self._currentNumApplies = 0
-
-        # clear the changes list
+        # clear the 'changes' list
         self._changes = ChangeDict()
-
-        # self.setDefaultButton()
-
         # GST stops a file icon being shown
         self.setWindowFilePath('')
         self.setWindowIcon(QtGui.QIcon())
-
-        # set the background/fontSize for the tooltips, fraction slower but don't need to import the colour-names
-        # self.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
-        #                    'color: {TOOLTIP_FOREGROUND}; '
-        #                    'font-size: {_size}pt ; }}'.format(_size=self.font().pointSize(), **getColours()))
 
         ## WARNING ==> setAttribute WA_DeleteOnClose, True :
         ## This flag should be used after checking all popup are closed correctly
@@ -311,35 +284,16 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
         # set the fixed sized policies as required
         if self.FIXEDWIDTH:
             self.setFixedWidth(max(_size.width(), _minimumSize.width()))
-            # this is very strange, setting fixed<dimension> does not necessarily set the policy :|
-            # self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, self.sizePolicy().verticalPolicy())
         elif minimumSize:
             # set minimumSize from settings
             self.setMinimumWidth(_minimumSize.width())
-
         if self.FIXEDHEIGHT:
             self.setFixedHeight(max(_size.height(), _minimumSize.height()))
-            # self.setSizePolicy(self.sizePolicy().horizontalPolicy(), QtWidgets.QSizePolicy.Fixed)
         elif minimumSize:
             # set minimumSize from settings
             self.setMinimumHeight(_minimumSize.height())
 
-        # self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Fixed if self.FIXEDWIDTH else QtWidgets.QSizePolicy.MinimumExpanding,
-        #                               QtWidgets.QSizePolicy.Fixed if self.FIXEDHEIGHT else QtWidgets.QSizePolicy.MinimumExpanding, )
         self.resize(_size)
-
-    # # pyqt5.15 does not allow setting with a float
-    # def setMinimumWidth(self, p_int):
-    #     super().setMinimumWidth(int(p_int))
-    #
-    # def setMinimumHeight(self, p_int):
-    #     super().setMinimumHeight(int(p_int))
-    #
-    # def setMaximumWidth(self, p_int):
-    #     super().setMaximumWidth(int(p_int))
-    #
-    # def setMaximumHeight(self, p_int):
-    #     super().setMaximumHeight(int(p_int))
 
     def setOkButton(self, callback=None, text=None,
                     tipText='Apply changes and close',
@@ -577,9 +531,11 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
         """Revert button signal comes here
         Revert (roll-back) the state of the project to before the popup was opened
         """
-        if self.project and self.project._undo:
+        from ccpn.framework.Application import getProject
+
+        if (project := getProject()) and project._undo:
             for _ in range(self._currentNumApplies):
-                self.project._undo.undo()
+                project._undo.undo()
 
         self._populate()
 
@@ -587,7 +543,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
         self._setButtonState()
 
     def _setButtonState(self):
-        """Set the state of the ok/apply/cancel buttons
+        """Set the state of the OK/apply/cancel buttons
         """
         if not hasattr(self, GETCHANGESTATE):
             raise RuntimeError(f'widget {self} must have changes defined')
@@ -678,7 +634,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=self._refreshGLItems)
 
-            # pass control to the calling function -user can set errorValue to stop accept
+            # pass control to the calling function - user can set errorValue to stop accept
             yield error
 
             # add item here to redraw items
@@ -702,16 +658,16 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
 
     def _applyChanges(self):
         """
-        The apply button has been clicked
-        Define an undo block for setting the properties of the object
-        If there is an error setting any values then generate an error message
-          If anything has been added to the undo queue then remove it with application.undo()
-          repopulate the popup widgets
+        The apply-button has been clicked.
+        Define an undo block for setting the properties of the object.
+        If there is an error setting any values, then generate an error message
+          If anything has been added to the undo-queue then remove it with application.undo()
+          repopulate the popup widgets.
 
         This is controlled by a series of dicts that contain change functions - operations that are scheduled
-        by changing items in the popup. These functions are executed when the Apply or OK buttons are clicked
+        by changing items in the popup. These functions are executed when the Apply or OK buttons are clicked.
 
-        Return True unless any errors occurred
+        Return True unless any errors occurred.
         """
         from ccpn.core.lib.ContextManagers import undoStackBlocking
 
@@ -794,25 +750,31 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
                     popup[_DONTSHOWPOPUP] = self._dontShowCheckBox.isChecked()
 
     def _refreshGLItems(self):
-        """emit a signal to rebuild any required GL items
+        """Emit a signal to rebuild any required GL items.
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
+    def _populate(self):
+        """Fill the widgets as required.
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
 
     def getActiveTabList(self):
-        """Get a list of tabs for calulating the changes to settings
+        """Get a list of tabs for calulating the changes to settings.
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
 
     def storeWidgetState(self):
-        """Store the state of any required widgets between popups
+        """Store the state of any required widgets between popups.
         """
         # TO BE SUBCLASSED
         pass
 
     def restoreWidgetState(self):
-        """Restore the state of any required widgets
+        """Restore the state of any required widgets.
         """
         # TO BE SUBCLASSED
         pass
@@ -862,20 +824,20 @@ class CcpnDialog(QtWidgets.QDialog, Base):
         button.setAutoDefault(True)
 
 
-def dialogErrorReport(self, undo, es):
+def dialogErrorReport(dialog, undo, es):
     """Show warning popup and check the undo stack for items that need to be culled
     """
     from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
     if es:
-        showWarning(str(self.windowTitle()), str(es))
+        showWarning(str(dialog.windowTitle()), str(es))
 
-    # should only undo if something new has been added to the undo deque
-    # may cause a problem as some things may be set with the same values
-    # and still be added to the change list, so only undo if length has changed
+    # Should only undo if something new has been added to the undo-deque.
+    # May cause a problem as some things may be set with the same values
+    # and still be added to the change list, so only undo if length has changed.
 
     # get the name of the class propagating the error
-    errorName = str(self.__class__.__name__)
+    errorName = str(dialog.__class__.__name__)
 
     if undo.newItemsAdded:
         # undo any valid items and clear the stack above the current undo point
@@ -888,23 +850,28 @@ def dialogErrorReport(self, undo, es):
 
 
 @contextmanager
-def handleDialogApply(self):
-    """Context manager to wrap the apply button for dialogs
+def handleDialogApply(dialog):
+    """Context manager to wrap the apply-button for dialogs.
     Error trapping is contained inside the undoBlockWithoutSideBar, any error raised is placed in
     the errorValue of the yielded object and a warning popup is raised
 
-    e.g.
+    Example:
+    ::
 
         with handleDialogApply(self) as error:
-            ...  code block here ...
+            ... code block here ...
 
         if error.errorValue:
             # an error occurred in the code block
     """
 
     from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+    from ccpn.framework.Application import getApplication, getProject
 
-    undo = self.project._undo
+    if not (_app := getApplication()) or not (_project := getProject()):
+        raise RuntimeError(f'No application or project found')
+
+    undo = _project._undo
 
 
     # simple class to export variables from the generator function
@@ -917,25 +884,23 @@ def handleDialogApply(self):
     try:
         # add an undoBlockWithoutSideBar
         with undoBlockWithoutSideBar():
-
             # transfer control to the calling function
             error = errorContent()
             yield error
 
     except Exception as es:
-
         # if an error occurs, report as a warning popup and return error to the calling method
-        dialogErrorReport(self, undo, es)
+        dialogErrorReport(dialog, undo, es)
         error.errorValue = es
 
-        # re-raise the error if in debug mode
-        if self.application._isInDebugMode:
+        # re-raises the error if in debug mode
+        if _app._isInDebugMode:
             raise es
 
     else:
         if error.cleanUndo:
             # clean-up with warning popup
-            dialogErrorReport(self, undo, None)
+            dialogErrorReport(dialog, undo, None)
 
 
 def _verifyPopupApply(self, attributeName, value, last, *postArgs, **postKwds):
@@ -1044,7 +1009,7 @@ LINELENGTH = 100
 
 
 def _wrapString(text, lineLength=LINELENGTH):
-    """Wrap a line of text to the desired width of the dialog
+    """Wrap a line of text to the desired width of the dialog.
     Returns list of individual lines and the concatenated string for dialog
     """
     newWrapped = []

@@ -886,18 +886,18 @@ def getDefaultSpectrumColours(self: 'Spectrum') -> Tuple[str, str]:
     return _getDefaultApiSpectrumColours(self)
 
 
-def get1DdataInRange(x, y, xRange):
+def get1DdataInRange(x, y, xRanges):
     """
     :param x:
     :param y:
-    :param xRange:
-    :return: x,y within the xRange (minXrange,maxXrange)
-
+    :param xRanges: list of tuples of range pairs
+    :return: x,y reconstruction of the xRanges
     """
-    if xRange is None:
+    if xRanges is None:
         return x, y
-    minX, maxX = min(xRange), max(xRange)
-    mask = (x >= minX) & (x <= maxX)
+    mask = np.full(len(x), False)
+    for xRange in xRanges:
+        mask += (x <= xRange[0]) & (x >= xRange[1])
     return x[mask], y[mask]
 
 

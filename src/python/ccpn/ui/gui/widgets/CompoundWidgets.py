@@ -579,6 +579,183 @@ class EntryCompoundWidget(CompoundBaseWidget):
         """
         return self.setText(value)
 
+class Region1DEntryCompoundWidget(CompoundBaseWidget):
+    """
+    Compound class comprising a Label, two DoubleSpinboxes, a Button, and a ListWidget, combined in a
+    CompoundBaseWidget (i.e.a Frame)
+
+      orientation       widget layout
+      ------------      ------------------------
+      left:             Label                   Spinboxes + Button
+                                                ListWidget
+
+      centreLeft:                               Spinboxes + Button
+                        Label                   ListWidget
+
+      right:            Spinboxes + Button      Label
+                        ListWidget
+
+      centreRight:      Spinboxes + Button
+                        ListWidget              Label
+
+      top:              Label
+                        Spinboxes + Button
+                        ListWidget
+
+      bottom:           Spinboxes + Button
+                        ListWidget
+                        Label
+
+      horizontal:       Label                   Spinboxes + Button          ListWidget
+
+    """
+    layoutDict = dict(
+            # grid positions for label, spinboxes and listWidget for the different orientations
+            left=[(0, 0), (0, 1), (1, 1)],
+            centreLeft=[(1, 0), (0, 1), (1, 1)],
+            right=[(0, 1), (0, 0), (1, 0)],
+            centreRight=[(1, 1), (0, 0), (1, 0)],
+            top=[(0, 0), (1, 0), (2, 0)],
+            bottom=[(2, 0), (0, 0), (1, 0)],
+            horizontal=[(0, 0), (0, 1), (0, 2)],
+            )
+
+    def __init__(self, parent=None, showBorder=False, orientation='left',
+                 minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                 labelText='', callback=None, itemsChangedCallback=None, defaults=None, uniqueList=True,
+                 minValue=-14.0, maxValue=14.0, minLimit=-1000, maxLimit=1000,
+                 allowOverlap=False, objectName='', compoundKwds=None, **kwds):
+        """
+        :param parent: parent widget
+        :param showBorder: flag to display the border of Frame (True, False)
+        :param orientation: flag to determine the orientation of the labelText relative to the Spinboxes/ListWidget.
+                            Allowed values: 'left', 'right', 'top', 'bottom', 'centreLeft, centreRight, horizontal
+        :param minimumWidths: tuple of three values specifying the minimum width of the Label, Spinboxes frame and ListWidget,
+                              respectively
+        :param maximumWidths: tuple of three values specifying the maximum width of the Label and Spinboxes frame and ListWidget,
+                              respectively
+        :param fixedWidths: tuple of three values specifying the maximum width of the Label and Spinboxes frame and ListWidget,
+                            respectively
+        :param labelText: Text for the Label
+        :param callback: (optional) callback for the ListWidget selection
+        :param itemsChangedCallback: (optional) callback for the ListWidget contents change
+        :param defaults: (optional) iterable of initially add elements to the ListWidget (text or index)
+        :param uniqueList: (True) only allow unique elements in the ListWidget
+        :param kwds: (optional) keyword, value pairs for the gridding of Frame
+        """
+        CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                    showBorder=showBorder, **kwds)
+        self.allowOverlap = allowOverlap
+        self.label = Label(parent=self, text=labelText, vAlign='center')
+        self._addWidget(self.label)
+        compoundKwds = compoundKwds or {}
+
+        # spinboxes
+        self.spinboxFrame = Frame(self, setLayout=True)
+        self.maxDoubleSpinbox = DoubleSpinbox(self.spinboxFrame, value=maxValue, min=minLimit, max=maxLimit, prefix='max', decimals=3, grid=(0, 0))
+        self.maxDoubleSpinbox.returnPressed.connect(self.addRegionToList)
+        self.minDoubleSpinbox = DoubleSpinbox(self.spinboxFrame, value=minValue, min=minLimit, max=maxLimit, prefix='min', decimals=3, grid=(0, 1))
+        self.minDoubleSpinbox.returnPressed.connect(self.addRegionToList)
+        self.addRegionButton = Button(self.spinboxFrame, text='add', callback=self.addRegionToList, grid=(0, 2))
+        self._addWidget(self.spinboxFrame)
+
+        # listWidget
+        self.listWidget = ListWidget(parent=self, callback=callback,
+                                     objectName=objectName,
+                                     **(compoundKwds or {}))
+        self.listWidget.changed.connect(itemsChangedCallback)
+        self.listWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self._uniqueList = uniqueList
+        if defaults is not None:
+            for dft in defaults:
+                self.addPulldownItem(dft)
+        self._addWidget(self.listWidget)
+
+        if minimumWidths is not None:
+            self.setMinimumWidths(minimumWidths)
+
+        if maximumWidths is not None:
+            self.setMinimumWidths(maximumWidths)
+
+        if fixedWidths is not None:
+            self.setFixedWidths(fixedWidths)
+
+    def addRegionToList(self):
+        """Callback for the add button and the returnPressed connect
+        If overlap is not permitted, nothing gets entered if there would be overlap in regions."""
+        maxValue = max(self.minDoubleSpinbox.value(), self.maxDoubleSpinbox.value())
+        minValue = min(self.minDoubleSpinbox.value(), self.maxDoubleSpinbox.value())
+        if not self.allowOverlap and any([maxValue > region[0] > minValue
+                                          or region[0] > maxValue > region[1]
+                                          for region in self.getRegions()]):
+            return
+        self.addText(f'{maxValue} : {minValue}')
+
+    def getRegions(self):
+        """Convenience: get the regions as a list of (float, float) tuples"""
+        return [(float(text.split(' : ')[0]), float(text.split(' : ')[1])) for text in self.getTexts()]
+
+    def minimumSizeHint(self) -> QtCore.QSize:
+        result = super().minimumSizeHint()
+        margins = self.listWidget.contentsMargins().top() + self.listWidget.contentsMargins().bottom()
+        spacing = self.layout().spacing()
+        minHeightHint = self.listWidget.minimumSizeHint().height() + margins + spacing
+        result.setHeight(minHeightHint)
+        return result
+
+    def clearList(self):
+        self.listWidget._deleteAll()
+
+    def setLabelText(self, label):
+        """Set the text for the list widget label
+        """
+        self.label.setText(label)
+
+    def setTexts(self, ll: list = []):
+        self.listWidget.clear()
+        for i in ll:
+            self.listWidget.addItem(str(i))
+
+    def modifyListWidgetTexts(self, texts):
+        """Modify the listWidget texts, with signal-blocking
+        """
+        with self.blockWidgetSignals():
+            self.setTexts(texts)
+
+    def getTexts(self):
+        """Convenience: Return list of texts in listWidget"""
+        return [self.listWidget.item(i).text() for i in range(self.listWidget.count())]
+
+    def addText(self, text):
+        """Convenience: Add text to listWidget"""
+        if text is None:
+            return
+        if self._uniqueList and text in self.getTexts():
+            return
+        self.listWidget.addItem(text)
+
+    def removeTexts(self, texts, blockSignals=False):
+        """Convenience: Remove texts to listWidget"""
+        if blockSignals:
+            with self.blockWidgetSignals(recursive=False, additionalWidgets=[self.pulldownList, self.listWidget]):
+                self.listWidget.removeTexts(texts)
+        else:
+            self.listWidget.removeTexts(texts)
+
+    def renameText(self, oldText, newText):
+        self.listWidget.renameItem(oldText, newText)
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getTexts()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setTexts(value)
 
 class EntryPathCompoundWidget(CompoundBaseWidget):
     """

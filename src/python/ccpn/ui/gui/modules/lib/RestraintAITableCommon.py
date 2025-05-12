@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-12-19 13:39:42 +0000 (Thu, December 19, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-05-12 18:29:37 +0100 (Mon, May 12, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,12 +29,14 @@ __date__ = "$Date: 2023-01-20 15:57:58 +0100 (Fri, January 20, 2023) $"
 
 import pandas as pd
 from dataclasses import dataclass, field
+from ccpn.framework.Application import getProject
 from ccpn.core.lib.WeakRefLib import WeakRefDescriptor, _WeakRefDataClassMeta
 from ccpn.ui.gui.lib.GuiStripContextMenus import (_selectedPeaksMenuItem, _addMenuItems,
                                                   _getNdPeakMenuItems, _setEnabledAllItems)
 from ccpn.ui.gui.widgets.table._TableAdditions import TableMenuABC
 from ccpn.ui.gui.widgets.SearchWidget import _TableFilterABC, Exclude, NotEqual
 from ccpn.util.DataEnum import DataEnum
+from ccpn.util.OrderedSet import OrderedSet
 
 
 UNITS = ['ppm', 'Hz', 'point']
@@ -88,6 +90,7 @@ _RESTRAINTTABLE = 'restraintTable'
 _VIOLATIONRESULT = 'violationResult'
 _CLEARBUTTON = 'ClearButton'
 _COMPARISONSETS = 'ComparisonSets'
+_RESTRAINTS_OPTION = 'New Collection from Restraints'
 
 _DEFAULTMEANTHRESHOLD = 0.0
 ALL = '<Use all>'
@@ -163,6 +166,8 @@ class _RestraintOptions(TableMenuABC):
         items = _getNdPeakMenuItems(menuId='Main')
         # attach to the _selectedPeaksMenu submenu
         _addMenuItems(parent, parent._selectedPeaksMenu, items)
+        self._newCollectionFromRestraintsMenuItem = menu.addAction(_RESTRAINTS_OPTION,
+                                                                   self._newCollectionFromRestraintsCallBack)
 
     def setMenuOptions(self, menu):
         """Update options in the right-mouse menu
@@ -173,6 +178,10 @@ class _RestraintOptions(TableMenuABC):
         # Enable/disable menu items as required
         parent._navigateToPeakMenuMain.setEnabled(False)
         _setEnabledAllItems(submenu, bool(parent.current.peaks))
+
+        # disable the copyCell options if not available
+        if (actions := [act for act in menu.actions() if act.text() == _RESTRAINTS_OPTION]):
+            actions[0].setEnabled(len(self._parent.selectedRows()) > 0)
 
     #-----------------------------------------------------------------------------------------
     # Properties
@@ -190,7 +199,19 @@ class _RestraintOptions(TableMenuABC):
     # Implementation
     #-----------------------------------------------------------------------------------------
 
-    ...
+    def _newCollectionFromRestraintsCallBack(self):
+        if not (project := getProject()):
+            return
+        if (rows := self._parent.selectedRows()) is None or rows.empty:
+            return
+        if not (pids := OrderedSet(rows.loc[:, (rows.columns.get_level_values(-1) == HeaderRestraint)]
+                                           .T.values.flatten())):
+            return
+
+        getByPid = project.getByPid
+        if newRess := list(filter(None, map(lambda pid: getByPid(pid), pids))):
+            # need a popup here for collections
+            project.newCollection(items=newRess)
 
 
 #=========================================================================================

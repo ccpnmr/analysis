@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-12 18:29:37 +0100 (Mon, May 12, 2025) $"
+__dateModified__ = "$dateModified: 2025-05-13 12:17:20 +0100 (Tue, May 13, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -525,11 +525,11 @@ class _NewRestraintAITableWidget(_CoreMITableWidgetABC):
                     for pk in res.peaks:
                         pks.add(pk)
                         pkRestraints.setdefault(pk.pid, set()).add(res)
-                    if not res.peaks:
+                    if colls := res.collections:
                         # add the collections to the table-object list
-                        for col in res.collections:
-                            pks.add(col)
-                            pkRestraints.setdefault(col.pid, set()).add(res)
+                        for coll in colls:
+                            pks.add(coll)
+                            pkRestraints.setdefault(coll.pid, set()).add(res)
 
             pks = sorted(pks)
             resLists = {cSet: cSet.getTreeTables(depth=1, selected=True)

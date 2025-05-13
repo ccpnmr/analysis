@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-16 12:49:01 +0100 (Wed, April 16, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-05-12 18:29:37 +0100 (Mon, May 12, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1305,7 +1305,7 @@ class TableABC(QtWidgets.QTableView, metaclass=_TableABCMeta):
                 tableOption.setMenuOptions(menu)
 
         pos = QtCore.QPoint(pos.x() + 5, pos.y())
-        menu.exec_(self.mapToGlobal(pos))
+        return menu.exec_(self.mapToGlobal(pos))
 
     def showSearchSettings(self):
         """Show the search-settings for the table

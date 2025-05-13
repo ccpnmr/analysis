@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-21 18:56:22 +0000 (Fri, March 21, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-05-09 15:55:47 +0100 (Fri, May 09, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,8 +31,8 @@ from collections import OrderedDict as OD
 import weakref
 from PyQt5 import QtWidgets, QtCore, QtGui
 from dataclasses import dataclass
-from functools import partial
-from typing import Optional
+from functools import partial, singledispatchmethod
+from typing import Optional, Callable
 
 from ccpn.core.lib.ContextManagers import catchExceptions, queueStateChange
 from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
@@ -56,25 +56,21 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpi
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
 from ccpn.ui.gui.widgets.HighlightBox import HighlightBox
 from ccpn.ui.gui.widgets.Font import getFontHeight, getSystemFonts
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import (GLFILENAME, GLGRIDLINES,
+from ccpn.ui._implementation.Strip import Strip
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import (GLFILENAME,
                                                    GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMULTIPLETLABELS,
                                                    GLMULTIPLETSYMBOLS, GLPEAKLABELS, GLPEAKSYMBOLS, GLPEAKARROWS,
-                                                   GLMULTIPLETARROWS,
-                                                   GLPRINTTYPE, GLPAGETYPE, GLPAGESIZE, GLSELECTEDPIDS,
-                                                   GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS,
-                                                   GLSPECTRUMDISPLAY, GLSTRIP,
-                                                   GLWIDGET, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS,
-                                                   GLFOREGROUND,
-                                                   GLCONTOURTHICKNESS, GLSHOWSPECTRAONPHASE,
-                                                   GLSTRIPDIRECTION, GLSTRIPPADDING, GLEXPORTDPI,
-                                                   GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS,
-                                                   GLDIAGONALSIDEBANDS,
+                                                   GLMULTIPLETARROWS, GLPRINTTYPE, GLPAGETYPE, GLPAGESIZE,
+                                                   GLSELECTEDPIDS, GLSPECTRUMDISPLAY, GLSTRIP, GLWIDGET,
+                                                   GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS,
+                                                   GLFOREGROUND, GLCONTOURTHICKNESS, GLSTRIPDIRECTION,
+                                                   GLSTRIPPADDING, GLEXPORTDPI, GLFULLLIST, GLEXTENDEDLIST,
                                                    GLALIASENABLED, GLALIASSHADE, GLALIASLABELSENABLED, GLSTRIPREGIONS,
-                                                   GLSCALINGMODE, GLSCALINGOPTIONS, GLSCALINGPERCENT, GLSCALINGBYUNITS,
-                                                   GLPRINTFONT, GLUSEPRINTFONT, GLSCALINGAXIS,
-                                                   GLPEAKSYMBOLSENABLED, GLPEAKLABELSENABLED, GLPEAKARROWSENABLED,
-                                                   GLMULTIPLETSYMBOLSENABLED,
-                                                   GLMULTIPLETLABELSENABLED, GLMULTIPLETARROWSENABLED)
+                                                   GLSCALINGMODE, GLSCALINGPERCENT, GLSCALINGBYUNITS, GLPRINTFONT,
+                                                   GLUSEPRINTFONT, GLSCALINGAXIS, GLPEAKSYMBOLSENABLED,
+                                                   GLPEAKLABELSENABLED, GLPEAKARROWSENABLED, GLMULTIPLETSYMBOLSENABLED,
+                                                   GLMULTIPLETLABELSENABLED, GLMULTIPLETARROWSENABLED
+                                                   )
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.Colour import (spectrumColours, addNewColour, fillColourPulldown, addNewColourString, hexToRgbRatio,
                               colourNameNoSpace)
@@ -410,7 +406,6 @@ class ExportStripToFilePopup(ExportDialogABC):
         HLine(sFrame, grid=(row, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
 
         row += 1
-        topRow = row
         Label(sFrame, text='Page Size', grid=(row, 0), hAlign='left', vAlign='centre')
         self.pageSize = PulldownList(sFrame, vAlign='t', grid=(row, 1),
                                      callback=self._queuePageSizeCallback)
@@ -498,7 +493,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.treeView = PrintTreeCheckBoxes(sFrame, project=None, grid=(row, 0), gridSpan=(1, 4))
         self.treeView.itemClicked.connect(self._queueGetPrintOptionCallback)
 
-        sFrame.layout().setRowStretch(row, 100)
+        sFrame.getLayout().setRowStretch(row, 100)
         sFrame.addSpacer(5, 5, expandX=True, expandY=True, grid=(row, 3))
 
     def _setupRangeWidget(self, row, userFrame):
@@ -549,7 +544,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                                       lineWidth=1, showBorder=False)
             _colourBox.setFixedHeight(_label.height() + 4)
 
-            _widgets = [_label]
+            _widgets: list[QtWidgets.QWidget] = [_label]
             for bt in range(len(STRIPBUTTONS[1:])):
                 _spinbox = DoubleSpinbox(self._rangeRight, grid=(_rangeRow, bt + 1), decimals=2, step=0.1,
                                          # hAlign='left',
@@ -606,9 +601,10 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._stripLists.setFixedHeight(8 * getFontHeight())
 
         _rangeFrame.getLayout().setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        self._rangeRight.getLayout().setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        self._rangeRight.layout().setColumnStretch(6, 1000)
-        self._rangeRight.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        rLayout = self._rangeRight.getLayout()
+        rLayout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        rLayout.setColumnStretch(6, 1000)  # enforce largest stretch on column 6
+        rLayout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
 
         return _rangeRow
 
@@ -866,7 +862,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         #             self._setRangeState(strip, updateCurrent=False)
 
     @staticmethod
-    def _setStripCentreValue(ddAxis, centre):
+    def _setStripCentreValue(ddAxis, centre) -> bool:
         """Set the centre value
         Update the row values and set the spinbox constraints"""
         ddAxis[STRIPCENTRE] = centre
@@ -874,6 +870,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         diff = abs(ddAxis[STRIPWIDTH] / 2.0)
         ddAxis[STRIPMIN] = centre - diff
         ddAxis[STRIPMAX] = centre + diff
+        return True
 
     def _setStripCentre(self, *args):
         for stripSet in self._validStripSetter('getAxisPosition', STRIPCENTRE):
@@ -901,7 +898,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         #             self._setRangeState(strip, updateCurrent=False)
 
     @staticmethod
-    def _setStripWidthValue(ddAxis, width):
+    def _setStripWidthValue(ddAxis, width) -> bool:
         """Set the width value
         Update the row values and set the spinbox constraints"""
         ddAxis[STRIPWIDTH] = width
@@ -909,6 +906,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         centre = ddAxis[STRIPCENTRE]
         ddAxis[STRIPMIN] = centre - abs(width / 2.0)
         ddAxis[STRIPMAX] = centre + abs(width / 2.0)
+        return True
 
     def _setStripWidth(self, *args):
         for stripSet in self._validStripSetter('getAxisWidth', STRIPWIDTH):
@@ -1002,7 +1000,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         try:
             _dd = self._stripDict.get(self._currentStrip)
             _dd.useRegion = value
-        except Exception as es:
+        except Exception:
             getLogger().debug2('Error updating _useOverrideCallback')
         else:
             self._setRangeState(self._currentStrip)
@@ -1025,12 +1023,12 @@ class ExportStripToFilePopup(ExportDialogABC):
             # change all to the same mode
             for dd in self._stripDict.values():
                 dd.minMaxMode = mode
-        except Exception as es:
+        except Exception:
             getLogger().debug2('Error updating _setModeCallback')
         else:
             self._setRangeState(self._currentStrip)
 
-    def _fontCheckBoxCallback(self, value):
+    def _fontCheckBoxCallback(self, _value):
         """Handle checking/unchecking font checkbox
         """
         self._fontPulldown.setEnabled(self._useFontCheckbox.isChecked())
@@ -1200,77 +1198,127 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._stripLists.select(self._currentStrip)
         # self._stripLists.setCurrentRow(1)
 
-    def _setRangeState(self, strip, setButton=None, setRow=None, updateCurrent=True, _updateQueue=True):
-        try:
-            stripId = strip.text()
-        except Exception:
-            stripId = strip
-        finally:
-            self._rangeRight.setVisible(False)
+    #-----------------------------------------------------------------------------------------
+    # different parameter types for setting range
+    @singledispatchmethod
+    def _setRangeState(self, strip: str | Strip | QtWidgets.QListWidgetItem,
+                       updateCurrent=True, _updateQueue=True):
+        """
+        Set the ranges for the buttons and spinboxes.
 
-            with self.blockWidgetSignals(self._rangeRight):
+        :param strip: The strip to set the range for. Must be of type str, Strip, or QListWidgetItem.
+        :type strip: str | Strip | QtWidgets.QListWidgetItem
+        :param updateCurrent: Flag to indicate whether to update the current state. Default is True.
+        :type updateCurrent: bool
+        :param _updateQueue: Flag to indicate whether to update the queue. Default is True.
+        :type _updateQueue: bool
+        :raises RuntimeError: If the type of strip is not str, Strip, or QListWidgetItem.
+        """
+        # Raise an error if the strip type is not supported
+        raise RuntimeError(f'Wrong type of strip {strip}, must be str|Strip|QListWidgetItem')
 
-                if updateCurrent:
-                    # set the current-id for updating range dict
-                    self._currentStrip = stripId
+    @_setRangeState.register(str)
+    def _setRangeStateStr(self, strip: str, updateCurrent=True, _updateQueue=True):
+        """
+        Handle the case where strip is a str.
 
-                # remove constraints so spin-boxes can be updated
-                self._setSpinboxConstraints(stripId, state=False)
+        :param strip: The strip to set the ranges for.
+        :type strip: str
 
-                if _dd := self._stripDict.get(stripId, None):
-                    self._useRegion.set(_dd.useRegion)
-                    self._rangeRadio.setIndex(_dd.minMaxMode)
+        Refer to the main _setRangeState method for detailed information.
+        """
+        return self._setRangeStateFromId(strip, updateCurrent=updateCurrent, _updateQueue=_updateQueue)
 
-                    # change visibility of buttons dependent on minMaxMode
-                    for btn in [STRIPMIN, STRIPMAX]:
-                        self._axisLabels[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 0)
-                        for ii in range(len(STRIPAXES)):
-                            self._axisSpinboxes[ii][STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 0)
-                        self._setRangeButtons.buttons[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 0)
+    @_setRangeState.register(Strip)
+    def _setRangeStateGuiStrip(self, strip: Strip, updateCurrent=True, _updateQueue=True):
+        """
+        Handle the case where strip is a Strip.
 
-                    for btn in [STRIPCENTRE, STRIPWIDTH]:
-                        self._axisLabels[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 1)
-                        for ii in range(len(STRIPAXES)):
-                            self._axisSpinboxes[ii][STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 1)
-                        self._setRangeButtons.buttons[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 1)
+        :param strip: The strip to set the ranges for.
+        :type strip: Strip
 
+        Refer to the main _setRangeState method for detailed information.
+        """
+        return self._setRangeStateFromId(strip.id, updateCurrent=updateCurrent, _updateQueue=_updateQueue)
+
+    @_setRangeState.register(QtWidgets.QListWidgetItem)
+    def _setRangeStateListItem(self, strip: QtWidgets.QListWidgetItem, updateCurrent=True, _updateQueue=True):
+        """
+        Handle the case where strip is a QListWidgetItem.
+
+        :param strip: The strip to set the ranges for.
+        :type strip: QtWidgets.QListWidgetItem
+
+        Refer to the main _setRangeState method for detailed information.
+        """
+        return self._setRangeStateFromId(strip.text(), updateCurrent=updateCurrent, _updateQueue=_updateQueue)
+
+    def _setRangeStateFromId(self, stripId: str, updateCurrent=True, _updateQueue=True):
+        """Set the ranges for the buttons and spinboxes from the strip Id.
+        """
+        self._rangeRight.setVisible(False)
+        with self.blockWidgetSignals(self._rangeRight):
+            if updateCurrent:
+                # set the current-id for updating range dict
+                self._currentStrip = stripId
+
+            # remove constraints so spin-boxes can be updated
+            self._setSpinboxConstraints(stripId, state=False)
+
+            if _dd := self._stripDict.get(stripId):
+                self._useRegion.set(_dd.useRegion)
+                self._rangeRadio.setIndex(_dd.minMaxMode)
+
+                # change visibility of buttons dependent on minMaxMode
+                for btn in [STRIPMIN, STRIPMAX]:
+                    self._axisLabels[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 0)
                     for ii in range(len(STRIPAXES)):
-                        axis = _dd.axes[ii]
-                        self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMIN)].set(axis[STRIPMIN])
-                        self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMAX)].set(axis[STRIPMAX])
-                        self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPCENTRE)].set(axis[STRIPCENTRE])
-                        self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPWIDTH)].set(axis[STRIPWIDTH])
+                        self._axisSpinboxes[ii][STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 0)
+                    self._setRangeButtons.buttons[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 0)
 
-                        for bb in self._axisSpinboxes[ii]:
-                            bb.setEnabled(_dd.useRegion)
-                        self._axisSpinboxes[ii][-1].showBorder = (_dd.useRegion and (self._currentAxis == ii))
+                for btn in [STRIPCENTRE, STRIPWIDTH]:
+                    self._axisLabels[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 1)
+                    for ii in range(len(STRIPAXES)):
+                        self._axisSpinboxes[ii][STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 1)
+                    self._setRangeButtons.buttons[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 1)
 
-                    # self._rangeRadio.setEnabled(_dd.useRegion)
-                    self._setRangeButtons.setEnabled(_dd.useRegion)
+                for ii in range(len(STRIPAXES)):
+                    axis = _dd.axes[ii]
+                    self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMIN)].set(axis[STRIPMIN])
+                    self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMAX)].set(axis[STRIPMAX])
+                    self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPCENTRE)].set(axis[STRIPCENTRE])
+                    self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPWIDTH)].set(axis[STRIPWIDTH])
 
-                    # set the colours for the highlight boxes
-                    if (sd := _dd.strip.spectrumDisplay) and len(sd.strips) > 1:
-                        if sd.stripArrangement == 'Y':
-                            self._axisSpinboxes[0][-1].setColour(getColours()[BORDERFOCUS])
-                            self._axisSpinboxes[1][-1].setColour(
-                                    SELECTAXIS_COLOR if self.strip in sd.strips else SELECTAXIS_COLOR2)
-                        else:
-                            self._axisSpinboxes[0][-1].setColour(
-                                    SELECTAXIS_COLOR if self.strip in sd.strips else SELECTAXIS_COLOR2)
-                            self._axisSpinboxes[1][-1].setColour(getColours()[BORDERFOCUS])
+                    for bb in self._axisSpinboxes[ii]:
+                        bb.setEnabled(_dd.useRegion)
+                    self._axisSpinboxes[ii][-1].showBorder = (_dd.useRegion and (self._currentAxis == ii))
 
-                    else:
+                # self._rangeRadio.setEnabled(_dd.useRegion)
+                self._setRangeButtons.setEnabled(_dd.useRegion)
+
+                # set the colours for the highlight boxes
+                if (sd := _dd.strip.spectrumDisplay) and len(sd.strips) > 1:
+                    if sd.stripArrangement == 'Y':
                         self._axisSpinboxes[0][-1].setColour(getColours()[BORDERFOCUS])
+                        self._axisSpinboxes[1][-1].setColour(
+                                SELECTAXIS_COLOR if self.strip in sd.strips else SELECTAXIS_COLOR2)
+                    else:
+                        self._axisSpinboxes[0][-1].setColour(
+                                SELECTAXIS_COLOR if self.strip in sd.strips else SELECTAXIS_COLOR2)
                         self._axisSpinboxes[1][-1].setColour(getColours()[BORDERFOCUS])
 
-                # re-enable constraints
-                self._setSpinboxConstraints(stripId)
+                else:
+                    self._axisSpinboxes[0][-1].setColour(getColours()[BORDERFOCUS])
+                    self._axisSpinboxes[1][-1].setColour(getColours()[BORDERFOCUS])
 
-            self._rangeRight.setVisible(True)
-            self._rangeRight.update()
+            # re-enable constraints
+            self._setSpinboxConstraints(stripId)
 
-            if _updateQueue:
-                self._queuePrintRangesCallback(None)
+        self._rangeRight.setVisible(True)
+        self._rangeRight.update()
+
+        if _updateQueue:
+            self._queuePrintRangesCallback(None)
 
     def _populateScaling(self):
         """Populate the widgets in the scaling frame
@@ -1328,7 +1376,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         """
         try:
             self._axisSpinboxes[row][STRIPBUTTONS.index(button)].setFocus()
-        except Exception as es:
+        except Exception:
             getLogger().debug2('Error updating _focusButton')
 
     def _setSpinboxConstraints(self, stripId, state=True):
@@ -1358,7 +1406,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                         self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPCENTRE)].setSingleStep(step)
                         self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPWIDTH)].setSingleStep(step)
 
-        except Exception as es:
+        except Exception:
             getLogger().debug2('Error updating _setSpinboxConstraints')
 
     def storeWidgetState(self):
@@ -1422,7 +1470,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         selectedList = self.treeView.getCheckStateItems()
         self._populateTreeView(selectedList)
 
-    def _populateTreeView(self, selectList=None):
+    def _populateTreeView(self, selectList: dict | None=None):
         self.treeView.clear()
 
         printItems = []
@@ -1523,7 +1571,7 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         printItems.extend(GLEXTENDEDLIST)
 
-        selectList = selectList or []
+        selectList = selectList or {}
         self.printList = []
 
         # add Print Options to the treeView
@@ -1924,7 +1972,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             self.foregroundColour = newColour.name()
 
     @queueStateChange(_verifyPopupApply)
-    def _queueForegroundPulldownCallback(self, _value):
+    def _queueForegroundPulldownCallback(self, _value) -> Callable | None:
         if _value >= 0:
             colName = colourNameNoSpace(self.foregroundColourBox.getText())
             if colName in spectrumColours.values():
@@ -1942,7 +1990,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             self.backgroundColour = newColour.name()
 
     @queueStateChange(_verifyPopupApply)
-    def _queueBackgroundPulldownCallback(self, _value):
+    def _queueBackgroundPulldownCallback(self, _value) -> Callable | None:
         if _value >= 0:
             colName = colourNameNoSpace(self.backgroundColourBox.getText())
             if colName in spectrumColours.values():
@@ -1955,7 +2003,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.printSettings.backgroundColour = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueBaseThicknessCallback(self, _value):
+    def _queueBaseThicknessCallback(self, _value) -> Callable | None:
         textFromValue = self.baseThicknessBox.textFromValue
         oldValue = textFromValue(self.printSettings.baseThickness or 0.0)
         if _value >= 0 and textFromValue(_value) != oldValue:
@@ -1965,7 +2013,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.printSettings.baseThickness = float(value)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueStripPaddingCallback(self, _value):
+    def _queueStripPaddingCallback(self, _value) -> Callable | None:
         textFromValue = self.stripPaddingBox.textFromValue
         oldValue = textFromValue(self.printSettings.stripPadding or 0.0)
         if _value >= 0 and textFromValue(_value) != oldValue:
@@ -1975,7 +2023,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.printSettings.stripPadding = float(value)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueDpiCallback(self, _value):
+    def _queueDpiCallback(self, _value) -> Callable | None:
         textFromValue = self.exportDpiBox.textFromValue
         oldValue = textFromValue(self.printSettings.dpi or 0.0)
         if _value >= 0 and textFromValue(_value) != oldValue:
@@ -1994,7 +2042,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.scalingAxis.setVisible(bool(_ind))
 
     @queueStateChange(_verifyPopupApply)
-    def _queueScalingModeCallback(self, _value):
+    def _queueScalingModeCallback(self, _value) -> Callable | None:
         value = self.scalingMode.getText()
         self._scalingModeIndex = SCALING_MODES.index(value)
         self._setScalingVisible()
@@ -2005,7 +2053,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.printSettings.scalingMode = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueScalingPercentageCallback(self, _value):
+    def _queueScalingPercentageCallback(self, _value) -> Callable | None:
         textFromValue = self.scalingPercentage.textFromValue
         oldValue = textFromValue(self.printSettings.scalingPercentage or 0.0)
         if _value >= 0 and textFromValue(_value) != oldValue:
@@ -2015,7 +2063,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.printSettings.scalingPercentage = float(value)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueScalingUnitsCallback(self, _value):
+    def _queueScalingUnitsCallback(self, _value) -> Callable | None:
         textFromValue = self.scalingUnits.textFromValue
         oldValue = textFromValue(self.printSettings.scalingUnits or 0.0)
         if _value >= 0 and textFromValue(_value) != oldValue:
@@ -2025,7 +2073,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.printSettings.scalingUnits = float(value)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueScalingAxisCallback(self, _value):
+    def _queueScalingAxisCallback(self, _value) -> Callable | None:
         value = self.scalingAxis.getText()
         if value != self.printSettings.scalingAxis:
             return partial(self._setScalingAxis, value)
@@ -2043,7 +2091,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._fontSpinbox.setEnabled(self._useFontSetting)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueUseFontCallback(self, _value):
+    def _queueUseFontCallback(self, _value) -> Callable | None:
         value = self._useFontCheckbox.isChecked()
         self._useFontSetting = value
         self._setUseFontVisible()
@@ -2054,7 +2102,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.printSettings.useFont = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueFontSizeCallback(self, _value):
+    def _queueFontSizeCallback(self, _value) -> Callable | None:
         textFromValue = self._fontSpinbox.textFromValue
         oldValue = textFromValue(self.printSettings.fontSize or 0.0)
         if _value >= 0 and textFromValue(_value) != oldValue:
@@ -2064,7 +2112,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.printSettings.fontSize = int(value)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueFontNameCallback(self, _value):
+    def _queueFontNameCallback(self, _value) -> Callable | None:
         value = self._fontPulldown.get()
         self._fontNameSetting = value
         self._setPulldownTextColour(self._fontPulldown)
@@ -2086,7 +2134,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             self._queuePrintOptionsCallback(option, checked)
 
     @queueStateChange(_verifyPopupApply)
-    def _queuePrintOptionsCallback(self, option, checked):
+    def _queuePrintOptionsCallback(self, option, checked) -> Callable | None:
         """Toggle a general checkbox option in the preferences
         Requires the parameter to be called 'option' so that the decorator gives it a unique name
         in the internal updates dict
@@ -2101,7 +2149,7 @@ class ExportStripToFilePopup(ExportDialogABC):
     # print ranges
 
     @queueStateChange(_verifyPopupApply)
-    def _queuePrintRangesCallback(self, _value):
+    def _queuePrintRangesCallback(self, _value) -> Callable | None:
         """Store the print ranges if they have changed
         """
         # get the first spinBox, assume all are the same
@@ -2155,11 +2203,11 @@ def main():
     from ccpn.ui.gui.widgets.Application import newTestApplication
     from ccpn.framework.Application import getApplication
 
-    app = newTestApplication()
-    application = getApplication()
+    app = newTestApplication()  # noqa
+    application = getApplication()  # noqa
 
     dialog = ExportStripToFilePopup(strips=[])
-    result = dialog.exec_()
+    dialog.exec_()
 
 
 if __name__ == '__main__':

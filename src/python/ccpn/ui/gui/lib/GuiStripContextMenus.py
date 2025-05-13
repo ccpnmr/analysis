@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-04-14 15:32:09 +0100 (Mon, April 14, 2025) $"
+__dateModified__ = "$dateModified: 2025-05-13 15:31:52 +0100 (Tue, May 13, 2025) $"
 __version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
@@ -280,12 +280,6 @@ def _phasingConsoleItem(strip):
     return _SCMitem(name='Enter Phasing-Console',
                     typeItem=ItemTypes.get(ITEM), icon='icons/phase-console', toolTip='Enter Phasing-Console',
                     shortcut='PC', callback=strip.spectrumDisplay.togglePhaseConsole)
-
-
-def _reloadSpectrum(strip):
-    return _SCMitem(name='Reload Spectra',
-                    typeItem=ItemTypes.get(ITEM), icon='icons/undo', toolTip='Reload visible Spectra',
-                    shortcut='SR', callback=strip.spectrumDisplay._reloadSpectra)
 
 
 def _mouseModeItem(strip):
@@ -976,8 +970,8 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _calibrateY(guiStrip1d),
         _stackSpectraDefaultItem(guiStrip1d),
         _phasingConsoleItem(guiStrip1d),
-        _reloadSpectrum(guiStrip1d),
         _separator(),
+
         _mouseModeItem(guiStrip1d),
         _separator(),
 
@@ -1175,8 +1169,8 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _toggleHorizontalTraceItem(guiStripNd),
         _toggleVerticalTraceItem(guiStripNd),
         _phasingConsoleItem(guiStripNd),
-        _reloadSpectrum(guiStripNd),
         _separator(),
+
         _mouseModeItem(guiStripNd),
         _separator(),
 

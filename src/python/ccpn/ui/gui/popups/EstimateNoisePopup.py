@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:22 +0100 (Thu, April 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Vicky Higman $"
+__dateModified__ = "$dateModified: 2025-05-08 11:31:14 +0100 (Thu, May 08, 2025) $"
+__version__ = "$Revision: 3.3.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -144,9 +145,9 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
         """Populate the top-frame"""
         row = 0
 
-        texts = ['Visible Area', 'Random Sampling']
-        tipTexts = ['Estimate the noise from the visible plane',
-                    'Estimate the noise from a random sampling of the whole spectrum']
+        texts = ['Random Sampling', 'Visible Area']
+        tipTexts = ['Estimate the noise from a random sampling of the whole spectrum',
+                    'Estimate the noise from the visible plane area']
 
         self.estimateOption = RadioButtonsCompoundWidget(self.topFrame, labelText='Estimation method',
                                                          grid=(row, 0), gridSpan=(1, 1), stretch=(0, 0),
@@ -353,9 +354,9 @@ class NoiseTab(Widget):
         # get the current mode and call the relevant estimate routine
         ind = self._parent.estimateOption.getIndex()
         if ind == 0:
-            self._estimateFromRegion()
-        elif ind == 1:
             self._estimateFromRandomSamples()
+        elif ind == 1:
+            self._estimateFromRegion()
 
     def _estimateFromRegion(self):
         if noise := getNoiseEstimateFromRegion(self.spectrum, self.strip):

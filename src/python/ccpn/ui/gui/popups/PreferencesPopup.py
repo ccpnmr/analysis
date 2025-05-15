@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-02 11:23:08 +0100 (Fri, May 02, 2025) $"
-__version__ = "$Revision: 3.3.2 $"
+__dateModified__ = "$dateModified: 2025-05-15 10:09:13 +0100 (Thu, May 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -342,7 +342,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
                     strip.symbolThickness = _prefsGen.symbolThickness
                     strip.gridVisible = _prefsGen.showGrid
                     strip.contourThickness = _prefsGen.contourThickness
-                    strip.crosshairVisible = _prefsGen.showCrosshair
+                    strip._crosshairVisible = _prefsGen.showCrosshair
+                    strip._doubleCrosshairVisible = _prefsGen.showDoubleCrosshair
                     strip.sideBandsVisible = _prefsGen.showSideBands
 
                     strip.spectrumBordersVisible = _prefsGen.showSpectrumBorder
@@ -1183,6 +1184,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.spectrumBorderBox.setChecked(self.preferences.general.showSpectrumBorder)
         self.showGridBox.setChecked(self.preferences.general.showGrid)
         self.showCrosshairBox.setChecked(self.preferences.general.showCrosshair)
+        self.showDoubleCrosshairBox.setChecked(self.preferences.general.showDoubleCrosshair)
         self.showSideBandsBox.setChecked(self.preferences.general.showSideBands)
         self.showLastAxisOnlyBox.setChecked(self.preferences.general.lastAxisOnly)
         self.matchAxisCode.setIndex(self.preferences.general.matchAxisCode)
@@ -1544,6 +1546,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showCrosshairLabel = _makeLabel(parent, text="Crosshairs", grid=(row, 0))
         self.showCrosshairBox = CheckBox(parent, grid=(row, 1))
         self.showCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showCrosshair'))
+
+        row += 1
+        self.showDoubleCrosshairLabel = _makeLabel(parent, text="Double-Crosshairs", grid=(row, 0))
+        self.showDoubleCrosshairBox = CheckBox(parent, grid=(row, 1))
+        self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
 
         row += 1
         self.showSideBandsLabel = _makeLabel(parent, text="MAS side-bands", grid=(row, 0))

@@ -51,7 +51,7 @@
         "lastAxisOnly"                         : true,
         "showGrid"                             : true,
         "showCrosshair"                        : true,
-        "showDoubleCrosshair"                  : false,
+        "showDoubleCrosshair"                  : true,
         "matchAxisCode"                        : 0,
         "restoreLayoutOnOpening"               : true,
         "useDefaultAspectRatio"                : false,

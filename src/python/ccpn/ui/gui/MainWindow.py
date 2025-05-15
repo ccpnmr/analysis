@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-02 17:07:58 +0100 (Fri, May 02, 2025) $"
-__version__ = "$Revision: 3.3.2 $"
+__dateModified__ = "$dateModified: 2025-05-15 10:09:12 +0100 (Thu, May 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2255,6 +2255,14 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         # toggle crosshairs for the spectrum displays in this window
         for spectrumDisplay in self.spectrumDisplays:
             spectrumDisplay.toggleCrosshair()
+
+    def toggleDoubleCrosshair(self):
+        """
+        Toggles whether double-crosshairs are displayed in all spectrum displays
+        """
+        # toggle crosshairs for the spectrum displays in this window
+        for spectrumDisplay in self.spectrumDisplays:
+            spectrumDisplay.toggleDoubleCrosshair()
 
     def showEstimateNoisePopup(self):
         """estimate the noise in the visible region of the current strip

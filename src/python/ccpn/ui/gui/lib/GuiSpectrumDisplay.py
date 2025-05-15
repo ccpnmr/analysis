@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-02 11:23:05 +0100 (Fri, May 02, 2025) $"
-__version__ = "$Revision: 3.3.2 $"
+__dateModified__ = "$dateModified: 2025-05-15 10:09:13 +0100 (Thu, May 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -217,6 +217,7 @@ class GuiSpectrumDisplay(CcpnModule):
     _PROPERTIESSTATE = 'properties'
     _GRIDVISIBLE = 'gridVisible'
     _CROSSHAIRVISIBLE = 'crosshairVisible'
+    _DOUBLECROSSHAIRVISIBLE = 'doubleCrosshairVisible'
     _SIDEBANDSVISIBLE = 'sideBandsVisible'
     _SHOWSPECTRAONPHASING = 'showSpectraOnPhasing'
     _SPECTRUMBORDERSVISIBLE = '_spectrumBordersVisible'
@@ -228,7 +229,7 @@ class GuiSpectrumDisplay(CcpnModule):
         :param mainWindow: MainWindow instance
         :param useScrollArea: Having a scrolled widget containing OpenGL and PyQtGraph widgets does not seem to work.
                               The leftmost strip is full of random garbage if it's not completely visible.
-                              So for now add option below to have it turned off (False) or on (True).
+                              So for now, add option below to have it turned off (False) or on (True).
         """
         if self.MAXPEAKLABELTYPES == 0:
             raise RuntimeError(f'MAXPEAKLABELTYPES == 0: cannot initialise')
@@ -625,7 +626,8 @@ class GuiSpectrumDisplay(CcpnModule):
         if self.strips and (strp := self.strips[0]):
             # NOTE:ED - not the best way, but can improve later
             pDict[self._GRIDVISIBLE] = strp.gridVisible
-            pDict[self._CROSSHAIRVISIBLE] = strp.crosshairVisible
+            pDict[self._CROSSHAIRVISIBLE] = strp._crosshairVisible
+            pDict[self._DOUBLECROSSHAIRVISIBLE] = strp._doubleCrosshairVisible
             pDict[self._SIDEBANDSVISIBLE] = strp.sideBandsVisible
             pDict[self._SHOWSPECTRAONPHASING] = strp.showSpectraOnPhasing
             pDict[self._SPECTRUMBORDERSVISIBLE] = strp.spectrumBordersVisible
@@ -639,7 +641,9 @@ class GuiSpectrumDisplay(CcpnModule):
             if (value := widgetsState.get(self._GRIDVISIBLE)) is not None:
                 strp.gridVisible = value
             if (value := widgetsState.get(self._CROSSHAIRVISIBLE)) is not None:
-                strp.crosshairVisible = value
+                strp._crosshairVisible = value
+            if (value := widgetsState.get(self._DOUBLECROSSHAIRVISIBLE)) is not None:
+                strp._doubleCrosshairVisible = value
             if (value := widgetsState.get(self._SIDEBANDSVISIBLE)) is not None:
                 strp.sideBandsVisible = value
             if (value := widgetsState.get(self._SHOWSPECTRAONPHASING)) is not None:
@@ -2643,8 +2647,15 @@ class GuiSpectrumDisplay(CcpnModule):
         for strip in self.strips:
             strip._toggleCrosshair()
 
+    def toggleDoubleCrosshair(self):
+        """Toggles whether double-crosshair is displayed in all strips of spectrum display.
+        """
+        # should hide these to be accessible through mainWindow only
+        for strip in self.strips:
+            strip._toggleDoubleCrosshair()
+
     def _cycleSymbolLabelling(self):
-        """Cycles peak symbols of current strip.
+        """Cycles peak symbols of current-strip.
         """
         try:
             if not self.current.strip:
@@ -2658,7 +2669,7 @@ class GuiSpectrumDisplay(CcpnModule):
             getLogger().warning('Error cycling peak labelling')
 
     def _cyclePeakSymbols(self):
-        """Cycles peak labelling of current strip.
+        """Cycles peak labelling of current-strip.
         """
         try:
             if not self.current.strip:

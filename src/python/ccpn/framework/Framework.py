@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-21 16:10:08 +0000 (Fri, March 21, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-05-15 10:09:12 +0100 (Thu, May 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2513,6 +2513,12 @@ class Framework(NotifierBase, GuiBase):
         """
         for window in self.project.windows:
             window.toggleCrosshair()
+
+    def toggleDoubleCrosshairAll(self):
+        """Toggles whether double-crosshairs are displayed in all windows.
+        """
+        for window in self.project.windows:
+            window.toggleDoubleCrosshair()
 
     #################################################################################################
     ## MENU callbacks:  Macro

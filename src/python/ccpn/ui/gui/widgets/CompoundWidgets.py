@@ -685,8 +685,8 @@ class Region1DEntryCompoundWidget(CompoundBaseWidget):
         If overlap is not permitted, nothing gets entered if there would be overlap in regions."""
         maxValue = max(self.minDoubleSpinbox.value(), self.maxDoubleSpinbox.value())
         minValue = min(self.minDoubleSpinbox.value(), self.maxDoubleSpinbox.value())
-        if not self.allowOverlap and any([maxValue > region[0] > minValue
-                                          or region[0] > maxValue > region[1]
+        if not self.allowOverlap and any([maxValue >= region[0] > minValue
+                                          or region[0] >= maxValue > region[1]
                                           for region in self.getRegions()]):
             return
         self.addText(f'{maxValue} : {minValue}')

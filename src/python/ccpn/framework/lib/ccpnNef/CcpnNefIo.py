@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-16 12:49:01 +0100 (Wed, April 16, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-05-20 12:37:57 +0100 (Tue, May 20, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -5747,19 +5747,18 @@ class CcpnNefReader(CcpnNefContent):
                 except (RuntimeError, ValueError) as es:
                     getLogger().warning(f'{es}')
 
-            framecode = saveFrame.get('chemical_shift_list')
+            framecode = saveFrame.get('chemical_shift_list', '')
             cslName = framecode[len('nef_chemical_shift_list_'):]
             # Defaults to the specified shiftList or the first shiftList (there should be only one, but we want the read to work)
             # if (csl := (self.frameCode2Object.get(framecode) or project.fetchChemicalShiftList(cslName))):
             #         # self.defaultChemicalShiftList)):
             #     spectrum.chemicalShiftList = csl
-
             if csl := (self.frameCode2Object.get(framecode) or
-                    project.getChemicalShiftList(cslName) or
-                    project.newChemicalShiftList(cslName) or
-                    self.defaultChemicalShiftList):
+                       (cslName and (project.getChemicalShiftList(cslName) or
+                                     project.newChemicalShiftList(cslName))) or
+                       self.defaultChemicalShiftList):
                 spectrum.chemicalShiftList = csl
-            print(f'==> chemicalshiftlist {framecode}     {cslName}     {csl}')
+            # print(f'==> chemicalshiftlist {framecode}     {cslName}     {csl}')
 
             framecode = saveFrame.get('ccpn_sample')
             if (sample := self.frameCode2Object.get(framecode)):

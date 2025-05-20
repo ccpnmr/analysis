@@ -579,6 +579,7 @@ class EntryCompoundWidget(CompoundBaseWidget):
         """
         return self.setText(value)
 
+
 class Region1DEntryCompoundWidget(CompoundBaseWidget):
     """
     Compound class comprising a Label, two DoubleSpinboxes, a Button, and a ListWidget, combined in a

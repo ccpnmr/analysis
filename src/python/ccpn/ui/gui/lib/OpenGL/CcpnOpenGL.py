@@ -57,7 +57,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-15 10:09:13 +0100 (Thu, May 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-05-20 12:57:46 +0100 (Tue, May 20, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -565,7 +565,10 @@ class CcpnGLWidget(QOpenGLWidget):
         to improve display speed
         """
 
-        if self.strip.isDeleted or not self.globalGL:
+        if (self.strip.isDeleted or
+                (not self.globalGL) or
+                (not self.viewports) or
+                (not self.glReady)):
             return
 
         # update the shader settings - assume axis limits have changed

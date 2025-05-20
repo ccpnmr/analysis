@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-10 16:43:20 +0000 (Fri, January 10, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-05-20 15:37:20 +0100 (Tue, May 20, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -350,7 +350,13 @@ class _CoreTableWidgetABC(_ProjectTableABC, ABC, metaclass=_CoreTableWidgetABCMe
         """Method that is called when the queue is deemed to be too big.
         Apply overall operation instead of all individual notifiers.
         """
+        # Possibly do a check here whether ANY of the objects will affect this table
+        #   and then possibly skip the update - could be tricky :|
+        # get the current hidden columns, to re-apply after the update
+        _hidden = self.hiddenColumns if (self._df is not None and not self._df.empty) else None
         self._update()
+        if _hidden is not None:
+            self.setHiddenColumns(_hidden)
 
     #-----------------------------------------------------------------------------------------
     # object properties

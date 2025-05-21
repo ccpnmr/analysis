@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-16 12:49:01 +0100 (Wed, April 16, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-05-21 12:43:52 +0100 (Wed, May 21, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -70,7 +70,8 @@ class MoreLessFrame(Frame):
         bold = kwds.get('bold', False)
         self._label = ActiveLabel(self, text=name or '', grid=(row, 1), bold=bold)
         # fix to the size of its text
-        self._label.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self._label.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        self._label.setMinimumWidth(50)
         if self._closable:
             self._closeButton = ActiveLabel(self, grid=(row, 2))
             self._closeButton.setFixedSize(self.PIXMAPWIDTH, self.PIXMAPWIDTH)
@@ -78,9 +79,6 @@ class MoreLessFrame(Frame):
             self._closeButton.sigClicked.connect(self.close)  # noqa: pycharm can't see qt
 
         row += 1
-        self._openButton.setSelectionCallback(self._toggleContents)
-        self._label.setSelectionCallback(self._toggleContents)
-
         if scrollable:
             # add a frame with scroll-bars
             self._contentsFrame = ScrollableFrame(self, setLayout=True, grid=(row, 0), gridSpan=(1, 4))
@@ -91,8 +89,11 @@ class MoreLessFrame(Frame):
 
         Spacer(self, 5, 5,
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-               grid=(row, 0), gridSpan=(1, 4))
+               grid=(row, 0), gridSpan=(1, 4))  # should I apply this to _contentsFrame?
         self.setContentsMargins(*frameMargins)
+
+        self._openButton.setSelectionCallback(self._toggleContents)
+        self._label.setSelectionCallback(self._toggleContents)
 
     def _showContents(self, visible):
         """Toggle visibility of the contents-widget.

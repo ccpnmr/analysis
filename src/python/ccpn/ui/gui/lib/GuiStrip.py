@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-02 17:07:59 +0100 (Fri, May 02, 2025) $"
-__version__ = "$Revision: 3.3.2 $"
+__dateModified__ = "$dateModified: 2025-05-15 10:09:13 +0100 (Thu, May 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -363,7 +363,7 @@ class GuiStrip(Frame):
             self.arrowMinimum = _firstStrip.arrowMinimum
 
             self.gridVisible = _firstStrip.gridVisible
-            self.crosshairVisible = _firstStrip.crosshairVisible
+            self._crosshairVisible = _firstStrip._crosshairVisible
             self.sideBandsVisible = _firstStrip.sideBandsVisible
 
             self.showSpectraOnPhasing = _firstStrip.showSpectraOnPhasing
@@ -383,7 +383,7 @@ class GuiStrip(Frame):
         else:
             # get the values from the preferences
             self.gridVisible = self._preferences.showGrid
-            self.crosshairVisible = self._preferences.showCrosshair
+            self._crosshairVisible = self._preferences.showCrosshair
             self.sideBandsVisible = self._preferences.showSideBands
 
             self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
@@ -705,36 +705,82 @@ class GuiStrip(Frame):
         self.sideBandsVisible = not self._CcpnGLWidget._sideBandsVisible
 
     @property
-    def crosshairVisible(self):
+    def _crosshairVisible(self):
         """True if crosshair is visible.
         """
         return self._CcpnGLWidget._crosshairVisible
 
-    @crosshairVisible.setter
-    def crosshairVisible(self, visible):
-        """set the crosshairVisible visibility
+    @_crosshairVisible.setter
+    def _crosshairVisible(self, visible):
+        """set the crosshair visibility
         """
         if hasattr(self, 'crosshairAction'):
+            # this is nasty, connecting to the checkbox of a menu-action
+            # feedback loop? actually not sure that they are doing anything
             self.crosshairAction.setChecked(visible)
         self._CcpnGLWidget._crosshairVisible = visible
 
-        # spawn a redraw event of the GL windows
+        # spawn a redraw-event of the GL windows - should be spawned by _CcpnGLWidget
+        self._CcpnGLWidget._refreshCursors = True
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     def _toggleCrosshair(self):
         """Toggles whether crosshair is visible.
         """
-        self.crosshairVisible = not self._CcpnGLWidget._crosshairVisible
+        # uses setter above
+        self._crosshairVisible = not self._crosshairVisible
 
     def _showCrosshair(self):
-        """Displays crosshair in strip.
+        """Displays crosshair in the strip.
         """
-        self.crosshairVisible = True
+        self._crosshairVisible = True
 
     def _hideCrosshair(self):
         """Hides crosshair in strip.
         """
-        self.crosshairVisible = False
+        self._crosshairVisible = False
+
+    @property
+    def _doubleCrosshairVisible(self):
+        """True if double-crosshair is visible.
+        """
+        return self._CcpnGLWidget._doubleCrosshairVisible
+
+    @_doubleCrosshairVisible.setter
+    def _doubleCrosshairVisible(self, visible):
+        """set the double-crosshair visibility
+        """
+        if not visible and not self._crosshairVisible:
+            self._crosshairVisible = True
+            return
+
+        if hasattr(self, 'doubleCrosshairAction'):
+            self.doubleCrosshairAction.setChecked(visible)
+        self._CcpnGLWidget._doubleCrosshairVisible = visible
+        # make both visible if both were hidden
+        if visible and not self._crosshairVisible:
+            self._crosshairVisible = True
+            return
+
+        # spawn a redraw-event of the GL windows
+        self._CcpnGLWidget._refreshCursors = True
+        self._CcpnGLWidget.GLSignals.emitPaintEvent()
+
+    def _toggleDoubleCrosshair(self):
+        """Toggles whether double-crosshair is visible.
+        """
+        # uses setter above
+        self._doubleCrosshairVisible = not self._doubleCrosshairVisible
+
+    def _showDoubleCrosshair(self):
+        """Displays double-crosshair in the strip.
+        """
+        self._doubleCrosshairVisible = True
+
+    def _hideDoubleCrosshair(self):
+        """Hides double-crosshair in the strip.
+        """
+        self._doubleCrosshairVisible = False
 
     def _crosshairCode(self, axisCode):
         """Determines what axisCodes are compatible as far as drawing crosshair is concerned

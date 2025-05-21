@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Vicky Higman $"
-__dateModified__ = "$dateModified: 2024-06-03 10:27:55 +0100 (Mon, June 03, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-05-21 12:41:14 +0100 (Wed, May 21, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,32 +27,29 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumSelectionWidget
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, RadioButtonsWithSubCheckBoxes
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtonsWithSubCheckBoxes
 from ccpn.ui.gui.widgets.RadioButton import CheckBoxCheckedText, CheckBoxCallbacks, CheckBoxTexts, CheckBoxTipTexts
 from collections import OrderedDict as od
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, _stoppableProgressBar, progressManager
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager
 import ccpn.ui.gui.widgets.CompoundWidgets as cw
 
 
 _OnlyPositionAndAssignments = 'Copy position and assignments'
-_IncludeAllPeakProperties   = 'Copy all existing properties'
-_SnapToExtremum             = 'Snap to extremum'
-_RefitPeaks                 = 'Refit peaks'
-_RefitPeaksAtPosition       = 'Refit peaks at position'
-_RecalculateVolume          = 'Recalculate volume'
-_tipTextOnlyPos             = f'''Copy Peaks and include only the original position and assignments (if available).\nAdditionally, execute the selected operations'''
-_tipTextIncludeAll          = f'''Copy Peaks and include all the original properties: \nPosition, Assignments, Heights, Linewidths, Volumes etc...'''
-_tipTextSnapToExtremum      = 'Snap all new peaks to extremum. Default properties set in the General Preferences'
-_tipTextRefitPeaks          = 'Refit all new peaks. Default properties set in the General Preferences'
-_tipTextRefitPeaksAtPosition= 'Refit peaks and force to maintain the original position. Default properties set in the General Preferences'
-_tipTextRecalculateVolume   = 'Recalculate volume for all peaks. Requires a Refit.'
+_IncludeAllPeakProperties = 'Copy all existing properties'
+_SnapToExtremum = 'Snap to extremum'
+_RefitPeaks = 'Refit peaks'
+_RefitPeaksAtPosition = 'Refit peaks at position'
+_RecalculateVolume = 'Recalculate volume'
+_tipTextOnlyPos = f'''Copy Peaks and include only the original position and assignments (if available).\nAdditionally, execute the selected operations'''
+_tipTextIncludeAll = f'''Copy Peaks and include all the original properties: \nPosition, Assignments, Heights, Linewidths, Volumes etc...'''
+_tipTextSnapToExtremum = 'Snap all new peaks to extremum. Default properties set in the General Preferences'
+_tipTextRefitPeaks = 'Refit all new peaks. Default properties set in the General Preferences'
+_tipTextRefitPeaksAtPosition = 'Refit peaks and force to maintain the original position. Default properties set in the General Preferences'
+_tipTextRecalculateVolume = 'Recalculate volume for all peaks. Requires a Refit.'
 
 
 class CopyPeakListPopup(CcpnDialogMainWidget):
@@ -75,7 +72,7 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
         self.sourcePeakList = None
         self.targetSpectrum = None
         self.defaultPeakList = self._getDefaultPeakList() if selectItem is None else \
-                               self.application.get(selectItem)
+            self.application.get(selectItem)
 
         self.setWidgets()
         self._populate()
@@ -89,23 +86,24 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
         # initialise the buttons and dialog size
         super()._postInit()
         self._extraActionDefs = {
-                                _SnapToExtremum: self._snapPeaksToExtremum,
-                                _RefitPeaks: self._refitPeaks,
-                                _RecalculateVolume: self._recalculateVolume,
-                                _RefitPeaksAtPosition: self._refitPeaksAtPositions,
-                                }
+            _SnapToExtremum      : self._snapPeaksToExtremum,
+            _RefitPeaks          : self._refitPeaks,
+            _RecalculateVolume   : self._recalculateVolume,
+            _RefitPeaksAtPosition: self._refitPeaksAtPositions,
+            }
 
     def setWidgets(self):
         self.sourcePeakListPullDownCW = cw.PulldownListCompoundWidget(self.mainWidget, labelText='Source PeakList',
-                                                              grid=(0, 0), callback=self._populateTargetSpectraPullDown)
+                                                                      grid=(0, 0),
+                                                                      callback=self._populateTargetSpectraPullDown)
 
         self.sourcePeakListPullDown = self.sourcePeakListPullDownCW.pulldownList
         self.targetSpectraPullDownCW = SpectrumSelectionWidget(self.mainWidget,
-                                                                     labelText='Target Spectra',
-                                                                     grid=(1, 0),
-                                                                     tipText='Select Target Spectra',
-                                                                     standardListItems=[str(sp.pid) for sp in
-                                                                                        self.project.spectra])
+                                                               labelText='Target Spectra',
+                                                               grid=(1, 0),
+                                                               tipText='Select Target Spectra',
+                                                               standardListItems=[str(sp.pid) for sp in
+                                                                                  self.project.spectra])
         self.targetSpectraPullDown = self.targetSpectraPullDownCW.pulldownList
 
         checkBoxTexts = [_SnapToExtremum, _RefitPeaks, _RefitPeaksAtPosition, _RecalculateVolume]
@@ -113,15 +111,15 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
                             _tipTextRecalculateVolume]
 
         checkBoxesDict = od([
-                            (_OnlyPositionAndAssignments,
-                             {
-                             CheckBoxTexts: checkBoxTexts,
-                             CheckBoxCheckedText: [_SnapToExtremum, _RefitPeaks, _RecalculateVolume],
-                             CheckBoxTipTexts: checkBoxTipTexts,
-                             CheckBoxCallbacks: [self._subSelectionCallback] * len(checkBoxTexts)
-                             }
-                            ),
-                            ])
+            (_OnlyPositionAndAssignments,
+             {
+                 CheckBoxTexts      : checkBoxTexts,
+                 CheckBoxCheckedText: [_SnapToExtremum, _RefitPeaks, _RecalculateVolume],
+                 CheckBoxTipTexts   : checkBoxTipTexts,
+                 CheckBoxCallbacks  : [self._subSelectionCallback] * len(checkBoxTexts)
+                 }
+             ),
+            ])
 
         self.copyOptionsRadioButtons = RadioButtonsWithSubCheckBoxes(self.mainWidget,
                                                                      texts=[_OnlyPositionAndAssignments,
@@ -141,16 +139,15 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
             # self.targetSpectrum = self.project.getByPid(self.targetSpectraPullDown.getTexts())
             self.sourcePeakList = self.project.getByPid(self.sourcePeakListPullDown.getText())
             # self._copyPeakListToSpectrum()
-
             spectra = self.project.getObjectsByPids(self.targetSpectraPullDownCW.getTexts())
-
             errors = []
-            for sp in spectra:
-                self.targetSpectrum = sp
-                try:
-                    self._copyPeakListToSpectrum()
-                except Exception as es:
-                    errors.append(f'• {es}')
+            with notificationEchoBlocking():
+                for sp in spectra:
+                    self.targetSpectrum = sp
+                    try:
+                        self._copyPeakListToSpectrum()
+                    except Exception as es:
+                        errors.append(f'• {es}')
 
             if errors:
                 _msg = (f'Your current values raise the following error{"s" if len(errors) > 1 else ""}:\n\n' +
@@ -259,10 +256,10 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
 
             not allowed:
                 - _RecalculateVolume alone
-                - _RefitPeaksAtPosition excludes any of  _RefitPeaks, _SnapToExtremum
+                - _RefitPeaksAtPosition excludes any of _RefitPeaks, _SnapToExtremum
 
         It is convoluted and a refactor might be needed for readability.
-        But double check the intended behaviour is maintained!
+        But double-check the intended behaviour is maintained!
 
         :param checked: bool
         :return: None
@@ -302,7 +299,8 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
     def _refitPeaksAtPositions(self, peakList, keepPosition=True):
         self._refitPeaks(peakList, keepPosition=keepPosition)
 
-    def _recalculateVolume(self, peakList):
+    @staticmethod
+    def _recalculateVolume(peakList):
         getLogger().info('Recalculating  peak volumes.')
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():

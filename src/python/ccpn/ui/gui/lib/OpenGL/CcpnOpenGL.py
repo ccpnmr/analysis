@@ -57,8 +57,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-12 16:12:35 +0100 (Mon, May 12, 2025) $"
-__version__ = "$Revision: 3.3.2.1 $"
+__dateModified__ = "$dateModified: 2025-05-20 12:57:46 +0100 (Tue, May 20, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -331,6 +331,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._selectionMode = 0
         self._startCoordinate = None
         self._endCoordinate = None
+        self._refreshCursors = False
         self.cursorSource = CURSOR_SOURCE_NONE  # can be CURSOR_SOURCE_NONE / CURSOR_SOURCE_SELF / CURSOR_SOURCE_OTHER
         self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
         self.doubleCursorCoordinate = np.zeros((4,), dtype=np.float32)
@@ -362,7 +363,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.gridList = []
         self._gridVisible = True  #self._preferences.showGrid
         self._crosshairVisible = True  #self._preferences.showCrosshair
-        # self._doubleCrosshairVisible = True  #self._preferences.showDoubleCrosshair
+        self._doubleCrosshairVisible = True  #self._preferences.showDoubleCrosshair
         self._sideBandsVisible = True
 
         self.diagonalGLList = None
@@ -564,7 +565,10 @@ class CcpnGLWidget(QOpenGLWidget):
         to improve display speed
         """
 
-        if self.strip.isDeleted or not self.globalGL:
+        if (self.strip.isDeleted or
+                (not self.globalGL) or
+                (not self.viewports) or
+                (not self.glReady)):
             return
 
         # update the shader settings - assume axis limits have changed
@@ -3026,7 +3030,8 @@ class CcpnGLWidget(QOpenGLWidget):
             self.buildSpectra()
         self.buildCursors()
         if self.underMouse():
-            self.buildMouseCoords()
+            self.buildMouseCoords(self._refreshCursors)
+            self._refreshCursors = False
         # only call if the axes have changed, and after spectra
         if self._notifyAxesChange:
             self.buildGrid()
@@ -3972,6 +3977,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def getCurrentCursorCoordinate(self):
 
+        # AAARRGH - mouse may be in another strip :|
         if self.cursorSource is None or self.cursorSource == 'self':
             currentPos = self.mapFromGlobal(QtGui.QCursor.pos())
 
@@ -4307,8 +4313,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
         return ox, oy
 
-    def buildMouseCoordsDQ(self, refresh=False):
+    def buildMouseCoordsDQ(self):
         """Builds Mouse Coord text for DQ crosshair."""
+        if not self._doubleCrosshairVisible or not self._crosshairVisible:
+            self.mouseStringDQ = None
+            return
         try:
             cursorCoordinate = self.mouseCoordDQ
             mx, my = cursorCoordinate[0], cursorCoordinate[1]
@@ -4318,8 +4327,6 @@ class CcpnGLWidget(QOpenGLWidget):
         smallFont = self.getSmallFont()
         newCoords = (f' {self._visibleOrderingAxisCodes[0]}: {self.XMode(mx)}\n'
                      f' {self._visibleOrderingAxisCodes[1]}: {self.YMode(my)}')
-
-        self.mouseStringDQ = True
 
         self.mouseStringDQ = GLString(text=newCoords,
                                       font=smallFont,
@@ -4464,6 +4471,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.mouseString.setStringOffset((ox, oy))
             self.mouseString.pushTextArrayVBOAttribs()
 
+            # getting a bit tangled :|
             self.buildMouseCoordsDQ()
 
     def drawMouseCoords(self):
@@ -6325,6 +6333,8 @@ class CcpnGLWidget(QOpenGLWidget):
         strip.toolbarAction.setChecked(strip.spectrumDisplay.spectrumUtilToolBar.isVisible())
         if attrib := getattr(strip, 'crosshairAction', None):
             attrib.setChecked(self._crosshairVisible)
+        if attrib := getattr(strip, 'doubleCrosshairAction', None):
+            attrib.setChecked(self._doubleCrosshairVisible)
         if attrib := getattr(strip, 'gridAction', None):
             attrib.setChecked(self._gridVisible)
         if attrib := getattr(strip, 'peakSymbolAction', None):

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-16 12:49:01 +0100 (Wed, April 16, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-05-21 12:43:52 +0100 (Wed, May 21, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -400,7 +400,7 @@ class NefDictFrame(Frame):
                 showMore=False)
         self._optionSplitter.addWidget(_frame)
         _fRow += 1
-        # allow the rows to exapand in these tables - need cleaner method
+        # allow the rows to expand in these tables - need cleaner method
         self._structureDataTable.model().resizeRowsEnabled = True
         self._collectionsTable.model().resizeRowsEnabled = True
         self._chemicalShiftListsTable.model().resizeRowsEnabled = True
@@ -1839,8 +1839,6 @@ class NefDictFrame(Frame):
         """
         from ccpn.framework.lib.ccpnNef.CcpnNefIo import _saveFrameNameFromCategory
 
-        # print(f'   CALL    _selectChemicalShiftId')
-
         if not (pulldownList and pulldownList.hasFocus()):
             return
 
@@ -1857,10 +1855,9 @@ class NefDictFrame(Frame):
             for ii, (_k, sFrame, _frameID) in enumerate(spectrumData):
                 # set the new name in nef_chemical_shift_list parameter
                 sFrame[SHIFTNAME] = '_'.join([nef_category, newCol])
+            self._updateTables()  # before repopulate? yes, to read the available chemicalShiftLists
 
         self._setCheckedItem(values.itemName, values.parentGroup)
-        # put into the context-manager?
-        self._updateTables()
 
     def _selectChemicalShiftListParentId(self, values=None, pulldownList=None, parent=None):
         """Handle chemicalShiftList pulldown
@@ -2719,7 +2716,7 @@ class NefDictFrame(Frame):
 
         frame.contentsFrame.getLayout().addWidget(table, 0, 0)
         frame.contentsFrame.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        frame.contentsFrame.setMinimumSize(100, 100)
+        frame.contentsFrame.setMinimumSize(table.minimumSize() + QtCore.QSize(10, 10))
         table.setVisible(True)
 
         if not ignoreFrame:

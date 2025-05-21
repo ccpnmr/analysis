@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-12 16:12:36 +0100 (Mon, May 12, 2025) $"
-__version__ = "$Revision: 3.3.2.1 $"
+__dateModified__ = "$dateModified: 2025-05-20 12:57:47 +0100 (Tue, May 20, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2369,19 +2369,16 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             self._parentStrip = self.spectrumDisplay.orderedStrips[0]
         except:
             return
-
-        if self._parentStrip.isDeleted or not self.globalGL:
-            return
-
-        if not self.viewports:
+        if (self._parentStrip.isDeleted or
+                (not self.globalGL) or
+                (not self.viewports) or
+                (not self.glReady)):
             return
 
         # use the updated size
         w = self.w
         h = self.h
-
         shader = self._shaderPixel.bind()
-
         # set projection to axis coordinates
         shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 

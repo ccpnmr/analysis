@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-12 18:29:37 +0100 (Mon, May 12, 2025) $"
+__dateModified__ = "$dateModified: 2025-05-21 12:43:52 +0100 (Wed, May 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -299,7 +299,8 @@ class TableABC(QtWidgets.QTableView, metaclass=_TableABCMeta):
         setWidgetFont(self, name=TABLEFONT)
         height = getFontHeight(name=TABLEFONT) - 2
         self._setHeaderWidgets(height, showHorizontalHeader, showVerticalHeader, df)
-        self.setMinimumSize(2 * height, 2 * height + self.horizontalScrollBar().height())
+        self.setMinimumSize(round(1.5 * height),
+                            round(1.5 * height + self.horizontalScrollBar().height()))
 
     def _setCallbacks(self, actionCallback, actionCallbackEnabled, selectionCallback, selectionCallbackEnabled):
         """Set the action/selection callbacks

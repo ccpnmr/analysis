@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-05-21 11:11:05 +0100 (Wed, May 21, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-05-21 12:18:53 +0100 (Wed, May 21, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -215,6 +215,7 @@ class AssignmentInspectorSettings(Widget):
 
         moreLessFrame = MoreLessFrame(self.nhTab, name='Pos:3 Neg:3', showMore=True,
                                       grid=(row, 0), gridSpan=(1, 1))
+        moreLessFrame.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
 
         frame = moreLessFrame.contentsFrame
 
@@ -240,6 +241,10 @@ class AssignmentInspectorSettings(Widget):
 
         removeButton = Button(parent=frame, grid=(3,0), hAlign='left', text='Remove Display Group',
                               callback=partial(self.removeMoreLess, widgets))
+
+        # Spacer(frame, 5, 5,
+        #        QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+        #        grid=(row, 0), gridSpan=(1, 4))
 
         display.getDisplays()
 

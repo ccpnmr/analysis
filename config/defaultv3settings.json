@@ -319,6 +319,9 @@
         },
         "_saveProjectAsSubDirs": {
             "dontShowPopup": false
+        },
+        "DeleteItemsPopup": {
+            "dontShowPopup": false
         }
     },
     "tables"           : {

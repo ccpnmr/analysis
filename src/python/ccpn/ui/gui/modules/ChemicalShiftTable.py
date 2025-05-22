@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-10 17:57:38 +0000 (Fri, January 10, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-05-22 14:56:17 +0100 (Thu, May 22, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -57,6 +57,7 @@ from ccpn.ui.gui.widgets.SettingsWidgets import ALL
 from ccpn.ui.gui.widgets.Column import COLUMN_COLDEFS, COLUMN_SETEDITVALUE, COLUMN_FORMAT
 from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, markNmrAtoms
 from ccpn.ui.gui.widgets.table._ProjectTable import _ProjectTableABC
+from ccpn.util.Common import makeIterableList
 from ccpn.util.Logging import getLogger
 
 
@@ -64,7 +65,7 @@ logger = getLogger()
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 
 #=========================================================================================
-# Chemical Shift Table Options
+# ChemicalShiftTable Menu Options
 #=========================================================================================
 
 _NAVIGATE_CST = 'Navigate to:'
@@ -72,6 +73,7 @@ _MERGE_CST = 'Merge NmrAtoms'
 _EDIT_CST = 'Edit NmrAtom'
 _REMOVE_CST = 'Remove assignments'
 _REMOVEDEL_CST = 'Remove assignments and Delete'
+_MARKSHIFTS = "Mark Chemical Shifts"
 _INTO_CSL = 'into'
 
 
@@ -87,7 +89,7 @@ class ChemicalShiftTableModule(CcpnTableModule):
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'left'
     _allowRename = True
-    activePulldownClass = None  # e.g., can make the table respond to current peakList
+    activePulldownClass = None  # e.g. can make the table respond to current peakList
 
     def __init__(self, mainWindow=None, name='Chemical Shift Table',
                  chemicalShiftList=None, selectFirstItem=False):
@@ -120,7 +122,7 @@ class ChemicalShiftTableModule(CcpnTableModule):
             self._settings = Widget(self.settingsWidget, setLayout=True,
                                     grid=(0, 0), vAlign='top', hAlign='left')
 
-            # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
+            # cannot set a notifier for displays, as these are not (yet?), implemented and the Notifier routines
             # underpinning the addNotifier call do not allow for it either
             colwidth = 140
 
@@ -190,7 +192,7 @@ class ChemicalShiftTableModule(CcpnTableModule):
             else:
                 self._modulePulldown.select(table.pid)
 
-    def _selectionPulldownCallback(self, item):
+    def _selectionPulldownCallback(self, _item):
         """Notifier Callback for selecting table from the pull-down menu.
         """
         self._table = self._modulePulldown.getSelectedObject()
@@ -306,7 +308,7 @@ class _NewChemicalShiftTable(_ProjectTableABC):
     search = False
 
     _enableSearch = True
-    _enableDelete = True
+    _enableDelete = False
     _enableExport = True
     _enableCopyCell = True
     _table = WeakRefDescriptor()
@@ -333,37 +335,30 @@ class _NewChemicalShiftTable(_ProjectTableABC):
     # Widget callbacks
     #-----------------------------------------------------------------------------------------
 
-    @staticmethod
-    def _getValidChemicalShift4Callback(objs):
-        if not objs or not all(objs):
-            return
-        if isinstance(objs, (tuple, list)):
-            cShift = objs[-1]
-        else:
-            cShift = objs
-        if not cShift:
-            showWarning('Cannot perform action', 'No selected ChemicalShift')
-            return
-
-        return cShift
+    def _getValidChemicalShift4Callback(self, objs: ChemicalShift | list[ChemicalShift] | tuple[ChemicalShift, ...]):
+        objs = makeIterableList(objs)
+        if objs := list(filter(lambda ch: isinstance(ch, ChemicalShift),
+                               map(lambda obj: self.project.getByPid(obj)
+                               if isinstance(obj, str) else obj, objs))):
+            return objs[-1]
+        showWarning('Cannot perform action', 'No selected ChemicalShift')
 
     def actionCallback(self, selection, lastItem):
         """Notifier DoubleClick action on item in table. Mark a chemicalShift based on attached nmrAtom.
         """
+        if selection := self.getSelectedObjects():
+            self._markSelectedShifts(selection)
+        getLogger().debug2(f'{self.__class__.__name__}.actionCallback: No selected ChemicalShifts')
 
-        try:
-            if not (objs := list(lastItem[self._OBJECT])):
-                return
-        except Exception as es:
-            getLogger().debug2(f'{self.__class__.__name__}.actionCallback: No selection\n{es}')
-            return
-
-        cShift = self._getValidChemicalShift4Callback(objs)
+    def _markSelectedShifts(self, selection):
         if len(self.mainWindow.marks):
             if self.moduleParent.autoClearMarksWidget.checkBox.isChecked():
                 self.mainWindow.clearMarks()
-        if cShift and cShift.nmrAtom:
-            markNmrAtoms(self.mainWindow, [cShift.nmrAtom])
+        with undoBlockWithoutSideBar():
+            for objs in selection:
+                cShift = self._getValidChemicalShift4Callback(objs)
+                if cShift and cShift.nmrAtom:
+                    markNmrAtoms(self.mainWindow, [cShift.nmrAtom])
 
     def selectionCallback(self, selected, deselected, selection, lastItem):
         """Notifier Callback for selecting rows in the table.
@@ -659,18 +654,20 @@ class _NewChemicalShiftTable(_ProjectTableABC):
         self._removeAssignmentsMenuAction = menu.addAction(_REMOVE_CST, partial(self._removeAssignments, delete=False))
         self._removeAssignmentsDeleteMenuAction = menu.addAction(_REMOVEDEL_CST,
                                                                  partial(self._removeAssignments, delete=True))
+        self._markChemicalShiftsAction = menu.addAction(_MARKSHIFTS, self._markChemicalShiftsCallback)
 
         if (_actions := menu.actions()):
             _topMenuItem = _actions[0]
             _topSeparator = menu.insertSeparator(_topMenuItem)
 
-            # move new actions to the top of the list
-            menu.insertAction(_topSeparator, self._removeAssignmentsDeleteMenuAction)
+            # move new actions to the top of the list - insert in reverse order
+            menu.insertAction(_topSeparator, self._markChemicalShiftsAction)
+            menu.insertAction(self._markChemicalShiftsAction, self._removeAssignmentsDeleteMenuAction)
             menu.insertAction(self._removeAssignmentsDeleteMenuAction, self._removeAssignmentsMenuAction)
             menu.insertAction(self._removeAssignmentsMenuAction, self._mergeMenuAction)
             menu.insertAction(self._mergeMenuAction, self._editMenuAction)
 
-        # add navigate option to the bottom
+        # add `navigate` option to the bottom
         menu.addSeparator()
         self._navigateMenu = menu.addMenu(_NAVIGATE_CST)
 
@@ -816,7 +813,7 @@ class _NewChemicalShiftTable(_ProjectTableABC):
             if len(failedStripPids) > 0:
                 stripStr = 'strip' if len(failedStripPids) == 1 else 'strips'
                 strips = ', '.join(failedStripPids)
-                getLogger().warn(
+                getLogger().warning(
                         f'Cannot navigate to position {round(chemicalShift.value, 3)} '
                         f'in {stripStr}: {strips} '
                         f'for nmrAtom {chemicalShift.nmrAtom.name}.')
@@ -828,36 +825,43 @@ class _NewChemicalShiftTable(_ProjectTableABC):
         data = self.getRightMouseItem()
         _peaks = None
 
-        if (data is not None and not data.empty) and selection:
-            if (matching := [cs for cs in selection if cs and cs.nmrAtom]):
+        if (data is not None and not data.empty) and selection and \
+                (matching := [cs for cs in selection if cs and cs.nmrAtom]):
 
-                # if there is a selection and the selection contains shift with nmrAtoms
-                with undoBlockWithoutSideBar():
-                    with notificationEchoBlocking():
+            # if there is a selection and the selection contains shift with nmrAtoms
+            with undoBlockWithoutSideBar():
+                with notificationEchoBlocking():
 
-                        # get the set of peaks that need updating, and corresponding set of nmrAtoms
-                        _peaks = reduce(or_, [set(cs.assignedPeaks) for cs in matching])
-                        nmrAtoms = set(cs.nmrAtom for cs in matching)
-                        for peak in _peaks:
-                            peakDimNmrAtoms = list(list(pp) for pp in peak.dimensionNmrAtoms)
+                    # get the set of peaks that need updating, and corresponding set of nmrAtoms
+                    _peaks = reduce(or_, [set(cs.assignedPeaks) for cs in matching])
+                    nmrAtoms = set(cs.nmrAtom for cs in matching)
+                    for peak in _peaks:
+                        peakDimNmrAtoms = list(list(pp) for pp in peak.dimensionNmrAtoms)
 
-                            # remove the required nmrAtoms from each assignment dimension
-                            found = False
-                            for peakDim in peakDimNmrAtoms:
-                                pDims = set(peakDim)
-                                diff = pDims - nmrAtoms
-                                if diff != pDims:
-                                    peakDim[:] = list(diff)
-                                    found = True
+                        # remove the required nmrAtoms from each assignment dimension
+                        found = False
+                        for peakDim in peakDimNmrAtoms:
+                            pDims = set(peakDim)
+                            diff = pDims - nmrAtoms
+                            if diff != pDims:
+                                peakDim[:] = list(diff)
+                                found = True
 
-                            if found:
-                                # update the peak assignments
-                                peak.dimensionNmrAtoms = peakDimNmrAtoms
+                        if found:
+                            # update the peak assignments
+                            peak.dimensionNmrAtoms = peakDimNmrAtoms
 
-                        if delete:
-                            # delete the chemicalShift
-                            for cs in matching:
-                                cs.delete()
+                    if delete:
+                        # delete the chemicalShift
+                        for cs in matching:
+                            cs.delete()
+
+    def _markChemicalShiftsCallback(self):
+        """Mark selected chemical-shifts.
+        """
+        if selection := self.getSelectedObjects():
+            self._markSelectedShifts(selection)
+        getLogger().debug2(f'{self.__class__.__name__}._markChemicalShiftsCallback: No selected ChemicalShifts')
 
 
 #=========================================================================================
@@ -902,22 +906,25 @@ class _CSLTableDelegate(QtWidgets.QStyledItemDelegate):
         else:
             raise Exception(f'Widget {widget} does not expose a set method; required for table editing')
 
-    def setModelData(self, widget, mode, index):
-        """Set the object to the new value.
-        :param widget - typically a lineedit handling the editing of the cell
-        :param mode - editing mode
-        :param index - QModelIndex of the cell
+    def setModelData(self, editor: QtWidgets.QWidget,
+                     model: QtCore.QAbstractItemModel,
+                     index: QtCore.QModelIndex) -> None:
+        """
+        Set the object to the new value.
+        Gets data from the editor widget and stores it in the specified model at the item index.
+
+        :param editor: The overlaid QWidget handling the editing of the cell.
+        :param model: Table-model handling the data.
+        :param index: The QModelIndex of the cell being edited.
         """
         for attrib in _EDITOR_GETTER:
-            if (func := getattr(widget, attrib, None)):
+            if (func := getattr(editor, attrib, None)):
                 if not callable(func):
                     raise TypeError(f"widget.{attrib} is not callable")
-
                 value = func()
                 break
-
         else:
-            raise Exception(f'Widget {widget} does not expose a get method; required for table editing')
+            raise Exception(f'Widget {editor} does not expose a get method; required for table editing')
 
         row, col = index.row(), index.column()
         try:

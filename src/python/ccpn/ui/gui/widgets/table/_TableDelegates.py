@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-09 20:28:59 +0000 (Thu, January 09, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-05-22 14:56:18 +0100 (Thu, May 22, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -106,8 +106,12 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
 
             return super().createEditor(parentWidget, itemStyle, index)
 
-    def setEditorData(self, widget, index) -> None:
-        """populate the editor widget when the cell is edited
+    def setEditorData(self, editor: QtWidgets.QWidget, index: QtCore.QModelIndex) -> None:
+        """
+        Populate the editor widget when the cell is edited.
+
+        :param editor: The overlaid QWidget handling the editing of the cell.
+        :param index: The QModelIndex of the cell being edited.
         """
         model = index.model()
         value = model.data(index, EDIT_ROLE)
@@ -117,42 +121,43 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
 
         for attrib in _EDITOR_SETTER:
             # get the method from the widget, and call with appropriate parameters
-            if (func := getattr(widget, attrib, None)):
+            if (func := getattr(editor, attrib, None)):
                 if not callable(func):
                     raise TypeError(f"widget.{attrib} is not callable")
-
                 func(*value)
                 break
-
         else:
-            raise RuntimeError(f'Widget {widget} does not expose a set method; required for table editing')
+            raise RuntimeError(f'Widget {editor} does not expose a set method; required for table editing')
 
-    def setModelData(self, widget, mode, index):
-        """Set the object to the new value
-        :param widget - typically a lineedit handling the editing of the cell
-        :param mode - editing mode:
-        :param index - QModelIndex of the cell
+    def setModelData(self, editor: QtWidgets.QWidget,
+                     model: QtCore.QAbstractItemModel,
+                     index: QtCore.QModelIndex) -> None:
         """
+        Set the object to the new value.
+        Gets data from the editor widget and stores it in the specified model at the item index.
+
+        :param editor: The overlaid QWidget handling the editing of the cell.
+        :param model: Table-model handling the data.
+        :param index: The QModelIndex of the cell being edited.
+        """
+        # SHOULD really be model.setData that handles this :| and remove dataFrameObject
         for attrib in _EDITOR_GETTER:
-            if (func := getattr(widget, attrib, None)):
+            if (func := getattr(editor, attrib, None)):
                 if not callable(func):
                     raise TypeError(f"widget.{attrib} is not callable")
-
                 value = func()
                 break
-
         else:
-            raise RuntimeError(f'Widget {widget} does not expose a get method; required for table editing')
+            raise RuntimeError(f'Widget {editor} does not expose a get method; required for table editing')
 
         row, col = index.row(), index.column()
         try:
             # get the sorted element from the dataFrame
             df = self._parent._df
-            iRow = self._parent.model()._sortIndex[row]
+            iRow = model._sortIndex[row]
             iCol = df.columns.get_loc(self._objectColumn)
             # get the object
             obj = df.iat[iRow, iCol]
-
             # set the data which will fire notifiers to populate all tables (including this)
             func = self._parent._dataFrameObject.setEditValues[col]
             if func and obj:
@@ -160,7 +165,7 @@ class _TableDelegate(QtWidgets.QStyledItemDelegate):
 
         except Exception as es:
             getLogger().debug(f'Error handling cell editing: {row:d} {col:d} - {str(es)}    '
-                              f'{self._parent.model()._sortIndex}    {value}')
+                              f'{model._sortIndex}    {value}')
 
     def updateEditorGeometry(self, widget, itemStyle, index):
         """Display the required editor for the cell
@@ -344,21 +349,25 @@ class _TableDelegateABC(QtWidgets.QStyledItemDelegate):
             else:
                 raise RuntimeError(f'Widget {widget} does not expose a set method; required for table editing')
 
-    def setModelData(self, widget, mode, index):
-        """Set the object to the new value.
+    def setModelData(self, editor: QtWidgets.QWidget,
+                     model: QtCore.QAbstractItemModel,
+                     index: QtCore.QModelIndex) -> None:
+        """
+        Set the object to the new value.
+        Gets data from the editor widget and stores it in the specified model at the item index.
 
-        :param widget: the editor widget.
-        :param mode: editing mode.
-        :param index: QModelIndex of the cell in the table.
+        :param editor: The overlaid QWidget handling the editing of the cell.
+        :param model: Table-model handling the data.
+        :param index: The QModelIndex of the cell being edited.
         """
         if not self.customWidget:
-            return super().setModelData(widget, mode, index)
+            return super().setModelData(editor, model, index)
 
         mapping = {'True': True, 'False': False}
-        if hasattr(widget, 'get'):
-            value = widget.get()
+        if hasattr(editor, 'get'):
+            value = editor.get()
         else:
-            raise RuntimeError(f'Widget {widget} does not expose a get method; required for table editing')
+            raise RuntimeError(f'Widget {editor} does not expose a get method; required for table editing')
         try:
             model = index.model()
             model.setData(index, mapping[value])
@@ -626,20 +635,24 @@ class _BooleanDelegate(QtWidgets.QStyledItemDelegate):
         else:
             super().setEditorData(widget, index)
 
-    def setModelData(self, widget, mode, index):
-        """Set the object to the new value.
+    def setModelData(self, editor: QtWidgets.QWidget,
+                     model: QtCore.QAbstractItemModel,
+                     index: QtCore.QModelIndex) -> None:
+        """
+        Set the object to the new value.
+        Gets data from the editor widget and stores it in the specified model at the item index.
 
-        :param widget: the editor widget.
-        :param mode: editing mode.
-        :param index: QModelIndex of the cell in the table.
+        :param editor: The overlaid QWidget handling the editing of the cell.
+        :param model: Table-model handling the data.
+        :param index: The QModelIndex of the cell being edited.
         """
         mapping = {'True': True, 'False': False}
 
         if self.customWidget:
-            if hasattr(widget, 'get'):
-                value = widget.get()
+            if hasattr(editor, 'get'):
+                value = editor.get()
             else:
-                raise RuntimeError(f'Widget {widget} does not expose a get method; required for table editing')
+                raise RuntimeError(f'Widget {editor} does not expose a get method; required for table editing')
             try:
                 model = index.model()
                 model.setData(index, mapping[value])
@@ -647,7 +660,7 @@ class _BooleanDelegate(QtWidgets.QStyledItemDelegate):
                 getLogger().debug(f'Error handling cell editing: {index.row()} {index.column()} - '
                                   f'{es}  {self._parent.model()._sortIndex}  {value}')
         else:
-            super().setModelData(widget, mode, index)
+            super().setModelData(editor, model, index)
 
     def updateEditorGeometry(self, widget, itemStyle, index):
         """Ensures that the editor is displayed correctly.

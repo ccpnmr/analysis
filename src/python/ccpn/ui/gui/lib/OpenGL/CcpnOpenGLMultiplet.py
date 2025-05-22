@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-30 18:35:26 +0100 (Tue, July 30, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2025-05-22 18:18:23 +0100 (Thu, May 22, 2025) $"
+__version__ = "$Revision: 3.3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,6 +28,7 @@ __date__ = "$Date: 2020-12-11 17:51:39 +0000 (Fri, December 11, 2020) $"
 #=========================================================================================
 
 import numpy as np
+import math
 from ccpn.core.lib.peakUtils import _getScreenPeakAnnotation, _getPeakAnnotation, _getPeakClusterId
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_MULTIPLETLINK
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
@@ -272,16 +273,86 @@ class GLmultipletListMethods():
                          + r * 0.5, - w * 0.85, 0, 0,
                          + r * 0.85, - w * 0.50,  0, 0], np.float32), self.LENSQ4
 
-    # class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):  #, GLpeakNdLabelling):
-    #     """Class to handle symbol and symbol labelling for Nd displays
-    #     """
-    #
-    #     def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
-    #         """Initialise the class
-    #         """
-    #         super(GLmultipletNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
-    #
-    #         self.autoColour = self._GLParent.SPECTRUMNEGCOLOUR
+    def _rescaleSymbols(self, spectrumView, objListView):
+        """rescale symbols when the screen dimensions change
+        """
+        drawList = self._GLSymbols[objListView]
+        if not drawList.numVertices:
+            return
+        _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
+
+        # NOTE:ED - mask method fails for multiplets - contain mixed sizes :|
+        if symbolType == 0 or symbolType == 3:  # a cross/plus
+            offsets, offLen = self._rescaleSymbolOffsets(r, w)
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
+                indexStart = 4 * drawList.pids[pp + 1]
+                drawList.vertices[indexStart:indexStart + offLen] = \
+                    drawList.offsets[indexStart:indexStart + offLen] + offsets
+
+        elif symbolType == 1:  # an ellipse
+            # only update the symbols defined without line-widths
+            numPoints = 12
+            angPlus = np.pi
+            skip = 2
+            np2 = 2 * numPoints
+            ang = list(range(numPoints))
+
+            # draw an ellipse at lineWidth
+            st, end, step, xtra = 0, 4 * np2, 4, 20
+            offsets = np.empty(end + xtra, dtype=np.float32)
+            offsets[st:end] = [val for an in ang
+                               for val in [- r * math.sin(skip * an * angPlus / numPoints),
+                                           - w * math.cos(skip * an * angPlus / numPoints),
+                                           0.0, 0.0,
+                                           - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                           - w * math.cos((skip * an + 1) * angPlus / numPoints),
+                                           0.0, 0.0]]
+            offsets[end:end + xtra] = [-r, -w, 0.0, 0.0,
+                                       +r, +w, 0.0, 0.0,
+                                       +r, -w, 0.0, 0.0,
+                                       -r, +w, 0.0, 0.0,
+                                       0.0, 0.0, 0.0, 0.0]
+
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
+                if drawList.pids[pp + 2] == 12:
+                    # not a very nice way to check whether the peak contains line-widths
+                    # and requires a fixed-size symbol
+                    indexStart = step * drawList.pids[pp + 1]
+                    drawList.vertices[indexStart:indexStart + end + xtra] = drawList.offsets[
+                                                                            indexStart:indexStart + end + xtra] + offsets
+
+        elif symbolType == 2:  # filled ellipse
+            numPoints = 12
+            angPlus = 1.0 * np.pi
+            skip = 2
+            np2 = 2 * numPoints
+            ang = list(range(numPoints))
+
+            # draw a filled ellipse at lineWidth
+            st, end, step, xtra = 0, 4 * np2, 4, 20
+            offsets = np.empty(end + xtra, dtype=np.float32)
+            offsets[st:end] = [val for an in ang
+                               for val in [- r * math.sin(skip * an * angPlus / numPoints),
+                                           - w * math.cos(skip * an * angPlus / numPoints),
+                                           0.0, 0.0,
+                                           - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                           - w * math.cos((skip * an + 1) * angPlus / numPoints),
+                                           0.0, 0.0]]
+            offsets[end:end + xtra] = [-r, -w, 0.0, 0.0,
+                                       +r, +w, 0.0, 0.0,
+                                       +r, -w, 0.0, 0.0,
+                                       -r, +w, 0.0, 0.0,
+                                       0.0, 0.0, 0.0, 0.0]
+
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
+                if drawList.pids[pp + 2] == 12:
+                    # not a very nice way to check whether the peak contains line-widths
+                    # and requires a fixed-size symbol
+                    indexStart = step * drawList.pids[pp + 1]
+                    drawList.vertices[indexStart:indexStart + end + xtra] = drawList.offsets[
+                                                                            indexStart:indexStart + end + xtra] + offsets
+        else:
+            raise ValueError('GL Error: bad symbol type')
 
     def appendExtraVertices(self, drawList, pIndex, multiplet, pxy, colour, fade):
         """Add extra vertices to the vertex list
@@ -661,3 +732,23 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
         """Get the current object is in visible planes settings
         """
         return True, False, 0, 1.0
+
+    def _rescaleSymbols(self, spectrumView, objListView):
+        """rescale symbols when the screen dimensions change
+        """
+        drawList = self._GLSymbols[objListView]
+        if not drawList.numVertices:
+            return
+        _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
+
+        if symbolType == 0 or symbolType == 3:  # a cross/plus
+            offsets, offLen = self._rescaleSymbolOffsets(r, w)
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
+                indexStart = 4 * drawList.pids[pp + 1]
+                drawList.vertices[indexStart:indexStart + offLen] = \
+                    drawList.offsets[indexStart:indexStart + offLen] + offsets
+
+        elif symbolType == 1 or symbolType == 2:
+            pass
+        else:
+            raise ValueError('GL Error: bad symbol type')

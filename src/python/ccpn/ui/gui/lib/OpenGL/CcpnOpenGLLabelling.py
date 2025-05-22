@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-02 11:23:07 +0100 (Fri, May 02, 2025) $"
-__version__ = "$Revision: 3.3.2 $"
+__dateModified__ = "$dateModified: 2025-05-22 18:18:23 +0100 (Thu, May 22, 2025) $"
+__version__ = "$Revision: 3.3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2373,9 +2373,17 @@ class GLLabelling():
                                        0.0, 0.0, 0.0, 0.0]
 
             # apply the resize to just the x/y of the vertices (so as not to scrub over alias)
-            mask = np.tile(np.array([True, True, False, False]), drawList.numVertices)
-            allOffsets = np.tile(offsets, 4 * drawList.numVertices // len(offsets))
-            drawList.vertices[mask] = drawList.offsets[mask] + allOffsets[mask]
+            # mask = np.tile(np.array([True, True, False, False]), drawList.numVertices)
+            # allOffsets = np.tile(offsets, 4 * drawList.numVertices // len(offsets))
+            # drawList.vertices[mask] = drawList.offsets[mask] + allOffsets[mask]
+            # NOTE:ED - mask method fails for multiplets - contain mixed sizes :|
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
+                if drawList.pids[pp + 2] == 12:
+                    # not a very nice way to check whether the peak contains line-widths
+                    # and requires a fixed-size symbol
+                    indexStart = step * drawList.pids[pp + 1]
+                    drawList.vertices[indexStart:indexStart + end + xtra] = drawList.offsets[
+                                                                            indexStart:indexStart + end + xtra] + offsets
 
         elif symbolType == 2:  # filled ellipse
             numPoints = 12
@@ -2402,9 +2410,17 @@ class GLLabelling():
                                        0.0, 0.0, 0.0, 0.0]
 
             # apply the resize to just the x/y of the vertices (so as not to scrub over alias)
-            mask = np.tile(np.array([True, True, False, False]), drawList.numVertices)
-            allOffsets = np.tile(offsets, 4 * drawList.numVertices // len(offsets))
-            drawList.vertices[mask] = drawList.offsets[mask] + allOffsets[mask]
+            # mask = np.tile(np.array([True, True, False, False]), drawList.numVertices)
+            # allOffsets = np.tile(offsets, 4 * drawList.numVertices // len(offsets))
+            # drawList.vertices[mask] = drawList.offsets[mask] + allOffsets[mask]
+            # NOTE:ED - mask method fails for multiplets - contain mixed sizes :|
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
+                if drawList.pids[pp + 2] == 12:
+                    # not a very nice way to check whether the peak contains line-widths
+                    # and requires a fixed-size symbol
+                    indexStart = step * drawList.pids[pp + 1]
+                    drawList.vertices[indexStart:indexStart + end + xtra] = drawList.offsets[
+                                                                            indexStart:indexStart + end + xtra] + offsets
         else:
             raise ValueError('GL Error: bad symbol type')
 
@@ -3445,6 +3461,7 @@ class GL1dLabelling():
             drawList.vertices[mask] = drawList.offsets[mask] + allOffsets[mask]
 
         elif symbolType == 1 or symbolType == 2:
+            # NOTE:ED - mask method fails for multiplets but not required here
             pass
         else:
             raise ValueError('GL Error: bad symbol type')

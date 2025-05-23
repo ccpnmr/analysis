@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-09 15:55:47 +0100 (Fri, May 09, 2025) $"
+__dateModified__ = "$dateModified: 2025-05-22 16:55:43 +0100 (Thu, May 22, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -158,7 +158,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
     ENABLEICONS = False
     FORCEWIDTHTOTITLE = True
     _dontShowEnabled = False
-    _defaultResponse = None
+    _defaultResponse = None  # needs to point to existing method (or None)
     _popupId = None
     _defaultButton = None
 
@@ -507,7 +507,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
                 # store in preferences
                 app = getApplication()
                 popup = app.preferences.popups[self._popupId]
-                state = popup[_DONTSHOWPOPUP]
+                state = bool(popup[_DONTSHOWPOPUP])
             except Exception:
                 state = False
             # what is the default response for this dialog?
@@ -609,7 +609,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
                 # store in preferences
                 app = getApplication()
                 popup = app.preferences.popups[self.__class__.__name__]
-                state = popup[_DONTSHOWPOPUP]
+                state = bool(popup[_DONTSHOWPOPUP])
             except Exception:
                 state = False
 

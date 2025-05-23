@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-15 10:09:12 +0100 (Thu, May 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-05-22 16:55:43 +0100 (Thu, May 22, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -2043,8 +2043,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
             ## Please always show the popup! Because we could have selected current objects that are not obviously displayed as selected in tables/or displays and
             ## could delete objects without being aware of this operation.
             ## This shortcut should be removed from here, and enabled only on displays/tables as a localised shortcut
-            popup = DeleteItemsPopup(parent=self, mainWindow=self, items=deleteItems)
-            popup.exec()
+            if popup := DeleteItemsPopup(parent=self, project=self.project, items=deleteItems):
+                popup.exec_()
 
     @logCommand('mainWindow.')
     def propagateAssignments(self):

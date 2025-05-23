@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-04 15:19:21 +0100 (Thu, April 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2025-05-22 16:55:43 +0100 (Thu, May 22, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,6 +32,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, CcpnDialogMainWidget
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 
 
@@ -53,26 +55,23 @@ class DeleteItemsPopup(CcpnDialogMainWidget):
     i.e. (('Peaks', peakList, checked), ('Multiplets', multipletList, checked))
     checked sets the state of the checkbox for the option.
     """
+    _dontShowEnabled = True
+    _popupId = 'DeleteItemsPopup'
+    _project = WeakRefDescriptor()
 
-    def __init__(self, parent=None, mainWindow=None, title='Delete Items', items=None, **kwds):
+    def __init__(self, parent=None, project=None, title='Delete Items', items=None, **kwds):
         """Initialise the widget
         """
         super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
-        self.mainWindow = mainWindow
-        if mainWindow:
-            self.application = mainWindow.application
-            self.project = mainWindow.application.project
-            self.current = mainWindow.application.current
-        else:
-            self.application = self.project = self.current = None
+        self._project = project
         self.deleteList = []
         self._items = []
-
         # initialise the content
         self._checkItems(items)
         self._setWidgets()
 
+        self._defaultResponse = self._okClicked
         self.setOkButton(callback=self._okClicked, tipText='Delete and close')
         self.setCloseButton(callback=self.reject, tipText='Close')
 
@@ -93,7 +92,8 @@ class DeleteItemsPopup(CcpnDialogMainWidget):
                                                  grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                                                  orientation='right',
                                                  # assume that the name is plural
-                                                 labelText='{} {}{}'.format(len(values), itemName.rstrip('s'), 's' if len(values) > 1 else ''),
+                                                 labelText='{} {}{}'.format(len(values), itemName.rstrip('s'),
+                                                                            's' if len(values) > 1 else ''),
                                                  checked=checkState  # True if itemName in _ALWAYS_CHECKLIST else False
                                                  )
             newCheckBox.setToolTip('\n'.join(str(obj.pid) for obj in values))
@@ -103,7 +103,8 @@ class DeleteItemsPopup(CcpnDialogMainWidget):
 
             if len(self._items) == 1:
                 # in the only item, so hide the checkboxes, rename the label
-                self.noteLabel.setText(f'Do you want to delete {len(values)} {itemName.rstrip("s")}{"s" if len(values) > 1 else ""}?')
+                self.noteLabel.setText(f'Do you want to delete {len(values)} {itemName.rstrip("s")}'
+                                       f'{"s" if len(values) > 1 else ""}?')
                 newCheckBox.set(True)
                 newCheckBox.setVisible(False)
 
@@ -126,16 +127,17 @@ class DeleteItemsPopup(CcpnDialogMainWidget):
                 raise ValueError(f'checkState must be True/False')
 
             # get the valid core objects
-            objs = self.project.getByPids(values)
+            objs = self._project.getByPids(values)
             self._items.append(_ItemState(name, objs, checkState, None))
 
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets
-        self.GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLINTEGRALS, GLNotifier.GLALLMULTIPLETS])
+        self.GLSignals.emitEvent(
+                triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLINTEGRALS, GLNotifier.GLALLMULTIPLETS])
 
     def _okClicked(self):
         """
-        When ok button pressed: delete and exit
+        When OK button pressed: delete and exit
         """
         # get the list of checked items - do first to stop threading issue?
         itms = set()
@@ -150,7 +152,7 @@ class DeleteItemsPopup(CcpnDialogMainWidget):
                 addUndoItem(undo=self._refreshGLItems)
 
             # delete the items
-            self.project.deleteObjects(*list(itms))
+            self._project.deleteObjects(*list(itms))
 
             # add item here to redraw items
             with undoStackBlocking() as addUndoItem:

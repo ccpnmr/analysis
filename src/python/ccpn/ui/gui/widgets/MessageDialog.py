@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-21 16:02:37 +0000 (Fri, March 21, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-05-22 16:55:44 +0100 (Thu, May 22, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,6 +31,7 @@ import textwrap
 import math
 import sys
 import re
+from typing import cast
 from contextlib import suppress
 from functools import partial
 from dataclasses import dataclass
@@ -39,7 +40,7 @@ from PyQt5.QtCore import Qt, QEvent, pyqtSlot
 from ccpn.ui.gui.widgets.Font import setWidgetFont
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.guiSettings import getColours
+# from ccpn.ui.gui.guiSettings import getColours
 from ccpn.util.Logging import getLogger
 
 
@@ -56,16 +57,17 @@ Ignore = QtWidgets.QMessageBox.Ignore
 Abort = QtWidgets.QMessageBox.Abort
 Close = QtWidgets.QMessageBox.Close
 Information = QtWidgets.QMessageBox.Information
-Warning = QtWidgets.QMessageBox.Warning
+QWarning = QtWidgets.QMessageBox.Warning
 Question = QtWidgets.QMessageBox.Question
 Critical = QtWidgets.QMessageBox.Critical
 Save = QtWidgets.QMessageBox.Save
 Discard = QtWidgets.QMessageBox.Discard
+NoIcon = QtWidgets.QMessageBox.NoIcon
 
-default_icons = (Information, Question, Warning, Critical)
+default_icons = (Information, Question, QWarning, Critical)
 
 if _isDarwin():
-    Question = Warning
+    Question = QWarning
 
 LINELENGTH = 100
 WRAPBORDER = 5
@@ -143,7 +145,7 @@ class MessageDialog(QtWidgets.QMessageBox):
         widgets = self.findChildren((QtWidgets.QLabel, QtWidgets.QTextEdit))
         for widg in widgets:
             setWidgetFont(widg, )
-        layout = self.layout()
+        layout = cast(QtWidgets.QGridLayout, self.layout())
         for (rr, cc) in ((0, 1), (0, 2)):
             # not sure whether it is column 1 or 2, but it might change?
             if (item := layout.itemAtPosition(rr, cc)) and (widg := item.widget()) and (widg in widgets):
@@ -161,7 +163,7 @@ class MessageDialog(QtWidgets.QMessageBox):
         if detailedText:
             # adds the 'Show Details...' button - style is not correct though
             self.setDetailedText(detailedText)
-        layout = self.layout()
+        layout = cast(QtWidgets.QGridLayout, self.layout())
         maxTextWidth = _STARTMAXWIDTH
         widgetSet = set()
         for (rr, cc) in ((0, 1), (0, 2)):
@@ -210,7 +212,7 @@ class MessageDialog(QtWidgets.QMessageBox):
             # any error should hide the checkbox
             self._dontShowCheckBox = None
             return
-        layout = self.layout()
+        layout = cast(QtWidgets.QGridLayout, self.layout())
         # add a checkbox below the buttons - looks a little cleaner
         # - just use simple widgets for the minute to stop cyclic imports
         self._frame = _frame = Frame(self)
@@ -245,7 +247,7 @@ class MessageDialog(QtWidgets.QMessageBox):
         pixmap = icon.pixmap(QtCore.QSize(48, 48))
         ll = QtWidgets.QLabel('Resizing')
         ll.setFixedSize(48, 48)
-        self.layout().addWidget(ll, 0, 0)
+        self.layout().addWidget(ll, 0, 0)  # noqa
         ll.setPixmap(pixmap)
 
     def _setStyle(self):
@@ -511,7 +513,7 @@ def showYesNoCancel(title, message, parent=None, iconPath=None,
 
 def showWarning(title, message, parent=None, iconPath=None, detailedText=None,
                 dontShowEnabled=False, defaultResponse=None, popupId=None):
-    dialog = MessageDialog(title='Warning', basicText=title, message=message, icon=Warning, iconPath=iconPath,
+    dialog = MessageDialog(title='Warning', basicText=title, message=message, icon=QWarning, iconPath=iconPath,
                            parent=parent, detailedText=detailedText,
                            dontShowEnabled=dontShowEnabled, defaultResponse=defaultResponse, popupId=popupId)
 
@@ -527,7 +529,7 @@ def showWarning(title, message, parent=None, iconPath=None, detailedText=None,
 
 def showOkCancelWarning(title, message, parent=None, iconPath=None,
                         dontShowEnabled=False, defaultResponse=None, popupId=None):
-    dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent,
+    dialog = MessageDialog('Warning', title, message, QWarning, iconPath, parent,
                            dontShowEnabled=dontShowEnabled, defaultResponse=defaultResponse, popupId=popupId)
     if dialog.dontShowPopup():
         getLogger().debug(f'Popup {popupId!r} skipped with response={defaultResponse}')
@@ -539,7 +541,7 @@ def showOkCancelWarning(title, message, parent=None, iconPath=None,
 
 def showYesNoWarning(title, message, parent=None, iconPath=None,
                      dontShowEnabled=False, defaultResponse=None, popupId=None):
-    dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent,
+    dialog = MessageDialog('Warning', title, message, QWarning, iconPath, parent,
                            dontShowEnabled=dontShowEnabled, defaultResponse=defaultResponse, popupId=popupId)
     if dialog.dontShowPopup():
         getLogger().debug(f'Popup {popupId!r} skipped with response={defaultResponse}')
@@ -550,7 +552,7 @@ def showYesNoWarning(title, message, parent=None, iconPath=None,
 
 
 def showYesNoCancelWarning(title, message, parent=None, iconPath=None):
-    dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
+    dialog = MessageDialog('Warning', title, message, QWarning, iconPath, parent)
     dialog.setStandardButtons(Yes | No | Cancel)
     dialog.setDefaultButton(Cancel)
     return dialog.exec_()
@@ -634,7 +636,7 @@ def showMessage(title, message, parent=None, iconPath=None):
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Label import Label
 from contextlib import contextmanager
-from time import sleep, time
+from time import sleep
 
 
 class progressPopup(CcpnDialog):
@@ -739,6 +741,7 @@ def progressManager(parent, title=None, progressMax=100):
         thisProg.close()
         if win := (_prog.newWindow or parent):
             # return correct focus control to the parent
+            # noinspection PyUnboundLocalVariable
             QtWidgets.QApplication.setActiveWindow(win)
 
 
@@ -758,6 +761,7 @@ def busyDialog(parent, title=None, progressMax=100):
         thisProg.close()
         if win := (_prog.newWindow or parent):
             # return correct focus control to the parent
+            # noinspection PyUnboundLocalVariable
             QtWidgets.QApplication.setActiveWindow(win)
 
 

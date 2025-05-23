@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-02 11:23:07 +0100 (Fri, May 02, 2025) $"
-__version__ = "$Revision: 3.3.2 $"
+__dateModified__ = "$dateModified: 2025-05-23 13:59:26 +0100 (Fri, May 23, 2025) $"
+__version__ = "$Revision: 3.3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2318,93 +2318,84 @@ class GLLabelling():
     #-----------------------------------------------------------------------------------------
 
     def _rescaleSymbolOffsets(self, r, w):
-        return np.array([-r, -w, 0, 0,
-                         +r, +w, 0, 0,
-                         +r, -w, 0, 0,
-                         -r, +w, 0, 0,
-                         0, 0, 0, 0,
-                         0, -w, 0, 0,
-                         0, +w, 0, 0,
-                         +r, 0, 0, 0,
-                         -r, 0, 0, 0], np.float32), \
-            self.LENSQ4
+        return np.array([-r, -w,
+                         +r, +w,
+                         +r, -w,
+                         -r, +w,
+                         0, 0,
+                         0, -w,
+                         0, +w,
+                         +r, 0,
+                         -r, 0,
+                         ], np.float32), \
+            self.LENSQ2  # len of the preceding array
 
     def _rescaleSymbols(self, spectrumView, objListView):
         """rescale symbols when the screen dimensions change
         """
         drawList = self._GLSymbols[objListView]
-
         if not drawList.numVertices:
             return
-
-        # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
         _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
-        if symbolType == 0 or symbolType == 3:  # a cross/plus
+        if symbolType in {0, 3}:  # a cross/plus
             offsets, offLen = self._rescaleSymbolOffsets(r, w)
             # apply the resize to just the x/y of the vertices (so as not to scrub over alias)
             mask = np.tile(np.array([True, True, False, False]), drawList.numVertices)
-            allOffsets = np.tile(offsets, 4 * drawList.numVertices // offLen)
-            drawList.vertices[mask] = drawList.offsets[mask] + allOffsets[mask]
+            allOffsets = np.tile(offsets, 2 * drawList.numVertices // offLen)
+            drawList.vertices[mask] = drawList.offsets[mask] + allOffsets
 
-        elif symbolType == 1:  # an ellipse
-            # only update the symbols defined without line-widths
-            numPoints = 12
-            angPlus = np.pi
-            skip = 2
-            np2 = 2 * numPoints
-            ang = list(range(numPoints))
-
-            # draw an ellipse at lineWidth
-            st, end, step, xtra = 0, 4 * np2, 4, 20
-
-            offsets = np.empty(end + xtra, dtype=np.float32)
-            offsets[st:end] = [val for an in ang
-                               for val in [- r * math.sin(skip * an * angPlus / numPoints),
-                                           - w * math.cos(skip * an * angPlus / numPoints),
-                                           0.0, 0.0,
-                                           - r * math.sin((skip * an + 1) * angPlus / numPoints),
-                                           - w * math.cos((skip * an + 1) * angPlus / numPoints),
-                                           0.0, 0.0]]
-            offsets[end:end + xtra] = [-r, -w, 0.0, 0.0,
-                                       +r, +w, 0.0, 0.0,
-                                       +r, -w, 0.0, 0.0,
-                                       -r, +w, 0.0, 0.0,
-                                       0.0, 0.0, 0.0, 0.0]
-
-            # apply the resize to just the x/y of the vertices (so as not to scrub over alias)
-            mask = np.tile(np.array([True, True, False, False]), drawList.numVertices)
-            allOffsets = np.tile(offsets, 4 * drawList.numVertices // len(offsets))
-            drawList.vertices[mask] = drawList.offsets[mask] + allOffsets[mask]
-
-        elif symbolType == 2:  # filled ellipse
-            numPoints = 12
-            angPlus = 1.0 * np.pi
-            skip = 2
-            np2 = 2 * numPoints
-            ang = list(range(numPoints))
-
-            # draw a filled ellipse at lineWidth
-            st, end, step, xtra = 0, 4 * np2, 4, 20
+        elif symbolType in {1, 2}:  # an ellipse
+            # NOTE:ED - there was a reason why these are split, but not sure why :|
+            if symbolType == 1:
+                # only update the symbols defined without line-widths
+                numPoints = 12
+                angPlus = np.pi
+                skip = 2
+                np2 = 2 * numPoints
+                ang = list(range(numPoints))
+                # draw an ellipse at lineWidth
+                st, end, xtra = 0, 2 * np2, 10  # all //'d 2, only x, y below
+            else:  # filled ellipse
+                numPoints = 12
+                angPlus = 1.0 * np.pi
+                skip = 2
+                np2 = 2 * numPoints
+                ang = list(range(numPoints))
+                # draw a filled ellipse at lineWidth
+                st, end, xtra = 0, 2 * np2, 10  # all //'d 2
 
             offsets = np.empty(end + xtra, dtype=np.float32)
             offsets[st:end] = [val for an in ang
                                for val in [- r * math.sin(skip * an * angPlus / numPoints),
                                            - w * math.cos(skip * an * angPlus / numPoints),
-                                           0.0, 0.0,
                                            - r * math.sin((skip * an + 1) * angPlus / numPoints),
                                            - w * math.cos((skip * an + 1) * angPlus / numPoints),
-                                           0.0, 0.0]]
-            offsets[end:end + xtra] = [-r, -w, 0.0, 0.0,
-                                       +r, +w, 0.0, 0.0,
-                                       +r, -w, 0.0, 0.0,
-                                       -r, +w, 0.0, 0.0,
-                                       0.0, 0.0, 0.0, 0.0]
-
+                                           ]]
+            offsets[end:end + xtra] = [-r, -w,
+                                       +r, +w,
+                                       +r, -w,
+                                       -r, +w,
+                                       0.0, 0.0,
+                                       ]
+            step = 4
+            xend = 2 * (end + xtra)
             # apply the resize to just the x/y of the vertices (so as not to scrub over alias)
-            mask = np.tile(np.array([True, True, False, False]), drawList.numVertices)
-            allOffsets = np.tile(offsets, 4 * drawList.numVertices // len(offsets))
-            drawList.vertices[mask] = drawList.offsets[mask] + allOffsets[mask]
+            # mask = np.tile(np.array([True, True, False, False]), drawList.numVertices)
+            # allOffsets = np.tile(offsets, 4 * drawList.numVertices // len(offsets))
+            # drawList.vertices[mask] = drawList.offsets[mask] + allOffsets[mask]
+            _pids = drawList.pids
+            stride = GLDefs.LENPID
+            # Get all pp indices
+            filtered_pps = np.where(_pids[2::stride] == 12)[0] * stride
+            # Compute start indices
+            starts = step * _pids[filtered_pps + 1].astype(int)
+            # Apply the offset to vertices, which are [x, y, null, null, ...]
+            mask = np.arange(0, xend, 2)  # this equates to a [True, True, False, False, ...] mask
+            mask[1::2] = np.arange(1, xend - 1, 4)
+            indices = starts[:, None] + mask
+            drawList.vertices[indices] = drawList.offsets[indices] + offsets
+            #       ^ [mask] removed because redundant elements removed from offsets; only x, y needed
         else:
             raise ValueError('GL Error: bad symbol type')
 
@@ -3437,14 +3428,15 @@ class GL1dLabelling():
         # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
         _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
-        if symbolType == 0 or symbolType == 3:  # a cross/plus
+        if symbolType in {0, 3}:  # a cross/plus
             offsets, offLen = self._rescaleSymbolOffsets(r, w)
             # apply the resize to just the x/y of the vertices (so as not to scrub over alias)
             mask = np.tile(np.array([True, True, False, False]), drawList.numVertices)
-            allOffsets = np.tile(offsets, 4 * drawList.numVertices // offLen)
-            drawList.vertices[mask] = drawList.offsets[mask] + allOffsets[mask]
+            allOffsets = np.tile(offsets, 2 * drawList.numVertices // offLen)
+            drawList.vertices[mask] = drawList.offsets[mask] + allOffsets
 
-        elif symbolType == 1 or symbolType == 2:
+        elif symbolType in {1, 2}:
+            # NOTE:ED - mask method fails for multiplets but not required here
             pass
         else:
             raise ValueError('GL Error: bad symbol type')

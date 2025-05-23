@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-30 18:35:26 +0100 (Tue, July 30, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2025-05-23 13:59:26 +0100 (Fri, May 23, 2025) $"
+__version__ = "$Revision: 3.3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,6 +28,7 @@ __date__ = "$Date: 2020-12-11 17:51:39 +0000 (Fri, December 11, 2020) $"
 #=========================================================================================
 
 import numpy as np
+import math
 from ccpn.core.lib.peakUtils import _getScreenPeakAnnotation, _getPeakAnnotation, _getPeakClusterId
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_MULTIPLETLINK
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
@@ -65,9 +66,11 @@ class GLmultipletListMethods():
     _plusMultSymbol = ((np.append(np.array((5, 6, 7, 8), dtype=np.uint32), _circleVertices),
                         np.append(np.array((5, 6, 7, 8, 0, 2, 2, 1, 0, 3, 3, 1), dtype=np.uint32), _circleVertices)),
                        (np.append(np.array((6, 4, 4, 5, 4, 8), dtype=np.uint32), _circleVertices),
-                        np.append(np.array((6, 4, 4, 5, 4, 8, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32), _circleVertices)),
+                        np.append(np.array((6, 4, 4, 5, 4, 8, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32),
+                                  _circleVertices)),
                        (np.append(np.array((6, 4, 4, 5, 4, 7), dtype=np.uint32), _circleVertices),
-                        np.append(np.array((6, 4, 4, 5, 4, 7, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32), _circleVertices)))
+                        np.append(np.array((6, 4, 4, 5, 4, 7, 0, 2, 2, 1, 3, 1, 0, 3), dtype=np.uint32),
+                                  _circleVertices)))
 
     _plusMultSymbolLen = tuple(tuple(len(pl) for pl in plusList) for plusList in _plusMultSymbol)
 
@@ -181,7 +184,8 @@ class GLmultipletListMethods():
 
         insertNum = len(multiplet.peaks)
         drawList.indices = np.append(drawList.indices, np.array(tuple(val for ii in range(insertNum)
-                                                                      for val in (index, 1 + index + ii)), dtype=np.uint32))
+                                                                      for val in (index, 1 + index + ii)),
+                                                                dtype=np.uint32))
         return 2 * insertNum, insertNum + 1
 
     @staticmethod
@@ -254,34 +258,93 @@ class GLmultipletListMethods():
         return iCount, _selected
 
     def _rescaleSymbolOffsets(self, r, w):
-        return np.array([-r, -w, 0, 0,
-                         +r, +w,  0, 0,
-                         +r, -w,  0, 0,
-                         -r, +w,  0, 0,
-                         0, 0,  0, 0,
-                         0, -w,  0, 0,
-                         0, +w,  0, 0,
-                         +r, 0,  0, 0,
-                         -r, 0, 0, 0,
-                         r * 0.85, w * 0.50, 0, 0,
-                         r * 0.5, w * 0.85, 0, 0,
-                         - r * 0.5, w * 0.85, 0, 0,
-                         - r * 0.85, w * 0.50, 0, 0,
-                         - r * 0.85, - w * 0.50, 0, 0,
-                         - r * 0.5, - w * 0.85, 0, 0,
-                         + r * 0.5, - w * 0.85, 0, 0,
-                         + r * 0.85, - w * 0.50,  0, 0], np.float32), self.LENSQ4
+        return np.array([-r, -w,
+                         +r, +w,
+                         +r, -w,
+                         -r, +w,
+                         0.0, 0.0,
+                         0.0, -w,
+                         0.0, +w,
+                         +r, 0.0,
+                         -r, 0.0,
+                         r * 0.85, w * 0.50,
+                         r * 0.5, w * 0.85,
+                         - r * 0.5, w * 0.85,
+                         - r * 0.85, w * 0.50,
+                         - r * 0.85, - w * 0.50,
+                         - r * 0.5, - w * 0.85,
+                         + r * 0.5, - w * 0.85,
+                         + r * 0.85, - w * 0.50,
+                         ], np.float32), self.LENSQ2  # len of the preceding array
 
-    # class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):  #, GLpeakNdLabelling):
-    #     """Class to handle symbol and symbol labelling for Nd displays
-    #     """
-    #
-    #     def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
-    #         """Initialise the class
-    #         """
-    #         super(GLmultipletNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
-    #
-    #         self.autoColour = self._GLParent.SPECTRUMNEGCOLOUR
+    def _rescaleSymbols(self, spectrumView, objListView):
+        """rescale symbols when the screen dimensions change
+        """
+        drawList = self._GLSymbols[objListView]
+        if not drawList.numVertices:
+            return
+        _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
+
+        if symbolType in {0, 3}:  # a cross/plus
+            offsets, offLen = self._rescaleSymbolOffsets(r, w)
+            # Get all starting indices
+            starts = 4 * drawList.pids[1::GLDefs.LENPID].astype(int)
+            # Create a 2D array of indices for each slice
+            mask = np.arange(0, 2 * offLen, 2)  # this equates to a [True, True, False, False, ...] mask
+            mask[1::2] = np.arange(1, 2 * offLen - 1, 4)
+            indices = starts[:, None] + mask
+            # Apply the offsets
+            drawList.vertices[indices] = drawList.offsets[indices] + offsets
+
+        elif symbolType in {1, 2}:  # an ellipse
+            # NOTE:ED - there was a reason why these are split, but not sure why :|
+            if symbolType == 1:
+                # only update the symbols defined without line-widths
+                numPoints = 12
+                angPlus = np.pi
+                skip = 2
+                np2 = 2 * numPoints
+                ang = list(range(numPoints))
+                # draw an ellipse at lineWidth
+                st, end, xtra = 0, 2 * np2, 10  # all //'d 2, only x, y below
+            else:  # filled ellipse
+                numPoints = 12
+                angPlus = 1.0 * np.pi
+                skip = 2
+                np2 = 2 * numPoints
+                ang = list(range(numPoints))
+                # draw a filled ellipse at lineWidth
+                st, end, xtra = 0, 2 * np2, 10  # all //'d 2
+
+            offsets = np.empty(end + xtra, dtype=np.float32)
+            offsets[st:end] = [val for an in ang
+                               for val in [- r * math.sin(skip * an * angPlus / numPoints),
+                                           - w * math.cos(skip * an * angPlus / numPoints),
+                                           - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                           - w * math.cos((skip * an + 1) * angPlus / numPoints),
+                                           ]]
+            offsets[end:end + xtra] = [-r, -w,
+                                       +r, +w,
+                                       +r, -w,
+                                       -r, +w,
+                                       0.0, 0.0,
+                                       ]
+            step = 4
+            xend = 2 * (end + xtra)
+            _pids = drawList.pids
+            stride = GLDefs.LENPID
+            # Get all pp indices
+            filtered_pps = np.where(_pids[2::stride] == 12)[0] * stride
+            # Compute start indices
+            starts = step * _pids[filtered_pps + 1].astype(int)
+            # Apply the offset to vertices, which are [x, y, null, null, ...]
+            mask = np.arange(0, xend, 2)  # this equates to a [True, True, False, False, ...] mask
+            mask[1::2] = np.arange(1, xend - 1, 4)
+            indices = starts[:, None] + mask
+            drawList.vertices[indices] = drawList.offsets[indices] + offsets
+            #       ^ [mask] removed because redundant elements removed from offsets; only x, y needed
+        else:
+            raise ValueError('GL Error: bad symbol type')
 
     def appendExtraVertices(self, drawList, pIndex, multiplet, pxy, colour, fade):
         """Add extra vertices to the vertex list
@@ -313,7 +376,8 @@ class GLmultipletListMethods():
         drawList.vertices = np.append(drawList.vertices, np.array(posList, dtype=np.float32))
         drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * numVertices, dtype=np.float32))
         drawList.attribs = np.append(drawList.attribs, np.array((alias, 0.0, 0.0, 0.0) * numVertices, dtype=np.float32))
-        drawList.offsets = np.append(drawList.offsets, np.array((pxy[0], pxy[1], 0.0, 0.0) * numVertices, dtype=np.float32))
+        drawList.offsets = np.append(drawList.offsets,
+                                     np.array((pxy[0], pxy[1], 0.0, 0.0) * numVertices, dtype=np.float32))
 
         return numVertices
 
@@ -352,7 +416,8 @@ class GLmultipletListMethods():
 
         return numVertices
 
-    def _insertSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing, obj,
+    def _insertSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount,
+                                  indexing, obj,
                                   objNum, pxy, pIndex, planeIndex, r, vertexPtr, w, alias):
 
         st, end = vertexPtr, vertexPtr + self.LENSQ4
@@ -379,7 +444,8 @@ class GLmultipletListMethods():
         drawList.offsets[st: end] = (pxy[0], pxy[1], 0.0, 0.0) * self.LENSQ
 
         # add extra indices
-        extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexing.end + iCount, indexing.start + self.LENSQ, obj)
+        extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexing.end + iCount,
+                                                                indexing.start + self.LENSQ, obj)
         # add extra vertices for the multiplet
         extraVertices = self.insertExtraVertices(drawList, vertexPtr + self.LENSQ4, pIndex, obj,
                                                  pxy, (*cols, fade), fade)
@@ -396,7 +462,8 @@ class GLmultipletListMethods():
         indexing.vertexPtr += (4 * (self.LENSQ + extraVertices))
         indexing.vertexStart += (self.LENSQ + extraVertices)
 
-    def _appendSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount, indexing, obj, pxy, pIndex,
+    def _appendSymbolItemVertices(self, _isInFlankingPlane, _isInPlane, _selected, cols, drawList, fade, iCount,
+                                  indexing, obj, pxy, pIndex,
                                   planeIndex, r, w, alias):
 
         drawList.vertices = np.append(drawList.vertices, np.array((pxy[0] - r, pxy[1] - w, alias, 0.0,
@@ -437,7 +504,8 @@ class GLmultipletListMethods():
         #                                                            ), dtype=np.float32))
         drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * self.LENSQ, dtype=np.float32))
         drawList.attribs = np.append(drawList.attribs, np.array((alias, 0.0, 0.0, 0.0) * self.LENSQ, dtype=np.float32))
-        drawList.offsets = np.append(drawList.offsets, np.array((pxy[0], pxy[1], 0.0, 0.0) * self.LENSQ, dtype=np.float32))
+        drawList.offsets = np.append(drawList.offsets,
+                                     np.array((pxy[0], pxy[1], 0.0, 0.0) * self.LENSQ, dtype=np.float32))
 
         # add extra indices
         _indexCount, extraIndices = self.appendExtraIndices(drawList, indexing.vertexStart + self.LENSQ, obj)
@@ -494,7 +562,8 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):  #, GLpeakNdL
             return self._objIsInVisiblePlanesCache[spectrumView][multiplet]
         except Exception:
             # calculate and store the new value
-            value = self._objIsInVisiblePlanes(spectrumView, multiplet, viewOutOfPlaneMultiplets=viewOutOfPlaneMultiplets)
+            value = self._objIsInVisiblePlanes(spectrumView, multiplet,
+                                               viewOutOfPlaneMultiplets=viewOutOfPlaneMultiplets)
             if spectrumView not in self._objIsInVisiblePlanesCache:
                 self._objIsInVisiblePlanesCache[spectrumView] = {multiplet: value}
             else:
@@ -614,7 +683,8 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
         drawList.vertices = np.append(drawList.vertices, np.array(posList, dtype=np.float32))
         drawList.colors = np.append(drawList.colors, np.array((*cols, fade) * numVertices, dtype=np.float32))
         drawList.attribs = np.append(drawList.attribs, np.array((alias, 0.0, 0.0, 0.0) * numVertices, dtype=np.float32))
-        drawList.offsets = np.append(drawList.offsets, np.array((pxy[0], pxy[1], 0.0, 0.0) * numVertices, dtype=np.float32))
+        drawList.offsets = np.append(drawList.offsets,
+                                     np.array((pxy[0], pxy[1], 0.0, 0.0) * numVertices, dtype=np.float32))
 
         return numVertices
 
@@ -661,3 +731,27 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
         """Get the current object is in visible planes settings
         """
         return True, False, 0, 1.0
+
+    def _rescaleSymbols(self, spectrumView, objListView):
+        """rescale symbols when the screen dimensions change
+        """
+        drawList = self._GLSymbols[objListView]
+        if not drawList.numVertices:
+            return
+        _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
+
+        if symbolType in {0, 3}:  # a cross/plus
+            offsets, offLen = self._rescaleSymbolOffsets(r, w)
+            # Get all starting indices
+            starts = 4 * drawList.pids[1::GLDefs.LENPID].astype(int)
+            # Create a 2D array of indices for each slice
+            mask = np.arange(0, 2 * offLen, 2)  # this equates to a [True, True, False, False, ...] mask
+            mask[1::2] = np.arange(1, 2 * offLen - 1, 4)
+            indices = starts[:, None] + mask
+            # Apply the offsets
+            drawList.vertices[indices] = drawList.offsets[indices] + offsets
+
+        elif symbolType in {1, 2}:
+            pass
+        else:
+            raise ValueError('GL Error: bad symbol type')

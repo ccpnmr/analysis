@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-28 14:55:44 +0100 (Wed, May 28, 2025) $"
+__dateModified__ = "$dateModified: 2025-05-28 14:57:36 +0100 (Wed, May 28, 2025) $"
 __version__ = "$Revision: 3.3.2.1 $"
 #=========================================================================================
 # Created
@@ -541,7 +541,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             else:
                 self.dataScale = 1.0
 
-            # self.temperature = self.acqus[0]['TE']
+            self.temperature = max(self.acqus[0]['TE'], 1.0)
 
             # Dimensional parameters
             for dimIndx in range(self.dimensionCount):

@@ -8,7 +8,7 @@ See SpectrumDataSourceABC for a description of the attributes and methods
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -19,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-07-25 10:11:17 +0100 (Thu, July 25, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-05-28 14:57:36 +0100 (Wed, May 28, 2025) $"
+__version__ = "$Revision: 3.3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -541,7 +541,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             else:
                 self.dataScale = 1.0
 
-            self.temperature = self.acqus[0]['TE']
+            self.temperature = max(self.acqus[0]['TE'], 1.0)
 
             # Dimensional parameters
             for dimIndx in range(self.dimensionCount):
@@ -562,10 +562,10 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                     self.measurementTypes[dimIndx] = specLib.MEASUREMENT_TYPE_SHIFT
 
                 self.pointCounts[dimIndx] = int(dimDict['SI'])
-                if self.dimensionTypes[dimIndx] == specLib.DIMENSION_TIME:
-                    tdeff = int(dimDict['TDeff'])
-                    if 0 < tdeff < self.pointCounts[dimIndx]:
-                        self.pointCounts[dimIndx] = tdeff
+                # if self.dimensionTypes[dimIndx] == specLib.DIMENSION_TIME:
+                #     tdeff = int(dimDict['TDeff'])
+                #     if 0 < tdeff < self.pointCounts[dimIndx]:
+                #         self.pointCounts[dimIndx] = tdeff
 
                 self.blockSizes[dimIndx] = int(dimDict['XDIM'])
                 if self.blockSizes[dimIndx] == 0:

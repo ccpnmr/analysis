@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-10-17 15:36:30 +0100 (Thu, October 17, 2024) $"
+__modifiedBy__ = "$modifiedBy: eliza $"
+__dateModified__ = "$dateModified: 2024-11-05 10:49:35 +0000 (Tue, November 05, 2024) $"
 __version__ = "$Revision: 3.2.7 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,8 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Label import Label
 # from ccpn.util.Common import _incrementObjectName, _validateName
 from ccpn.core.StructureData import StructureData
 from ccpn.core.RestraintTable import RestraintTable
@@ -108,6 +110,13 @@ class CalculateDistanceRestraintsPopup(CcpnDialogMainWidget):
     def _createWidgets(self):
 
         row = 0
+
+        topFrame = Frame(self.mainWidget, grid=(row, 0), gridSpan=(1, 3), setLayout=True)
+        Label(topFrame,
+              text='This macro is only suitable for 3D Noesy data.\n \n',
+              grid=(0, 0), gridSpan=(1, 3))
+
+        row += 1
         self.nameWidget = cw.EntryCompoundWidget(self.mainWidget, labelText='New Dataset Name',
                                                  entryText=DefaultOptions.get(NewDsName),
                                                  grid=(row, 0), gridSpan=(1, 1))

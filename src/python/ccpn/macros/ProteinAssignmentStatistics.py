@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-02-12 14:33:33 +0000 (Wed, February 12, 2025) $"
-__version__ = "$Revision: 3.2.12 $"
+__modifiedBy__ = "$modifiedBy: eliza $"
+__dateModified__ = "$dateModified: 2025-05-27 09:24:37 +0100 (Tue, May 27, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -534,33 +534,33 @@ class calculateAssignments():
                     temp = 0
                     # the atoms in this atomset are CH2 and therefore can possibly give 2 signals
                     indexes = list(set(resiRow.index) & set(atomSet[0:2]))
-                    temp = resiRow.where(resiRow[indexes] > 0).count()
+                    temp = resiRow.where(resiRow[indexes] != 0).count()
                     percent += temp
 
                     # the atoms in this atomset are a methyl and therefore are expected to only give 1 signal
                     indexes = list(set(resiRow.index) & set(atomSet[2:]))
-                    temp = resiRow.where(resiRow[indexes] > 0).count() * (1 / 3)
+                    temp = resiRow.where(resiRow[indexes] != 0).count() * (1 / 3)
                     percent += temp
 
                 elif residue.name == "ILE" and atomSet == ILE.hg[1]:
                     # ILE Hg
                     temp = 0
                     indexes = list(set(resiRow.index) & set(atomSet))
-                    temp = resiRow.where(resiRow[indexes] > 0).count() * 1
+                    temp = resiRow.where(resiRow[indexes] != 0).count() * 1
                     percent += temp
 
                 elif residue.name == "ILE" and atomSet == ILE.hg[2]:
                     # ILE Hg1%
                     temp = 0
                     indexes = list(set(resiRow.index) & set(atomSet))
-                    temp = resiRow.where(resiRow[indexes] > 0).count() * 2
+                    temp = resiRow.where(resiRow[indexes] != 0).count() * 2
                     percent += temp
 
                 elif residue.name == "ILE" and atomSet == ILE.hg[3]:
                     # ILE Hg
                     temp = 0
                     indexes = list(set(resiRow.index) & set(atomSet))
-                    temp = resiRow.where(resiRow[indexes] > 0).count() * 1
+                    temp = resiRow.where(resiRow[indexes] != 0).count() * 1
                     percent += temp
 
                 # elif residue.name == "VAL" and atomSet == VAL.hg[0]:

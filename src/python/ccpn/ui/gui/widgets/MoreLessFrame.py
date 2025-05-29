@@ -23,7 +23,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-27 12:07:03 +0100 (Tue, May 27, 2025) $"
+__dateModified__ = "$dateModified: 2025-05-29 11:38:47 +0100 (Thu, May 29, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -266,29 +266,52 @@ class MoreLessFrame(Frame):
                   (self._closeButton.sizeHint().width() if self._closable else 0))
         offset: int = w
 
-        # Define points for the main border-lines
-        points0: list[QtCore.QPoint] = [
-            QtCore.QPoint(0, 1),  # Start top-left
-            QtCore.QPoint(offset + 2, 1),  # To right of label (top line segment 1)
-            QtCore.QPoint(offset + 2, 1),
-            QtCore.QPoint(offset + h, h - 1),  # Diagonal from top-right of label
-            QtCore.QPoint(offset + h + 1, h - 1),
-            QtCore.QPoint(rgn.width() + 1, h - 1),  # Extend to right edge (bottom line segment 1)
-            ]
-        # Define points for secondary lines (inner diagonal, if applicable)
-        points1: list[QtCore.QPoint] = [
-            QtCore.QPoint(offset + 3, 2),
-            QtCore.QPoint(offset + h - 1, h - 2),
-            ]
+        # offset so that the diagonals look correct for displays with devicePixelRatio > 1
+        uOffset = QtCore.QPointF(0.75, 0.75)
+        lOffset = QtCore.QPointF(0.25, 0.25)
+        if h > 40:
+            # if the height is greater than 40, then add a vertical section to the boundary;
+            # otherwise, there can be an enormous diagonal
+            tt = 15
+            bb = h - tt + 3
+            # Define points for the main border-lines
+            points0: list[QtCore.QPointF] = [
+                QtCore.QPointF(0, 1),  # Start top-left
+                QtCore.QPointF(offset + 2, 1),  # To right of label (top line segment 1)
+                QtCore.QPointF(offset + tt, tt - 1),  # Vertical between diagonals
+                QtCore.QPointF(offset + tt, bb - 1),
+                QtCore.QPointF(offset + 2 * tt - 3, h - 1),  # Extend to right edge (bottom line segment 1)
+                QtCore.QPointF(rgn.width() + 1, h - 1),
+                ]
+            # Define points for diagonal lines
+            points1: list[QtCore.QPointF] = [
+                QtCore.QPointF(offset + 2, 1) + uOffset,  # Diagonal from top-right of label
+                QtCore.QPointF(offset + tt, tt - 1) - lOffset,
+                QtCore.QPointF(offset + tt, bb - 1) + uOffset,  # Diagonal to bottom-right of label
+                QtCore.QPointF(offset + 2 * tt - 3, h - 1) - lOffset,
+                ]
+        else:
+            # Define points for the main border-lines
+            points0: list[QtCore.QPointF] = [
+                QtCore.QPointF(0, 1),  # Start top-left
+                QtCore.QPointF(offset + 2, 1),  # To right of label (top line segment 1)
+                QtCore.QPointF(offset + h, h - 1),  # Extend to right edge (bottom line segment 1)
+                QtCore.QPointF(rgn.width() + 1, h - 1),
+                ]
+            # Define points for diagonal lines
+            points1: list[QtCore.QPointF] = [
+                QtCore.QPointF(offset + 2, 1) + uOffset,
+                QtCore.QPointF(offset + h, h - 1) - lOffset,
+                ]
 
         # Set pen color for drawing the lines
         # Use user-defined colour or default to palette's dark color for theme consistency
         pen_color: QtGui.QColor = self._borderColour or self.palette().dark().color()
-        p.setPen(QtGui.QPen(pen_color, 1))
-
-        # Add a little smoothing for drawing
+        p.setPen(QtGui.QPen(pen_color, 1.25))
+        # Add a little smoothing for drawing diagonals
         p.setRenderHint(QtGui.QPainter.Antialiasing, True)
         p.drawLines(*points1)  # Draw secondary lines
+        p.setPen(QtGui.QPen(pen_color, 1))
         p.setRenderHint(QtGui.QPainter.Antialiasing, False)
         p.drawLines(*points0)  # Draw main border-lines
         p.end()

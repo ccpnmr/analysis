@@ -322,6 +322,9 @@
         },
         "DeleteItemsPopup": {
             "dontShowPopup": false
+        },
+        "ImportNefPopup": {
+            "dontShowPopup": false
         }
     },
     "tables"           : {

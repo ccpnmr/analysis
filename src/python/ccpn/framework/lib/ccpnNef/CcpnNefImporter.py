@@ -4,19 +4,20 @@ This file contains CcpnNefImporter class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:47:14 +0000 (Tue, February 15, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2025-05-29 14:42:41 +0100 (Thu, May 29, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,11 +29,9 @@ __date__ = "$Date: 2022-02-05 10:28:48 +0000 (Saturday, February 5, 2022) $"
 
 from ccpn.framework.Application import getApplication
 from ccpn.framework.lib.ccpnNef.CcpnNefIo import CcpnNefReader
-
 from ccpn.util.Logging import getLogger
-from ccpn.util.nef.NefImporter import NefImporter
+from ccpn.util.nef.NefImporter import NefImporter, SF_CATEGORY
 from ccpn.util.nef.ErrorLog import NEF_STANDARD, NEF_STRICT
-from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, notificationEchoBlocking
 
 
 class CcpnNefImporter(NefImporter):
@@ -44,7 +43,7 @@ class CcpnNefImporter(NefImporter):
 
     def __init__(self, errorLogging=NEF_STANDARD, validateDictPath=None, hidePrefix=True):
         """
-        Initialise the CcpNefImporter instance. This will attach the logger and optionally a  Nef validation
+        Initialise the CcpNefImporter instance. This will attach the logger and optionally the Nef validation
         dictionary.
         :param errorLogging: Nef error logging level: one of (NEF_SILENT, NEF_STANDARD, NEF_STRICT)
         :param validateDictPath: Path to a Nef validation dictory definition (in star format)
@@ -73,6 +72,7 @@ class CcpnNefImporter(NefImporter):
 
         # process the data to replace ccpn_dataset_id wth ccpn_structuredata_name
         self.upgradeDataSetIds()
+        self.addMissingStructureDataName()
 
         return self.data
 
@@ -81,11 +81,12 @@ class CcpnNefImporter(NefImporter):
 
         # process the data to replace ccpn_dataset_id wth ccpn_structuredata_name
         self.upgradeDataSetIds()
+        self.addMissingStructureDataName()
 
         return self.data
 
     def importIntoProject(self, project):
-        """Import the data of self into project, using a previously attached
+        """Import the data of self into the project, using a previously attached
         reader (auto-generated if None).
 
         :param project: a Project instance
@@ -137,5 +138,28 @@ class CcpnNefImporter(NefImporter):
                 # replace the deprecated tag with the new tag
                 if self._DATANAME_DEPRECATED in sf:
                     if self._DATANAME not in sf:
-                        sf[self._DATANAME] = sf.get(self._DATANAME_DEPRECATED) or self._DATANAME_DEFAULT  # cannot be empty
+                        sf[self._DATANAME] = sf.get(
+                            self._DATANAME_DEPRECATED) or self._DATANAME_DEFAULT  # cannot be empty
                     del sf[self._DATANAME_DEPRECATED]  # remove as new tag takes priority
+
+    def addMissingStructureDataName(self):
+        """Update the saveFrames
+        Insert missing occurrences of _DATANAME -> _DATANAME_DEFAULT
+        """
+        from ccpn.framework.lib.ccpnNef.CcpnNefIo import NAMETOOBJECTMAPPING
+        from ccpn.core.RestraintTable import RestraintTable
+        from ccpn.core.ViolationTable import ViolationTable
+
+        # get the subset of saveframes referring to restraint/violation-tables
+        requireStructure = {k for k, v in NAMETOOBJECTMAPPING.items() if v in {RestraintTable, ViolationTable}}
+
+        getLogger().debug(f'>>> inserting missing tags {self._DATANAME}')
+        # search through the saveframes for occurrences of _DATANAME
+        _sfNames = self.getSaveFrameNames()
+        for sf in _sfNames:
+            sFrame = self.getSaveFrame(sf)
+            if (sFrame is not None and
+                    (sf := sFrame._nefFrame) and
+                    (sf.get(SF_CATEGORY) in requireStructure)):
+                if not sf.get(self._DATANAME):
+                    sf[self._DATANAME] = self._DATANAME_DEFAULT

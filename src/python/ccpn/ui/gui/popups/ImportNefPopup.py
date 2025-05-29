@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-21 12:43:52 +0100 (Wed, May 21, 2025) $"
+__dateModified__ = "$dateModified: 2025-05-29 14:42:41 +0100 (Thu, May 29, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ import json
 import pandas as pd
 
 from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5.QtCore import pyqtSlot as Slot
 from contextlib import contextmanager
 from dataclasses import dataclass
 
@@ -46,7 +47,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, showYesNoWarning
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -80,6 +81,7 @@ from ccpn.util.OrderedSet import OrderedSet
 
 INVALIDTEXTROWCHECKCOLOUR = QtGui.QColor('crimson')
 INVALIDTEXTROWNOCHECKCOLOUR = QtGui.QColor('darkorange')
+INVALIDTEXTROWEMPTYBACKGROUND = QtGui.QColor('navajowhite')  # actually a strange pale-orange
 INVALIDBUTTONCHECKCOLOUR = QtGui.QColor('lightpink')
 INVALIDBUTTONNOCHECKCOLOUR = QtGui.QColor('navajowhite')
 INVALIDTABLEFILLCHECKCOLOUR = QtGui.QColor('lightpink')
@@ -125,6 +127,7 @@ COLLECTION_ATTRIB = COLLECTION.lower()
 CHEMICALSHIFTLIST_ATTRIB = CHEMICALSHIFTLIST.lower()
 ITEMS = 'Items'
 _ROWSTRETCH = 10
+
 
 # simple class to export variables from the contextmanager
 @dataclass
@@ -269,6 +272,11 @@ class NefDictFrame(Frame):
         # add the collection fill option to the bottom of the menu
         self.nefTreeView.setPostMenuAction(partial(self._addToCollectionsMenu, selectionWidget=self.nefTreeView))
 
+        # interval checking timer
+        self._qTimer = tt = QtCore.QTimer()
+        tt.setSingleShot(True)
+        tt.timeout.connect(self._timerEvent)
+
     def paintEvent(self, ev):
         """Paint the border to the screen
         """
@@ -342,6 +350,7 @@ class NefDictFrame(Frame):
                                                 enableMouseMenu=self._enableMouseMenu,
                                                 pathName=os.path.basename(self._pathName) if self._pathName else None,
                                                 multiSelect=True)
+        self.nefTreeView.checkStateChanged.connect(self._itemStateChanged)
 
         # info frame (right frame)
         self._nefContentSplitter = Splitter(self._infoFrame, setLayout=True, horizontal=False)
@@ -466,6 +475,13 @@ class NefDictFrame(Frame):
         # force an event to show/resize the horizontal-scrollbar correctly
         self.nefTreeView.resizeColumnToContents(0)
 
+    @Slot(QtWidgets.QTreeWidgetItem, int)
+    def _itemStateChanged(self, item: QtWidgets.QTreeWidgetItem, column: int):
+        self._qTimer.start(0)
+
+    def _timerEvent(self):
+        self._colourTreeView()
+
     def _colourTreeView(self):
         projectSections = self.nefTreeView.nefToTreeViewMapping
         saveFrameLists = self.nefTreeView.nefProjectToSaveFramesMapping
@@ -531,6 +547,7 @@ class NefDictFrame(Frame):
                         childColour = INVALIDTEXTROWCHECKCOLOUR if childItem.checkState(
                                 0) else INVALIDTEXTROWNOCHECKCOLOUR
                     self.nefTreeView.setForegroundForRow(childItem, childColour)
+                    childItem.setData(1, QtCore.Qt.UserRole, _rowError and childItem.checkState(0))
 
                 if _sectionError:
                     sectionColour = INVALIDTEXTROWCHECKCOLOUR if pluralItem.checkState(
@@ -538,6 +555,7 @@ class NefDictFrame(Frame):
                     if pluralItem.checkState(0):
                         _projectError = True
                 self.nefTreeView.setForegroundForRow(pluralItem, sectionColour)
+                pluralItem.setData(1, QtCore.Qt.UserRole, _sectionError and pluralItem.checkState(0))
 
         if _projectError:
             projectColour = INVALIDTEXTROWCHECKCOLOUR if projectItem.checkState(0) else INVALIDTEXTROWNOCHECKCOLOUR
@@ -999,8 +1017,9 @@ class NefDictFrame(Frame):
             self._colourRenameWidgets(vals._errors, vals._fillColour, errorCode, vals.itemName, saveFrameData)
 
             # add widgets to handle linking to structureData parent
-            vals.row = self._addStructureDataWidgets(vals.item, vals.plural, vals.row, saveFrame)
-
+            vals.row, sPulldown = self._addStructureDataWidgets(vals.item, vals.plural, vals.row, saveFrame)
+            vals.row = self._addUniqueWidgets(vals.item, vals.itemName, vals.plural, vals.row, saveFrame,
+                                              vals.singular, pulldown=sPulldown)
             self._makeCollectionStructurePulldown(vals)
             vals.row += 1
         return vals
@@ -1017,7 +1036,9 @@ class NefDictFrame(Frame):
             self._colourRenameWidgets(vals._errors, vals._fillColour, errorCode, vals.itemName, saveFrameData)
 
             # add widgets to handle linking to structureData parent
-            vals.row = self._addStructureDataWidgets(vals.item, vals.plural, vals.row, saveFrame)
+            vals.row, sPulldown = self._addStructureDataWidgets(vals.item, vals.plural, vals.row, saveFrame)
+            vals.row = self._addUniqueWidgets(vals.item, vals.itemName, vals.plural, vals.row, saveFrame,
+                                              vals.singular, pulldown=sPulldown)
         return vals
 
     def _addAssignmentWidgets(self, item, plural, row, saveFrame, saveFrameData):
@@ -1036,14 +1057,14 @@ class NefDictFrame(Frame):
 
     def _addStructureDataWidgets(self, item, plural, row, saveFrame):
 
-        self._makeStructureDataPulldown(item, plural, row, saveFrame, DATANAME)
+        pulldown = self._makeStructureDataPulldown(item, plural, row, saveFrame, DATANAME)
         row += 1
 
         if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
             self._makeSetButton(item, plural, row, saveFrame, 'ccpn_parameter_name', self._editParameterName)
             row += 1
 
-        return row
+        return row, pulldown
 
     def _finaliseSelection(self, _content, _errors):
         self.logData.clear()
@@ -1128,6 +1149,24 @@ class NefDictFrame(Frame):
 
         return row, saveFrameData
 
+    def _addUniqueWidgets(self, item, itemName, plural, row, saveFrame, singular, allowPeriod=True,
+                          pulldown=None):
+        text = 'Get Unique Name'
+        if not (_data := item.data(1, 0)):
+            return
+        _itmName, _, _itmParentName, _, _ = _data
+
+        _autoUniqueCallback = partial(self._selectStructureDataId, item=item, itemName=_itmName,
+                                      itemParentName=_itmParentName, parentName=plural,
+                                      pulldownList=pulldown, saveFrame=saveFrame,
+                                      modifyKlass=StructureData, modifyName=self._nefLoader._DATANAME_DEFAULT)
+        tipText = "Automatically generate a unique name\nthat doesn't exist in the project.\n"
+        Button(self.frameOptionsFrame, text=text, tipText=tipText, callback=_autoUniqueCallback,
+               grid=(row, 2), gridSpan=(1, 1))
+        row += 1
+
+        return row
+
     def _handleItemRename(self, item, mappingCode, saveFrame):
         mappingCode = mappingCode or ''
         mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
@@ -1169,6 +1208,7 @@ class NefDictFrame(Frame):
         structurePulldown.activated.connect(callbackSelect)
 
         self._populateStructureDataPulldown([_data], structurePulldown)
+        return structurePulldown
 
     def _makeCollectionPulldown(self, values):
 
@@ -1289,10 +1329,34 @@ class NefDictFrame(Frame):
                 _indexing.add(list(colNames).index(''))
 
         collectionPulldown.setData(list(colNames))
-        if len(_indexing) == 1:
-            collectionPulldown.setIndex(list(_indexing)[0])
+        # apply 'bad' colour if items already exist in the project
+        self._colourPulldown(_indexing, collectionPulldown, Collection)
+
+    def _colourPulldown(self, setItems: set, pulldown: QtWidgets.QComboBox, coreType: type):
+        # apply 'bad' colour if items already exist in the project
+        combo: QtWidgets.QComboBox = pulldown
+        model = combo.model()
+        for ind in range(combo.count()):
+            if (item := model.item(ind)) is not None:
+                txt = item.text()
+                if self.project.getByPid(Pid._join(coreType.shortClassName, txt)):
+                    item.setData(INVALIDTEXTROWNOCHECKCOLOUR, role=QtCore.Qt.ForegroundRole)
+                    # item.setData(None, role=QtCore.Qt.BackgroundRole)
+                elif not txt:
+                    # set the background because there is no text
+                    item.setData(None, role=QtCore.Qt.ForegroundRole)
+                    # item.setData(INVALIDTEXTROWEMPTYBACKGROUND, role=QtCore.Qt.BackgroundRole)
+                else:
+                    # clears the colour and reverts to palette.Text
+                    item.setData(None, role=QtCore.Qt.ForegroundRole)
+                    # item.setData(None, role=QtCore.Qt.BackgroundRole)
+        combo.repaint()
+        if len(setItems) == 1:
+            # not sure about the order here
+            pulldown.setIndex(list(setItems)[0])
         else:
-            collectionPulldown.setIndex(0)
+            pulldown.setIndex(0)
+            pulldown.lineEdit().repaint()
 
     def _populateChemicalShiftListPulldown(self, _children, chemicalShiftListPulldown):
 
@@ -1320,10 +1384,8 @@ class NefDictFrame(Frame):
                 _indexing.add(list(colNames).index(''))
 
         chemicalShiftListPulldown.setData(list(colNames))
-        if len(_indexing) == 1:
-            chemicalShiftListPulldown.setIndex(list(_indexing)[0])
-        else:
-            chemicalShiftListPulldown.setIndex(0)
+        # apply 'bad' colour if items already exist in the project
+        self._colourPulldown(_indexing, chemicalShiftListPulldown, ChemicalShiftList)
 
     def _populateCollectionStructurePulldown(self, _children, collectionPulldown):
 
@@ -1356,10 +1418,8 @@ class NefDictFrame(Frame):
                 _indexing.add(list(colNames).index(''))
 
         collectionPulldown.setData(list(colNames))
-        if len(_indexing) == 1:
-            collectionPulldown.setIndex(list(_indexing)[0])
-        else:
-            collectionPulldown.setIndex(0)
+        # apply 'bad' colour if items already exist in the project
+        self._colourPulldown(_indexing, collectionPulldown, Collection)
 
     def _populateStructureDataPulldown(self, _children, structurePulldown):
 
@@ -1383,10 +1443,8 @@ class NefDictFrame(Frame):
                 _indexing.add(list(sdIds).index(_itmPid))
 
         structurePulldown.setData(list(sdIds))
-        if len(_indexing) == 1:
-            structurePulldown.setIndex(list(_indexing)[0])
-        else:
-            structurePulldown.setIndex(0)
+        # apply 'bad' colour if items already exist in the project
+        self._colourPulldown(_indexing, structurePulldown, StructureData)
 
     def _makeCollectionParentStructureDataPulldown(self, values):
 
@@ -1621,7 +1679,7 @@ class NefDictFrame(Frame):
 
     @contextmanager
     def _editSaveFramePulldown(self, itemName=None, itemParentName=None, parentName=None, pulldownList=None,
-                               saveFrame=None, autoRename=False, parameter=None):
+                               saveFrame=None, autoRename=False, parameter=None, modifyKlass=None, modifyName=None):
         """Handler for editing values in main saveFrame
         """
         if not itemName:
@@ -1631,7 +1689,9 @@ class NefDictFrame(Frame):
         newEdit.itemName = itemName
         newEdit.parentGroup = itemParentName
         newEdit.newVal = pulldownList.getText() if pulldownList else None
-
+        if modifyKlass:
+            newEdit.newVal = modifyKlass._uniqueName(parent=self.project,
+                                                     name=modifyName)
         dd = {}
         fr: MoreLessFrame
         # grab the tree state
@@ -1661,12 +1721,12 @@ class NefDictFrame(Frame):
                     fr.setContentsVisible(visible[fr.name])
 
     def _selectStructureDataId(self, item=None, itemName=None, itemParentName=None, parentName=None,
-                               pulldownList=None, saveFrame=None, autoRename=False):
+                               pulldownList=None, saveFrame=None, autoRename=False, modifyKlass=None, modifyName=None):
         """Handle clicking rename structureData button
         """
 
         with self._editSaveFramePulldown(itemName, itemParentName, parentName, pulldownList, saveFrame, autoRename,
-                                         DATANAME) as _edit:
+                                         DATANAME, modifyKlass=modifyKlass, modifyName=modifyName) as _edit:
             # reads a non-empty string for a value
             if not _edit.newVal and DATANAME in saveFrame:
                 if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
@@ -1703,7 +1763,7 @@ class NefDictFrame(Frame):
             _, _, _, _, ccpnClassName = item.data(1, 0)
             _itmPid = Pid._join(ccpnClassName, _newName or '', itemName)
             if (_itmPid in self._structureData[_newName]):
-                showWarning('Selecting StructureData', f"'{itemName}' already exists in '{_newName}'")
+                # showWarning('Selecting StructureData', f"'{itemName}' already exists in '{_newName}'")
                 return True
 
     def _selectStructureDataParentId(self, values=None, pulldownList=None, parent=None):
@@ -1725,12 +1785,6 @@ class NefDictFrame(Frame):
                 if self._checkAlreadyInStructureData(newName, itm, itmName):
                     continue
                 saveFrame[DATANAME] = newName
-
-                # TODO:ED - check this
-                # if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
-                #     if _edit.itemName and _oldName and _edit.itemName.startswith(_oldName):
-                #         _edit.itemName = _edit.newVal + _edit.itemName[len(_oldName):]
-
                 for k, v in self._collections.items():
                     if v:
                         ll = []
@@ -1761,12 +1815,6 @@ class NefDictFrame(Frame):
                 if self._checkAlreadyInStructureData(newName, itm, itmName):
                     continue
                 saveFrame[DATANAME] = newName
-
-                # TODO:ED - check this
-                # if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
-                #     if _edit.itemName and _oldName and _edit.itemName.startswith(_oldName):
-                #         _edit.itemName = _edit.newVal + _edit.itemName[len(_oldName):]
-
                 for k, v in self._collections.items():
                     if v:
                         ll = []
@@ -2546,7 +2594,7 @@ class NefDictFrame(Frame):
                     # handler(self, saveFrame, item)
                     handler(self, name=itemName, saveFrame=saveFrame, parentGroup=parentGroup)
 
-            # clicking the checkbox also comes here - above loop may set item._badName
+            # clicking the checkbox also comes here - the above loop may set item._badName
             self._colourTreeView()
 
             self._filterLogFrame.setVisible(self._enableFilterFrame)
@@ -2592,7 +2640,7 @@ class NefDictFrame(Frame):
                 parentHandler = self.handleParentGroups.get(parentItemName)
                 if parentHandler is not None:
                     parentHandler(self, parentItem=parentItem, parentItemName=parentItemName,
-                                           _handleAutoRename=False)
+                                  _handleAutoRename=False)
 
             for colInd, st in enumerate([1, 100, 1]):
                 self.frameOptionsFrame.getLayout().setColumnStretch(colInd, st)
@@ -2777,7 +2825,8 @@ class NefDictFrame(Frame):
             self._chemicalShiftListsTable.updateDf(_df)
         self._chemicalShiftListsTable.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self._chemicalShiftListsTable.resizeRowsToContents()
-        self._chemicalShiftListsTable.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)  # or whatever it was
+        self._chemicalShiftListsTable.verticalHeader().setSectionResizeMode(
+                QtWidgets.QHeaderView.Interactive)  # or whatever it was
 
     def _updateStructureDataWidget(self):
         # rebuild the list of structureData
@@ -2818,7 +2867,7 @@ class NefDictFrame(Frame):
         self._structureDataTable.resizeRowsToContents()
 
     def _updateCollectionsWidget(self):
-        # update the collections table
+        # update the collections-table
         if not self._collectionsTable:
             return
         if self._collections:
@@ -2837,17 +2886,18 @@ class NefDictFrame(Frame):
         self._collectionsTable.resizeRowsToContents()
 
     def _fillPopup(self, nefObject=None):
-        """Initialise the project setting - only required for testing
+        """Initialise the project setting
         Assumes that the nef loaders may not be initialised if called from outside of Analysis
         """
         if not self._nefLoader:
-            self._nefLoader = self._nefImporterClass(errorLogging=Nef.el.NEF_STANDARD, hidePrefix=True)
-
-            if not self.project:
-                raise TypeError('Project is not defined')
-            self._nefWriter = CcpnNefIo.CcpnNefWriter(self.project)
-            self._nefDict = self._nefLoader._nefDict = self._nefWriter.exportProject(expandSelection=True,
-                                                                                     includeOrphans=False, pidList=None)
+            raise RuntimeError('nefLoader is not defined')
+            # self._nefLoader = self._nefImporterClass(errorLogging=Nef.el.NEF_STANDARD, hidePrefix=True)
+            #
+            # if not self.project:
+            #     raise TypeError('Project is not defined')
+            # self._nefWriter = CcpnNefIo.CcpnNefWriter(self.project)
+            # self._nefDict = self._nefLoader._nefDict = self._nefWriter.exportProject(expandSelection=True,
+            #                                                                          includeOrphans=False, pidList=None)
 
         # attach the import/verify/content methods
         self._nefLoader._attachVerifier(self._nefReader.verifyProject)
@@ -2871,7 +2921,7 @@ class NefDictFrame(Frame):
         self._populate()
 
     def _verifyChecked(self, state=False):
-        """Respond to clicking the verify checkbox
+        """Respond to clicking the verify-checkbox
         """
         if state:
             self._verifyPopulate()
@@ -2984,6 +3034,17 @@ class NefDictFrame(Frame):
 
         return selection
 
+    def getInvalidItemsToImport(self):
+        self._nefReader.setImportAll(False)
+        treeItems = [item for item in self.nefTreeView.traverseTree() if item.checkState(0) == QtCore.Qt.Checked]
+        # selection = [item.data(1, 0)[1] for item in treeItems if item.data(1, 0)] or [None]  # saveFrame
+        selection = []
+        for item in treeItems:
+            if (_data := item.data(1, 0)) and item.data(1, QtCore.Qt.UserRole) not in {False, None}:
+                _, sFrame, _, _, _ = _data
+                selection.append(sFrame)
+        return selection
+
     def _addToCollectionsMenu(self, contextMenu, selectionWidget):
         """Add options to the bottom of the menu
         """
@@ -3039,6 +3100,7 @@ class NefDictFrame(Frame):
         else:
             combo.setToolTip('Select existing chemicalShiftList, or edit to create new chemicalShiftList.')
         combo.setCompleter(None)
+        combo._backgroundEmptyColor = INVALIDTEXTROWEMPTYBACKGROUND
 
         return combo
 
@@ -3192,7 +3254,7 @@ class NefDictFrame(Frame):
             self._setCheckedItem(itemName, parentGroup)
 
     def _setExpandState(self, state=True):
-        """Set the expanded state of the children of the clicked item
+        """Set the expanded state for the children of the clicked item
         """
         itm = self.nefTreeView.currentItem()
         _children = [itm.child(ii) for ii in range(itm.childCount())]
@@ -3346,17 +3408,6 @@ class ImportNefPopup(CcpnDialogMainWidget):
         """
         super().__init__(parent, setLayout=True, windowTitle='Import Nef', size=(1000, 700), **kwds)
 
-        # nefObjects=({NEFFRAMEKEY_IMPORT: project,
-        #             },
-        #             {NEFFRAMEKEY_IMPORT           : nefImporter,
-        #              NEFFRAMEKEY_ENABLECHECKBOXES : True,
-        #              NEFFRAMEKEY_ENABLERENAME     : True,
-        #              NEFFRAMEKEY_ENABLEFILTERFRAME: True,
-        #              NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
-        #              NEFFRAMEKEY_PATHNAME         : str(path),
-        #              }
-        #             )
-
         self.mainWindow = mainWindow
         self.application = mainWindow.application
         self.project = project
@@ -3382,7 +3433,7 @@ class ImportNefPopup(CcpnDialogMainWidget):
         # enable the buttons
         self.setOkButton(callback=self._okClicked, text='Import', tipText='Import nef file over existing project')
         self.setCancelButton(callback=self.reject, tipText='Cancel import')
-        self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
+        self.setDefaultButton(self.CANCELBUTTON)
 
     def _postInit(self):
         # initialise the buttons and dialog size
@@ -3402,19 +3453,6 @@ class ImportNefPopup(CcpnDialogMainWidget):
         self.mainWidget.getLayout().addWidget(self.paneSplitter, 0, 0)
 
         self._nefWindows = OrderedDict()
-        # for nefObj in self.nefObjects:
-        #     # for obj, enableCheckBoxes, enableRename in self.nefObjects:
-        #
-        #     # add a new nefDictFrame for each of the objects in the list (project or nefImporter)
-        #     newWindow = NefDictFrame(parent=self,
-        #                              mainWindow=self.mainWindow,
-        #                              nefLoader=self._nefImporter,
-        #                              pathName=self._path,
-        #                              grid=(0, 0), showBorder=True,
-        #                              **nefObj)
-        #
-        #     self._nefWindows[nefObj[NEFFRAMEKEY_IMPORT]] = newWindow
-        #     self.paneSplitter.addWidget(newWindow)
         _options = {NEFFRAMEKEY_ENABLECHECKBOXES : True,
                     NEFFRAMEKEY_ENABLERENAME     : True,
                     NEFFRAMEKEY_ENABLEFILTERFRAME: True,
@@ -3537,16 +3575,29 @@ class ImportNefPopup(CcpnDialogMainWidget):
     def _okClicked(self):
         """Accept the dialog, set the selection list _selectedSaveFrames to the required items
         """
-        if self._okButton.hasFocus():
-            self._saveFrameSelection = list(self._nefWindows.values())[self._activeImportWindow].getItemsToImport()
+        if not self._okButton.hasFocus():
+            # ignore button
+            return
 
-            # set the collections to import in the nefImporter
-            self._nefImporter.collections = list(self._nefWindows.values())[self._activeImportWindow]._collections
-
-            for _window in self._nefWindows.values():
-                _window.exitNefDictFrame()
-
-        self.accept()
+        # check that all the values for import a valid
+        if list(self._nefWindows.values())[self._activeImportWindow].getInvalidItemsToImport():
+            msg = (f'Imported objects will clash with current project.\n'
+                   f'It is advised to rectify all red items before continuing.\n'
+                   f'Continuing will have undesirable results.\n\n'
+                   f'Would you like to continue importing?')
+            _ok = showYesNoWarning(str(self.windowTitle()), msg, parent=self,
+                                   dontShowEnabled=True,
+                                   defaultResponse=False,
+                                   popupId=f'{self.__class__.__name__}',
+                                   )
+            if not _ok:
+                return
+        self._saveFrameSelection = list(self._nefWindows.values())[self._activeImportWindow].getItemsToImport()
+        # set the collections to import in the nefImporter
+        self._nefImporter.collections = list(self._nefWindows.values())[self._activeImportWindow]._collections
+        for _window in self._nefWindows.values():
+            _window.exitNefDictFrame()
+        super().accept()  # ignore mouse-position
 
 
 #=========================================================================================

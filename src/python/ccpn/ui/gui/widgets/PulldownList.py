@@ -5,7 +5,7 @@ PulldownList widget
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-12-09 12:39:16 +0000 (Mon, December 09, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-05-29 14:42:42 +0100 (Thu, May 29, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -82,6 +82,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
     _userActivated = False
     highlightColour = None
     highlightColourSelect = None
+    _backgroundEmptyColor = None  # set this to change the lineEdit background color when empty
 
     def __init__(self, parent, texts=None, objects=None,
                  icons=None, callback=None,
@@ -103,7 +104,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         :param backgroundText: a transparent text that will disappear as soon as you click to type.
                                 the place-holder or the transparent "backgroundText" will work only if the pulldown is editable.
                                 Otherwise, use HeaderText and enabled = False if you need only a title inside the pulldown
-        :param headerText: text of first item of the pullDown. E.g. '-- Select Item --'
+        :param headerText: text for the first item of the pullDown. E.g. '-- Select Item --'
         :param headerEnabled: True to be selectable, False to disable and be grayed out
         :param editable: If True: allows for editing the value
         :param clickToShowCallback: callback when click to open the pulldown. Used to populate pulldown only when clicked the first time
@@ -273,6 +274,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
         """Set the colour of the selected pulldown-text.
         """
         col = QtWidgets.QApplication.instance().palette().text().color()
+        item = None
         if ((model := self.model()) and
                 (item := model.item(super().currentIndex())) is not None and
                 item.text() and
@@ -284,6 +286,11 @@ class PulldownList(QtWidgets.QComboBox, Base):
             pal.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text,
                          QtGui.QColor(col))
             self.lineEdit().setPalette(pal)
+            pal = self.palette()
+            if item and not item.text() and self._backgroundEmptyColor is not None:
+                pal.setColor(QtGui.QPalette.Active, QtGui.QPalette.Base,
+                             QtGui.QColor(self._backgroundEmptyColor))
+            self.setPalette(pal)
         else:
             pal = self.palette()
             pal.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text,

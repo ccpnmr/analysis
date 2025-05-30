@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-05-21 12:18:53 +0100 (Wed, May 21, 2025) $"
+__dateModified__ = "$dateModified: 2025-05-30 13:11:06 +0100 (Fri, May 30, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -2594,7 +2594,10 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
 
     def filterByAxisCode(self, displayList):
         def filterList(allowlist, blocklist, display):
-            if not (display := self.application.getByGid(display)):
+            if not isinstance(display, SpectrumDisplay):
+                display = self.application.getByGid(display)
+
+            if not display:
                 return
 
             return (not set(display.axisCodes).isdisjoint(allowlist)

@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-05-30 13:11:06 +0100 (Fri, May 30, 2025) $"
+__dateModified__ = "$dateModified: 2025-06-06 15:45:36 +0100 (Fri, June 06, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -127,12 +127,14 @@ class AssignmentInspectorSettings(Widget):
         self.parent = parent
 
         self._setWidgets(parent)
-        self._initSettings()
-
         self.setMinimumWidth(250)
 
     def _setWidgets(self, parent):
+        """Initiate all widgets
 
+        .. note:: Order important!
+        (Create widgets for tabs -> create tab widget -> add widgets to tabs)
+        """
         self._initNhTab(parent)
         self._initChTab(parent)
         self._initGenTab(parent)
@@ -145,10 +147,11 @@ class AssignmentInspectorSettings(Widget):
         self.tabWidget.addTab(self.chTab, 'CH Strips')
 
 
-    def _initSettings(self):
-        pass
-
     def _initNhTab(self, parent):
+        """Initialised the NH tab.
+
+        Create the scrollable frame, list of nhGroups and add one display group
+        """
         self.nhTab = ScrollableFrame(parent=parent, setLayout=True, grid=(0, 0))
         addButton = Button(parent=self.nhTab, grid=(0,0), text='Add Display Group',
                               callback=self.addNhDisplayGroup)
@@ -158,6 +161,10 @@ class AssignmentInspectorSettings(Widget):
 
 
     def _initChTab(self, parent):
+        """Initialised the NH tab.
+
+        Create the scrollable frame, and add one SpectrumDisplay Selection widget.
+        """
         self.chTab = ScrollableFrame(parent=parent, setLayout=True, grid=(0, 0))
 
         axisCodeFilter = {'allowlist': ['C', 'Ch', 'Hc', 'Hc1'], 'blocklist': ['N']}
@@ -171,6 +178,7 @@ class AssignmentInspectorSettings(Widget):
 
 
     def _initGenTab(self, parent):
+        """Initialise the general setttings tab"""
         self.genTab = ScrollableFrame(parent=parent, setLayout=True, grid=(0, 0))
 
         self.sequentialStripsWidget = CheckBoxCompoundWidget(
@@ -180,7 +188,6 @@ class AssignmentInspectorSettings(Widget):
                 labelText='Show sequential strips',
                 checked=False
                 )
-
         self.markPositionsWidget = CheckBoxCompoundWidget(
                 self.genTab,
                 grid=(1, 0), hAlign='left',
@@ -202,12 +209,24 @@ class AssignmentInspectorSettings(Widget):
                 labelText='Show nmrAtom list',
                 checked=True,
                 )
+        self.ignoreAxisCodePref = CheckBoxCompoundWidget(
+                self.genTab,
+                grid=(3, 0), hAlign='left',
+                orientation='left',
+                labelText='Use AxisCode Marks',
+                checked=True,
+                )
 
 
     def addNhDisplayGroup(self):
+        """Creates a moreLessFrame containing nhDisplay control widgets.
 
+        Adds a dict of each widget and adds this to the nhGroups attribute.
+        """
         axisCodeFilter = {'allowlist': ['N', 'Hn', 'Nh'], 'blocklist': []}
 
+        # sets correct positioning of the moreLessFrame based on number of
+        # existing moreLessFrames.
         if group := self.nhGroups:
             row = len(group) + 2
         else:
@@ -242,16 +261,14 @@ class AssignmentInspectorSettings(Widget):
         removeButton = Button(parent=frame, grid=(3,0), hAlign='left', text='Remove Display Group',
                               callback=partial(self.removeMoreLess, widgets))
 
-        # Spacer(frame, 5, 5,
-        #        QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-        #        grid=(row, 0), gridSpan=(1, 4))
-
+        # ensure the selection widget is populated
         display.getDisplays()
-
+        # connect renaming to the spinboxes
         posSpin.spinBox.valueChanged.connect(partial(self.renameMoreLessFrame, widgets))
         negSpin.spinBox.valueChanged.connect(partial(self.renameMoreLessFrame, widgets))
 
     def removeMoreLess(self, widgetList):
+        """Deletes all widgets in a widgetList"""
         self.nhGroups.remove(widgetList)
 
         for widget in widgetList.values():
@@ -259,6 +276,7 @@ class AssignmentInspectorSettings(Widget):
 
 
     def renameMoreLessFrame(self, widgetList):
+        """Renames moreLessFrame based on spinbox values"""
         pos = widgetList.get('posSpin')
         neg = widgetList.get('negSpin')
         frame = widgetList.get('moreLessFrame')

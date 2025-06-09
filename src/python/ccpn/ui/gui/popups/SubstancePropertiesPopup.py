@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Morgan Hayward $"
-__dateModified__ = "$dateModified: 2025-06-06 19:28:58 +0100 (Fri, June 06, 2025) $"
+__dateModified__ = "$dateModified: 2025-06-09 14:55:21 +0100 (Mon, June 09, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ SELECT = '> Select <'
 LESS_BUTTON = 'Show less'
 MORE_BUTTON = 'Show more'
 TYPENEW = 'Type_New'
-LABELLING = ['', TYPENEW, '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'ILVAT', 'Metabolite', 'SAIL', '1,3-13C-_and_2-13C-Glycerol']
+LABELLING = ['', TYPENEW, '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'ILVAT', 'SAIL', '1,3-13C-_and_2-13C-Glycerol']
 BUTTONSTATES = ['New', 'From Existing']
 
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificSpinBoxCompoundWidget, \

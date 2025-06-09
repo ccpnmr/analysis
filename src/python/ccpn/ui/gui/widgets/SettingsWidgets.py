@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-06-06 15:45:36 +0100 (Fri, June 06, 2025) $"
+__dateModified__ = "$dateModified: 2025-06-09 11:03:28 +0100 (Mon, June 09, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -211,7 +211,7 @@ class AssignmentInspectorSettings(Widget):
                 )
         self.ignoreAxisCodePref = CheckBoxCompoundWidget(
                 self.genTab,
-                grid=(3, 0), hAlign='left',
+                grid=(4, 0), hAlign='left',
                 orientation='left',
                 labelText='Use AxisCode Marks',
                 checked=True,

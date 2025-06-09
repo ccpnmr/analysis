@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-06-09 15:08:43 +0100 (Mon, June 09, 2025) $"
+__dateModified__ = "$dateModified: 2025-06-09 15:33:41 +0100 (Mon, June 09, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -749,8 +749,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.aliasShadeLabel = Label(parent, text="Opacity", hAlign='r', grid=(row, 0))
         _sliderBox = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l')
         self.aliasShadeData = Slider(_sliderBox, grid=(0, 1), hAlign='l', objectName='SDS_aliasShade')
-        self.shadeLabel = Label(parent, text="100%", hAlign='r', grid=(row, 2))
-        self.aliasShadeData.valueChanged.connect(self._aliasShadeChanged)
+        self.shadeLabel = Label(parent, text=f"{self.preferences.general.aliasShade}%", hAlign='l', grid=(row, 2))
         # Label(_sliderBox, text="0", grid=(0, 0), hAlign='l')
         # Label(_sliderBox, text="100%", grid=(0, 2), hAlign='l')
         self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)
@@ -1009,6 +1008,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         """Handle changing the symbols
         """
         self.symbolsChanged.emit(self.getValues())
+        self.shadeLabel.setText(f'{int(self.aliasShadeData.get())}%')
 
         _enabled = self.aliasEnabledData.get()
         self.aliasLabelsEnabledData.setEnabled(_enabled)
@@ -1052,9 +1052,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.mainWindow.statusBar().showMessage(f"Cycle Symbol Labelling: {self.annotationsData.get()} ")
 
             self.blockSignals(False)
-
-    def _aliasShadeChanged(self, _value):
-        self.shadeLabel.setText(f'{_value}%')
 
     def _stripArrangementChanged(self):
         """Emit a signal if the strip arrangement buttons have been pressed

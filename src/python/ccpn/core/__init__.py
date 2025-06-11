@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-12-16 18:55:07 +0000 (Mon, December 16, 2024) $"
-__version__ = "$Revision: 3.3.0.develop $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-06-11 12:53:49 +0100 (Wed, June 11, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -244,6 +244,10 @@ NmrResidue objects behave in there different ways:
 """
 
 _PRINT_HOTFIXES = False
+_PRINT_TYPING = False
+_PRINT_INSTANCE = False
+_PRINT_IGNORE = False
+_PRINT_BOUND = False
 _coreImportOrder = (
     'Project',
         'Spectrum',
@@ -518,20 +522,69 @@ _allGetters = {}
 _Project._linkWrapperClasses(_allGetters=_allGetters)
 
 if _PRINT_HOTFIXES:
+
+    import sys
+    import re
+
+    def get_module_paths(name):
+        match = re.compile(fr"ccpn\..*\.{name}$")
+        if not (found := [kk for kk in sys.modules.keys()
+                     if re.match(match, kk)]):
+            raise RuntimeError(f'Could not find module {name!r}')
+        if len(found) > 1:
+            for pp in found:
+                yield f'# ***   ', f'{pp}.{name}'
+        else:
+            yield '', f'{found[0]}.{name}'
+
+
+    print('\nfrom typing import TypeVar, TYPE_CHECKING\n')
     # print the hotfixes to save to change-log/edit into core classes
     for grp, stubs in sorted(_allGetters.items(), key=lambda val: val[0]):
-        print(f'\n\n\n#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n# --> {grp}')
+        print(f'\n# --> {grp}')
+
+        if _PRINT_TYPING:
+            header = True
+            for num, stub in sorted(stubs):
+                if 0 <= stub.find('get') <= 1:
+                    if header:
+                        header = False
+                        # header for type_checking
+                        print(f'#=========================================================================================')
+                        print(f'# typing.TypeVars')
+                        print(f'#=========================================================================================\n')
+                        print(f"# from __future__ import annotations\n\n")
+                        print(f'if TYPE_CHECKING:')
+                    # print code-stub for TypeVar
+                    lbl = stub.replace('get', '', 1)
+                    for err, _path in get_module_paths(lbl):
+                        _stubpath = _path.rsplit('.', 1)
+                        print(f"    {err}from {_stubpath[0] if len(_stubpath) > 1 else _path} "
+                              f"import {lbl}"
+                              f"{f' as {lbl}Instance' if _PRINT_INSTANCE else ''}"
+                              f"{'  # type: ignore[unused-ignore]' if _PRINT_IGNORE else ''}")
+
+            header = True
+            for num, stub in sorted(stubs):
+                if 0 <= stub.find('get') <= 1:
+                    if header:
+                        header = False
+                        # header for instances
+                        print(f'')
+                    # print code-stub for TypeVar
+                    lbl = stub.replace('get', '', 1)
+                    for err, _path in get_module_paths(lbl):
+                        print(f"{err}{lbl}Instance = TypeVar('{lbl}Instance', bound="
+                              f"'{_path if _PRINT_BOUND else lbl}')")
+
+            if not header:
+                print(f'\n\n#=========================================================================================')
+                print(f'# {grp}')
+                print(f'#=========================================================================================\n')
 
         header = True
         for num, stub in sorted(stubs):
-            if not stub.startswith('get'):
-                if header:
-                    header = False
-                    # header for property section
-                    print(f'#=========================================================================================')
-                    print(f'# property STUBS: hot-fixed later')
-                    print(f'#=========================================================================================\n')
-
+            if not (0 <= stub.find('get') <= 1):
                 if stub == 'spectra':
                     lbl = 'Spectrum'
                 elif stub == 'axes':
@@ -540,38 +593,70 @@ if _PRINT_HOTFIXES:
                     lbl = 'Complex'
                 else:
                     lbl = stub[0].upper() + (stub[1:-1] if stub.endswith('s') else stub[1:])
+                    if lbl.startswith('_'):
+                        lbl = lbl[0] + lbl[1].upper() + lbl[2:]
+                if header:
+                    header = False
+                    # header for property-section
+                    print(f'class {grp}:\n')  # stops pycharm complaining if copied to a file
+                    print(f'    '
+                          f'#-----------------------------------------------------------------------------------------')
+                    print(f'    # property STUBS: hot-fixed later')
+                    print(f'    '
+                          f'#-----------------------------------------------------------------------------------------\n')
+
                 # print code-stub for property
-                print(f'''@property
-    def {stub}(self) -> list['{lbl}']:
+                print(f'''    @property
+    def {stub}(self) -> list[{f"{lbl}Instance" if _PRINT_INSTANCE else f"{lbl}"}]:
         """STUB: hot-fixed later
+
         :return: a list of {stub} in the {grp}
+        :rtype: list[{f"{lbl}Instance" if _PRINT_INSTANCE else f"{lbl}"}]
         """
         return []
-    '''
-                      )
+''')
 
         header = True
         for num, stub in sorted(stubs):
-            if stub.startswith('get'):
+            if 0 <= stub.find('get') <= 1:
                 if header:
                     header = False
-                    # header for getter section
-                    print(f'#=========================================================================================')
-                    print(f'# getter STUBS: hot-fixed later')
-                    print(f'#=========================================================================================\n')
+                    # header for getter-section
+                    print(f'    '
+                          f'#-----------------------------------------------------------------------------------------')
+                    print(f'    # Attribute getters of the data structure')
+                    print(f'    # getter STUBS: hot-fixed later')
+                    print(f'    '
+                          f'#-----------------------------------------------------------------------------------------\n')
 
+                lbl = stub.replace('get', '', 1)
                 # print code-stub for getter
-                print(f'''def {stub}(self, relativeId: str) -> '{stub[3:]} | None':
-        """STUB: hot-fixed later
-        :return: an instance of {stub[3:]}, or None
+                print(f'''    # noinspection PyUnusedLocal
+    @staticmethod
+    def {stub}(relativeId: str) -> {f"{lbl}Instance | None" if _PRINT_INSTANCE else f"{lbl} | None"}:
+        """
+        STUB: hot-fixed later
+
+        :param relativeId: The relative identifier for the {lbl} instance
+        :type relativeId: str
+        :return: an instance of {lbl}, or None
+        :rtype: {f"{lbl}Instance" if _PRINT_INSTANCE else f"{lbl}"} | None
         """
         return None
-    '''
-                      )
+''')
         # header for the next block
-        print(f'#=========================================================================================')
-        print(f'# Core methods')
-        print(f'#=========================================================================================\n')
+        print(f'    #-----------------------------------------------------------------------------------------')
+        print(f'    # Core methods')
+        print(f'    #-----------------------------------------------------------------------------------------\n')
+
+    print(f'\n\n\n\n#=========================================================================================')
+    print(f'# current list of getters for core objects - inserted by _linkWrapperClasses')
+
+    # print the hotfixes to save to change-log/edit into core classes
+    for grp, stubs in sorted(_allGetters.items(), key=lambda val: val[0]):
+        for num, stub in sorted(stubs):
+            print(f'#     {grp}.{stub}')
+
 
 #=========================================================================================
 # current list of getters for core objects - inserted by _linkWrapperClasses

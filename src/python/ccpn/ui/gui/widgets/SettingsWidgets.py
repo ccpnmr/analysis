@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-06-09 15:33:41 +0100 (Mon, June 09, 2025) $"
+__dateModified__ = "$dateModified: 2025-06-17 14:13:26 +0100 (Tue, June 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -254,12 +254,12 @@ class AssignmentInspectorSettings(Widget):
 
         negSpin = SpinBoxCompoundWidget(parent=frame, grid=(1, 0), gridSpan=(1, 0),
                                        hAlign='left', labelText='i-1 strips to show',
-                                       value=3, step=1, minimum=0
+                                       value=1, step=1, minimum=0
                                        )
 
         posSpin = SpinBoxCompoundWidget(parent=frame, grid=(2, 0), gridSpan=(1, 0),
                                         hAlign='left', labelText='i+1 strips to show',
-                                        value=3, step=1, minimum=0,
+                                        value=1, step=1, minimum=0,
                                         )
 
         widgets = {'moreLessFrame': moreLessFrame, 'display': display, 'negSpin': negSpin, 'posSpin': posSpin}

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-15 10:09:13 +0100 (Thu, May 15, 2025) $"
-__version__ = "$Revision: 3.3.3 $"
+__dateModified__ = "$dateModified: 2025-06-18 19:30:41 +0100 (Wed, June 18, 2025) $"
+__version__ = "$Revision: 3.3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2047,8 +2047,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 # marks are not automatically deleted by the model when deleting strips
                 for mark in st.marks:
                     mark.delete()
-                st.close()
-
+                # st.close()
             # marks are not automatically deleted by the model when deleting strips
             for mark in self.marks:
                 mark.delete()

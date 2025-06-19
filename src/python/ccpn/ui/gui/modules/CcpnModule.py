@@ -2,6 +2,9 @@
 This file contains CcpnModule base class
 modified by Geerten 1-12/12/2016
 """
+from __future__ import annotations
+
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -16,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-02-14 17:36:57 +0000 (Fri, February 14, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-06-19 17:15:34 +0100 (Thu, June 19, 2025) $"
+__version__ = "$Revision: 3.3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,6 +35,7 @@ import re
 import contextlib
 import itertools
 import collections
+from typing import TYPE_CHECKING
 from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph.dockarea.Container import Container
@@ -48,11 +52,9 @@ from ccpn.ui.gui.widgets.SideBar import SideBar, SideBarSearchListView
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.MainWindow import MainWindow
 from ccpn.ui.gui.guiSettings import (getColours, BORDERNOFOCUS, CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND,
                                      CCPNMODULELABEL_BACKGROUND_ACTIVE, CCPNMODULELABEL_FOREGROUND_ACTIVE)
 from ccpn.ui.gui.lib.ModuleLib import getBlockingDialogs
-from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.Pid import Pid, createPid
 from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
@@ -78,6 +80,12 @@ WIDGETSTATE = 'widgetsState'
 MIN_PIXMAP = 32
 MAX_PIXMAP = 128
 _DEBUG = True
+
+if TYPE_CHECKING:
+    from ccpn.framework.Current import Current
+    from ccpn.framework.Framework import Framework
+    from ccpn.ui.gui.widgets.MainWindow import MainWindow
+    from ccpn.core.Project import Project
 
 
 #=========================================================================================
@@ -128,9 +136,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     # After closing a renamed module, any new instance will be named as default.
 
     mainWindow: MainWindow | None = WeakRefDescriptor()
-    application = WeakRefDescriptor()
-    project: Project | None = WeakRefDescriptor()
-    current = WeakRefDescriptor()
+    application: Framework = WeakRefDescriptor()
+    project: Project = WeakRefDescriptor()
+    current: Current = WeakRefDescriptor()
 
     def __init__(self, mainWindow, name, closable=True,
                  settingsScrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):

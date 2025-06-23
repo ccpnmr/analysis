@@ -19,13 +19,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-06-17 14:13:26 +0100 (Tue, June 17, 2025) $"
+__dateModified__ = "$dateModified: 2025-06-23 15:44:33 +0100 (Mon, June 23, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -88,8 +89,8 @@ from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpn.util.Logging import getLogger
 
-
 from collections import OrderedDict
+
 
 ALL = '<Use all>'
 UseCurrent = '<Use active>'
@@ -107,7 +108,8 @@ STRIPPLOT_NMRATOMSFROMPEAKS = 'nmrAtomsPeaks'
 NO_STRIP = 'noStrip'
 LineEditsMinimumWidth = 195
 TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
-ZEROMARGINS = (0, 0, 0, 0) # l, t, r, b
+ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
+
 
 class AssignmentInspectorSettings(Widget):
     """Settings widget for the assignment inspector module."""
@@ -146,19 +148,17 @@ class AssignmentInspectorSettings(Widget):
         self.tabWidget.addTab(self.nhTab, 'NH Strips')
         self.tabWidget.addTab(self.chTab, 'CH Strips')
 
-
     def _initNhTab(self, parent):
         """Initialised the NH tab.
 
         Create the scrollable frame, list of nhGroups and add one display group
         """
         self.nhTab = ScrollableFrame(parent=parent, setLayout=True, grid=(0, 0))
-        addButton = Button(parent=self.nhTab, grid=(0,0), text='Add Display Group',
-                              callback=self.addNhDisplayGroup)
+        Button(parent=self.nhTab, grid=(0, 0), text='Add Display Group',
+               callback=self.addNhDisplayGroup)
 
         self.nhGroups = []
         self.addNhDisplayGroup()
-
 
     def _initChTab(self, parent):
         """Initialised the NH tab.
@@ -170,12 +170,11 @@ class AssignmentInspectorSettings(Widget):
         axisCodeFilter = {'allowlist': ['C', 'Ch', 'Hc', 'Hc1'], 'blocklist': ['N']}
 
         self.chDisplay = SpectrumDisplaySelectionWidget(parent=self.chTab, mainWindow=self.mainWindow,
-                                                 grid=(0, 0), gridSpan=(1, 1),
-                                                 labelText='Display(s)',
-                                                 texts=None,
-                                                 fixedWidths=[100, 200, 200],
-                                                 axisCodeFilter=axisCodeFilter)
-
+                                                        grid=(0, 0), gridSpan=(1, 1),
+                                                        labelText='Display(s)',
+                                                        texts=None,
+                                                        fixedWidths=[100, 200, 200],
+                                                        axisCodeFilter=axisCodeFilter)
 
     def _initGenTab(self, parent):
         """Initialise the general setttings tab"""
@@ -224,7 +223,6 @@ class AssignmentInspectorSettings(Widget):
                 checked=True,
                 )
 
-
     def addNhDisplayGroup(self):
         """Creates a moreLessFrame containing nhDisplay control widgets.
 
@@ -253,9 +251,9 @@ class AssignmentInspectorSettings(Widget):
                                                  axisCodeFilter=axisCodeFilter)
 
         negSpin = SpinBoxCompoundWidget(parent=frame, grid=(1, 0), gridSpan=(1, 0),
-                                       hAlign='left', labelText='i-1 strips to show',
-                                       value=1, step=1, minimum=0
-                                       )
+                                        hAlign='left', labelText='i-1 strips to show',
+                                        value=1, step=1, minimum=0
+                                        )
 
         posSpin = SpinBoxCompoundWidget(parent=frame, grid=(2, 0), gridSpan=(1, 0),
                                         hAlign='left', labelText='i+1 strips to show',
@@ -265,7 +263,7 @@ class AssignmentInspectorSettings(Widget):
         widgets = {'moreLessFrame': moreLessFrame, 'display': display, 'negSpin': negSpin, 'posSpin': posSpin}
         group.append(widgets)
 
-        removeButton = Button(parent=frame, grid=(3,0), hAlign='left', text='Remove Display Group',
+        removeButton = Button(parent=frame, grid=(3, 0), hAlign='left', text='Remove Display Group',
                               callback=partial(self.removeMoreLess, widgets))
 
         # ensure the selection widget is populated
@@ -281,9 +279,10 @@ class AssignmentInspectorSettings(Widget):
         for widget in widgetList.values():
             widget.deleteLater()
 
-
-    def renameMoreLessFrame(self, widgetList):
-        """Renames moreLessFrame based on spinbox values"""
+    @staticmethod
+    def renameMoreLessFrame(widgetList):
+        """Renames moreLessFrame based on spinbox values
+        """
         pos = widgetList.get('posSpin')
         neg = widgetList.get('negSpin')
         frame = widgetList.get('moreLessFrame')
@@ -292,9 +291,9 @@ class AssignmentInspectorSettings(Widget):
             frame.name = f'Pos:{pos.getValue()} Neg:{neg.getValue()}'
 
 
-
 class PickAndAssignSettings(Widget):
-    """Settings widget for the pick and assign module."""
+    """Settings widget for the pick and assign module.
+    """
     def __init__(self, parent=None, mainWindow=None, **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -377,6 +376,7 @@ class PickAndAssignSettings(Widget):
 
         # fix the second column to stop extra widgets flickering
         alignWidgets(self.nmrResidueTableSettings, columnScale=1.2)
+
 
 class SpectrumDisplaySettings(Widget, SignalBlocking):
     # signal for parentWidgets to respond to changes in the widget
@@ -1352,15 +1352,16 @@ class _commonSettings():
         :param data: required for notifiers
         """
 
-        def _codeDictUpdate(displayKey: str = None, checkBox: CheckBox = None):
+        def _codeDictUpdate(peakListKey: str = None, checkBox: CheckBox = None):
             """update axisCode dict when check boxes are changed.
             """
-            if (display is None) or (box is None):
+            print(peakListKey)
+            if (peakList is None) or (box is None):
                 return
 
-            if not self.axisCodeOptionsDict.get(displayKey):
-                self.axisCodeOptionsDict[displayKey] = {}
-            self.axisCodeOptionsDict[displayKey] = checkBox.parent().getSelectedIndexes()
+            if not self.axisCodeOptionsDict.get(peakListKey):
+                self.axisCodeOptionsDict[peakListKey] = {}
+            self.axisCodeOptionsDict[peakListKey] = checkBox.parent().getSelectedIndexes()
 
         if self._spectraWidget:
             self._spectraWidget.hide()
@@ -1398,11 +1399,11 @@ class _commonSettings():
             for box in axisCodeOptions.checkBoxes:
                 box.stateChanged.connect(partial(_codeDictUpdate, f'{peakList}', box))
 
-            if (displayDict := self.axisCodeOptionsDict.get(f'{display}')) is not None:
+            if (peakListDict := self.axisCodeOptionsDict.get(f'{peakList}')) is not None:
                 # if checkboxes previously existed set to same state
                 axisCodeOptions.selectAll()
                 for ii, box in enumerate(axisCodeOptions.checkBoxes):
-                    if ii not in displayDict:
+                    if ii not in peakListDict:
                         box.setChecked(False)
             else:
                 # just clear the 'C' axes - this is the usual configuration
@@ -1421,9 +1422,8 @@ class _commonSettings():
                 # ignore if view is deleted
                 if data is not None and data.get(Notifier.TRIGGER) == 'delete':
                     notifObj = data.get(Notifier.OBJECT)
-                    # check if it is a SpectrumView and both correct spectrum display and spectrum.
-                    if isinstance(notifObj,
-                                  SpectrumView) and notifObj.strip.spectrumDisplay is display and notifObj.spectrum is spectrum:
+                    # check if it is a PeakList and is the correct PeakList.
+                    if isinstance(notifObj, PeakList) and notifObj is peakList:
                         continue
 
                 f_row += 1
@@ -1439,7 +1439,7 @@ class _commonSettings():
     def _displayPeakListRadioButtonCallback(self, data=None):
         index = self.displayPeakListRadioButton.getIndex()
 
-        if index == 0: # Display
+        if index == 0:  # Display
             self.spectrumDisplayPulldown.setEnabled(True)
             self.spectrumDisplayPulldown.setVisible(True)
             self.peakListPulldown.setEnabled(False)
@@ -1447,7 +1447,7 @@ class _commonSettings():
             self.setCurrentPeaksCheckBox.setEnabled(False)
             self.setCurrentPeaksCheckBox.setVisible(False)
             self._spectrumDisplaySelectionPulldownCallback()
-        elif index == 1: # PeakList
+        elif index == 1:  # PeakList
             self.setCurrentPeaksCheckBox.setEnabled(True)
             self.setCurrentPeaksCheckBox.setVisible(True)
             self.peakListPulldown.setEnabled(True)
@@ -1455,7 +1455,7 @@ class _commonSettings():
             self.spectrumDisplayPulldown.setEnabled(False)
             self.spectrumDisplayPulldown.setVisible(False)
             self._peakListSelectionPulldownCallback()
-        else: # Shouldn't get here.
+        else:  # Shouldn't get here.
             getLogger().warning(f'Case given with no matches: {index}')
 
     def _spectrumDisplaySelectionPulldownCallback(self, data=None):
@@ -1483,7 +1483,6 @@ class _commonSettings():
             self.prevNotifierObj = obj
 
         self._fillAllSpectrumFrame(gids, data)
-
 
     def _peakListSelectionPulldownCallback(self, data=None):
         """Notifier Callback for selecting a spectrumDisplay
@@ -1739,7 +1738,8 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
             specDisRow = 0
 
             self.automaticBbNmrAtomAssignment = CheckBoxCompoundWidget(self.spectrumDisplayOptionsFrame,
-                                                                       grid=(specDisRow, 0), vAlign='top', stretch=(0, 0),
+                                                                       grid=(specDisRow, 0), vAlign='top',
+                                                                       stretch=(0, 0),
                                                                        hAlign='left',
                                                                        fixedWidths=(colwidth, None),
                                                                        orientation='left',
@@ -1749,7 +1749,8 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
 
             specDisRow += 1
 
-            self.HNCACBSettingsLabel = Label(parent=self.spectrumDisplayOptionsFrame, text='HNCACB Settings:', grid=(specDisRow, 0))
+            self.HNCACBSettingsLabel = Label(parent=self.spectrumDisplayOptionsFrame, text='HNCACB Settings:',
+                                             grid=(specDisRow, 0))
 
             specDisRow += 1
 
@@ -1770,7 +1771,6 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                                                     'CAs negative / CBs positive'])
 
             # specDisRow += 1
-
 
             # HLine(self.spectrumDisplayOptionsFrame, grid=(specDisRow, 0), gridSpan=(specDisRow, 4),
             #       colour = getColours()[DIVIDER], height = 15)
@@ -1994,6 +1994,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
             # select the nmrChain here
             self.listButtons.setIndex(self.NMRCHAINBUTTON)
 
+
 class _PeakListRow(Frame):
     """Class to make a peakList Row"""
 
@@ -2036,6 +2037,7 @@ class _PeakListRow(Frame):
         assignment = list(spectrum.assignmentTolerances)
         assignment[ii] = float(spinBox.getValue())
         spectrum.assignmentTolerances = tuple(assignment)
+
 
 class _SpectrumRow(Frame):
     """Class to make a spectrum row
@@ -2566,6 +2568,7 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
     .. Note:: Method for callback requires a data argument.
     """
     KLASS = SpectrumDisplay
+
     def __init__(self, axisCodeFilter=None, **kwds):
         super().__init__(**kwds)
 
@@ -2618,7 +2621,6 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
 
         self.pulldownList.setData(texts=ll, )  # objects=pulldownObjs)
 
-
     def filterByAxisCode(self, displayList):
         def filterList(allowlist, blocklist, display):
             if not isinstance(display, SpectrumDisplay):
@@ -2628,7 +2630,7 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
                 return
 
             return (not set(display.axisCodes).isdisjoint(allowlist)
-                and set(display.axisCodes).isdisjoint(blocklist))
+                    and set(display.axisCodes).isdisjoint(blocklist))
 
         if filter := self.axisCodeFilter:
             allowlist = set(self.axisCodeFilter.get('allowlist'))
@@ -2695,7 +2697,7 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
             return
 
         if obj:
-            # when <Use All> in texts
+
             if ALL in (tt := self.getTexts()):
                 if obj.pid in tt:
                     self.removeTexts([obj.pid])  # remove text if is also in listWidget

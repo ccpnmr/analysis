@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-06-23 15:44:33 +0100 (Mon, June 23, 2025) $"
+__dateModified__ = "$dateModified: 2025-06-26 14:05:24 +0100 (Thu, June 26, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -161,9 +161,9 @@ class AssignmentInspectorSettings(Widget):
         self.addNhDisplayGroup()
 
     def _initChTab(self, parent):
-        """Initialised the NH tab.
+        """Initialised the CH tab.
 
-        Create the scrollable frame, and add one SpectrumDisplay Selection widget.
+        A scrollable frame and a SpectrumDisplaySelectionWidget.
         """
         self.chTab = ScrollableFrame(parent=parent, setLayout=True, grid=(0, 0))
 
@@ -237,7 +237,7 @@ class AssignmentInspectorSettings(Widget):
         else:
             row = 2
 
-        moreLessFrame = MoreLessFrame(self.nhTab, name='Pos:3 Neg:3', showMore=True,
+        moreLessFrame = MoreLessFrame(self.nhTab, name='Pos:1 Neg:1', showMore=True,
                                       grid=(row, 0), gridSpan=(1, 1))
         moreLessFrame.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
 

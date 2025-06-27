@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-15 10:09:13 +0100 (Thu, May 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-06-27 13:30:47 +0100 (Fri, June 27, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -868,18 +868,11 @@ class GuiStrip(Frame):
 
             else:
                 # popup to calibrate from selected peaks in this display
-                from ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup import (CalibrateSpectraFromPeaksPopupNd,
-                                                                               CalibrateSpectraFromPeaksPopup1d)
+                from ccpn.ui.gui.popups.CalibrateSpectraFromPeaksPopup import CalibrateSpectraFromPeaksPopupNd
 
-                if self.spectrumDisplay.is1D:
-                    popup = CalibrateSpectraFromPeaksPopup1d(parent=self.mainWindow, mainWindow=self.mainWindow,
-                                                             strip=self, spectrumCount=spectrumCount)
-                else:
-                    popup = CalibrateSpectraFromPeaksPopupNd(parent=self.mainWindow, mainWindow=self.mainWindow,
-                                                             strip=self, spectrumCount=spectrumCount)
-
-                popup.exec_()
-
+                if popup := CalibrateSpectraFromPeaksPopupNd(parent=self.mainWindow, mainWindow=self.mainWindow,
+                                                             strip=self, spectrumCount=spectrumCount):
+                    popup.exec_()
         else:
             MessageDialog.showMessage('Not Enough Peaks', 'Select more than one peak, only one per spectrum')
 

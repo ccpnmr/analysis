@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-14 15:59:37 +0100 (Mon, April 14, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-07-02 10:23:01 +0100 (Wed, July 02, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -476,13 +476,14 @@ class Gui(Ui):
         mainWindow.namespace['current'] = self.application.current
         return mainWindow
 
-    def echoCommands(self, commands: typing.List[str]):
+    def echoCommands(self, commands: typing.List[str], logLevel='INFO'):
         """Echo commands strings, one by one, to logger
         and store them in internal list for perusal
         """
         logger = Logging.getLogger()
         for command in commands:
-            logger.echoInfo(command)
+            logger.dynamic(logLevel, command)
+            # logger.echoInfo(command)
 
         if self.application.ui is not None and \
                 self.application.ui.mainWindow is not None and \

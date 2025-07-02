@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-20 13:19:04 +0000 (Wed, November 20, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-07-02 10:23:01 +0100 (Wed, July 02, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -412,7 +412,7 @@ def _inspectFunc(func):
     return f'({_file}.{func.__name__}:{_line + 1})'
 
 
-def logCommand(prefix='', get=None, isProperty=False):
+def logCommand(prefix='', get=None, isProperty=False, logLevel='INFO'):
     """A decorator to log the invocation of the call to a Framework, Project, ... method.
     Use prefix to set the proper command context, e.g. 'application.' or 'project.'
     Use isProperty to get ' = 'args[1]
@@ -459,7 +459,7 @@ def logCommand(prefix='', get=None, isProperty=False):
             # this has been removed from the logger.formatting and moved to the logging methods
             _trace = _inspectFunc(func)
             msg = f'{logS:90}    {_trace}'
-            application.ui.echoCommands([msg])
+            application.ui.echoCommands([msg], logLevel)
 
         # increase blocking
         with notificationEchoBlocking(application=application):

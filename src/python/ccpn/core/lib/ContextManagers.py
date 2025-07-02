@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-07-04 18:51:59 +0100 (Thu, July 04, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-07-02 10:23:01 +0100 (Wed, July 02, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -413,7 +413,7 @@ def notificationEchoBlocking(application=None):
 
 
 @contextmanager
-def logCommandManager(prefix, funcName, *args, **kwds):
+def logCommandManager(prefix, funcName, logLevel='INFO', *args, **kwds):
     """Echo commands as prefix.funcName( **kwds )"""
     from ccpn.util.decorators import _obj2pid
 
@@ -437,7 +437,7 @@ def logCommandManager(prefix, funcName, *args, **kwds):
             msg = msg[:-2]
         msg += ')'
 
-        application.ui.echoCommands([msg])
+        application.ui.echoCommands([msg], logLevel)
 
     with notificationEchoBlocking(application=application):
         yield

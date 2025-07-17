@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-06-26 14:05:24 +0100 (Thu, June 26, 2025) $"
+__dateModified__ = "$dateModified: 2025-07-17 14:22:58 +0100 (Thu, July 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -1103,6 +1103,8 @@ class _commonSettings():
     spectrumDisplayOptionsFrame: Frame | None = None
     axisCodeOptionsDict: dict = None
     spectrumDisplayPulldown: SpectrumDisplaySelectionWidget | None = None
+    peakListPulldown: PeakListSelectionWidget | None = None
+    setCurrentPeaksCheckBox: CheckBox | None = None
     _changeAxisCode: Callable = None
 
     # separated from settings widgets below, but only one seems to use it now
@@ -1283,12 +1285,18 @@ class _commonSettings():
         self._spectraWidget = Widget(parent=self.spectrumDisplayOptionsFrame, setLayout=True,
                                      grid=(10, 0), gridSpan=(1, 2), vAlign='top')
 
+        HLine(self._spectraWidget, grid=(0, 0), gridSpan=(1, 4),
+              colour=getColours()[DIVIDER], height=15)
+
         if not displays:
             return
 
         self.spectrumIndex = []
         for num, display in enumerate(displays):
             maxLen, axisLabels, specInd, validSpectrumViews = self._getSpectraFromDisplays([display])
+
+            num += 1
+
             if not maxLen:
                 continue
 
@@ -1371,6 +1379,9 @@ class _commonSettings():
         self._spectraWidget = Widget(parent=self.spectrumDisplayOptionsFrame, setLayout=True,
                                      grid=(9, 0), gridSpan=(1, 2), vAlign='top')
 
+        HLine(self._spectraWidget, grid=(0, 0), gridSpan=(1, 4),
+              colour=getColours()[DIVIDER], height=15)
+
         if not peakLists:
             return
 
@@ -1379,6 +1390,8 @@ class _commonSettings():
             spectrum = peakList.spectrum
             axisLabels = spectrum.axisCodes
             maxLen = len(axisLabels)
+
+            num += 1
 
             if not maxLen:
                 continue
@@ -1500,9 +1513,9 @@ class _commonSettings():
         if data is not None and data.get(Notifier.TRIGGER) == 'delete':
             obj = data.get(Notifier.OBJECT)
 
-            if isinstance(obj, PeakList):
-                # object is a PeakList, check if last object deleted is this views display
-                if obj.strip.spectrumDisplay is self.prevNotifierObj:
+            if isinstance(obj, PeakList) and self.prevNotifierObj:
+                # object is a PeakList, check if last object deleted is this peakList
+                if obj is self.prevNotifierObj:
                     return
 
             pids = [pid for pid in pids if pid and pid != obj]
@@ -1823,11 +1836,6 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                     labelText='Select All Peaks in List',
                     checked=False
                     )
-
-            specDisRow += 1
-
-            HLine(self.spectrumDisplayOptionsFrame, grid=(specDisRow, 0), gridSpan=(1, 4),
-                  colour=getColours()[DIVIDER], height=15)
 
             self._displayPeakListRadioButtonCallback()
 

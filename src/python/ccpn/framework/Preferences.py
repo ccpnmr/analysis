@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-02-25 14:04:49 +0000 (Tue, February 25, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-07-21 14:50:27 +0100 (Mon, July 21, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,6 +29,7 @@ __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
 
 import json
 from itertools import chain
+from json import JSONDecodeError
 
 from ccpn.ui.gui.guiSettings import FONTLIST
 from ccpn.util.AttrDict import AttrDict
@@ -103,7 +104,11 @@ class Preferences(AttrDict):
             return None
 
         with path.open(mode='r') as fp:
-            _prefs = json.load(fp, object_hook=AttrDict)
+            try:
+                _prefs = json.load(fp, object_hook=AttrDict)
+            except JSONDecodeError as e:
+                getLogger().error(f'Preferences Error: {e}')
+                return None
 
         self._lastPath = str(path)
 

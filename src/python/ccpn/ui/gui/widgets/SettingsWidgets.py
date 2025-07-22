@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-07-17 14:22:58 +0100 (Thu, July 17, 2025) $"
+__dateModified__ = "$dateModified: 2025-07-22 16:20:14 +0100 (Tue, July 22, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -1363,7 +1363,6 @@ class _commonSettings():
         def _codeDictUpdate(peakListKey: str = None, checkBox: CheckBox = None):
             """update axisCode dict when check boxes are changed.
             """
-            print(peakListKey)
             if (peakList is None) or (box is None):
                 return
 

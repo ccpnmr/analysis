@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-14 15:03:47 +0100 (Mon, April 14, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-10-08 19:44:50 +0100 (Wed, October 08, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -23,6 +23,31 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+__all__ = [
+    "ButtonCompoundWidget",
+    "ButtonListCompoundWidget",
+    "CheckBoxCompoundWidget",
+    "CheckBoxesCompoundWidget",
+    "ColourSelectionCompoundWidget",
+    "ColourSelectionWidget",
+    "CompoundViewCompoundWidget",
+    "DoubleSpinBoxCompoundWidget",
+    "EntryCompoundWidget",
+    "EntryPathCompoundWidget",
+    "FrameCompoundWidget",
+    "InputPulldown",
+    "LabelCompoundWidget",
+    "LineEditPopup",
+    "ListCompoundWidget",
+    "PlainListCompoundWidget",
+    "PulldownListCompoundWidget",
+    "RadioButtonsCompoundWidget",
+    "ScientificSpinBoxCompoundWidget",
+    "SelectorWidget",
+    "SpinBoxCompoundWidget",
+    "TextEditorCompoundWidget"
+    ]
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 import contextlib
@@ -319,7 +344,7 @@ class PlainListCompoundWidget(CompoundBaseWidget):
 
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', texts=None, callback=None, uniqueList=True,  objectName='', compoundKwds=None,
+                 labelText='', texts=None, callback=None, uniqueList=True, objectName='', compoundKwds=None,
                  **kwds):
         """
         :param parent: parent widget
@@ -420,7 +445,6 @@ class PlainListCompoundWidget(CompoundBaseWidget):
     def renameText(self, oldText, newText):
         self.listWidget.renameItem(oldText, newText)
 
-
     def _getSaveState(self):
         """
         Internal. Called for saving/restoring the widget state.
@@ -432,6 +456,7 @@ class PlainListCompoundWidget(CompoundBaseWidget):
         Internal. Called for saving/restoring the widget state.
         """
         return self.setTexts(value)
+
 
 class EntryCompoundWidget(CompoundBaseWidget):
     """
@@ -491,10 +516,11 @@ class EntryCompoundWidget(CompoundBaseWidget):
         compoundKwds = compoundKwds or {}
         spacer = compoundKwds.get('addSpacer', False)
 
-        self.label = Label(parent=self, text=labelText, vAlign='center')
-        self._addWidget(self.label)
-        if tipText:
-            self.label.setToolTip(tipText)
+        if labelText is not None:
+            self.label = Label(parent=self, text=labelText, vAlign='center')
+            self._addWidget(self.label)
+            if tipText:
+                self.label.setToolTip(tipText)
 
         self.entry = Entry(parent=self, text=entryText, callback=callback, editable=editable, **compoundKwds)
         self._addWidget(self.entry)
@@ -1199,11 +1225,12 @@ class FrameCompoundWidget(CompoundBaseWidget):
             top=[(0, 0), (1, 0)],
             bottom=[(1, 0), (0, 0)],
             )
+
     def __init__(self, parent=None, mainWindow=None,
                  showBorder=False, orientation='left',
                  scrollable=False,
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='',  compoundKwds=None,
+                 labelText='', compoundKwds=None,
                  **kwds):
 
         CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
@@ -1216,11 +1243,12 @@ class FrameCompoundWidget(CompoundBaseWidget):
         frameKwds.update(compoundKwds or {})
         frameGrid = self.layoutDict[orientation][1]
         if scrollable:
-            self.widgetArea = ScrollableFrame(self, setLayout=True, grid=frameGrid, ) #the container where to add widgets
-            self._frame = Frame(self.widgetArea, setLayout=True, showBorder=False) #hAlign=orientation, **frameKwds)
+            self.widgetArea = ScrollableFrame(self, setLayout=True,
+                                              grid=frameGrid, )  #the container where to add widgets
+            self._frame = Frame(self.widgetArea, setLayout=True, showBorder=False)  #hAlign=orientation, **frameKwds)
         else:
-            self.widgetArea = Frame(self, setLayout=True, grid=frameGrid,)
-            self._frame = self.widgetArea # just to have same class attr as when scrollable=True
+            self.widgetArea = Frame(self, setLayout=True, grid=frameGrid, )
+            self._frame = self.widgetArea  # just to have same class attr as when scrollable=True
         self.widgetArea.setObjectName(labelText)
         self.setObjectName(labelText)
         self._widgets.append(self.label)
@@ -1239,6 +1267,7 @@ class FrameCompoundWidget(CompoundBaseWidget):
 
     def clear(self):
         self.widgetArea._clear()
+
 
 class ButtonCompoundWidget(CompoundBaseWidget):
     """
@@ -1329,7 +1358,6 @@ class ButtonCompoundWidget(CompoundBaseWidget):
             self.setFixedWidths(fixedWidths)
 
 
-
 class ButtonListCompoundWidget(CompoundBaseWidget):
     """
     Compound class comprising a Label and a ButtonList, combined in a CompoundBaseWidget (i.e. a Frame)
@@ -1374,12 +1402,12 @@ class ButtonListCompoundWidget(CompoundBaseWidget):
 
         hAlign = orientation if orientation in ['left', 'right'] else 'center'
         buttonKwds = {
-                      'texts'    : texts,
-                      'tipTexts':tipTexts,
-                      'hAlign'  : hAlign,
-                      'icons'    : icons,
-                      'callbacks': callbacks,
-                      'direction': direction,
+            'texts'    : texts,
+            'tipTexts' : tipTexts,
+            'hAlign'   : hAlign,
+            'icons'    : icons,
+            'callbacks': callbacks,
+            'direction': direction,
 
             }
         buttonKwds.update(compoundKwds or {})
@@ -1419,6 +1447,7 @@ class ButtonListCompoundWidget(CompoundBaseWidget):
 
     def getButtons(self):
         return self.buttonList.buttons
+
 
 class LabelCompoundWidget(CompoundBaseWidget):
     """

@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-07-08 14:18:48 +0300 (Tue, July 08, 2025) $"
-__version__ = "$Revision: 3.3.2.1 $"
+__dateModified__ = "$dateModified: 2025-07-24 13:56:27 +0100 (Thu, July 24, 2025) $"
+__version__ = "$Revision: 3.3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -190,7 +190,7 @@ class JcampSpectrumDataSource(SpectrumDataSourceABC):
 
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
         if self._realData is None:
-            raise RuntimeError('JcampSpectrumDatSource.getSliceData: no data defined; ' \
+            raise RuntimeError('JcampSpectrumDatSource.getSliceData: no data defined; '
                                'has readParameters been called?')
         return self._realData
 

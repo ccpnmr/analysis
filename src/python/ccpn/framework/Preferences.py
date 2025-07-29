@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-07-21 14:50:27 +0100 (Mon, July 21, 2025) $"
+__dateModified__ = "$dateModified: 2025-07-29 11:10:46 +0100 (Tue, July 29, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -74,26 +74,53 @@ class Preferences(AttrDict):
     """A singleton class to hold the preferences,
     implemented as a AttrDict-of-AttrDict-of-AttrDict
     """
+    initialised = False
 
     def __init__(self, application, userPreferences=True):
         super().__init__()
+        self.errors = []
+        try:
+            # self._applicationVersion = str(application.applicationVersion) # removed to fix order of operations
+            self._lastPath = None
 
-        # self._applicationVersion = str(application.applicationVersion) # removed to fix order of operations
-        self._lastPath = None
+            if not userPreferencesDirectory.exists():
+                userPreferencesDirectory.mkdir()
 
-        if not userPreferencesDirectory.exists():
-            userPreferencesDirectory.mkdir()
+            # read the default preference and populate self so all valid keys
+            # are defined
+            self.update(self._getDefaultPreferences())
+            if userPreferences:
+                self._getUserPreferences()
 
-        # read the default preference and populate self so all valid keys
-        # are defined
-        self.update(self._getDefaultPreferences())
-        if userPreferences:
-            self._getUserPreferences()
+            # needs to be after user prefs are loaded as this is always true
+            self._applicationVersion = str(application.applicationVersion)
+            self._overrideDefaults(self)
+            self._updateOldPrefs(self)
+            self.initialised = True
+        except Exception as e:
+            self.errors.append(f'{e}')
 
-        # needs to be after user prefs are loaded as this is always true
-        self._applicationVersion = str(application.applicationVersion)
-        self._overrideDefaults(self)
-        self._updateOldPrefs(self)
+    # possible option to force a save every time a value is changed.
+    # def __setattr__(self, name, value):
+    #     super().__setattr__(name, value)
+    #
+    #     if not self.initialised:
+    #         return
+    #     if name == '_lastPath':
+    #         return
+    #     if name == 'recentMacros':
+    #         return
+    #     if name == 'recentFiles':
+    #         return
+    #     if name == 'errors':
+    #         return
+    #
+    #     self._saveUserPreferences()
+
+    @staticmethod
+    def _saveBackup():
+        backupPath = userPreferencesDirectory / 'v3settings.back.json'
+        userPreferencesPath.copyFile(backupPath, overwrite=True)
 
     def _readPreferencesFile(self, path):
         """Read the preference from the json file path,
@@ -107,8 +134,12 @@ class Preferences(AttrDict):
             try:
                 _prefs = json.load(fp, object_hook=AttrDict)
             except JSONDecodeError as e:
+                self.errors.append(f'Preferences Error: Invalid v3settings json file')
                 getLogger().error(f'Preferences Error: {e}')
                 return None
+
+        if not self.initialised:
+            self.errors = []
 
         self._lastPath = str(path)
 
@@ -137,6 +168,8 @@ class Preferences(AttrDict):
     def _saveUserPreferences(self):
         """Save the current preferences to the user preferences file
         """
+        getLogger().info('Saving Preferences...')
+
         diffDict = {"_applicationVersion" : self._applicationVersion,
                     "_lastPath" : self._lastPath}
 
@@ -163,8 +196,11 @@ class Preferences(AttrDict):
             if isinstance(ll := self[dd], list) and ll:
                 diffDict[dd] = ll
 
-        with userPreferencesPath.open(mode='w') as fp:
+        with userPreferencesPath.saveWriteToFile(mode='w', overwrite=True) as fp:
             json.dump(diffDict, fp, indent=4)
+
+        # saves backup on file on save.
+        self._saveBackup()
 
     def _recursiveUpdate(self, theDict, updateDict):
         """update theDict with key,value from updateDict, if key exists in theDict

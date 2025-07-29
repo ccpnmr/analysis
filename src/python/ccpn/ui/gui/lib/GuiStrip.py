@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-02 17:07:59 +0100 (Fri, May 02, 2025) $"
-__version__ = "$Revision: 3.3.2 $"
+__dateModified__ = "$dateModified: 2025-07-29 18:04:24 +0100 (Tue, July 29, 2025) $"
+__version__ = "$Revision: 3.3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -70,8 +70,8 @@ from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
-STRIP_MINIMUMWIDTH = 100
-STRIP_MINIMUMHEIGHT = 150
+STRIP_MINIMUMWIDTH = 70
+STRIP_MINIMUMHEIGHT = 70
 
 DefaultMenu = 'DefaultMenu'
 PeakMenu = 'PeakMenu'

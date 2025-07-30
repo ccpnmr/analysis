@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-06 11:26:40 +0000 (Thu, March 06, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-07-30 16:17:55 +0100 (Wed, July 30, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,13 +32,17 @@ from collections import OrderedDict
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
+from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
+from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.widgets.Column import ColumnClass
+from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.table._TableAdditions import TableMenuABC
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget
 from ccpn.ui.gui.lib.GuiStripContextMenus import (_selectedPeaksMenuItem, _addMenuItems,
@@ -89,27 +93,30 @@ class PeakTableModule(CcpnTableModule):
     def _setWidgets(self, settingsWidget, mainWidget, peakList, selectFirstItem):
         """Set up the widgets for the module
         """
-        self._settings = None
-        if self.activePulldownClass:
-            # add to settings widget - see sequenceGraph for more detailed example
-            settingsDict = OrderedDict(
-                    ((LINKTOPULLDOWNCLASS, {'label'   : f'Link to current {self.activePulldownClass.className}',
-                                            'tipText' : f'Set/update current {self.activePulldownClass.className} when selecting from pulldown',
-                                            'callBack': None,
-                                            'enabled' : True,
-                                            'checked' : False,
-                                            '_init'   : None}),
-                     ))
-            self._settings = ModuleSettingsWidget(parent=settingsWidget, mainWindow=self.mainWindow,
-                                                  settingsDict=settingsDict,
-                                                  grid=(0, 0))
-
         # add the frame containing the pulldown and table
         self._mainFrame = _PeakTableFrame(parent=mainWidget,
                                           mainWindow=self.mainWindow,
                                           moduleParent=self,
                                           peakList=peakList, selectFirstItem=selectFirstItem,
                                           grid=(0, 0))
+
+        self._settings = None
+        if self.activePulldownClass:
+            # # add to settings widget - see sequenceGraph for more detailed example
+            # settingsDict = OrderedDict(
+            #         ((LINKTOPULLDOWNCLASS, {'label'   : f'Link to current {self.activePulldownClass.className}',
+            #                                 'tipText' : f'Set/update current {self.activePulldownClass.className} when selecting from pulldown',
+            #                                 'callBack': None,
+            #                                 'enabled' : True,
+            #                                 'checked' : False,
+            #                                 '_init'   : None}),
+            #          ))
+            # self._settings = ModuleSettingsWidget(parent=settingsWidget, mainWindow=self.mainWindow,
+            #                                       settingsDict=settingsDict,
+            #                                       grid=(0, 0))
+
+            self._settings = PeakTableModuleSettings(parent=settingsWidget, mainWindow=self.mainWindow,
+                                                     peakTableFrame=self._mainFrame)
 
     @property
     def tableFrame(self):
@@ -134,7 +141,7 @@ class PeakTableModule(CcpnTableModule):
 
             # set the active callback from the pulldown
             self._mainFrame.setActivePulldownClass(coreClass=self.activePulldownClass,
-                                                   checkBox=self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget'])
+                                                   checkBox=self._settings.linkToPeakListCheckbox)
 
         # set the dropped callback through mainWidget
         self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
@@ -251,14 +258,14 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
                      'Pos F6'     : 'Pos F6',
                      'Pos F7'     : 'Pos F7',
                      'Pos F8'     : 'Pos F8',
-                     'LW F1 (Hz)' : 'LW F1 (Hz)',
-                     'LW F2 (Hz)' : 'LW F2 (Hz)',
-                     'LW F3 (Hz)' : 'LW F3 (Hz)',
-                     'LW F4 (Hz)' : 'LW F4 (Hz)',
-                     'LW F5 (Hz)' : 'LW F5 (Hz)',
-                     'LW F6 (Hz)' : 'LW F6 (Hz)',
-                     'LW F7 (Hz)' : 'LW F7 (Hz)',
-                     'LW F8 (Hz)' : 'LW F8 (Hz)',
+                     'LW F1'      : 'LW F1',
+                     'LW F2'      : 'LW F2',
+                     'LW F3'      : 'LW F3',
+                     'LW F4'      : 'LW F4',
+                     'LW F5'      : 'LW F5',
+                     'LW F6'      : 'LW F6',
+                     'LW F7'      : 'LW F7',
+                     'LW F8'      : 'LW F8',
                      'Height'     : 'Height',
                      'HeightError': 'HeightError',
                      'S/N'        : 'S/N',
@@ -325,6 +332,7 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
     _maximumQueueLength = 25
 
     positionsUnit = UNITS[0]  # default
+    lwUnit = UNITS[1]  # default
 
     #-----------------------------------------------------------------------------------------
     # Properties
@@ -494,8 +502,8 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
             # line-width column TODO remove hardcoded Hz unit
             for i in range(peakList.spectrum.dimensionCount):
                 linewidthTipTexts = f'Peak line width {str(i + 1)}'
-                columnDefs.append((f'LW F{str(i + 1)} (Hz)', lambda pk, dim=i: getPeakLinewidth(pk, dim),
-                                   linewidthTipTexts, None, '%0.3f'))
+                columnDefs.append((f'LW F{str(i + 1)}', lambda pk, dim=i, unit=self.lwUnit:
+                                   getPeakLinewidth(pk, dim, unit), linewidthTipTexts, None, '%0.3f'))
 
         # height column
         heightTipText = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
@@ -550,9 +558,13 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
     # Widgets callbacks
     #-----------------------------------------------------------------------------------------
 
-    def _pulldownUnitsCallback(self, unit):
+    def _pulldownUnitsPosCallback(self, unit):
         # update the table with new units
         self._setPositionUnit(unit)
+        self._updateAllModule()
+
+    def _pulldownUnitsLWCallback(self, unit):
+        self._setLWUnit(unit)
         self._updateAllModule()
 
     def _pulldownPLcallback(self, data):
@@ -572,6 +584,10 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
     def _setPositionUnit(self, value):
         if value in UNITS:
             self.positionsUnit = value
+
+    def _setLWUnit(self, value):
+        if value in UNITS:
+            self.lwUnit = value
 
     #-----------------------------------------------------------------------------------------
     # object properties
@@ -643,12 +659,81 @@ class _PeakTableFrame(_CoreTableFrameABC):
     def _pulldownUnitsCallback(self, unit):
         """Pass units change callback to the table
         """
-        self._tableWidget._pulldownUnitsCallback(unit)
+        self._tableWidget._pulldownUnitsPosCallback(unit)
 
     def _setPositionUnit(self, value):
         """Change the units in the table
         """
         self._tableWidget._setPositionUnit(value)
+
+
+class PeakTableModuleSettings(Widget):
+    """Settings widget for the PeakTable module."""
+
+    mainWindow = WeakRefDescriptor()
+    application = WeakRefDescriptor()
+    project = WeakRefDescriptor()
+    current = WeakRefDescriptor()
+
+    def __init__(self, parent=None, mainWindow=None, peakTableFrame: _NewPeakTableWidget = None, **kwds):
+        super().__init__(parent, setLayout=True, **kwds)
+
+        # Derive application, project, and current from mainWindow
+        self.mainWindow = mainWindow
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = self.project = self.current = None
+
+        self.parent = parent
+        self.peakTableFrame = peakTableFrame
+        self.peakTable = peakTableFrame.guiTable
+
+        self._setWidgets()
+
+        self.peakTableFrame.posUnitPulldownLabel.setVisible(False)
+        self.peakTableFrame.posUnitPulldown.setVisible(False)
+
+    def _setWidgets(self):
+        """Initiate all widgets
+        """
+        self.posUnitPulldownLabel = Label(parent=self.parent, text='Position Unit', grid=(0, 0))
+        self.posUnitPulldown = PulldownList(parent=self.parent, texts=UNITS, callback=self._pulldownUnitsCallbackPos,
+                                            objectName='posUnits_PT', grid=(0, 1))
+
+        self.lwUnitPulldownLabel = Label(parent=self.parent, text='LW Unit', grid=(1, 0))
+        self.lwUnitPulldown = PulldownList(parent=self.parent, texts=UNITS[1::-1],
+                                           callback=self._pulldownUnitsCallbackLW,
+                                           objectName='lwUnits_PT', grid=(1, 1))
+
+        self.linkToPeakListCheckbox = CheckBoxCompoundWidget(parent=self.parent,
+                                                             grid=(2, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                                                             orientation='left',
+                                                             labelText='Link to current PeakList',
+                                                             tipText='Set/update current PeakList '
+                                                                     'when selecting from pulldown',
+                                                             checked=False,
+                                                             )
+
+    def _pulldownUnitsCallbackPos(self, unit):
+        """Pass units change callback to the table
+        """
+        self.peakTable._pulldownUnitsPosCallback(unit)
+
+    def _pulldownUnitsCallbackLW(self, unit):
+        """Pass units change callback to the table
+        """
+        self.peakTable._pulldownUnitsLWCallback(unit)
+
+    # DT: unsure if this is needed or not.
+    def closeEvent(self, event):
+        """Clean-up and close.
+        """
+        from ccpn.ui.gui.lib.WidgetClosingLib import CloseHandler
+        with CloseHandler(self):
+            super().closeEvent(event)
 
 
 #=========================================================================================

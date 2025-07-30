@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-07-30 16:17:55 +0100 (Wed, July 30, 2025) $"
+__dateModified__ = "$dateModified: 2025-07-30 16:57:23 +0100 (Wed, July 30, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -36,12 +36,13 @@ from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.modules.CcpnModule import CcpnTableModule
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, RadioButtonsCompoundWidget
 from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.widgets.Column import ColumnClass
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.table._TableAdditions import TableMenuABC
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget
@@ -699,14 +700,16 @@ class PeakTableModuleSettings(Widget):
     def _setWidgets(self):
         """Initiate all widgets
         """
-        self.posUnitPulldownLabel = Label(parent=self.parent, text='Position Unit', grid=(0, 0))
-        self.posUnitPulldown = PulldownList(parent=self.parent, texts=UNITS, callback=self._pulldownUnitsCallbackPos,
-                                            objectName='posUnits_PT', grid=(0, 1))
+        self.posUnitRadioButton = RadioButtonsCompoundWidget(
+                parent=self.parent, labelText='Pos Unit',
+                callback=self._radioUnitsCallbackPos,
+                grid=(0, 0), hAlign='left', compoundKwds={'texts' : UNITS})
 
-        self.lwUnitPulldownLabel = Label(parent=self.parent, text='LW Unit', grid=(1, 0))
-        self.lwUnitPulldown = PulldownList(parent=self.parent, texts=UNITS[1::-1],
-                                           callback=self._pulldownUnitsCallbackLW,
-                                           objectName='lwUnits_PT', grid=(1, 1))
+        self.lwUnitRadioButton = RadioButtonsCompoundWidget(
+                parent=self.parent, labelText='LW Unit',
+                callback=self._radioUnitsCallbackLW,
+                grid=(1, 0), hAlign='left', compoundKwds={'texts' : UNITS[1::-1]}
+                )
 
         self.linkToPeakListCheckbox = CheckBoxCompoundWidget(parent=self.parent,
                                                              grid=(2, 0), vAlign='top', stretch=(0, 0), hAlign='left',
@@ -717,14 +720,16 @@ class PeakTableModuleSettings(Widget):
                                                              checked=False,
                                                              )
 
-    def _pulldownUnitsCallbackPos(self, unit):
+    def _radioUnitsCallbackPos(self):
         """Pass units change callback to the table
         """
+        unit = self.posUnitRadioButton.radioButtons.getSelectedText()
         self.peakTable._pulldownUnitsPosCallback(unit)
 
-    def _pulldownUnitsCallbackLW(self, unit):
+    def _radioUnitsCallbackLW(self):
         """Pass units change callback to the table
         """
+        unit = self.lwUnitRadioButton.radioButtons.getSelectedText()
         self.peakTable._pulldownUnitsLWCallback(unit)
 
     # DT: unsure if this is needed or not.

@@ -20,9 +20,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-21 15:36:32 +0000 (Fri, March 21, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-07-29 11:04:54 +0100 (Tue, July 29, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -43,6 +43,8 @@ import datetime
 import re
 from functools import reduce
 from operator import add
+
+from decorator import contextmanager
 
 
 dirsep = '/'
@@ -331,6 +333,87 @@ class Path(_Path_):
             else:
                 raise FileNotFoundError('Error opening file "%s"' % self)
         return fp
+
+    _tempSuffix = '~temp'
+
+    @contextmanager
+    def saveWriteToFile(self, mode: str = 'w', overwrite: bool = False, keepOnError: bool = True, validator=None):
+        """Initiate a save write to file:
+        Write to temporary file first; catch any errors on writing. Generate result as atomic
+        operation by moving temporary file as self.
+
+        Use in a with statement; ie.:
+
+        with myFile.saveWriteToFile(mode='w', validator=myValidatorFunc) as fp:
+            sys.write(fp, 'text')
+
+        :param mode: usual string defining write (w) or append (a) access, text or binary (b)
+        :param overwrite: flag to indicate overwriting of existing file
+        :param keepOnError: flag to keep the intermediate file on error
+        :param validator: A function to validate the result prior to moving, returning True for a valid file,
+                          False in case of error. Can raise any error which will be caught and passed as RuntimeError
+                          signature: validator(path:Path) -> bool
+
+        :raise RunTimeError upon catching any error during open, write, close, ..
+
+        Loosely based on internet discussions using os.rename() as an atomic operation (on most platform's)
+        """
+
+        _tempFile = aPath(self + self._tempSuffix).uniqueVersion()
+
+        error = False
+        validatorError = False
+        errorString = ''
+        fp = None
+
+        try:
+            # Some checks first
+            if self.exists() and self.is_dir():
+                raise RuntimeError(f'{self} exists and is a directory')
+
+            if self.exists() and not overwrite:
+                raise FileExistsError(f'{self} exists and overwrite is False')
+
+            if not self.parent.exists():
+                raise FileNotFoundError(f'{self.parent} does not exists: unable to write to {self.basename}')
+
+            # check for append; if so copy self as tempFile first
+            if self.exists() and 'a' in mode:
+                self.copyFile(destination=_tempFile, overwrite=True)
+
+            fp = _tempFile.open(mode=mode)
+            yield fp
+            error = False
+
+        except Exception as es:
+            error = True
+            errorString = str(es)
+
+        finally:
+            if fp:
+                fp.close()
+
+            # Once we have closed the file and there is no error:
+            # Optionally call the validator to check _tempFile before moving
+            if not error and validator is not None:
+                error = not validator(_tempFile)
+                if error:
+                    errorString = 'Validation failed'
+
+            if error:
+                # An error occurred
+                if _tempFile.exists() and not keepOnError:
+                    _tempFile.remove()
+                raise RuntimeError(f'While writing to {self} an error occured: {errorString}')
+
+            else:
+                # We have successfully written (and optionally validated) the data as a temporary file.
+                # We already have checked if we can overwrite the file, so now just remove any existing
+                # "self" and rename the temporary file
+                if self.exists():
+                    self.remove()
+                # use the os.rename call to make it an atomic operation
+                os.rename(_tempFile.asString(), aPath(self).asString())
 
     def globList(self, pattern='*') -> list:
         """Return a list rather than a generator
@@ -958,6 +1041,30 @@ def main():
     except TypeError:
         ...
     # Error, Error
+
+
+def testSaveWriteToFileJson():
+    import json
+
+    testDir = aPath('~/.ccpn/temp')
+    testFile = aPath('~/.ccpn/temp/test.json')
+
+    testDir.mkdir()
+
+    validJson = {'case1' : {
+                    'bool1': True,
+                    'bool2': False
+                    },
+                 'case2': True
+                 }
+
+    with testFile.saveWriteToFile(mode='w') as file:
+        json.dump(validJson, file, indent=4)
+
+    with testFile.open(mode='r') as file:
+        assert validJson == json.load(file)
+
+    testDir.removeDir()
 
 
 if __name__ == '__main__':

@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-15 10:09:12 +0100 (Thu, May 15, 2025) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-07-29 11:10:45 +0100 (Tue, July 29, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,7 @@ import contextlib
 from datetime import datetime
 import time
 
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.decorators import deprecated
 
 
@@ -925,8 +926,16 @@ class Framework(NotifierBase, GuiBase):
         loadTipsSetup(tipOfTheDayConfig, [ccpnCodePath])
         self._tip_of_the_day_wait_dialogs = (RegisterPopup,)
         self._startupShowTipofTheDay()
+        if self.preferences.errors:
+            self._showPreferencesErrors()
 
     #-----------------------------------------------------------------------------------------
+
+    def _showPreferencesErrors(self):
+        showWarning(parent=self._mainWindow, title='Loading Error...',
+                    message=f'Following Errors while loading:\n'
+                            f'{chr(10).join(self.preferences.errors)}'
+                            'Resetting to default preferences.')
 
     def _startupShowTipofTheDay(self):
         if self._shouldDisplayTipOfTheDay():

@@ -473,13 +473,14 @@ class Gui(Ui):
         mainWindow.namespace['current'] = self.application.current
         return mainWindow
 
-    def echoCommands(self, commands: typing.List[str]):
+    def echoCommands(self, commands: typing.List[str], logLevel='INFO'):
         """Echo commands strings, one by one, to logger
         and store them in internal list for perusal
         """
         logger = Logging.getLogger()
         for command in commands:
-            logger.echoInfo(command)
+            logger.dynamic(logLevel, command)
+            # logger.echoInfo(command)
 
         if self.application.ui is not None and \
                 self.application.ui.mainWindow is not None and \

@@ -289,12 +289,6 @@ def _phasingConsoleItem(strip):
                     shortcut='PC', callback=strip.spectrumDisplay.togglePhaseConsole)
 
 
-def _reloadSpectrum(strip):
-    return _SCMitem(name='Reload Spectra',
-                    typeItem=ItemTypes.get(ITEM), icon='icons/undo', toolTip='Reload visible Spectra',
-                    shortcut='SR', callback=strip.spectrumDisplay._reloadSpectra)
-
-
 def _mouseModeItem(strip):
     from ccpn.framework.Application import getApplication
 
@@ -853,8 +847,8 @@ def _copyYAxisCodeRangeFromStripMenuItem2(strip):
 def _showSpectraOnPhasingItem(strip):
     return _SCMitem(name='Show Spectra on Phasing',
                     typeItem=ItemTypes.get(ITEM), toolTip='Show Spectra while phasing traces are visible',
-                    checkable=True, checked=strip.showSpectraOnPhasing,
-                    callback=strip._toggleShowSpectraOnPhasingCallback, stripMethodName='spectraOnPhasingAction')
+                    checkable=True, checked=strip.showSpectraOnPhasing, shortcut='CH',
+                    callback=strip._toggleShowSpectraOnPhasing, stripMethodName='spectraOnPhasingAction')
 
 
 def _showActivePhaseTraceItem(strip):
@@ -983,8 +977,8 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _calibrateY(guiStrip1d),
         _stackSpectraDefaultItem(guiStrip1d),
         _phasingConsoleItem(guiStrip1d),
-        _reloadSpectrum(guiStrip1d),
         _separator(),
+
         _mouseModeItem(guiStrip1d),
         _separator(),
 
@@ -1182,8 +1176,8 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _toggleHorizontalTraceItem(guiStripNd),
         _toggleVerticalTraceItem(guiStripNd),
         _phasingConsoleItem(guiStripNd),
-        _reloadSpectrum(guiStripNd),
         _separator(),
+
         _mouseModeItem(guiStripNd),
         _separator(),
 

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-07-08 14:16:26 +0300 (Tue, July 08, 2025) $"
-__version__ = "$Revision: 3.3.2.1 $"
+__dateModified__ = "$dateModified: 2024-07-04 18:51:59 +0100 (Thu, July 04, 2024) $"
+__version__ = "$Revision: 3.2.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -418,7 +418,7 @@ def notificationEchoBlocking(application=None):
 
 
 @contextmanager
-def logCommandManager(prefix, funcName, *args, **kwds):
+def logCommandManager(prefix, funcName, logLevel='INFO', *args, **kwds):
     """Echo commands as prefix.funcName( **kwds )"""
     from ccpn.util.decorators import _obj2pid
 
@@ -442,7 +442,7 @@ def logCommandManager(prefix, funcName, *args, **kwds):
             msg = msg[:-2]
         msg += ')'
 
-        application.ui.echoCommands([msg])
+        application.ui.echoCommands([msg], logLevel)
 
     with notificationEchoBlocking(application=application):
         yield

@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-22 14:56:17 +0100 (Thu, May 22, 2025) $"
-__version__ = "$Revision: 3.3.3 $"
+__dateModified__ = "$dateModified: 2025-07-31 15:06:07 +0100 (Thu, July 31, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -766,30 +766,23 @@ class _NewChemicalShiftTable(_ProjectTableABC):
                 popup.exec_()
 
     def _addNavigationStripsToContextMenu(self):
+        from ccpn.framework.Preferences import getPreferences
+        from ccpn.ui.gui.lib.MenuLib import _addItemsToNavigateMenu
+
         if (data := self.getRightMouseItem()) is None or data.empty:
             return
-
         cShift = data.get(DATAFRAME_OBJECT)
 
         self._navigateMenu.clear()
-        if cShift and cShift.nmrAtom:
-            name = cShift.nmrAtom.name
-            if cShift.value is None:
-                return
+        if cShift and cShift.nmrAtom and cShift.value is not None:
             value = round(cShift.value, 3)
             if self._navigateMenu is not None:
-                self._navigateMenu.addItem(f'All ({name}:{value})',
-                                           callback=partial(self._navigateToChemicalShift,
-                                                            chemicalShift=cShift,
-                                                            stripPid=ALL))
-                self._navigateMenu.addSeparator()
-                for spectrumDisplay in self.mainWindow.spectrumDisplays:
-                    for strip in spectrumDisplay.strips:
-                        self._navigateMenu.addItem(f'{strip.pid} ({name}:{value})',
-                                                   callback=partial(self._navigateToChemicalShift,
-                                                                    chemicalShift=cShift,
-                                                                    stripPid=strip.pid))
-                    self._navigateMenu.addSeparator()
+                # this is still a little hard-coded
+                _addItemsToNavigateMenu(self.current.strip,
+                                        [value], [cShift.atomName],
+                                        'ChemicalShift', self._navigateMenu,
+                                        includeAxisCodes=True, allowMenuDuplicates=True, showBlankDimensions=False
+                                        )
 
     def _navigateToChemicalShift(self, chemicalShift, stripPid):
         strips = []
@@ -802,13 +795,12 @@ class _NewChemicalShiftTable(_ProjectTableABC):
         if strips:
             failedStripPids = []
             for strip in strips:
-
                 try:
                     navigateToPositionInStrip(strip,
                                               positions=[chemicalShift.value],
                                               axisCodes=[chemicalShift.nmrAtom.name],
                                               widths=[])
-                except:
+                except Exception:
                     failedStripPids.append(strip.pid)
             if len(failedStripPids) > 0:
                 stripStr = 'strip' if len(failedStripPids) == 1 else 'strips'

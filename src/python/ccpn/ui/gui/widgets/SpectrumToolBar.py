@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-16 18:16:51 +0000 (Thu, January 16, 2025) $"
-__version__ = "$Revision: 3.2.13 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-05-13 15:31:53 +0100 (Tue, May 13, 2025) $"
+__version__ = "$Revision: 3.3.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -288,6 +288,9 @@ class SpectrumToolBar(ToolBar):
             _SCMitem(name='Remove Spectrum from SpectrumDisplay',
                      typeItem=ItemTypes.get(ITEM), icon='icons/null',
                      callback=partial(self._removeSpectrum, button)),
+            _SCMitem(name='Reload Spectrum',
+                     typeItem=ItemTypes.get(ITEM), icon='icons/undo',
+                     callback=partial(self._reloadSpectrum, button)),
             ]
 
         _addMenuItems(self.widget, contextMenu, menuItems)
@@ -372,6 +375,14 @@ class SpectrumToolBar(ToolBar):
                 action.setText(spectrum.id)
                 action.setObjectName(spectrum.pid)
                 # setWidgetFont(action, size='SMALL')
+
+    def _reloadSpectrum(self, button):
+        """
+        Reloads the spectrum
+        """
+        spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
+        if spectrum:
+            spectrum.reload()
 
     def _removeSpectrum(self, button: QtWidgets.QToolButton):
         """

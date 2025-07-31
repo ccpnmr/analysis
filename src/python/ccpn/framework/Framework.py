@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-15 10:09:12 +0100 (Thu, May 15, 2025) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-07-29 11:10:45 +0100 (Tue, July 29, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,9 @@ import faulthandler
 import contextlib
 from datetime import datetime
 import time
+
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.decorators import deprecated
 
 
 try:
@@ -940,7 +943,15 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #         self.current.strip = mainWindow.strips[0]
     # except Exception as e:
     #     getLogger().warning(f'Error restoring current.strip: {e}')
-
+    #
+    #     # GST slightly complicated as we have to wait for any license or other
+    #     # startup dialogs to close before we display tip of the day
+    #     loadTipsSetup(tipOfTheDayConfig, [ccpnCodePath])
+    #     self._tip_of_the_day_wait_dialogs = (RegisterPopup,)
+    #     self._startupShowTipofTheDay()
+    #     if self.preferences.errors:
+    #         self._showPreferencesErrors()
+    #
     #-----------------------------------------------------------------------------------------
     # GWV 18/9/2024: code now in gui.lib.TipOfTheDayManager
     # def _initTipOfTheDay(self):

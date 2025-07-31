@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-26 16:23:30 +0100 (Sat, October 26, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-07-30 16:17:08 +0100 (Wed, July 30, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -143,14 +143,17 @@ def getPeakAnnotation(peak, dim, separator=', '):
         return separator.join([dna.pid.id for dna in peak.dimensionNmrAtoms[dim] if not dna.isDeleted])
 
 
-def getPeakLinewidth(peak, dim):
+def getPeakLinewidth(peak, dim, unit):
     """Return the lineWidth in dimension 'dim' for the peakTable entries
     """
     lineWidths = peak.lineWidths
     if lineWidths and dim < len(lineWidths):
         lw = peak.lineWidths[dim]
         if lw is not None:
-            return float(lw)
+            if unit == 'Hz':
+                return float(lw)
+            elif unit == 'ppm':
+                return float(lw) / peak.peakList.spectrum.spectrometerFrequencies[dim]
 
     # need to return this as a string otherwise the table changes between 'None' and 'nan'
     return 'None'

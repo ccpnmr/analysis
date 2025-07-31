@@ -763,7 +763,7 @@ class Gui(Ui, _Gui_V3_V4):
         self.mainWindow._setReadOnlyIcon()
         self.mainWindow.namespace['current'] = self.application.current
 
-    def echoCommands(self, commands: typing.List[str]):
+    def echoCommands(self, commands: typing.List[str], logLevel='INFO'):
         """Echo commands strings, one by one, to logger
         and store them in internal list for perusal
         """
@@ -771,7 +771,8 @@ class Gui(Ui, _Gui_V3_V4):
 
         logger = getLogger()
         for command in commands:
-            logger.echoInfo(command)
+            logger.dynamic(logLevel, command)
+            # logger.echoInfo(command)
 
         if self.application.ui is not None and \
                 self.application.ui.mainWindow is not None and \

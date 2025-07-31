@@ -20,9 +20,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-21 15:36:32 +0000 (Fri, March 21, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-07-29 11:04:54 +0100 (Tue, July 29, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1051,6 +1051,30 @@ def main():
     except TypeError:
         ...
     # Error, Error
+
+
+def testSaveWriteToFileJson():
+    import json
+
+    testDir = aPath('~/.ccpn/temp')
+    testFile = aPath('~/.ccpn/temp/test.json')
+
+    testDir.mkdir()
+
+    validJson = {'case1' : {
+                    'bool1': True,
+                    'bool2': False
+                    },
+                 'case2': True
+                 }
+
+    with testFile.saveWriteToFile(mode='w') as file:
+        json.dump(validJson, file, indent=4)
+
+    with testFile.open(mode='r') as file:
+        assert validJson == json.load(file)
+
+    testDir.removeDir()
 
 
 if __name__ == '__main__':

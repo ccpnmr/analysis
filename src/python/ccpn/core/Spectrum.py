@@ -64,9 +64,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-21 16:01:55 +0000 (Fri, March 21, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-07-02 10:23:00 +0100 (Wed, July 02, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -3121,9 +3121,9 @@ class Spectrum(AbstractWrapperObject):
 
         return newSpectrum
 
-    @logCommand(get='self')
+    @logCommand(get='self', logLevel='DEBUG')
     def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2) -> PlaneData:
-        """Get a plane defined by by xDim and yDim ('1'-based), and a position vector ('1'-based)
+        """Get a plane defined by xDim and yDim ('1'-based), and a position vector ('1'-based)
         as a PlaneData object (i.e. a 2D np.ndarray). Dimensionality must be >= 2
 
         :param position: A list/tuple of point-positions (1-based)

@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-21 15:35:52 +0000 (Fri, March 21, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-07-02 10:23:01 +0100 (Wed, July 02, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -83,6 +83,7 @@ class CustomLogger(logging.Logger):
     debug3: _message
     debug3_backup_thread: _message
     warning: _message
+    dynamic: _dynamicLevel
 
 
 logger: CustomLogger | None = None
@@ -128,6 +129,7 @@ def getLogger() -> CustomLogger:
         logger.debug3 = functools.partial(_message, DEBUG3, logger)
         logger.debug3_backup_thread = logger.debug3
         logger.warning = functools.partial(_message, WARNING, logger)
+        logger.dynamic = functools.partial(_dynamicLevel, logger)
 
         logging.addLevelName(DEBUG2, 'DEBUG2')
         logging.addLevelName(DEBUG3, 'DEBUG3')
@@ -233,6 +235,28 @@ def _message(MESSAGE: int, logger: CustomLogger, msg: str, *args,
     # increase the stack level to account for the partial wrapper
     logger.log(MESSAGE, _msg, stacklevel=stacklevel)
 
+
+def _dynamicLevel(logger: CustomLogger, logLevel : str | int, msg: str, stacklevel=1, *args, **kwds):
+    """Provides a dynamic logging level for getLogger().dynamic
+
+    :param logger: The logger instance used to log the message.
+    :param logLevel: The logging level, either string (e.g. logging.INFO) or int (e.g. 20).
+    :param msg: The main message to be logged.
+    :param stacklevel: Controls the stack trace depth. Defaults to 1. stacklevel is _message stacklevel + 1.
+    :param args: Optional positional arguments that are formatted and appended to the message.
+    :param kwds: Optional keyword arguments that are formatted as key-value pairs and appended to the message.
+    """
+    match logLevel:
+        case logging.DEBUG | 'DEBUG1' | 'DEBUG_GL' | 'DEBUG':
+            _message(DEBUG1, logger, msg, stacklevel=stacklevel+1, *args, **kwds)
+        case logging.INFO | 'INFO':
+            _message(INFO, logger, msg, stacklevel=stacklevel+1, *args, **kwds)
+        case logging.WARNING | 'WARNING':
+            _message(WARNING, logger, msg, stacklevel=stacklevel+1, *args, **kwds)
+        case _:
+            _message(WARNING, logger,
+                     f'{logLevel} Is not a valid dynamic logLevel. MSG: {msg}',
+                     stacklevel=stacklevel+1 , *args, **kwds)
 
 def createLogger(loggerName,
                  logDirectory,

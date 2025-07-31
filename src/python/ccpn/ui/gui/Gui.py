@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-14 15:59:37 +0100 (Mon, April 14, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-07-31 15:06:06 +0100 (Thu, July 31, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,6 +34,7 @@ import json
 from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
 
+from ccpn.core.Project import Project
 from ccpn.framework.Application import getApplication
 from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_SAVEAS_SUB_DIRECTORIES
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import _checkPathForDataLoader
@@ -46,6 +47,7 @@ from ccpn.core.lib.ContextManagers import (
 )
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
 
+    logCommandManager, undoStackBlocking, busyHandler)
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui import Layout
 # from ccpn.ui.gui.guiSettings import LIGHT, DARK
@@ -55,26 +57,31 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application as PyQtApplication
 # from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets import FileDialog
+from ccpn.ui.gui.widgets import MessageDialog, FileDialog
 from ccpn.ui.gui.widgets.Font import getSystemFonts
 from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
-
 # This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
 from ccpn.ui.gui.guiSettings import (FontSettings, consoleStyle, getTheme,
                                      Theme, setColourScheme)
+                                     Theme, setColourScheme)
+# from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.lib.TipOfTheDayManager import TipOfTheDayManager
 
 from ccpn.util.Logging import getLogger
 from ccpn.util import Logging, Register
 from ccpn.util.Path import aPath, Path
+from ccpn.util import Logging, Register
+from ccpn.util.Path import aPath
 from ccpn.util.decorators import logCommand
-
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
 # _Gui_V3_V4 contains code shared between V3 and V4
 from ccpn.ui.gui._Gui_V3_V4 import _Gui_V3_V4
+
+
+_FOREGROUND = '_foregroundColour'
+_ACTIONGEOMETRIES = '_actionGeometries'
 
 
 #-----------------------------------------------------------------------------------------
@@ -161,9 +168,10 @@ MAXITEMDEPTH = 5
 #         #         option.palette.setColor(option.palette.Highlight, Base._highlightVivid)
 #         if (element in {QtWidgets.QStyle.CE_MenuItem,} and
 #               isinstance(option, QtWidgets.QStyleOptionMenuItem) and
-#                 (_actionGeometries := getattr(widget, '_actionGeometries', None)) and
+#                 (_actionGeometries := getattr(widget, _ACTIONGEOMETRIES, None)) and
 #                 (action := _actionGeometries.get(str(option.rect))) and
-#                 (colour := getattr(action, '_foregroundColour', None))):
+#                 (colour := action.property(_FOREGROUND))):
+            # NOTE:ED - should move this exclusively to the menu-module
 #             # Customise the foreground colour for the menu-item from the QAction
 #             # - menu-items don't have a stylesheet or palette
 #             option.palette.setColor(option.palette.Text, colour)
@@ -635,7 +643,7 @@ class Gui(Ui, _Gui_V3_V4):
                 mark.colour = autoCorrectHexColour(mark.colour,
                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
 
-    def _changeThemeInstant(self, theme: str=None, colour: str=None, themeSD: str=None):
+    def _changeThemeInstant(self, theme: str = None, colour: str = None, themeSD: str = None):
         """Set the light/dark palette in single step.
         0 - dark, 1 - light, 2 - default = follow OS/application
         """
@@ -672,9 +680,9 @@ class Gui(Ui, _Gui_V3_V4):
             self._qtApp.setPalette(pal)
             # QtCore.QTimer.singleShot(0, partial(self.qtApp.setPalette, pal))
             QtCore.QTimer.singleShot(0, partial(self._qtApp.sigPaletteChanged.emit, pal,
-                                              prefsApp.themeStyle,
-                                              prefsApp.themeColour,
-                                              prefsGen.colourScheme)
+                                                prefsApp.themeStyle,
+                                                prefsApp.themeColour,
+                                                prefsGen.colourScheme)
                                      )
         getLogger().debug(f'{consoleStyle.fg.darkblue}==> end palette-change event.{consoleStyle.reset}')
 
@@ -1021,8 +1029,8 @@ class Gui(Ui, _Gui_V3_V4):
             msg = None
             if dataLoader.count > MAXITEMLOADING or dataLoader.depth > MAXITEMDEPTH:
                 _nSpectra = len([dl for dl in dataLoader.dataLoaders if dl.isSpectrumLoader and dl.isValid])
-                _spectra = f', of which {_nSpectra} are spectra' if _nSpectra>0 else ''
-                msg =  f'CAUTION: You are trying to load {dataLoader.count:d} items{_spectra}.\n'
+                _spectra = f', of which {_nSpectra} are spectra' if _nSpectra > 0 else ''
+                msg = f'CAUTION: You are trying to load {dataLoader.count:d} items{_spectra}.\n'
 
                 if dataLoader.depth > MAXITEMDEPTH:
                     msg += f'The folder is {dataLoader.depth}-subfolders deep.\n\n'
@@ -1214,7 +1222,7 @@ class Gui(Ui, _Gui_V3_V4):
                 dataLoader, createNewProject, ignore = self._getDataLoader(path)
 
                 newProjectUrls = self._scanDataLoaders([dataLoader], func=lambda dl: (dl is not None and
-                                                                                    dl.createNewProject))
+                                                                                      dl.createNewProject))
 
                 if len(newProjectUrls) > 1:
                     # We found more than one dataLoader that would create a new project; not allowed

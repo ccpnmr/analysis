@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-15 10:09:13 +0100 (Thu, May 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-06-27 13:30:47 +0100 (Fri, June 27, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -1099,7 +1099,6 @@ def _get1dPeakMenuItems(menuId) -> list:
         _propagateAssignmentsFromReferenceItem(),
         _copyAssignmentsFromReferenceItem(),
         _setPeakAliasingItem(),
-        _calibrateFromPeaks(),
         _separator(),
 
         _refitPeakItem(),
@@ -1110,13 +1109,14 @@ def _get1dPeakMenuItems(menuId) -> list:
         _estimateCurrentVolumesItem(),
         _separator(),
 
-        _makeStripPlotItem(menuId),
-        _separator(),
-
         _arrangePeakLabelsItem(),
         _resetLabelsItem(),
         _arrangePeakLabelsSelectedItem(),
         _resetLabelsSelectedItem(),
+        _separator(),
+
+        _makeStripPlotItem(menuId),
+        _calibrateFromPeaks(),
         _separator(),
 
         _newMultipletItem(),

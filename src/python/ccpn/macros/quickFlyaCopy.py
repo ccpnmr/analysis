@@ -65,7 +65,7 @@ class FlyaPeakCopyPopup(CcpnDialogMainWidget):
         current_row = 0
 
         # Information label at the top
-        info_text = "Note: Copied peaks will be snap to extrema, not fitting will be performed\n"
+        info_text = "Note: Copied peaks will be snapped to extrema, but no fitting will be performed\n"
         cw.Label(self.mainWidget, text=info_text, grid=(current_row, 0), style='italic', gridSpan=(1, 3))
         current_row += 1
 

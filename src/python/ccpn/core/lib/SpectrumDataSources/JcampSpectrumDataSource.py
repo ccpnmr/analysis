@@ -8,9 +8,10 @@ See SpectrumDataSourceABC for a description of the methods
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -19,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:48 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2025-07-24 13:56:27 +0100 (Thu, July 24, 2025) $"
+__version__ = "$Revision: 3.3.2.2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -71,10 +72,11 @@ class JcampSpectrumDataSource(SpectrumDataSourceABC):
         :param checkValid:flag to do validity check (default=False)
 
         """
-        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount, checkValid=checkValid)
         self._realData = None  # storage for the real data array
         self._imaginaryData = None  # storage for the imaginary data
         self._params = None  # the nmrGlue parsed parameters dictionary
+
+        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount, checkValid=checkValid)
 
     def readParameters(self):
         """Read the parameters from the file
@@ -108,11 +110,12 @@ class JcampSpectrumDataSource(SpectrumDataSourceABC):
                 self._imaginaryData = None
 
             else:
-                raise RuntimeError(
-                    'JcampDataSource.readParameters: parsing "%s" did not yield viable data' % self.path)
+                raise RuntimeError('JcampDataSource.readParameters: parsing "%s" '
+                                   'did not yield viable data' % self.path)
 
-            if (dimCount:= len(self._realData.shape)) != 1:
-                raise RuntimeError('JcampDataSource.readParameters: data reading only implemented for 1D; got dimensionCount "%s"' % dimCount)
+            if (dimCount := len(self._realData.shape)) != 1:
+                raise RuntimeError('JcampDataSource.readParameters: data reading only '
+                                   'implemented for 1D; got dimensionCount "%s"' % dimCount)
             self.setDimensionCount(1)
             self.pointCounts[specLib.X_DIM_INDEX] = self._realData.shape[0]
 
@@ -122,7 +125,7 @@ class JcampSpectrumDataSource(SpectrumDataSourceABC):
             _comment.extend('---- end comment ----')
             self.comment = '\n'.join(_comment)
 
-        if (_date := params.get('$DATE',None)) is not None:
+        if (_date := params.get('$DATE', None)) is not None:
             _date = int(_date[0])
             _date = datetime.fromtimestamp(_date)
             self.date = str(_date)
@@ -135,7 +138,9 @@ class JcampSpectrumDataSource(SpectrumDataSourceABC):
         else:
             self.dataScale = 1.0
 
-        self.temperature = float(params['$TE'][0])
+        if '$TE' in params:
+            # not sure of the ramifications if not set or None
+            self.temperature = float(params['$TE'][0])
 
         # Extract the dimensional parameters;
         # Written to optionally (later) allow for 2D as well (and to remain in-sinc
@@ -144,7 +149,7 @@ class JcampSpectrumDataSource(SpectrumDataSourceABC):
 
             # create a dict with the parameters for this dimension only, also removing the
             # '$' from the key
-            dimDict = dict((key[1:], val[i]) for key, val in params.items() )
+            dimDict = dict((key[1:], val[i]) for key, val in params.items())
 
             # self.pointCounts[i] = int(dimDict['SI'])
             # self.blockSizes[i] = int(dimDict['XDIM'])
@@ -155,15 +160,15 @@ class JcampSpectrumDataSource(SpectrumDataSourceABC):
             #     # (comment from orginal V2-based code)
             #     self.blockSizes[i] = min(self.blockSizes[i], self.pointCounts[i])
 
-            self.isotopeCodes[i] = dimDict.get('AXNUC').strip('<>')
-            self.axisLabels[i] = dimDict.get('AXNAME').strip('<>')
+            self.isotopeCodes[i] = dimDict.get('AXNUC', '?').strip('<>')
+            self.axisLabels[i] = dimDict.get('AXNAME', 'Undefined').strip('<>')
 
             if int(float(dimDict.get('FT_mod', 1))) == 0:
                 # point/time axis
                 self.dimensionTypes[i] = specLib.DIMENSION_TIME
                 self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_TIME
             else:
-               # frequency axis
+                # frequency axis
                 self.dimensionTypes[i] = specLib.DIMENSION_FREQUENCY
                 self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_SHIFT
 
@@ -194,8 +199,9 @@ class JcampSpectrumDataSource(SpectrumDataSourceABC):
 
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
         if self._realData is None:
-            raise RuntimeError('JcampSpectrumDatSource.getSliceData: no data defined; '\
+            raise RuntimeError('JcampSpectrumDatSource.getSliceData: no data defined; '
                                'has readParameters been called?')
         return self._realData
+
 
 JcampSpectrumDataSource._registerFormat()

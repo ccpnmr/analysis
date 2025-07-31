@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-20 12:57:47 +0100 (Tue, May 20, 2025) $"
-__version__ = "$Revision: 3.3.3 $"
+__dateModified__ = "$dateModified: 2025-07-29 18:04:24 +0100 (Tue, July 29, 2025) $"
+__version__ = "$Revision: 3.3.2.1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1496,7 +1496,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.GLSignals.glEvent.connect(self._glEvent)
         # self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
         self.GLSignals.glAxisUnitsChanged.connect(self._glAxisUnitsChanged)
-
         self.glReady = True
 
     def _attachParentStrip(self):
@@ -2378,6 +2377,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # use the updated size
         w = self.w
         h = self.h
+
+        self.makeCurrent()
         shader = self._shaderPixel.bind()
         # set projection to axis coordinates
         shader.setProjection(self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)

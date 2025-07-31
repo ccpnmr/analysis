@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-03-28 11:42:24 +0000 (Fri, March 28, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-06-27 13:30:47 +0100 (Fri, June 27, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -421,7 +421,9 @@ def _calibrateX1D(spectrum, currentPosition, newPosition):
 def _calibrateY1D(spectrum, currentPosition, newPosition):
     shift = newPosition - currentPosition
     spectrum.intensities = spectrum.intensities + shift
-
+    # NOTE:ED - update all peak-positions, but needs revisiting
+    for pp in spectrum.peaks:
+        pp.height += shift
 
 def _calibrateXND(spectrum, strip, currentPosition, newPosition):
     # map the X change to the correct spectrum axis

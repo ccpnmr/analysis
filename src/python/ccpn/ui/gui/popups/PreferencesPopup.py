@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-15 10:09:13 +0100 (Thu, May 15, 2025) $"
-__version__ = "$Revision: 3.3.3 $"
+__dateModified__ = "$dateModified: 2025-07-31 15:06:08 +0100 (Thu, July 31, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -186,11 +186,14 @@ def _makeLine(parent, grid, text=None, **kwds):
     return result
 
 
-def _makeCheckBox(parent, row, text, callback, toolTip=None, visible=True, enabled=True, **kwds):
+def _makeCheckBox(parent, row, text, callback, toolTip=None, visible=True, enabled=True, _wordwrap=False, **kwds):
     """Convenience routine to make a row with a label and a checkbox
     :return CheckBox instance
     """
     _label = _makeLabel(parent, text=text, grid=(row, 0), **kwds)
+    if _wordwrap:
+        _label.setAlignment(QtCore.Qt.AlignRight)
+        _label.setWordWrap(True)
     _checkBox = CheckBox(parent, grid=(row, 1), hAlign='l', hPolicy='minimal', spacing=(0, 0))
     _checkBox.toggled.connect(callback)
     if toolTip is not None:
@@ -1187,6 +1190,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showDoubleCrosshairBox.setChecked(self.preferences.general.showDoubleCrosshair)
         self.showSideBandsBox.setChecked(self.preferences.general.showSideBands)
         self.showLastAxisOnlyBox.setChecked(self.preferences.general.lastAxisOnly)
+        self.allowMenuDuplicatesBox.setChecked(self.preferences.general.allowMenuDuplicates)
+        self.showBlankDimensionsBox.setChecked(self.preferences.general.showBlankDimensions)
         self.matchAxisCode.setIndex(self.preferences.general.matchAxisCode)
         self.axisOrderingOptions.setIndex(self.preferences.general.axisOrderingOptions)
         self.spectrumScalingData.setValue(float(self.preferences.general.scalingFactorStep))
@@ -1421,6 +1426,28 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                          'Plane navigation tools are displayed in the upper-left corner of each strip'),
                                                      )
         self.zPlaneNavigationModeLabel.setToolTip('Select where the Plane navigation tools are located')
+
+        row += 1
+        self.allowMenuDuplicatesBox = _makeCheckBox(parent,
+                                                    text="Include duplicated axis-codes in 'Navigate to:' "
+                                                         "menus",
+                                                    row=row,
+                                                    callback=partial(self._queueToggleGeneralOptions,
+                                                                     'allowMenuDuplicates'),
+                                                    toolTip="Include duplicated axis-codes in 'Navigate to:' "
+                                                            "menus.",
+                                                    _wordwrap=True)
+
+        row += 1
+        self.showBlankDimensionsBox = _makeCheckBox(parent,
+                                                    text="Include blank axis-codes in 'Navigate to:' "
+                                                         "menus",
+                                                    row=row,
+                                                    callback=partial(self._queueToggleGeneralOptions,
+                                                                     'showBlankDimensions'),
+                                                    toolTip="Include blank axis-codes in 'Navigate to:' "
+                                                            "menus.",
+                                                    _wordwrap=True)
 
         row += 1
         self.useApplyToSpectrumDisplaysLabel = _makeLabel(parent, text="Apply to open spectrum displays", grid=(row, 0))

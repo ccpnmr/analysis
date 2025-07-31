@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-14 17:20:12 +0100 (Mon, April 14, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-07-31 15:06:07 +0100 (Thu, July 31, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -77,9 +77,8 @@ from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.ui.gui.popups.DataTablePopup import DataTablePopup
 from ccpn.ui.gui.popups.ViolationTablePopup import ViolationTablePopup
 from ccpn.ui.gui.popups.CollectionEditorPopup import CollectionEditorPopup
-from ccpn.core.lib.ContextManagers import notificationEchoBlocking, \
-    undoBlockWithoutSideBar, undoStackBlocking
-
+from ccpn.core.lib.ContextManagers import (notificationEchoBlocking,
+                                           undoBlockWithoutSideBar, undoStackBlocking)
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getProject, getApplication
@@ -91,6 +90,7 @@ _ADD_TO_COLLECTION = 'Add to Collection'
 _REMOVE_FROM_COLLECTION = 'Remove from Collection'
 _ITEMS_COLLECTION = 'Items'
 _CLASH_COLOUR = QtGui.QColor('darkgoldenrod')
+_FOREGROUND = '_foregroundColour'
 
 
 class CreateNewObjectABC():
@@ -596,7 +596,7 @@ class OpenItemABC:
             if diff and diff != selSet:
                 # flag that some of the selection may already be in this collection
                 # Needs cleaning-up, probably needs to be an attribute of subclassed action
-                _action._foregroundColour = QtGui.QColor('darkorange')
+                _action.setProperty(_FOREGROUND, QtGui.QColor('darkorange'))
                 _action.setToolTip(ttOk)
             elif _objs:
                 _action.setToolTip(ttGood)
@@ -617,7 +617,7 @@ class OpenItemABC:
         collections = self.mainWindow.application.project.collections
         ttOk = 'Collection contains 1 or more of the selected objects;\nremove the remaining objects from the ' \
                'collection.'
-        ttGood = 'Remove all obects from the collection.'
+        ttGood = 'Remove all objects from the collection.'
         ttBad = 'None of the selected objects are in this collection.'
         _count = 0
         for col in collections:
@@ -629,7 +629,7 @@ class OpenItemABC:
             _action = subMenu.addAction(col.pid, partial(col.removeItems, _objs))
             if diff and diff != selSet:
                 # flag that some of the selection may already be in this collection
-                _action._foregroundColour = QtGui.QColor('darkorange')
+                _action.setProperty(_FOREGROUND, QtGui.QColor('darkorange'))
                 _action.setToolTip(ttOk)
             elif _objs:
                 _action.setToolTip(ttGood)
@@ -961,9 +961,9 @@ class _openItemChemicalShiftListTable(OpenItemABC):
                         'Chemical Shifts')
             return
 
-        ok = showYesNoWarning('Delete Orphaned Chemical Shifts', f'Do you wish to delete {len(orphanList)} '
+        ok = showYesNoWarning('Delete Orphaned Chemical Shifts',
+                              f'Do you wish to delete {len(orphanList)} '
                               f'orphaned Chemical Shift{"s" if len(orphanList) > 1 else ""}?')
-
         if ok:
             with undoBlockWithoutSideBar():
                 for cs in orphanList:
@@ -1085,9 +1085,11 @@ class _openItemNmrChainTable(_openItemNmrClass):
 
     def _renumberChain(self, objs):
         from ccpn.ui.gui.popups.ChainRenumberPopup import ChainRenumberPopup
+
         popup = ChainRenumberPopup(mainWindow=self.mainWindow, chain=objs[0])
         popup.show()
         popup.raise_()
+
 
 class _openItemNmrResidueItem(_openItemNmrClass):
     objectArgumentName = 'nmrResidue'
@@ -1179,6 +1181,7 @@ class _openItemChainTable(OpenItemABC):
 
     def _renumberChain(self, objs):
         from ccpn.ui.gui.popups.ChainRenumberPopup import ChainRenumberPopup
+
         popup = ChainRenumberPopup(mainWindow=self.mainWindow, chain=objs[0])
         popup.show()
         popup.raise_()

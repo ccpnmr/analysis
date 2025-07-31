@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-07-31 15:06:06 +0100 (Thu, July 31, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__dateModified__ = "$dateModified: 2025-07-31 16:44:25 +0100 (Thu, July 31, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -46,8 +46,6 @@ from ccpn.core.lib.ContextManagers import (
     logCommandManager, undoStackBlocking, busyHandler, undoStack
 )
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
-
-    logCommandManager, undoStackBlocking, busyHandler)
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui import Layout
 # from ccpn.ui.gui.guiSettings import LIGHT, DARK
@@ -62,7 +60,6 @@ from ccpn.ui.gui.widgets.Font import getSystemFonts
 from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
 # This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
 from ccpn.ui.gui.guiSettings import (FontSettings, consoleStyle, getTheme,
-                                     Theme, setColourScheme)
                                      Theme, setColourScheme)
 # from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.widgets.Icon import Icon

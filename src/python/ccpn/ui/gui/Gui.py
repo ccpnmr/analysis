@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-14 15:59:37 +0100 (Mon, April 14, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-07-31 15:06:06 +0100 (Thu, July 31, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,38 +34,34 @@ import json
 from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
 from ccpn.core.Project import Project
-
 from ccpn.framework.Application import getApplication
 from ccpn.framework.PathsAndUrls import CCPN_DIRECTORY_SUFFIX, CCPN_SAVEAS_SUB_DIRECTORIES
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import _checkPathForDataLoader
-
 from ccpn.core.lib.ContextManagers import (
     notificationEchoBlocking, catchExceptions,
     logCommandManager, undoStackBlocking, busyHandler)
-
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
 # from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets import FileDialog
+from ccpn.ui.gui.widgets import MessageDialog, FileDialog
 from ccpn.ui.gui.widgets.Font import getSystemFonts
 # from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
-
 # This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
 from ccpn.ui.gui.guiSettings import (FontSettings, consoleStyle, getTheme,
-                                     getColours, PALETTE, Theme, setColourScheme)
+                                     Theme, setColourScheme)
 # from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.widgets.Icon import Icon
-
 from ccpn.util.Logging import getLogger
-from ccpn.util import Logging
-from ccpn.util import Register
+from ccpn.util import Logging, Register
 from ccpn.util.Path import aPath
 from ccpn.util.decorators import logCommand
-
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
+
+
+_FOREGROUND = '_foregroundColour'
+_ACTIONGEOMETRIES = '_actionGeometries'
 
 
 #-----------------------------------------------------------------------------------------
@@ -155,11 +151,12 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
         #     # Customise the highlight color for the tab-widget
         #     if Base._highlightVivid is not None:
         #         option.palette.setColor(option.palette.Highlight, Base._highlightVivid)
-        if (element in {QtWidgets.QStyle.CE_MenuItem,} and
-              isinstance(option, QtWidgets.QStyleOptionMenuItem) and
-                (_actionGeometries := getattr(widget, '_actionGeometries', None)) and
+        if (element in {QtWidgets.QStyle.CE_MenuItem, } and
+                isinstance(option, QtWidgets.QStyleOptionMenuItem) and
+                (_actionGeometries := getattr(widget, _ACTIONGEOMETRIES, None)) and
                 (action := _actionGeometries.get(str(option.rect))) and
-                (colour := getattr(action, '_foregroundColour', None))):
+                (colour := action.property(_FOREGROUND))):
+            # NOTE:ED - should move this exclusively to the menu-module
             # Customise the foreground colour for the menu-item from the QAction
             # - menu-items don't have a stylesheet or palette
             option.palette.setColor(option.palette.Text, colour)
@@ -179,7 +176,7 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
                        }:
             focus = option.state & QtWidgets.QStyle.State_HasFocus
             option.state &= ~QtWidgets.QStyle.State_HasFocus
-            if control in {QtWidgets.QStyle.CC_ComboBox,}:
+            if control in {QtWidgets.QStyle.CC_ComboBox, }:
                 # hack to set the drop-arrow colour
                 # using window-text allows setting the text colour on non-editable combobox
                 option.palette.setColor(option.palette.ButtonText,
@@ -284,7 +281,7 @@ class Gui(Ui):
         # styles = QtWidgets.QStyleFactory()
         # self.qtApp.setStyle(styles.create('fusion'))
 
-    def _changeThemeInstant(self, theme: str=None, colour: str=None, themeSD: str=None):
+    def _changeThemeInstant(self, theme: str = None, colour: str = None, themeSD: str = None):
         """Set the light/dark palette in single step.
         0 - dark, 1 - light, 2 - default = follow OS/application
         """
@@ -321,9 +318,9 @@ class Gui(Ui):
             self.qtApp.setPalette(pal)
             # QtCore.QTimer.singleShot(0, partial(self.qtApp.setPalette, pal))
             QtCore.QTimer.singleShot(0, partial(self.qtApp.sigPaletteChanged.emit, pal,
-                                              prefsApp.themeStyle,
-                                              prefsApp.themeColour,
-                                              prefsGen.colourScheme)
+                                                prefsApp.themeStyle,
+                                                prefsApp.themeColour,
+                                                prefsGen.colourScheme)
                                      )
         getLogger().debug(f'{consoleStyle.fg.darkblue}==> end palette-change event.{consoleStyle.reset}')
 
@@ -407,10 +404,10 @@ class Gui(Ui):
         """Set the new light/dark theme.
         theme = 0|'dark' for dark, 1|'light' for light.
         """
-        themeStates = {'dark': 0,
+        themeStates = {'dark' : 0,
                        'light': 1,
-                       0 : 0,
-                       1 : 1}
+                       0      : 0,
+                       1      : 1}
         if theme not in themeStates:
             raise ValueError(f'{self.__class__.__name__}.setTheme: '
                              f'theme must be in {json.dumps(list(themeStates.keys()))}')
@@ -687,8 +684,8 @@ class Gui(Ui):
             msg = None
             if dataLoader.count > MAXITEMLOADING or dataLoader.depth > MAXITEMDEPTH:
                 _nSpectra = len([dl for dl in dataLoader.dataLoaders if dl.isSpectrumLoader and dl.isValid])
-                _spectra = f', of which {_nSpectra} are spectra' if _nSpectra>0 else ''
-                msg =  f'CAUTION: You are trying to load {dataLoader.count:d} items{_spectra}.\n'
+                _spectra = f', of which {_nSpectra} are spectra' if _nSpectra > 0 else ''
+                msg = f'CAUTION: You are trying to load {dataLoader.count:d} items{_spectra}.\n'
 
                 if dataLoader.depth > MAXITEMDEPTH:
                     msg += f'The folder is {dataLoader.depth}-subfolders deep.\n\n'
@@ -891,7 +888,7 @@ class Gui(Ui):
                 dataLoader, createNewProject, ignore = self._getDataLoader(path)
 
                 newProjectUrls = self._scanDataLoaders([dataLoader], func=lambda dl: (dl is not None and
-                                                                                    dl.createNewProject))
+                                                                                      dl.createNewProject))
 
                 if len(newProjectUrls) > 1:
                     # We found more than one dataLoader that would create a new project; not allowed

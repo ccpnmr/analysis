@@ -127,7 +127,9 @@
         "macroAutosave"                        : true,
         "macroSaveProfile"                     : true,
         "macroSortProfile"                     : "time",
-        "macroShowLines"                       : "Minimal"
+        "macroShowLines"                       : "Minimal",
+        "allowMenuDuplicates"                  : false,
+        "showBlankDimensions"                  : false
     },
     "proxySettings"    : {
         "verifySSL"        : true,

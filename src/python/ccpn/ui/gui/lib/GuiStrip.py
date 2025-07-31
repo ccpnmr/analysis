@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-07-29 18:04:24 +0100 (Tue, July 29, 2025) $"
-__version__ = "$Revision: 3.3.2.1 $"
+__dateModified__ = "$dateModified: 2025-07-31 15:06:06 +0100 (Thu, July 31, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,25 +30,26 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from typing import List, Tuple, Sequence
 from copy import deepcopy
 from functools import partial
-import numpy as np
-import contextlib
+# import contextlib
 from time import time_ns
+# from collections import OrderedDict
+
+import numpy as np
 from PyQt5 import QtWidgets, QtCore, QtGui
-from collections import OrderedDict
-import weakref
 
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar
-from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND, consoleStyle
+from ccpn.ui.gui.guiSettings import (getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND, GUISTRIP_PIVOT,
+                                     ZPlaneNavigationModes)
+from ccpn.ui.gui.lib.MenuLib import _addItemsToNavigateMenu
 from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
+from ccpn.util.Constants import AXIS_FULLATOMNAME, AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
 from ccpn.util.UpdateScheduler import UpdateScheduler
 from ccpn.util.UpdateQueue import UpdateQueue
-from ccpn.ui.gui.guiSettings import GUISTRIP_PIVOT, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -63,10 +64,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import (AXISXUNITS, AXISYUNITS,
                                                    PEAKSYMBOLSENABLED, PEAKLABELSENABLED, PEAKARROWSENABLED,
                                                    MULTIPLETSYMBOLSENABLED, MULTIPLETLABELSENABLED,
                                                    MULTIPLETARROWSENABLED,
-                                                   SPECTRUM_STACKEDMATRIXOFFSET,
                                                    ARROWTYPES, ARROWSIZE, ARROWMINIMUM, MULTIPLETANNOTATIONTYPE,
                                                    MULTIPLETTYPE)
-from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
@@ -79,82 +78,14 @@ IntegralMenu = 'IntegralMenu'
 MultipletMenu = 'MultipletMenu'
 AxisMenu = 'AxisMenu'
 PhasingMenu = 'PhasingMenu'
+_STRIP = '_strip'
+_FOREGROUND = '_foregroundColour'
+_ACTIONGEOMETRIES = '_actionGeometries'
 
 
 #=========================================================================================
 # Supporting classes
 #=========================================================================================
-
-class _MenuEventFilter(QtCore.QObject):
-
-    def __init__(self, menu, parent=None):
-        super().__init__(parent)
-        getLogger().debug(f'--> new QMenu filter {menu}')
-        self._lastAction = None
-        self._menu = weakref.ref(menu)
-        if menu:
-            menu.installEventFilter(self)
-
-    def eventFilter(self, obj, event):
-        """Handle enter/leave events for actions in the menu.
-        """
-        if self._menu():
-            if event.type() == QtCore.QEvent.MouseMove:
-                # mouse is moving in the menu
-                if action := self._menu().actionAt(event.pos()):
-                    # events MUST be spawned with singleShot to fire outside menu handling
-                    QtCore.QTimer.singleShot(0, partial(self._enterAction, action))
-                else:
-                    QtCore.QTimer.singleShot(0, self._leaveAction)
-            elif event.type() == QtCore.QEvent.Leave:
-                QtCore.QTimer.singleShot(0, self._leaveAction)
-        return False
-
-    def _enterAction(self, action):
-        """Handle mouse moving into a new action in the menu.
-        """
-        if action != self._lastAction:
-            if self._lastAction:
-                self._lowerOverlay(self._lastAction)
-            self._raiseOverlay(action)
-            # store the new action
-            self._lastAction = action
-
-    def _leaveAction(self):
-        """Check the last action and lower any overlays.
-        """
-        if self._lastAction:
-            self._lowerOverlay(self._lastAction)
-            self._lastAction = None
-
-    @staticmethod
-    def _raiseOverlay(action):
-        """Raise the overlay on the strip referenced by the selected action.
-        """
-        if not (action and (strip := getattr(action, '_strip', None))):
-            return
-        sDisplay = strip.spectrumDisplay
-        # get the list of visible plotted strips in the scroll-area
-        dStrips = list(filter(lambda st: not st.visibleRegion().isEmpty(), sDisplay.orderedStrips))
-        if strip in dStrips:
-            strip.setOverlayArea(True)
-        if sDisplay.stripArrangement == 'Y':
-            if strip == dStrips[-1]:
-                sDisplay.setRightOverlayArea(True)
-        elif sDisplay.stripArrangement == 'X':
-            if strip == dStrips[-1]:
-                sDisplay.setBottomOverlayArea(True)
-
-    @staticmethod
-    def _lowerOverlay(action):
-        """Lower the overlay on the strip referenced by the previous action.
-        """
-        if not (action and (strip := getattr(action, '_strip', None))):
-            return
-        sDisplay = strip.spectrumDisplay
-        strip.setOverlayArea(None)
-        sDisplay.setRightOverlayArea(None)
-        sDisplay.setBottomOverlayArea(None)
 
 
 class _StripOverlay(QtWidgets.QWidget):
@@ -622,7 +553,7 @@ class GuiStrip(Frame):
 
     @property
     def gridVisible(self):
-        """True if grid is visible.
+        """True if the grid is visible.
         """
         return self._CcpnGLWidget._gridVisible
 
@@ -749,7 +680,7 @@ class GuiStrip(Frame):
 
     @property
     def stackingMode(self):
-        pass
+        return None
 
     def setStackingMode(self, value):
         pass
@@ -909,186 +840,37 @@ class GuiStrip(Frame):
         """
         pass
 
-    @staticmethod
-    def _createMenuItemForNavigate(currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label,
-                                   includeAxisCodes=True, prefix=None):
-        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
-
-        if includeAxisCodes:
-            item = ', '.join([f"{cc}:{str(x if isinstance(x, str) else round(x, 3))}"
-                              for x, cc in zip(showPos, strip.axisCodes)])
-        else:
-            item = ', '.join([str(x if isinstance(x, str) else round(x, 3)) for x in showPos])
-
-        prefix = strip.pid if prefix is None else prefix
-        text = f'{prefix} ({item})'
-        toolTip = f'Show cursor in strip {str(strip.id)} at {label} position ({item})'
-        if strip.visibleRegion().isEmpty():
-            toolTip += '\n(strip is not in visible region of spectrumDisplay)'
-        action = menuFunc.addItem(text=text,
-                                  callback=partial(navigateToPositionInStrip, strip=strip,
-                                                   positions=navigatePos,
-                                                   axisCodes=navigateAxes, ),
-                                  toolTip=toolTip)
-        action._strip = strip
-        return action
-
-    def _createCommonMenuItem(self, currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip,
-                              prefix=None):
-        showPos = []
-        navigatePos = []
-        navigateAxes = []
-        for jj, ii in enumerate(perm):
-            if ii is not None:
-                showPos.append(position[ii])
-                navigatePos.append(position[ii])
-                navigateAxes.append(strip.axisCodes[jj])
-            else:
-                showPos.append(' - ')
-        return self._createMenuItemForNavigate(currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label,
-                                               includeAxisCodes=includeAxisCodes, prefix=prefix)
-
-    def _addItemsToNavigateMenu(self, position, axisCodes, label, menuFunc, includeAxisCodes=True):
-        """Adds item to navigate to section of context menu.
-        """
-        from itertools import product, combinations
-        from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
-        from ccpn.ui.gui.widgets.Icon import Icon
-
-        if not menuFunc:
-            return
-        if not self.current.project.spectrumDisplays:
-            return
-
-        menuFunc.clear()
-        menuFunc.setColourEnabled(True)  # enable foreground-colours for this menu
-        currentStrip = self
-        if not getattr(menuFunc, '_filter', None):
-            # add a menu-filter to show/hide strip overlays as move the mouse over actions in menu
-            menuFunc._filter = _MenuEventFilter(menuFunc)
-        menuFunc.setEnabled(True)
-
-        # add the opposite diagonals for matching axisCodes - always at the top of the list
-        indices = getAxisCodeMatchIndices(currentStrip.axisCodes, axisCodes, allMatches=False)
-        allIndices = getAxisCodeMatchIndices(currentStrip.axisCodes, axisCodes, allMatches=True)
-        permutationList1 = [jj for jj in product(*(ii or (None,) for ii in allIndices))
-                            if len(set(jj)) == len(currentStrip.axisCodes)]
-        for perm in permutationList1:
-
-            # skip any that match the original indexing
-            if any(ii != jj for ii, jj in zip(perm, indices)):
-                self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position,
-                                           currentStrip)
-
-        menuFunc.addSeparator()
-
-        _icon = Icon('icons/pin-black')  # use the black as gets disabled and looks grey
-        _previousMenuItem = None
-        _currentMenuItem = None
-        for pCheck in (True, False):
-            # add the permutations for the other strips
-            for spectrumDisplay in self.current.project.spectrumDisplays:
-
-                # skip the spectrumDisplay containing the current strip (for the minute)
-                if spectrumDisplay == currentStrip.spectrumDisplay:
-                    continue
-                pStrips = list(filter(lambda st: st.pinned == pCheck, spectrumDisplay.strips))
-                if not pStrips:
-                    continue
-
-                specCount = 0
-                specAction = menuFunc.addItem(text=spectrumDisplay.pid,
-                                              icon=_icon if len(pStrips) == 1 and pStrips[0].pinned else None)
-                _strip = pStrips[0]
-                if self.mainWindow._previousStrip == _strip:
-                    _previousMenuItem = specAction
-                elif self.current.strip == _strip:
-                    # this should NEVER be in the list :|
-                    _currentMenuItem = specAction
-
-                prefix = '       ' if len(pStrips) > 1 else '  '  # minor indenting
-                for strip in pStrips:
-                    if strip == currentStrip:
-                        continue
-                    strCount = 0
-                    strAction = menuFunc.addItem(text=f'    {strip.pid}',
-                                                 icon=_icon if strip.pinned else None)
-                    if len(pStrips) > 1:
-                        # otherwise the strips are hidden and the spectrumDisplay label holds the pin/colour
-                        if self.mainWindow._previousStrip == strip:
-                            _previousMenuItem = strAction
-                        elif self.current.strip == strip:
-                            # duh, this should never be in the list
-                            _currentMenuItem = strAction
-
-                    # get a list of all isotope code matches for each axis code in 'strip'
-                    indices = getAxisCodeMatchIndices(strip.axisCodes, axisCodes, allMatches=True)
-
-                    # generate a permutation list of the axis codes that have unique indices
-                    # permutation list is list of tuples
-                    # each element is list of indices to fetch from currentStrip and map to strip
-
-                    # permutationList1 = [jj for jj in product(*(ii if ii else (None,) for ii in indices)) if len(set(jj)) == len(strip.axisCodes)]
-                    permutationList1 = list(product(*(ii or (None,) for ii in indices)))
-                    posMap = []
-                    try:
-                        for k in range(1,
-                                       max(len(axisCodes) + 1, len(strip.axisCodes) + 1)):
-                            for perm in permutationList1:
-                                ext = list(combinations(list(enumerate(perm)), k))
-                                posMap.extend(ext)
-                    except Exception:
-                        posMap = []
-                    # remove all the duplicates
-                    newPerms = OrderedDict()
-                    for perm in posMap:
-                        perm2 = [None] * len(strip.axisCodes)
-                        for cc in perm:
-                            with contextlib.suppress(Exception):
-                                perm2[cc[0]] = cc[1]
-                        newPerms[str(perm2)] = perm2
-                    for perm2 in newPerms.values():
-                        # ignore all Nones
-                        if perm2.count(None) != len(perm2):
-                            actn = self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc,
-                                                              perm2, position, strip, prefix=prefix)
-                            strCount += 1
-                            specCount += 1
-
-                    # hide the spectrumDisplay/strip menu items if nothing added
-                    strAction.setEnabled(False)
-                    if not strCount or len(pStrips) == 1:
-                        strAction.setVisible(False)
-
-                specAction.setEnabled(False)
-                if not specCount:
-                    specAction.setVisible(False)
-                menuFunc.addSeparator()
-
-        if _previousMenuItem:
-            _previousMenuItem._foregroundColour = QtGui.QColor('orange')
-        if _currentMenuItem:
-            # this should NEVER be in the list :|
-            _currentMenuItem._foregroundColour = QtGui.QColor('mediumseagreen')
-
     def _addItemsToNavigateToPeakMenu(self, peaks):
-        """Adds item to navigate to peak position from context menu.
+        """Adds item to navigate to peak position from the context-menu.
         """
+        from ccpn.framework.Preferences import getPreferences
+
+        allowMenuDuplicates = ((prefs := getPreferences()) and prefs.general.get('allowMenuDuplicates'))
+        showBlankDimensions = ((prefs := getPreferences()) and prefs.general.get('showBlankDimensions'))
         if peaks and self._navigateToPeakMenuSelected:
-            self._addItemsToNavigateMenu(peaks[0].position, peaks[0].axisCodes, 'Peak',
-                                         self._navigateToPeakMenuSelected, includeAxisCodes=True)
+            _addItemsToNavigateMenu(self, peaks[0].position, peaks[0].axisCodes, 'Peak',
+                                    self._navigateToPeakMenuSelected,
+                                    includeAxisCodes=True, allowMenuDuplicates=allowMenuDuplicates,
+                                    showBlankDimensions=showBlankDimensions)
 
     def _addItemsToNavigateToCursorPosMenu(self):
-        """Copied from old viewbox. This function apparently take the current cursorPosition
+        """Copied from old viewbox. This function apparently takes the current cursorPosition
          and uses to pan a selected display from the list of spectrumViews or the current cursor position.
         """
+        from ccpn.framework.Preferences import getPreferences
+
+        allowMenuDuplicates = ((prefs := getPreferences()) and prefs.general.get('allowMenuDuplicates'))
+        showBlankDimensions = ((prefs := getPreferences()) and prefs.general.get('showBlankDimensions'))
         mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
         position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
                     for ax in self.axisCodes]
         if None in position:
             return
 
-        self._addItemsToNavigateMenu(position, self.axisCodes, 'Cursor', self.navigateCursorMenu, includeAxisCodes=True)
+        _addItemsToNavigateMenu(self, position, self.axisCodes, 'Cursor',
+                                self.navigateCursorMenu,
+                                includeAxisCodes=True, allowMenuDuplicates=allowMenuDuplicates,
+                                showBlankDimensions=showBlankDimensions)
 
     def markAxisIndices(self, indices=None):
         """Mark the X/Y/XY axisCodes by index
@@ -1105,7 +887,7 @@ class GuiStrip(Frame):
         self._createMarkAtPosition(positions=pos, axisCodes=axes)
 
     def _addItemsToMenu(self, position, axisCodes, label, menuFunc):
-        """Adds item to mark peak position from context menu.
+        """Adds item to mark peak position from context-menu.
         """
         from functools import partial
 

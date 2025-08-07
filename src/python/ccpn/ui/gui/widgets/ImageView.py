@@ -98,6 +98,7 @@ class ImageViewSVG(Widget):
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.Splitter import Splitter
+    from ccpn.util import Path
 
     app = TestApplication()
 
@@ -107,12 +108,12 @@ if __name__ == '__main__':
     split = Splitter(parent=None, horizontal=True)
     window.getLayout().addWidget(split)
 
-    image = ImageView(parent=None,
-                      pixmap=QPixmap(r'C:\Users\work\Projects\AnalysisV3\internal\launcher\Images\trace.png'))
-    image2 = ImageViewSVG(parent=None,
-                          svg=r'C:\Users\work\Projects\AnalysisV3\internal\launcher\Images\trace.svg')
+    topDir = Path.aPath(Path.getTopDirectory())
 
-    # window.layout().addWidget(image)
+    image = ImageView(parent=None,
+                      pixmap=QPixmap(f'{topDir}' + '/internal/launcher/Images/trace.png'))
+    image2 = ImageViewSVG(parent=None,
+                          svg=(f'{topDir}' + r'/internal/launcher/Images/trace.svg'))
 
     split.addWidget(image)
     split.addWidget(image2)

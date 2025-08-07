@@ -10,6 +10,14 @@ from ccpn.ui.gui.widgets.Frame import Frame
 
 
 class ImageView(Widget):
+    """A widget to add a pixmap image to a layout.
+
+    Takes a QPixmap object renders it based on the available size.
+    Uses KeepAspectRatio to ensure proper scaling when the widget is resized.
+
+    Example provided at the bottom of the file on how to use the widget.
+    """
+
     _sizeHint = QSize()
 
     def __init__(self, parent=None, pixmap=None, **kwds) -> None:
@@ -20,32 +28,49 @@ class ImageView(Widget):
 
     @property
     def pixmap(self):
+        """The pixmap to be rendered"""
         return self._pixmap
 
     @pixmap.setter
     def pixmap(self, value):
+        """Sets pixmap
+
+        Rescales the image
+        """
         if isinstance(value, QPixmap):
             self._pixmap = value
             self._sizeHint = value.size()
+        else:
+            return
 
-        self.updateGeometry()
         self.rescale()
 
     def setPixmap(self, pixmap):
+        """Sets the pixmap to be rendered
+
+        Added to be the same style PyQt5.
+        """
         self.pixmap = pixmap
 
     @property
     def scaledImage(self):
+        """Scaled pixmap"""
         return self._scaledImage
 
     @scaledImage.setter
     def scaledImage(self, value):
+        """Sets the scaled pixmap"""
         self._scaledImage = value
 
     def sizeHint(self):
         return self._sizeHint
 
     def rescale(self):
+        """Rescales the pixmap
+
+        Keeps the aspect ratio of the image and sets to
+        the size of the widget.
+        """
         if self.pixmap:
             self.scaledImage = self.pixmap.scaled(self.size() , QtCore.Qt.KeepAspectRatio)
         self.update()
@@ -54,6 +79,7 @@ class ImageView(Widget):
         self.rescale()
 
     def paintEvent(self, event):
+        """Paint event for the image"""
         if not self.pixmap:
             return
 
@@ -65,33 +91,53 @@ class ImageView(Widget):
 
 
 class ImageViewSVG(Widget):
+    """A widget to add a svg image to a layout.
+
+    Takes a path and adds provides svg rendering.
+    Uses KeepAspectRatio to ensure proper scaling when the widget is resized.
+
+    Example provided at the bottom of the file on how to use the widget.
+    """
     _sizeHint = QSize()
 
-    def __init__(self, parent=None, svg=None, **kwds) -> None:
+    def __init__(self, parent=None, svg: str | None = None, **kwds) -> None:
         super().__init__(parent=parent)
         self._svg = None
         self.svg = svg
 
     @property
     def svg(self):
+        """The path to the svg"""
         return self._svg
 
     @svg.setter
     def svg(self, value):
+        """Sets the svg renderer on the path given"""
+        if not value:
+            return
+
         self._svg = value
         self.renderer = QtSvg.QSvgRenderer(self.svg)
+        self._sizeHint = self.renderer.defaultSize()
         self.renderer.setAspectRatioMode(QtCore.Qt.KeepAspectRatio)
 
     def setSvg(self, svg):
+        """Sets the svg renderer on the path given
+
+        Added to be the same style PyQt5.
+        """
         self.svg = svg
 
+    def sizeHint(self):
+        return self._sizeHint
+
     def paintEvent(self, event):
+        """Subclassed from widget to us an svg renderer.
+        """
         if not self.svg:
             return
 
         painter = QtGui.QPainter(self)
-
-        painter.restore()
         self.renderer.render(painter)
 
 

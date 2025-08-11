@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-05-18 18:49:15 +0100 (Thu, May 18, 2023) $"
-__version__ = "$Revision: 3.1.1 $"
+__dateModified__ = "$dateModified: 2025-08-11 11:18:37 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,9 +31,8 @@ import re
 import typing
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.PMIListABC import COLOURCHECK, INHERITCOLOUR
-from ccpn.core.lib.ContextManagers import ccpNmrV3CoreUndoBlock
+from ccpn.core.lib.ContextManagers import ccpNmrV3CoreSetter
 from ccpn.ui._implementation.SpectrumView import SpectrumView
-from ccpn.util.decorators import logCommand
 
 
 class PMIListViewABC(AbstractWrapperObject):
@@ -70,7 +70,7 @@ class PMIListViewABC(AbstractWrapperObject):
     _SYMBOLCOLOUR = 'symbolColour'
     _TEXTCOLOUR = 'textColour'
     _ARROWCOLOUR = 'arrowColour'
-    
+
     def _setListClasses(self):
         """Set the primary classType for the child list attached to this container
         """
@@ -122,8 +122,7 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @symbolStyle.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreUndoBlock()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def symbolStyle(self, value: str):
         if self.symbolStyle != value:
             self._apiListView.symbolStyle = value
@@ -146,17 +145,18 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @symbolColour.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreUndoBlock()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def symbolColour(self, value: typing.Optional[str]):
         # ccpnInternal - changes this to '#' for non-valid colour check to validate in model
         if not isinstance(value, (str, type(None))):
-            raise TypeError(f"symbolColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}') or None")
+            raise TypeError(f"symbolColour must be a hex colour string "
+                            f"(e.g. '#ABCDEF' or '{INHERITCOLOUR}') or None")
 
         if value:
             # a non-empty string
             if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
-                raise ValueError(f"symbolColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
+                raise ValueError(f"symbolColour {value} not defined correctly, must be a hex colour string "
+                                 f"(e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
 
             value = value.upper()
 
@@ -180,8 +180,7 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @textColour.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreUndoBlock()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def textColour(self, value: typing.Optional[str]):
         # ccpnInternal - changes this to '#' for non-valid colour check to validate in model
         if not isinstance(value, (str, type(None))):
@@ -190,7 +189,8 @@ class PMIListViewABC(AbstractWrapperObject):
         if value:
             # a non-empty string
             if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
-                raise ValueError(f"textColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
+                raise ValueError(f"textColour {value} not defined correctly, must be a hex colour string "
+                                 f"(e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
 
             value = value.upper()
 
@@ -202,8 +202,7 @@ class PMIListViewABC(AbstractWrapperObject):
         return self._apiListView.isSymbolDisplayed
 
     @isSymbolDisplayed.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreUndoBlock()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def isSymbolDisplayed(self, value: bool):
         self._apiListView.isSymbolDisplayed = value
 
@@ -213,8 +212,7 @@ class PMIListViewABC(AbstractWrapperObject):
         return self._apiListView.isTextDisplayed
 
     @isTextDisplayed.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreUndoBlock()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def isTextDisplayed(self, value: bool):
         self._apiListView.isTextDisplayed = value
 
@@ -224,8 +222,7 @@ class PMIListViewABC(AbstractWrapperObject):
         return self._apiListView.isSymbolDisplayed and self._apiListView.isTextDisplayed
 
     @isDisplayed.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreUndoBlock()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def isDisplayed(self, value: bool):
         self._apiListView.isSymbolDisplayed = value
         self._apiListView.isTextDisplayed = value
@@ -247,8 +244,7 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @meritColour.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreUndoBlock()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def meritColour(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
             raise TypeError(f"meritColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}') or None")
@@ -256,7 +252,8 @@ class PMIListViewABC(AbstractWrapperObject):
         if value:
             # a non-empty string
             if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
-                raise ValueError(f"meritColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
+                raise ValueError(f"meritColour {value} not defined correctly, must be a hex colour string "
+                                 f"(e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
 
             value = value.upper()
 
@@ -276,8 +273,7 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @meritEnabled.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreUndoBlock()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def meritEnabled(self, value: bool):
         if not isinstance(value, bool):
             raise TypeError("meritEnabled must be True/False.")
@@ -298,8 +294,7 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @meritThreshold.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreUndoBlock()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def meritThreshold(self, value: typing.Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError("meritThreshold must be a float or integer")
@@ -326,8 +321,7 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @lineColour.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreUndoBlock()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def lineColour(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
             raise TypeError(f"lineColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}') or None")
@@ -335,7 +329,8 @@ class PMIListViewABC(AbstractWrapperObject):
         if value:
             # a non-empty string
             if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
-                raise ValueError(f"lineColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
+                raise ValueError(f"lineColour {value} not defined correctly, must be a hex colour string "
+                                 f"(e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
 
             value = value.upper()
 
@@ -358,16 +353,17 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @arrowColour.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreUndoBlock()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def arrowColour(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
-            raise TypeError(f"arrowColour must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}') or None")
+            raise TypeError(f"arrowColour must be a hex colour string "
+                            f"(e.g. '#ABCDEF' or '{INHERITCOLOUR}') or None")
 
         if value:
             # a non-empty string
             if not (re.findall(COLOURCHECK, value) or value == INHERITCOLOUR):
-                raise ValueError(f"arrowColour {value} not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
+                raise ValueError(f"arrowColour {value} not defined correctly, must be a hex colour string "
+                                 f"(e.g. '#ABCDEF' or '{INHERITCOLOUR}')")
 
             value = value.upper()
 

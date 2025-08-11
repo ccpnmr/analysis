@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-07-31 15:06:06 +0100 (Thu, July 31, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-11 11:59:37 +0100 (Mon, August 11, 2025) $"
 __version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
@@ -211,7 +211,7 @@ class GuiStrip(Frame):
         else:
             from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidget as CcpnGLWidget
 
-        self._CcpnGLWidget = CcpnGLWidget(strip=self, mainWindow=self.mainWindow)
+        self._CcpnGLWidget = CcpnGLWidget(self)
 
         self.getLayout().addWidget(self._CcpnGLWidget, *openGLGrid, *openGlSpan)
         self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,

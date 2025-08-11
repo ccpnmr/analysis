@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-02 10:38:36 +0100 (Fri, May 02, 2025) $"
-__version__ = "$Revision: 3.3.2 $"
+__dateModified__ = "$dateModified: 2025-08-11 11:17:21 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,6 +37,7 @@ from enum import Enum
 from functools import partial, update_wrapper
 from collections import deque
 
+from ccpn.ui.gui.guiSettings import consoleStyle
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 
@@ -309,7 +310,11 @@ class Undo(deque):
         if self.nextIndex < 1:
             return
 
-        if waypoints and waypoints[-1] == self.nextIndex - 1:  # don't need to add a new waypoint
+        # NOTE:ED - there is a strange bug that, occasionally, the last 2 numbers in the
+        #   waypoint list get repeated, e.g. [1, 5, 7, 8, 9, 8, 9, 8, 9, ...]
+        #   the tweak below effectively discards these,
+        #   will be be refactored in next release
+        if waypoints and (self.nextIndex - 1) in waypoints:  # already pointing to an existing waypoint
             return  # if is the same as the last one
 
         waypoints.append(self.nextIndex - 1)  # add the new waypoint to the end
@@ -338,8 +343,8 @@ class Undo(deque):
             return
 
         if self._debug:
-            getLogger().debug2('undo._newItem %s %s %s' % (self.undoItemBlocking, undoPartial,
-                                                          redoPartial))
+            getLogger().debug2(f'{consoleStyle.fg.yellow}undo._newItem {self.undoItemBlocking} '
+                               f'{undoPartial} {redoPartial}{consoleStyle.reset}')
 
         # clear out redos that are no longer going to be doable
         for n in range(len(self) - self.nextIndex):
@@ -385,10 +390,10 @@ class Undo(deque):
             return
 
         if self._debug:
-            getLogger().debug2('undo.newItem %s %s %s %s %s %s %s' % (self.undoItemBlocking, undoMethod,
-                                                                      redoMethod, undoArgs,
-                                                                      undoKwargs, redoArgs,
-                                                                      redoKwargs))
+            getLogger().debug2(f'{consoleStyle.fg.yellow}'
+                               f'undo.newItem {self.undoItemBlocking} {undoMethod} '
+                               f'{redoMethod} {undoArgs} {undoKwargs} {redoArgs} {redoKwargs}'
+                               f'{consoleStyle.reset}')
 
         if not undoArgs:
             undoArgs = ()

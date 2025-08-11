@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-07-08 14:16:26 +0300 (Tue, July 08, 2025) $"
-__version__ = "$Revision: 3.3.2.1 $"
+__dateModified__ = "$dateModified: 2025-08-11 11:17:20 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1250,7 +1250,7 @@ class BlankedPartial(object):
                 self._obj._finaliseAction(self._trigger)
 
 
-def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
+def ccpNmrV3CoreSetter(doNotify=True, noUndo=False, **actionKwds):
     """A decorator wrap the property setters method in an undo block and triggering the
     'change' notification if doNotify=True
     """
@@ -1274,11 +1274,11 @@ def ccpNmrV3CoreSetter(doNotify=True, **actionKwds):
                     result = func(*args, **kwds)
                 except Exception:
                     raise
-
                 finally:
-                    addUndoItem(undo=BlankedPartial(func, self, ('change', actionKwds), False, self, oldValue),
-                                redo=BlankedPartial(func, self, ('change', actionKwds), False, self, args[1]))
-
+                    # currently block all items from the spectrum-/peakList-Views, etc.
+                    if not noUndo and (args[1] != oldValue):
+                        addUndoItem(undo=BlankedPartial(func, self, ('change', actionKwds), False, self, oldValue),
+                                    redo=BlankedPartial(func, self, ('change', actionKwds), False, self, args[1]))
         if doNotify:
             self._finaliseAction('change', **actionKwds)
 

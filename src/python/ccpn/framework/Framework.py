@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-21 16:10:08 +0000 (Fri, March 21, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-08-11 11:17:21 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1661,13 +1661,13 @@ class Framework(NotifierBase, GuiBase):
 
         :raises: Logs a warning if there is nothing to undo.
         """
-        if undoStack := self._getUndo():
-            if not undoStack.canUndo():
-                getLogger().warning('nothing to undo')
-            if self._undoRedoHandlerBlocked:
-                return
-            with self._undoRedoHandler('Undo ...'):
-                undoStack.undo()
+        if not (undoStack := self._getUndo()) or not undoStack.canUndo():
+            getLogger().warning('nothing to undo')
+            return
+        if self._undoRedoHandlerBlocked:
+            return
+        with self._undoRedoHandler('Undo ...'):
+            undoStack.undo()
 
     @logCommand('application.')
     def redo(self):
@@ -1680,13 +1680,13 @@ class Framework(NotifierBase, GuiBase):
 
         :raises: Logs a warning if there is nothing to redo.
         """
-        if undoStack := self._getUndo():
-            if not undoStack.canRedo():
-                getLogger().warning('nothing to redo')
-            if self._undoRedoHandlerBlocked:
-                return
-            with self._undoRedoHandler('Redo ...'):
-                undoStack.redo()
+        if not (undoStack := self._getUndo()) or not undoStack.canRedo():
+            getLogger().warning('nothing to redo')
+            return
+        if self._undoRedoHandlerBlocked:
+            return
+        with self._undoRedoHandler('Redo ...'):
+            undoStack.redo()
 
     def _getUndo(self):
         """Return the undo object for the project

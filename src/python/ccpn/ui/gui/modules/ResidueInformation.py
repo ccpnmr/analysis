@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-11 16:50:57 +0100 (Mon, August 11, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-11 16:51:49 +0100 (Mon, August 11, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -268,9 +268,6 @@ class ResidueInformation(CcpnModule):
         self.spacer = Spacer(self._scrollWidget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                              grid=(3, 1), gridSpan=(1, 1))
-
-    # def _setImageWidget(self):
-    #     self._image = ImageView(parent=None, pixmap=r'C:\Users\work\Projects\AnalysisV3\tutorials\html_files\graphics\ala.png')
 
     def _setBottomWidget(self, mainWindow):
         # initialise the sequence module

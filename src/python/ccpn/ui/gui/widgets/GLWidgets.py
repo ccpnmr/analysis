@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-02 17:07:59 +0100 (Fri, May 02, 2025) $"
-__version__ = "$Revision: 3.3.2 $"
+__dateModified__ = "$dateModified: 2025-08-11 11:59:37 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,11 +30,12 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 
 import numpy as np
 from PyQt5 import QtGui
-from itertools import zip_longest, product
-
+from itertools import zip_longest
+from typing import TypeVar, TYPE_CHECKING
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib.peakUtils import movePeak
 from ccpn.core.lib.SpectrumLib import CoherenceOrder
+from ccpn.ui.gui.guiSettings import consoleStyle
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs, GL
 from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode, PICK
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import (CcpnGLWidget, GLVertexArray, GLRENDERMODE_DRAW,
@@ -45,6 +46,12 @@ from ccpn.util.Constants import MOUSEDICTSTRIP, AXIS_FULLATOMNAME, AXIS_MATCHATO
 from ccpn.util.Logging import getLogger
 
 
+if TYPE_CHECKING:
+    from ccpn.ui.gui.lib.Strip import Strip1d as _Strip1d, StripNd as _StripNd
+
+_CoreStrip = TypeVar('_CoreStrip', bound='_Strip1d | _StripNd')
+
+
 class GuiNdWidget(CcpnGLWidget):
     is1D = False
     XDIRECTION = -1.0
@@ -52,9 +59,6 @@ class GuiNdWidget(CcpnGLWidget):
     SPECTRUMPOSCOLOUR = 'positiveContourColour'
     SPECTRUMNEGCOLOUR = 'negativeContourColour'
     AXIS_INSIDE = False
-
-    def __init__(self, strip=None, mainWindow=None, stripIDLabel=None):
-        super().__init__(strip=strip, mainWindow=mainWindow, stripIDLabel=stripIDLabel)
 
     def _mouseInPeak(self, xPosition, yPosition, firstOnly=False):
         """Find the peaks under the mouse.
@@ -1011,6 +1015,10 @@ class GuiNdWidget(CcpnGLWidget):
         return mouseMovedDict
 
 
+#=========================================================================================
+# Gui1dWidget
+#=========================================================================================
+
 class Gui1dWidget(CcpnGLWidget):
     AXIS_MARGINRIGHT = 80
     YAXISUSEEFORMAT = True
@@ -1025,17 +1033,18 @@ class Gui1dWidget(CcpnGLWidget):
     SPECTRUMYZOOM = 1.0e6
     SHOWSPECTRUMONPHASING = False
 
-    def __init__(self, strip=None, mainWindow=None, stripIDLabel=None):
+    def __init__(self, parent: _CoreStrip, *, stripIDLabel=None):
+        from ccpn.ui.gui.lib.Strip import Strip1d as _Strip1d, StripNd as _StripNd
 
-        if strip.spectrumDisplay._flipped:
+        if not isinstance(parent, _Strip1d | _StripNd):
+            raise RuntimeError(f'{parent} is not a Strip')
+        if parent.spectrumDisplay._flipped:
             self.YDIRECTION = -1.0
             self.XAXES = YAXISUNITS1D
         else:
             self.YAXES = YAXISUNITS1D
 
-        super(Gui1dWidget, self).__init__(strip=strip,
-                                          mainWindow=mainWindow,
-                                          stripIDLabel=stripIDLabel)
+        super().__init__(parent, stripIDLabel=stripIDLabel)
 
     def _mouseInPeak(self, xPosition, yPosition, firstOnly=False):
         """Find the peaks under the mouse.
@@ -1410,6 +1419,8 @@ class Gui1dWidget(CcpnGLWidget):
                                                                     dimension=2,
                                                                     GLContext=self)
                 spectrumView._buildGLContours(self._contourList[spectrumView])
+                # update the colour of the attached spectrum-label
+                self._spectrumLabelling.setStringColour(spectrumView)
 
                 self._buildSpectrumSetting(spectrumView=spectrumView, stackCount=stackCount)
                 # if self._stackingMode:
@@ -1431,8 +1442,6 @@ class Gui1dWidget(CcpnGLWidget):
 
         for specView in tuple(self._spectrumSettings.keys()):
             if specView not in self._ordering:
-                getLogger().debug(f'>>>_updateVisibleSpectrumViews GLWidgets  1D   delete {specView} {id(specView)}')
-                getLogger().debug(f'>>> _ordering {[id(spec) for spec in self._ordering]}')
                 if specView in self._spectrumSettings:
                     del self._spectrumSettings[specView]
                 if specView in self._contourList:

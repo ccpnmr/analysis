@@ -42,6 +42,9 @@ By Mouse button:
 
     shift-right-drag:                   draws a zooming box and zooms the viewing window.
 """
+from __future__ import annotations
+
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -57,8 +60,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-12 16:12:35 +0100 (Mon, May 12, 2025) $"
-__version__ = "$Revision: 3.3.2.1 $"
+__dateModified__ = "$dateModified: 2025-08-11 11:59:37 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -73,7 +76,7 @@ import re
 import time
 import numpy as np
 from functools import partial
-from typing import Tuple
+from typing import TYPE_CHECKING, TypeVar, Generic
 from itertools import takewhile
 from pyqtgraph import functions as fn
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -84,6 +87,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 from ccpn.core.Integral import Integral
 from ccpn.core.Multiplet import Multiplet
+from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
 from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
 from ccpn.ui.gui.lib.GuiStrip import (DefaultMenu, PeakMenu, IntegralMenu,
                                       MultipletMenu, PhasingMenu, AxisMenu)
@@ -130,6 +134,14 @@ from ccpn.util.Constants import AXIS_FULLATOMNAME
 from ccpn.util.Logging import getLogger
 
 
+if TYPE_CHECKING:
+    from ccpn.ui.gui.modules.SpectrumDisplay import (SpectrumDisplay1d as _SpectrumDisplay1d,
+                                                     SpectrumDisplayNd as _SpectrumDisplayNd)
+    from ccpn.ui.gui.lib.Strip import Strip1d as _Strip1d, StripNd as _StripNd
+
+_CoreStrip = TypeVar('_CoreStrip', bound='_Strip1d | _StripNd')
+_CoreSpectrumDisplay = TypeVar('_CoreSpectrumDisplay', bound='_SpectrumDisplay1d | _SpectrumDisplayNd')
+
 UNITS_PPM = 'ppm'
 UNITS_HZ = 'Hz'
 UNITS_POINT = 'point'
@@ -175,7 +187,7 @@ def _buildSingleWildCard(axisCodes: list[str]) -> str:
 # CcpnGLWidget
 #=========================================================================================
 
-class CcpnGLWidget(QOpenGLWidget):
+class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
     """Widget to handle all visible spectra/peaks/integrals/multiplets
     """
     painted = QtCore.pyqtSignal(object)
@@ -209,12 +221,25 @@ class CcpnGLWidget(QOpenGLWidget):
     tilePosition = None
     mouseCoordDQ = None
 
-    def __init__(self, strip=None, mainWindow=None, stripIDLabel=None, antiAlias=4):
+    strip: _CoreStrip = WeakRefDescriptor()
+    spectrumDisplay: _CoreSpectrumDisplay = WeakRefDescriptor()
+    application = WeakRefDescriptor()
+    mainWindow = WeakRefDescriptor()
+    project = WeakRefDescriptor()
+    current = WeakRefDescriptor()
+    _preferences = WeakRefDescriptor()
+
+    def __init__(self, parent: _CoreStrip,
+                 *, mainWindow=None, stripIDLabel=None, antiAlias=4):
+        from ccpn.ui.gui.lib.Strip import Strip1d as _Strip1d, StripNd as _StripNd
+        from ccpn.framework.Application import getMainWindow
 
         # add a flag so that scaling cannot be done until the gl-attributes are initialised
         self.glReady = False
 
-        super().__init__(strip)
+        if not isinstance(parent, _Strip1d | _StripNd):
+            raise RuntimeError(f'{parent} is not a Strip')
+        super().__init__(parent)
 
         # GST add antiAliasing, no perceptible speed impact on my mac (intel iris graphics!)
         # samples = 4 is good enough but 8 also works well in terms of speed...
@@ -234,23 +259,18 @@ class CcpnGLWidget(QOpenGLWidget):
         self._blankDisplay = False
         self.setAutoFillBackground(False)
 
-        if not strip:  # don't initialise if nothing there
+        if not parent:  # don't initialise if nothing there
             return
-
-        self.strip = strip
-        self.spectrumDisplay = strip.spectrumDisplay
-
-        self.mainWindow = mainWindow
-        if mainWindow:
+        self.strip = parent
+        self.spectrumDisplay = parent.spectrumDisplay
+        if mainWindow := getMainWindow():
+            self.mainWindow = mainWindow
             self.application = mainWindow.application
-            self.project = mainWindow.application.project
-            self.current = mainWindow.application.current
-        else:
-            self.application = None
-            self.project = None
-            self.current = None
+            if mainWindow.application:
+                self.project = mainWindow.application.project
+                self.current = mainWindow.application.current
+                self._preferences = self.application.preferences.general
 
-        self._preferences = self.application.preferences.general
         self.globalGL = None
         self.stripIDLabel = stripIDLabel or ''
         self.setMouseTracking(True)  # generate mouse events when button not pressed
@@ -263,7 +283,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # set a minimum size so that the strips resize nicely
         self.setMinimumSize(self.AXIS_MARGINRIGHT + 10, self.AXIS_MARGINBOTTOM + 10)
         # initialise the pyqt-signal notifier
-        self.GLSignals = GLNotifier(parent=self, strip=strip)
+        self.GLSignals = GLNotifier(parent=self, strip=parent)
         self.lastPixelRatio = None
         self._setStyle()
 
@@ -1502,7 +1522,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.update()
 
-    def zoom(self, xRegion: Tuple[float, float], yRegion: Tuple[float, float]):
+    def zoom(self, xRegion: tuple[float, float], yRegion: tuple[float, float]):
         """Zooms strip to the specified region
         """
         if self.XDIRECTION < 0:
@@ -3859,7 +3879,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # build the marks VBO
             index = 0
-            # for mark in self.project.marks:
             for mark in self.mainWindow.marks + \
                         self.strip.spectrumDisplay.marks + \
                         self.strip.marks:

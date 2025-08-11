@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-13 18:50:05 +0000 (Thu, March 13, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-08-11 11:59:36 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -379,35 +379,33 @@ def _spectrumViewHasChanged(data):
 
     NB SpectrumView change notifiers are triggered when either DataSource or ApiSpectrumView change.
     """
-    self = data[Notifier.OBJECT]
+    specView = data[Notifier.OBJECT]
 
-    if self.isDeleted:
+    if specView.isDeleted:
         return
 
-    spectrumDisplay = self.strip.spectrumDisplay
+    spectrumDisplay = specView.strip.spectrumDisplay
 
     # Update action icon colour
-    action = spectrumDisplay.spectrumActionDict.get(self.spectrum)
+    action = spectrumDisplay.spectrumActionDict.get(specView.spectrum)
     if action:
         # add spectrum action for non-grouped action
-        _addActionIcon(action, self, spectrumDisplay)
+        _addActionIcon(action, specView, spectrumDisplay)
 
-    # if spectrumDisplay.isGrouped and self in spectrumDisplay.spectrumViews:
-    #     if hasattr(self, '_guiChanged'):
-    if self in spectrumDisplay.spectrumViews and hasattr(self, '_guiChanged'):
-        del self._guiChanged
+    if specView in spectrumDisplay.spectrumViews and hasattr(specView, '_guiChanged'):
+        del specView._guiChanged
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
-        GLSignals = GLNotifier(parent=self)
+        GLSignals = GLNotifier(parent=specView)
 
-        self.buildContoursOnly = True
+        specView.buildContoursOnly = True
 
         # repaint
         GLSignals.emitPaintEvent()
 
     # Update strip
-    self.strip.update()
+    specView.strip.update()
 
 
 def _addActionIcon(action, self, spectrumDisplay):

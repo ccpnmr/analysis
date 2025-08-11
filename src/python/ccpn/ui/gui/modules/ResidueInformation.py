@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-07 15:18:24 +0100 (Thu, August 07, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-11 16:50:57 +0100 (Mon, August 11, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -24,19 +24,19 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
 from itertools import product
+
+from PyQt5 import QtGui, QtWidgets, QtCore
 import pandas as pd
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QWidget
 
 from ccpn.core.Chain import Chain
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.AssignmentLib import CCP_CODES
+from ccpn.framework.PathsAndUrls import ccpnResourcesPath
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.ImageView import ImageView
+from ccpn.ui.gui.widgets.ImageView import ImageViewSVG
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -58,6 +58,7 @@ from ccpn.util.UpdateQueue import UpdateQueue
 
 ALL = '<all>'
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
+AMINO_ACID_SVG_DIR = ccpnResourcesPath / 'AminoAcids'
 
 
 class ResidueInformation(CcpnModule):
@@ -215,7 +216,7 @@ class ResidueInformation(CcpnModule):
         self._topWidget = Widget(None, setLayout=True, showBorder=True)
         self._bottomWidget = Frame(None, setLayout=True, showBorder=True)
 
-        self._setTopWidget(kwds, mainWindow)
+        self._setTopWidget(kwds)
         self._setBottomWidget(mainWindow)
 
         self._setWidgetData()
@@ -223,7 +224,7 @@ class ResidueInformation(CcpnModule):
         self._horizontalSplit.addWidget(self._topWidget)
         self._horizontalSplit.addWidget(self._bottomWidget)
 
-    def _setTopWidget(self, kwds, mainWindow):
+    def _setTopWidget(self, kwds):
         self._verticalSplit = Splitter(self._topWidget, horizontal=True)
         self._topWidget.getLayout().addWidget(self._verticalSplit, 1, 0)
 
@@ -231,9 +232,7 @@ class ResidueInformation(CcpnModule):
                                               scrollBarPolicies=('asNeeded', 'asNeeded'), **kwds)
 
         self._setResidueTableWidget()
-        self._image = ImageView(parent=None,
-                          pixmap=QPixmap(r'C:\Users\work\Projects\AnalysisV3\tutorials\html_files\graphics\ala.png'))
-
+        self._image = ImageViewSVG(parent=None, svg=f'{AMINO_ACID_SVG_DIR / "ala.svg"}')
 
         self._verticalSplit.addWidget(self._residueTableWidget)
         self._verticalSplit.addWidget(self._image)
@@ -355,6 +354,8 @@ class ResidueInformation(CcpnModule):
         """
         self.selectedResidueType = value
         self._getResidues()
+
+        self._image.setSvg(f'{AMINO_ACID_SVG_DIR / value.lower()}.svg')
 
     def _updateTable(self, data):
         """Process notifier from core objects.

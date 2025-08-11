@@ -1883,6 +1883,12 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
             navigateToCurrentPeakPosition(self.application, selectClickedPeak=True, allStrips=False)
 
+
+    def centreZOnPeak(self):
+        if self.current.peaks and self.current.strip:
+            pass
+
+
     def calibrateFromPeaks(self):
         """Calibrate the current strip from the selected peaks
         """

@@ -19,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-10 12:02:32 +0100 (Wed, September 10, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-08-11 16:50:56 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -505,6 +505,14 @@ def _centreOnSelectedPeak():
                     typeItem=ItemTypes.get(ITEM), toolTip='Centre the current strip on the first selected peak',
                     callback=_app.mainWindow.centreOnSelectedPeak)
 
+def _centreZOnSelectedPeak():
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+
+    return _SCMitem(name='Centre Z axis on Selected Peak',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Centre Z axes on the current peak',
+                    callback=_app.mainWindow.centreZOnPeak)
 
 def _refitPeakItem():
     from ccpn.framework.Application import getApplication

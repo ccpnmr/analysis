@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-02 12:46:27 +0100 (Wed, April 02, 2025) $"
-__version__ = "$Revision: 3.2.12 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-08-11 16:50:56 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -77,6 +77,10 @@ def navigateToCurrentPeakPosition(application, selectFirstPeak=False, selectClic
 
     elif cStrip:
         navigateToPositionInStrip(cStrip, peak.position, peak.axisCodes)
+
+
+def navigateToCurrentPeakZ(application, selectFirstPeak=False, selectedClickedPeak=False, allStrips=False):
+    pass
 
 
 def navigateToCurrentNmrResiduePosition(application):

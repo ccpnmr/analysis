@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-13 18:50:05 +0000 (Thu, March 13, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-08-11 11:59:37 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,10 +29,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import numpy as np
 from PyQt5 import QtGui
-
+from ccpn.ui.gui.guiSettings import consoleStyle
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView, SpectrumCache
 from ccpn.util.Colour import spectrumColours, colorSchemeTable
 from ccpn.util.Logging import getLogger
+
+
+_DEBUG = False
 
 
 class GuiSpectrumView1d(GuiSpectrumView):
@@ -41,13 +44,11 @@ class GuiSpectrumView1d(GuiSpectrumView):
     buildContoursOnly = False
 
     def __init__(self):
-        """ spectrumPane is the parent
-            spectrum is the Spectrum name or object
+        """
+        spectrumPane is the parent
+        spectrum is the Spectrum name or object
         """
         GuiSpectrumView.__init__(self)
-
-        # GWV 24/10/24: no usage; if needed use getApplication or self.project.application
-        # self._application = self.strip.spectrumDisplay.mainWindow.application
 
         self.hPhaseTrace = None
         self.buildContours = True
@@ -57,13 +58,87 @@ class GuiSpectrumView1d(GuiSpectrumView):
         """PostRestore actions
         """
         self.data = self.spectrum.positions, self.spectrum.intensities
+        self._refreshColours()
 
-        # for strip in self.strips:
-        if self.spectrum.sliceColour is None:
+    def _refreshColours(self):
+        if not self.strip or not self.strip.spectrumDisplay:
+            return
+
+        toolBar = self.strip.spectrumDisplay.spectrumGroupToolBar
+        wActions = {act._spectrumGroup: toolBar.widgetForAction(act) for act in toolBar.actions()}
+        hiddenGroups = {_sg for _sg, widg in wActions.items()
+                        if not widg.isChecked()}
+
+        if self.strip.spectrumDisplay.isGrouped:
+            # get the index of the spectrumView in the display and set the appropriate colour
+            # NOTE:ED HACK - this is really a parent operation :|
+            from ccpn.util import Colour
+
+            if _DEBUG:
+                getLogger().debug(f'{consoleStyle.fg.green}==> finding colours  {self}  '
+                                  f'{hiddenGroups}{consoleStyle.reset}')
+
+            # keep a list of those spectrumViews already set
+            done = []
+            _spectrumGroups = [self.strip.project.getByPid(pid) for pid in
+                               self.strip.spectrumDisplay._getSpectrumGroups()]
+            _specViews = self.strip.spectrumViews
+            if hiddenGroups is not None:
+                _spectrumGroups = list(filter(lambda g: g not in hiddenGroups, _spectrumGroups))
+
+            # iterate through spectrumGroups from right-to-left
+            for sgNum, sg in enumerate(reversed(_spectrumGroups)):
+                spectra = sg.spectra
+
+                _sliceCol = sg.sliceColour
+                if _DEBUG:
+                    getLogger().debug(f'{consoleStyle.fg.darkgreen}==>    {_spectrumGroups}{consoleStyle.reset}')
+                    getLogger().debug(f'{consoleStyle.fg.darkgreen}==>    {_specViews}{consoleStyle.reset}')
+
+                _sliceColours = (None,)
+                if _sliceCol and _sliceCol.startswith('#'):
+                    _sliceColours = (_sliceCol,)
+                elif _sliceCol in Colour.colorSchemeTable:
+                    _sliceColours = Colour.colorSchemeTable[_sliceCol]
+                # get the slice contour colour-list
+                stepX = step = len(spectra) - 1
+                stepY = len(_sliceColours) - 1
+                # iterate through the colours in the colour-list
+                jj = 0
+                if stepX > 0:
+                    for ii in range(stepX + 1):
+                        _interp = (stepX - step) / stepX
+                        _intCol = Colour.interpolateColourHex(_sliceColours[min(jj, stepY)],
+                                                              _sliceColours[min(jj + 1, stepY)],
+                                                              _interp,
+                                                              alpha=1.0)
+                        spec = spectra[ii]
+                        if (spec not in done and
+                                (sv := next(filter(lambda sv: sv.spectrum == spec, _specViews), None)) and
+                                sv.isDisplayed):
+                            sv.sliceColour = _intCol
+                            if _DEBUG:
+                                getLogger().debug(f'{consoleStyle.fg.darkgreen}==>      found colour  {spec.pid}  '
+                                                  f'{_intCol}{consoleStyle.reset}')
+                            done.append(spec)
+
+                        step -= stepY
+                        while step < 0:
+                            step += stepX
+                            jj += 1
+                elif stepX == 0:
+                    # there is only one spectrumView to colour (should be the same as self)
+                    _specViews[0].sliceColour = _sliceColours[0]
+
+        elif self.spectrum.sliceColour is None:
+            # set the spectrum colour if it has not been defined yet
+            # spectrumView sliceColour should remain as None
             if len(self.strip.spectrumViews) < 12:
                 self.spectrum.sliceColour = list(spectrumColours.keys())[len(self.strip.spectrumViews) - 1]
             else:
                 self.spectrum.sliceColour = list(spectrumColours.keys())[(len(self.strip.spectrumViews) % 12) - 1]
+
+        self.update()
 
     def getVisibleState(self, dimensionCount=None):
         """Get the visible state for the X/Y axes
@@ -94,16 +169,21 @@ class GuiSpectrumView1d(GuiSpectrumView):
         GLSignals = GLNotifier(parent=self)
         GLSignals.emitPaintEvent()
 
-    def _buildGLContours(self, glList, firstShow=False):
+    def _buildGLContours(self, glList, isGrouped=False):
         # build a glList for the spectrum
         glList.clearArrays()
         numVertices = len(ppms := self.spectrum.positions)
         glList.numVertices = numVertices
 
+        self._refreshColours()
+
         colour = self._getColour('sliceColour', '#AAAAAA')
         if not colour.startswith('#'):
             # get the colour from the gradient table or a single red
             colour = colorSchemeTable[colour][0] if colour in colorSchemeTable else '#FF0000'
+        if _DEBUG:
+            getLogger().debug(f'{consoleStyle.fg.green}_buildGLContours   {self}   '
+                              f'{self.strip.spectrumDisplay}  {colour}{consoleStyle.reset}')
 
         colR = int(colour.strip('# ')[0:2], 16) / 255.0
         colG = int(colour.strip('# ')[2:4], 16) / 255.0

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-06-18 19:30:41 +0100 (Wed, June 18, 2025) $"
-__version__ = "$Revision: 3.3.2.1 $"
+__dateModified__ = "$dateModified: 2025-08-11 11:59:36 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1053,7 +1053,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def _spectrumDisplayChanged(self, data):
         """Respond to spectrumDisplay being renamed, update contents of label.
         """
-        if data:
+        if data and not self.isDeleted:
             trigger = data[Notifier.TRIGGER]
             if trigger == Notifier.RENAME and data[Notifier.OBJECT] == self:
                 self._name = data[Notifier.OBJECT].title
@@ -1064,6 +1064,9 @@ class GuiSpectrumDisplay(CcpnModule):
     def _spectrumGroupChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
         """
+        if self.isDeleted:
+            return
+
         if self.isGrouped and data:
             trigger = data[Notifier.TRIGGER]
             spectrumGroup = data[Notifier.OBJECT]
@@ -1074,6 +1077,19 @@ class GuiSpectrumDisplay(CcpnModule):
                 spectrumGroups = [action.text() for action in self.spectrumGroupToolBar.actions()]
                 if spectrumGroup.pid not in spectrumGroups:
                     return
+
+                oldSpectra = {sv.spectrum: sv for sv in self.spectrumViews}
+                _spectrumGroups = [self.project.getByPid(pid) for pid in self._getSpectrumGroups()]
+                newSpectra = {sp for sg in _spectrumGroups if not sg.isDeleted
+                           for sp in sg.spectra if not sp.isDeleted}
+                for sp, sv in oldSpectra.items():
+                    if sp not in newSpectra:
+                        self.removeSpectrum(sp)
+                for sp in newSpectra:
+                    if sp not in oldSpectra:
+                        self.displaySpectrum(sp)
+
+                # don't know the specific change at this point
                 self._colourChanged(spectrumGroup)
                 _spectrumGroupViewHasChanged({Notifier.OBJECT: spectrumGroup})
 
@@ -1082,6 +1098,9 @@ class GuiSpectrumDisplay(CcpnModule):
                 self.spectrumGroupToolBar._removeSpectrumGroup(None, spectrumGroup)
 
     def _colourChanged(self, spectrumGroup):
+        # HACK:ED - not sure why this can be empty
+        if not hasattr(self, 'is1D'):
+            return
         if self.is1D:
             self._1dColourChanged(spectrumGroup)
         else:
@@ -2914,7 +2933,9 @@ class GuiSpectrumDisplay(CcpnModule):
             _specViews = self.getSpectrumViewFromSpectrum(spectrum)
             if len(_specViews) > 0:
                 getLogger().debug('displaySpectrum: Spectrum %s already in display %s' % (spectrum, self))
-                return _specViews[0]
+                for _sv in _specViews:
+                    _sv._refreshColours()
+            return _specViews[0]
 
         # _getDimensionsMapping will check the match for axisCodes
         displayOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
@@ -2980,19 +3001,19 @@ class GuiSpectrumDisplay(CcpnModule):
             raise TypeError('spectrum must be of type Spectrum/str')
 
         # get the spectrumViews from the first strip
-        sv = [(spectrum, specView) for specView in self.strips[0].spectrumViews if specView.spectrum == spectrum]
-        if len(sv) != 1:
+        svToRemove = [(spectrum, specView) for specView in self.strips[0].spectrumViews
+                      if specView.spectrum == spectrum]
+        if not svToRemove:
             return
 
-        _spectrum, specView = sv[0]
-        uniqueViews = set(sv.spectrum for sv in self.spectrumViews)
-        if len(uniqueViews) == 1 and spectrum in uniqueViews and \
-                self.application.preferences.appearance.closeSpectrumDisplayOnLastSpectrum:
-            self.close()  # calls _closeModule to do cleanup
-            return
+        with undoStackBlocking() as _:  # NOTE:ED - Do not add to undo/redo stack
+            for _spectrum, specView in svToRemove:
+                uniqueViews = set(_sv.spectrum for _sv in self.spectrumViews)
+                if len(uniqueViews) == 1 and spectrum in uniqueViews and \
+                        self.application.preferences.appearance.closeSpectrumDisplayOnLastSpectrum:
+                    self.close()
+                    return
 
-        with undoStackBlocking() as addUndoItem:
-            with undoBlock():
                 # block any undo additions, as the displaySpectrum and removeSpectrum are
                 # "atomic" operations, which are being added at the end
 
@@ -3000,15 +3021,15 @@ class GuiSpectrumDisplay(CcpnModule):
                 # for multiple strips will delete all spectrumViews attached to spectrum
                 # GWV 19/6/24: This sounds crazy!
                 specView._delete()
-                self._deleteSpectrumNotifiers(spectrum=spectrum)
                 self._setToolbarButtons()
-                # Now that the spectrum has been removed, we need to update the plane-related axis values
-                for strip in self.strips:
-                    strip._updatePlaneAxes()
+            self._deleteSpectrumNotifiers(spectrum=spectrum)
+            # Now that the spectrum has been removed, we need to update the plane-related axis values
+            for strip in self.strips:
+                strip._updatePlaneAxes()
 
-            addUndoItem(undo=partial(self.displaySpectrum, spectrum=spectrum.pid),
-                        redo=partial(self.removeSpectrum, spectrum=spectrum.pid)
-                        )
+            # addUndoItem(undo=partial(self.displaySpectrum, spectrum=spectrum.pid),
+            #             redo=partial(self.removeSpectrum, spectrum=spectrum.pid)
+            #             )
 
         #end waypoint
         return
@@ -3197,22 +3218,6 @@ class GuiSpectrumDisplay(CcpnModule):
         if _row and len(_row) > 1 and (_row[-1] == strip):
             self._rightGLAxis.highlightCurrentStrip(state)
             self._bottomGLAxis.highlightCurrentStrip(state)
-
-    def clearContourAttributes(self):
-        """Clear all the contour attributes associated with the spectrumViews in the spectrumDisplay
-        Attributes will revert to the spectrum values
-        """
-        with undoBlockWithoutSideBar():
-            for specView in self.spectrumViews:
-                specView.clearContourAttributes()
-
-    def copyContourAttributesFromSpectra(self):
-        """Copy all the contour attributes associated with a spectrumView.spectrum
-        to the spectrumView for all spectrumViews in the spectrumDisplay
-        """
-        with undoBlockWithoutSideBar():
-            for specView in self.spectrumViews:
-                specView.copyContourAttributesFromSpectrum()
 
     def adjustContours(self):
         """Initiate a popup to modify  settings

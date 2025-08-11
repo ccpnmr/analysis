@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-12 16:12:36 +0100 (Mon, May 12, 2025) $"
-__version__ = "$Revision: 3.3.2.1 $"
+__dateModified__ = "$dateModified: 2025-08-11 11:59:37 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -65,9 +65,8 @@ class GLSimpleStrings:
                 continue
 
             if spectrumView not in self.strings:
-
                 _posColours = (ERRORCOLOUR,)
-                _posCol = spectrumView.spectrum.sliceColour
+                _posCol = spectrumView.sliceColour
                 if _posCol and _posCol.startswith('#'):
                     _posColours = (_posCol,)
                 elif _posCol in colorSchemeTable:
@@ -161,11 +160,35 @@ class GLSimpleStrings:
             string.buildString()
             self._rescaleString(string)
 
+    def setStringColour(self, specView, colour=None):
+        """Set the colour for a string, if it exists
+        """
+        if foundSt := next((st for spView, st in self.strings.items()
+                          if spView == specView), None):
+            self._setStringColour(foundSt, colour)
+
     def removeString(self, obj):
         """Remove a string from the list, if it exists
         """
         if obj in self.strings:
             del self.strings[obj]
+
+    def _setStringColour(self, obj, colour):
+        try:
+            _posColours = (ERRORCOLOUR,)
+            _posCol = colour or obj.spectrumView.sliceColour
+            if _posCol and _posCol.startswith('#'):
+                _posColours = (_posCol,)
+            elif _posCol in colorSchemeTable:
+                _posColours = colorSchemeTable[colour]
+
+            # reset the colour, may have changed due to spectrum colour change, but not caught anywhere else yet
+            obj.setStringHexColour(_posColours[0], alpha=1.0)
+            # obj.sliceColour = colour
+            # redefine the string's colour VBOs
+            obj.pushTextArrayVBOColour()
+        except Exception as es:
+            getLogger().warning(f'error setting string colour {es}')
 
     def _rescaleString(self, obj):
         vertices = obj.numVertices
@@ -289,7 +312,7 @@ class GLSimpleStrings:
 
             try:
                 _posColours = (ERRORCOLOUR,)
-                _posCol = obj.spectrumView.spectrum.sliceColour
+                _posCol = obj.spectrumView.sliceColour
                 if _posCol and _posCol.startswith('#'):
                     _posColours = (_posCol,)
                 elif _posCol in colorSchemeTable:

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-16 18:16:50 +0000 (Thu, January 16, 2025) $"
-__version__ = "$Revision: 3.2.13 $"
+__dateModified__ = "$dateModified: 2025-08-11 11:59:37 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,14 +29,20 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtCore, QtGui
 from functools import partial
+
+from ccpn.ui.gui.guiSettings import consoleStyle
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.lib.Notifiers import CurrentNotifier
 from ccpn.core.lib import Pid
+from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.framework.Application import getCurrent
+
+
+_DEBUG = False
 
 
 class SpectrumGroupToolBar(ToolBar):
@@ -222,6 +228,9 @@ class SpectrumGroupToolBar(ToolBar):
             return strips[0]
 
     def _toggleSpectrumGroup(self, spectrumGroup):
+        from functools import reduce
+        from operator import or_
+
         spectrumGroupPeakLists = [spectrum.peakLists[0] for spectrum in spectrumGroup.spectra]
         peakListViews = [peakListView for peakListView in self.spectrumDisplay.peakListViews]
 
@@ -230,19 +239,50 @@ class SpectrumGroupToolBar(ToolBar):
             spectrumViews = [spectrumView for spectrumView in strip.spectrumViews
                              if spectrumView.spectrum in spectrumGroup.spectra]
 
-            widget = self.widgetForAction(self.sender())
-            if widget.isChecked():
-                for spectrumView in spectrumViews:
-                    spectrumView.setVisible(True)
-                    if hasattr(spectrumView, 'plot'):
-                        spectrumView.plot.show()
+            if _DEBUG:
+                getLogger().debug(f'{consoleStyle.fg.yellow}_toggleSpectrumGroup   '
+                                  f'{spectrumGroup}{consoleStyle.reset}')
+
+            wActions = {act._spectrumGroup: self.widgetForAction(act) for act in self.actions()}
+            # hiddenGroups = {_sg for _sg, widg in wActions.items()
+            #                 if not widg.isChecked()}
+
+            # get the widget-action for the button - should be checkable
+            if widget := self.widgetForAction(self.sender()):
+
+                # get the spectrumGroups for the display
+                sGroups = list(filter(None,
+                                      map(lambda sg: strip.project.getByPid(sg),
+                                          strip.spectrumDisplay._getSpectrumGroups())))
+                # get all spectra not covered by this spectrumGroup
+                otherSpecs = reduce(or_, map(lambda sg: set(sg.spectra),
+                                            filter(lambda _sg: _sg != spectrumGroup and
+                                                               _sg in wActions and
+                                                               wActions.get(_sg).isChecked(),
+                                                   sGroups)), set())
+                specs = set(spectrumGroup.spectra)
+                if _DEBUG:
+                    getLogger().debug(f'{consoleStyle.fg.blue}   {sGroups}')
+                    getLogger().debug(f'{consoleStyle.fg.blue}   {otherSpecs}   {specs - otherSpecs}{consoleStyle.reset}')
+
+                # this actioned AFTER it has been checked/unchecked
+                if widget.isChecked():
+                    for sp in list(specs - otherSpecs):
+                        if spectrumView := next(filter(lambda sv: sv.spectrum == sp, spectrumViews), None):
+                            spectrumView.setVisible(True)
+                            if hasattr(spectrumView, 'plot'):
+                                spectrumView.plot.show()
+                            spectrumView._refreshColours()
                     self._showPeakList(spectrumGroupPeakLists, peakListViews)
-            else:
-                for spectrumView in spectrumViews:
-                    spectrumView.setVisible(False)
-                    if hasattr(spectrumView, 'plot'):
-                        spectrumView.plot.hide()
-                self._hidePeakLists(spectrumGroupPeakLists, peakListViews)
+                else:
+                    for sp in list(specs - otherSpecs):
+                        if spectrumView := next(filter(lambda sv: sv.spectrum == sp, spectrumViews), None):
+                            spectrumView.setVisible(False)
+                            if hasattr(spectrumView, 'plot'):
+                                spectrumView.plot.hide()
+                    self._hidePeakLists(spectrumGroupPeakLists, peakListViews)
+
+            # need to refresh the spectrumView colours here
 
     def _removeSpectrumGroup(self, action, spectrumGroup):
         """Remove the spectrumGroup from the toolbar.
@@ -338,22 +378,26 @@ class SpectrumGroupToolBar(ToolBar):
 
 
 def _spectrumGroupViewHasChanged(data):
-    self = data[Notifier.OBJECT]
-    if self.isDeleted:
+    specView = data[Notifier.OBJECT]
+    if specView.isDeleted:
         return
 
     from ccpn.ui.gui.lib.GuiSpectrumView import _addActionIcon
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
-    specDisplays = [sd for sd in self.project.spectrumDisplays if sd and sd.isGrouped and not sd.isDeleted]
-
+    specDisplays = [sd for sd in specView.project.spectrumDisplays if sd and sd.isGrouped and not sd.isDeleted]
+    if _DEBUG:
+        getLogger().debug(f'{consoleStyle.fg.green}_spectrumGroupViewHasChanged   {specView}'
+                          f'{consoleStyle.reset}')
+        for _sd in specDisplays:
+            getLogger().debug(f'{consoleStyle.fg.green}    {_sd}{consoleStyle.reset}')
     for specDisplay in specDisplays:
-        _actions = [action for action in specDisplay.spectrumGroupToolBar.actions() if action.text() == self.pid]
+        _actions = [action for action in specDisplay.spectrumGroupToolBar.actions() if action.text() == specView.pid]
         for action in _actions:
             # add spectrum action for grouped action
-            _addActionIcon(action, self, specDisplay)
+            _addActionIcon(action, specView, specDisplay)
 
-    GLSignals = GLNotifier(parent=self)
-    self.buildContoursOnly = True
+    GLSignals = GLNotifier(parent=specView)
+    specView.buildContoursOnly = True
     # repaint
     GLSignals.emitPaintEvent()

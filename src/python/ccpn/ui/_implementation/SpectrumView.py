@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-10-25 11:08:17 +0100 (Fri, October 25, 2024) $"
-__version__ = "$Revision: 3.2.7.GWV $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-08-11 11:18:37 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,7 +29,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import operator
 from typing import Tuple
-
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 
@@ -38,18 +37,9 @@ from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.PeakList import PeakList
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-
 from ccpn.core.lib import Pid
-from ccpn.core.lib.Notifiers import NotifierABC
-
-from ccpn.core.lib.ContextManagers import deleteWrapperWithoutSideBar, \
-    ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSetter, newV3Object
-
+from ccpn.core.lib.ContextManagers import deleteWrapperWithoutSideBar, ccpNmrV3CoreSetter, newV3Object
 from ccpn.ui._implementation.Strip import Strip
-from ccpn.ui.gui.guiSettings import _styleBlue
-
-from ccpn.util.decorators import logCommand
-from ccpn.util.Logging import getLogger
 
 
 class SpectrumView(AbstractWrapperObject):
@@ -149,6 +139,7 @@ class SpectrumView(AbstractWrapperObject):
         return self._wrappedData.spectrumView.isDisplayed
 
     @isDisplayed.setter
+    @ccpNmrV3CoreSetter(noUndo=True)
     def isDisplayed(self, value: bool):
         self._wrappedData.spectrumView.isDisplayed = value
 
@@ -167,8 +158,7 @@ class SpectrumView(AbstractWrapperObject):
         return result
 
     @positiveContourColour.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def positiveContourColour(self, value: str):
         if not isinstance(value, (str, type(None))):
             raise ValueError("positiveContourColour must be a string/None.")
@@ -191,6 +181,7 @@ class SpectrumView(AbstractWrapperObject):
         return result
 
     @positiveContourCount.setter
+    @ccpNmrV3CoreSetter(noUndo=True)
     def positiveContourCount(self, value: int):
         if self.positiveContourCount != value:
             self._wrappedData.spectrumView.positiveContourCount = value
@@ -210,6 +201,7 @@ class SpectrumView(AbstractWrapperObject):
         return result
 
     @positiveContourBase.setter
+    @ccpNmrV3CoreSetter(noUndo=True)
     def positiveContourBase(self, value: float):
         if self.positiveContourBase != value:
             self._wrappedData.spectrumView.positiveContourBase = value
@@ -229,6 +221,7 @@ class SpectrumView(AbstractWrapperObject):
         return result
 
     @positiveContourFactor.setter
+    @ccpNmrV3CoreSetter(noUndo=True)
     def positiveContourFactor(self, value: float):
         if self.positiveContourFactor != value:
             self._wrappedData.spectrumView.positiveContourFactor = value
@@ -239,6 +232,7 @@ class SpectrumView(AbstractWrapperObject):
         return self._wrappedData.spectrumView.displayPositiveContours
 
     @displayPositiveContours.setter
+    @ccpNmrV3CoreSetter(noUndo=True)
     def displayPositiveContours(self, value: bool):
         self._wrappedData.spectrumView.displayPositiveContours = value
 
@@ -257,8 +251,7 @@ class SpectrumView(AbstractWrapperObject):
         return result
 
     @negativeContourColour.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def negativeContourColour(self, value: str):
         if not isinstance(value, (str, type(None))):
             raise ValueError("negativeContourColour must be a string/None.")
@@ -281,6 +274,7 @@ class SpectrumView(AbstractWrapperObject):
         return result
 
     @negativeContourCount.setter
+    @ccpNmrV3CoreSetter(noUndo=True)
     def negativeContourCount(self, value: int):
         if self.negativeContourCount != value:
             self._wrappedData.spectrumView.negativeContourCount = value
@@ -300,6 +294,7 @@ class SpectrumView(AbstractWrapperObject):
         return result
 
     @negativeContourBase.setter
+    @ccpNmrV3CoreSetter(noUndo=True)
     def negativeContourBase(self, value: float):
         if self.negativeContourBase != value:
             self._wrappedData.spectrumView.negativeContourBase = value
@@ -319,6 +314,7 @@ class SpectrumView(AbstractWrapperObject):
         return result
 
     @negativeContourFactor.setter
+    @ccpNmrV3CoreSetter(noUndo=True)
     def negativeContourFactor(self, value: float):
         if self.negativeContourFactor != value:
             self._wrappedData.spectrumView.negativeContourFactor = value
@@ -329,6 +325,7 @@ class SpectrumView(AbstractWrapperObject):
         return self._wrappedData.spectrumView.displayNegativeContours
 
     @displayNegativeContours.setter
+    @ccpNmrV3CoreSetter(noUndo=True)
     def displayNegativeContours(self, value: bool):
         self._wrappedData.spectrumView.displayNegativeContours = value
 
@@ -373,8 +370,7 @@ class SpectrumView(AbstractWrapperObject):
         return result
 
     @sliceColour.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
+    @ccpNmrV3CoreSetter(noUndo=True)
     def sliceColour(self, value: str):
         if not isinstance(value, (str, type(None))):
             raise ValueError("sliceColour must be a string/None.")
@@ -642,27 +638,6 @@ class SpectrumView(AbstractWrapperObject):
         """
         return sorted(parent._wrappedData.stripSpectrumViews,
                       key=operator.attrgetter('spectrumView.spectrumName'))
-
-    @ccpNmrV3CoreUndoBlock()
-    def clearContourAttributes(self):
-        """Clear all the contour attributes associated with the spectrumView
-        Attributes will revert to the spectrum values
-        """
-        _spectrum = self.spectrum
-        for param in self._CONTOURATTRIBUTELIST.split():
-            if hasattr(_spectrum, param):
-                setattr(self, param, None)
-
-    @ccpNmrV3CoreUndoBlock()
-    def copyContourAttributesFromSpectrum(self):
-        """Copy all the contour attributes associated with the spectrumView.spectrum
-        to the spectrumView
-        """
-        _spectrum = self.spectrum
-        for param in self._CONTOURATTRIBUTELIST.split():
-            if hasattr(_spectrum, param):
-                value = getattr(_spectrum, param)
-                setattr(self, param, value)
 
     @property
     def _index(self):

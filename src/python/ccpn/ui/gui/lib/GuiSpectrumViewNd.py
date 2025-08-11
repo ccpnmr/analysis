@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-04-03 10:16:24 +0100 (Thu, April 03, 2025) $"
-__version__ = "$Revision: 3.2.12 $"
+__dateModified__ = "$dateModified: 2025-08-11 11:59:37 +0100 (Mon, August 11, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -90,6 +90,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         self.buildContours = True   # Build contour, peaks, integrals ...
         self.buildContoursOnly = False  # Only build contours
+
+    def _refreshColours(self):
+        ...
 
     def _turnOnPhasing(self):
         """

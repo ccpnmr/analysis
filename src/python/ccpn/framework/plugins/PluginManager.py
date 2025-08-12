@@ -1,0 +1,469 @@
+"""
+PluginManager: Descriptor-based plugin system
+
+This manager handles discovery and activation of plugins using JSON descriptors.
+Plugins do not need to inherit from a base class or follow a strict interface.
+
+Supported plugin types:
+    - Python functions (via dotted entryPoint)
+    - Modules with `run()` functions
+    - UI components
+    - Menu/context actions
+    - Any callable object declared in plugin_descriptor.json
+
+See plugins/README.md for structure, examples, and best practices.
+
+"""
+
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2025-08-12 19:40:42 +0100 (Tue, August 12, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: Luca Mureddu  $"
+__date__ = "$Date: 2025-08-06 15:08:39 +0100 (Wed, August 06, 2025) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
+import sys
+import importlib
+import io
+import zipfile
+import requests
+from functools import partial
+from types import ModuleType
+from typing import Any, Callable, Dict, List, Optional
+from ccpn.util.Path import aPath
+from ccpn.framework.Preferences import Preferences
+from ccpn.util.Logging import getLogger
+from ccpn.framework.PathsAndUrls import pluginPath
+from ccpn.framework.plugins.PluginDescriptor import PluginDescriptor
+from ccpn.framework.plugins.PluginLoader import PluginLoader
+from ccpn.framework.plugins import pluginNamespaces as pluginVariables
+from ccpn.framework.plugins.PluginBase import PluginBase
+
+class PluginManager:
+    """
+    Manages discovery, registration, and lifecycle of plugins. Headless.
+
+    Features:
+        - Discovers plugins in a directory.
+        - Loads plugins dynamically.
+        - Tracks enabled/disabled.
+         - Initialises enabled plugins.
+        - Publishes and subscribes to events.
+        - install from url (github etc)
+
+    Plugin Load Workflow:
+        1.	Discover descriptors — Scan for plugin_descriptor.json
+        2.	Check enabled state —  check preferences for disabled and enabled. Use enabledByDefault  for first time
+        3.	Resolve entry point and load the plugin — Import and validate the entryPoint
+        4.	Store Load plugin — Store in the registry dict with metadata and loaded module
+        5.	Integrate / initialise — start or hook into UI, menus, pipelines, etc.
+
+
+    """
+
+    classVersion = 1.0
+
+    def __init__(self, application, autoLoad=True) -> None:
+        """
+        Initialise the Plugin Manager.
+        """
+        self.application = application
+        self.preferences = self._getUserPreferences()
+        self.ccpnPluginsDirPath = aPath(pluginPath)
+        self._userPluginsDirPath: Optional[aPath] = None  # Dynamically set. See property below
+        self._registerPluginRootPath(self.userPluginsPath)
+        self._registerPluginRootPath(self.ccpnPluginsDirPath)
+
+        # Plugin Load Workflow
+        # ~ 1. Discover descriptors
+        self._descriptors: dict[str, PluginDescriptor] = {}
+        self.discoverPlugins()
+
+        # ~ 2.	Load from Resolved entry points
+        self._registeredPlugins: dict[str, dict[str, Any]] = {} # it’s a dictionary of plugin records see "pluginRegistry" property
+        if autoLoad:
+            self._loadPlugins(level=0)
+            # ~3 Integrate / initialise
+            self._initialisePlugins(level=pluginVariables.PLUGIN_LOAD_STARTUP)
+
+
+    # ----------------------
+    # Public API
+    # ----------------------
+
+    @property
+    def pluginRegistry(self) -> dict[str, dict[str, Any]]:
+        """
+        Read-only access to the registry of all successfully loaded plugins.
+
+        Each plugin record contains:
+            - 'descriptor': The PluginDescriptor object with metadata
+            - 'entry':      The resolved plugin object (function/class/etc.)
+            - 'module':     The imported module
+
+        :return: A dictionary mapping plugin names to their plugin records.
+        """
+        return self._registeredPlugins
+
+    def createPluginDescriptorFileTemplate(self, filePath) -> None:
+        """
+        Create a template plugin descriptor file with default values.
+        :param filePath: Path where the descriptor file will be created.
+        :return: None
+        """
+        from ccpn.framework.plugins.PluginDescriptor import PluginDescriptor
+        handler = PluginDescriptor(None)
+        handler.saveToFile(filePath=filePath)
+
+    def installPluginFromUrl(self, url: str) -> aPath:
+        """
+        Download and install a plugin from a remote ZIP URL into the user plugins path.
+        Then rediscover plugins so the new one is available.
+        """
+        pluginPath = self._downloadAndExtract(url, self.userPluginsPath)
+
+        # Re-run discovery so the new plugin gets picked up
+        self.discoverPlugins(internal=False, external=True)
+
+        return pluginPath
+
+    def discoverPlugins(self, internal: bool = True, external: bool = True) -> dict:
+        """
+        Discover available plugins and collect their descriptors.
+
+        This method scans the configured plugin directories for valid plugin
+        descriptor files (e.g., ``plugin.json``) using the :class:`PluginScanner`.
+
+        Args:
+        :param internal:  If ``True``, scan the internal (built‑in) plugins directory
+                located at :attr:`ccpnPluginsDirPath`.
+        :param external: If ``True``, scan the external (user‑installed) plugins
+                directory located at :attr:`userPluginsPath`.
+
+        Notes:
+            - This method only discovers and collects plugin descriptors.
+              It does not import or initialise the plugin modules.
+            - The descriptors returned by :class:`PluginScanner` can be used
+              later by the plugin manager to validate and load plugins.
+            - Both internal and external scans may be enabled simultaneously.
+        """
+        from ccpn.framework.plugins.PluginScanner import PluginScanner
+        descriptors = []
+        if internal:
+            descriptors = PluginScanner(self.ccpnPluginsDirPath).scan()
+            _ = [setattr(d, '_isInternalPlugin', True) for d in descriptors]
+
+        if external:
+            descriptors += PluginScanner(self.userPluginsPath).scan()
+        for descriptor in descriptors:
+            self._descriptors[descriptor.name] = descriptor
+        return self._descriptors
+
+    def loadPlugin(self, name: str) -> None:
+        """
+        Load an enabled plugin by name.
+        """
+        return self._loadPluginByName(name)
+
+
+    def isLoaded(self, name: str) -> bool:
+        """
+
+        Check if a plugin is currently enabled.
+        """
+
+        return True if self.pluginRegistry.get(name) else False
+
+    def enablePluginOnPreferences(self, name, enabled:bool):
+        self._setPluginEnabledInPreferences(name, enabled=enabled)
+        self._registerLazyMenus(self.application.mainWindow)
+
+    def getEnabledPlugins(self):
+        return self._getPluginListFromPreferences(pluginVariables.ENABLED_PLUGINS)
+
+    def getDisabledPlugins(self):
+        return self._getPluginListFromPreferences(pluginVariables.DISABLED_PLUGINS)
+
+    def isEnabled(self, name):
+        return name in self.getEnabledPlugins()
+
+    @property
+    def userPluginsPath(self) -> aPath:
+        path = self._userPluginsDirPath or self._getUserPluginsPath()
+        return aPath(path)
+
+    @userPluginsPath.setter
+    def userPluginsPath(self, path:str):
+        self._userPluginsDirPath = path
+
+
+    def unloadPlugin(self, pluginName: str) -> None:
+        """
+        Unload a plugin by name. Removes it from the plugin registry and sys.modules
+        if loaded. This is a best-effort operation: side effects from the plugin
+        (e.g., monkey-patching) must be manually reverted if needed.
+
+        :param pluginName: Name of the plugin to unload.
+        """
+        pluginRecord = self.pluginRegistry.get(pluginName)
+        if not pluginRecord:
+            getLogger().warning(f"Plugin '{pluginName}' is not currently loaded.")
+            return
+
+        module = pluginRecord.get(pluginVariables.MODULE)
+        # self._unloadPluginModule(module) #todo
+        # Remove from registry
+        self.pluginRegistry.pop(pluginName, None)
+        self._setPluginEnabledInPreferences(pluginName, enabled=False)
+
+
+    # ------------------------------------------------------------------------------------------------------
+    # Private Methods
+    # ------------------------------------------------------------------------------------------------------
+
+    ## ~~~ Loading helpers ~~~~
+
+
+    def _registerLazyMenus(self, mainWindow):
+        from ccpn.ui.gui.widgets.Menu import PLUGINSMENU, CCPNPLUGINSMENU
+
+        userPluginsSubMenu = mainWindow.searchMenuAction(PLUGINSMENU)
+        internalPluginsSubMenu = mainWindow.searchMenuAction(CCPNPLUGINSMENU)
+        userPluginsSubMenu.clear() #clear all to don't mess with ordering or complex checking
+        internalPluginsSubMenu.clear()
+
+        for pluginName, pluginDescriptor in self._descriptors.items():
+            _isInternalPlugin = pluginDescriptor._isInternalPlugin
+            isEnabled = self.isEnabled(pluginName)
+            menuTitle = pluginDescriptor.menuTitle
+            if not menuTitle:
+                continue
+            if _isInternalPlugin:
+                action = internalPluginsSubMenu.addAction(menuTitle, partial(self._menuActionCallback, pluginName))
+            else:
+                action = userPluginsSubMenu.addAction(menuTitle,  partial(self._menuActionCallback, pluginName))
+
+            action.setEnabled(isEnabled)
+
+    def _menuActionCallback(self, pluginName, *args):
+        """On menu item clicked lazy load the plugin if not already loaded
+        and show the ui if any otherwise run the run method"""
+
+        self.loadPlugin(pluginName)
+        # create the instance
+        # run the show if it has UI or the run methods
+        loadedRegistry = self.loadPlugin(pluginName) or {}
+        if not loadedRegistry:
+            getLogger().warning('Plugin not registered or found')
+            return
+
+        resolvedClass = loadedRegistry.get(pluginVariables.RESOLVED_ENTRY_POINT)
+        descriptor = loadedRegistry.get(pluginVariables.DESCRIPTOR)
+
+        if issubclass(resolvedClass, PluginBase):
+            plugin = resolvedClass(descriptor, self.application)
+            plugin.show()
+
+    def _loadPlugins(self, level:int):
+        if not self._descriptors:
+            return
+        getLogger().info(f"Loading level {level} plugins:\n")
+        for pluginName in self._descriptors:
+            descriptor = self._descriptors[pluginName]
+            if descriptor.loadLevel == level:
+                self._loadPluginByName(pluginName)
+
+
+    def _loadPluginByName(self, pluginName: str):
+        if pluginName in self.pluginRegistry:
+            return self.pluginRegistry[pluginName]
+        usersEnabledPlugins = self.getEnabledPlugins()
+        usersDisablePlugins = self.getDisabledPlugins()
+
+        descriptor = self._descriptors.get(pluginName)
+        if not descriptor:
+            return
+        enabledByDefault = descriptor.enabledByDefault
+        if enabledByDefault and pluginName in usersDisablePlugins:
+            getLogger().debug('Cannot load a User-disabled plugin even if is enabledByDefault')
+            return
+        if enabledByDefault or descriptor.name in usersEnabledPlugins:
+            if pluginRecord := self._loadFromDescriptor(descriptor):
+                self.pluginRegistry[descriptor.name] = pluginRecord
+                return pluginRecord
+
+    def _initialisePlugins(self, level:int) -> None:
+        """
+        Initialise all registered plugins that are callable.
+        """
+        for name, pluginRegister in self.pluginRegistry.items():
+            descriptor = pluginRegister.get(pluginVariables.DESCRIPTOR)
+            if descriptor.loadLevel == level:
+                self._initialisePlugin(name)
+
+
+    def _initialisePlugin(self, name):
+        pluginRegister = self.pluginRegistry.get(name)
+        resolved = pluginRegister.get(pluginVariables.RESOLVED_ENTRY_POINT)
+        try:
+            if isinstance(resolved, type):
+                # Got a class, instantiate; then grab .run
+                instance = resolved()  # pass deps if needed
+                entry = getattr(instance, "run")
+            elif callable(resolved):
+                entry = resolved
+            else:
+                entry = resolved  # handle module/object case as needed
+            return entry
+        except Exception as e:
+            getLogger().exception(f"Error while initialising plugin '{name}': {e}")
+
+    def _registerPluginRootPath(self, pluginRoot: aPath) -> None:
+        """
+        Ensure the given top-level pluginRoot directory is on sys.path.
+        This allows importing plugins as packages, e.g.:
+            from myPlugin import plugin
+        :param pluginRoot: Path to the directory that contains all plugin packages.
+        """
+        pathStr = str(pluginRoot.resolve())
+        if pathStr not in sys.path:
+            sys.path.insert(0, pathStr)
+
+    def _loadFromDescriptor(self, descriptor) -> Optional[dict[str, Any]]:
+        """
+        Load and optionally initialise a plugin from its descriptor.
+
+        Splits the process into:
+          - Importing the module
+          - Resolving the entry point
+        Returns a structured plugin record for storage.
+
+        :param descriptor: PluginDescriptor with at least 'name' and 'entryPoint'
+        :return: A dict with 'entry', 'module', 'descriptor', or None on failure.
+        """
+        name = descriptor.name
+
+        # try:
+        if True:
+            resolvedEntryPoint = PluginLoader.resolveForDescriptor(descriptor)
+            getLogger().info(f"\u2003{name} loaded. \n")
+
+            return {
+                pluginVariables.DESCRIPTOR   : descriptor,
+                pluginVariables.RESOLVED_ENTRY_POINT:  resolvedEntryPoint,
+                }
+
+        # except Exception as e:
+        #     getLogger().warning(f"Failed to load plugin '{name}': {e}")
+        #     return None
+
+    def _downloadAndExtract(self, url: str, targetDir: aPath) -> Optional[aPath]:
+        """
+        Download a ZIP archive from the given URL and extract it into targetDir.
+        Only returns the extracted plugin root if it contains plugin_descriptor.json.
+
+        :param url: Direct link to the ZIP file (e.g., GitHub archive URL).
+        :param targetDir: Directory where the plugin should be extracted.
+        :return: Path to the extracted plugin directory, or None if invalid.
+        :raises Exception: On download or extraction failure.
+        """
+        targetDir.mkdir(parents=True, exist_ok=True)
+
+        # Download
+        resp = requests.get(url, stream=True)
+        resp.raise_for_status()
+
+        # Extract into targetDir
+        with zipfile.ZipFile(io.BytesIO(resp.content)) as z:
+            z.extractall(targetDir)
+
+        # Detect plugin folder (GitHub zips often contain a single top-level dir)
+        extractedDirs = sorted(
+                [d for d in targetDir.iterdir() if d.is_dir()],
+                key=lambda p: p.stat().st_mtime,
+                reverse=True
+                )
+
+        for folder in extractedDirs:
+            if (folder / pluginVariables.PLUGIN_DESCRIPTOR_FILE_NAME).exists():
+                return folder
+
+        return None
+
+
+
+
+    ## ~~~ Preferences helpers ~~~~
+
+    def _getUserPreferences(self):
+        """
+        Fetch Preferences from the loading application or from file.
+        """
+        if self.application is not None:
+            return self.application.preferences
+        try:
+            preferences = Preferences(None)._getUserPreferences()
+            return preferences
+        except Exception as err:
+            getLogger().warning('Unable to load user preferences.')
+
+    def _getUserPluginsPath(self) -> Optional[str]:
+        """
+        Resolve the user plugin path from preferences if available.
+        Returns:
+            The path from preferences.general.userPluginPath, or None if not set.
+        """
+        if not self.preferences or not hasattr(self.preferences, "general"):
+            return None
+        return getattr(self.preferences.general, "userPluginPath", None)
+
+    def _getPluginListFromPreferences(self, key: str) -> list[str]:
+        """
+        Generic getter for plugin lists from preferences.
+
+        :param key: Either 'enabledPlugins' or 'disabledPlugins'
+        :return: List of plugin names, or empty list if unavailable
+        """
+        pluginsPrefs = getattr(self.preferences, "plugins", None)
+        return list(getattr(pluginsPrefs, key, [])) if pluginsPrefs else []
+
+    def _setPluginEnabledInPreferences(self, name: str, enabled: bool) -> None:
+        """
+        Set plugin as enabled or disabled in preferences. Ensures mutual exclusivity.
+
+        :param name: Plugin name
+        :param enabled: True to enable, False to disable
+        """
+        pluginsPrefs = getattr(self.preferences, "plugins", None)
+        if not pluginsPrefs:
+            return
+
+        for lst in (pluginsPrefs.enabledPlugins, pluginsPrefs.disabledPlugins):
+            if name in lst:
+                lst.remove(name)
+
+        target = pluginsPrefs.enabledPlugins if enabled else pluginsPrefs.disabledPlugins
+        target.append(name)
+
+
+
+# m = PluginManager()

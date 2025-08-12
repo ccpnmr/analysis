@@ -149,6 +149,10 @@
         "xplor"     : "",
         "PDFViewer" : ""
     },
+    "plugins" : {
+        "enabledPlugins"         : [],
+        "disabledPlugins"         : []
+    },
     "appearance"       : {
         "font0"                              : "",
         "font1"                              : "",

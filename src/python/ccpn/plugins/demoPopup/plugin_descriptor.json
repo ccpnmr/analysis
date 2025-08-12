@@ -1,0 +1,21 @@
+{
+  "name": "My Popup",
+  "version": "0.0.1",
+  "author": "John Doe",
+  "entryPoint": "demoPopup.popup:MyPopupPlugin",
+  "type": "",
+  "description": "A plugin to show a popup",
+  "enabledByDefault": true,
+  "loadLevel": 3,
+  "menuTitle": "My Popup",
+  "tags": [],
+
+  "_metadata": {
+    "jsonVersion": 3.0,
+    "className": "PluginDescriptor",
+    "classVersion": 1.0,
+    "user": "luca",
+    "lastPath": "",
+    "timestamp": "Thu Aug  7 13:21:42 2025"
+  }
+}

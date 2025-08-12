@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-07-31 15:06:08 +0100 (Thu, July 31, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2025-08-12 19:40:43 +0100 (Tue, August 12, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -516,7 +516,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                    (self._setPeaksTabWidgets, 'Peaks'),
                                    (self._setExternalProgramsTabWidgets, 'External Programs'),
                                    (self._setAppearanceTabWidgets, 'Appearance'),
-                                   (self._setMacroEditorTabWidgets, 'Macro Editor')
+                                   (self._setMacroEditorTabWidgets, 'Macro Editor'),
+                                    (self._setPluginsTabWidgents, 'Plugins')
                                    ):
             fr = ScrollableFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
                                  scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
@@ -880,6 +881,49 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 2), gridSpan=(1, 1))
+
+
+    def _setPluginsTabWidgents(self, parent):
+        from ccpn.framework.plugins import pluginNamespaces as pluginVariables
+        row = 0
+        #==== Enabled ====#
+
+        pluginManager = self.application.pluginManager
+
+        row += 1
+        _makeLine(parent, grid=(row, 0), )
+        row += 1
+
+        # Alphabetically Sorted for start. Once plugins will grow, we can think of funcy systems.
+        descriptorsDict = dict(sorted(pluginManager._descriptors.items()))
+        for pluginName, descriptor in descriptorsDict.items():
+            isEnabled = pluginManager.isLoaded(pluginName)
+            _label = _makeLabel(parent, text=f'{pluginName}', grid=(row, 0))
+            _checkBox = CheckBox(parent, grid=(row, 1), hAlign='l', hPolicy='minimal', tipText='Set Enabled/Disabled', checked=isEnabled,
+                                 callback=partial(self._toggleEnablePlugin, pluginName), spacing=(0, 0))
+            row += 1
+            _versionValueLabel = Label(parent, grid=(row, 1), hAlign='l', hPolicy='minimal', text=f'<i>Version:</i> {descriptor.version}')
+            row += 1
+            _authorValueLabel = Label(parent, grid=(row, 1), hAlign='l', hPolicy='minimal', text=f'<i>Author:</i> {descriptor.author}')
+            row += 1
+            _moreButton = Button(parent, grid=(row, 1), hAlign='l', hPolicy='minimal', text='More...', enabled=False,
+                                 callback=partial(self._showPluginMorePopup, pluginName), spacing=(0, 0))
+            row += 1
+            _makeLine(parent, grid=(row, 0), )
+            row += 1
+
+    def _toggleEnablePlugin(self, pluginName, checked):
+        """     Update the plugin preferences to reflect the plugin's enabled state. load/unload if enabled/disabled  """
+        pluginManager = self.application.pluginManager
+        pluginManager.enablePluginOnPreferences(pluginName, checked)
+        # todo: we need to check if we can load/unload as well safely
+        # if checked:
+        #     pluginManager.loadPlugin(pluginName)
+        # else:
+        #     pluginManager.unloadPlugin(pluginName)
+
+    def _showPluginMorePopup(self, pluginName, ):
+        print('NIY', pluginName)
 
     def _setMacroEditorTabWidgets(self, parent):
         row = 0

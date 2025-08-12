@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-22 16:55:43 +0100 (Thu, May 22, 2025) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2025-08-12 19:40:43 +0100 (Tue, August 12, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -797,7 +797,9 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         self._fillPredefinedLayoutMenu()
         self._fillRecentMacrosMenu()
         #TODO:ED needs fixing
-        self._reloadCcpnPlugins()
+        self.application.pluginManager._registerLazyMenus(self)
+
+        # self._reloadCcpnPlugins()
         # self._fillCcpnPluginsMenu()
         # self._fillUserPluginsMenu()
 
@@ -1319,7 +1321,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
     def _fillCcpnPluginsMenu(self):
 
-        from ccpn.plugins import loadedPlugins
+        from ccpn._old_plugins import loadedPlugins
 
         pluginsMenu = self.searchMenuAction(CCPNPLUGINSMENU)
         pluginsMenu.clear()
@@ -1330,11 +1332,11 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                                      callback=self._reloadCcpnPlugins))
 
     def _reloadCcpnPlugins(self):
-        from ccpn import plugins
+        from ccpn import _old_plugins
         from importlib import reload
         from ccpn.util.Path import aPath
 
-        reload(plugins)
+        reload(_old_plugins)
 
         pluginUserPath = self.application.preferences.general.userPluginPath
         import importlib.util
@@ -1353,7 +1355,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
     def _fillUserPluginsMenu(self):
 
-        from ccpn.plugins import loadedUserPlugins
+        from ccpn._old_plugins import loadedUserPlugins
 
         pluginsMenu = self.searchMenuAction(PLUGINSMENU)
         pluginsMenu.clear()

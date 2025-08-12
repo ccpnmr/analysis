@@ -1,0 +1,20 @@
+{
+  "name": "My func",
+  "version": "0.0.1",
+  "author": "John Doe",
+  "entryPoint": "demoFunc.plugin:run",
+  "type": "",
+  "description": "A plugin to show an hello message on the status bar at startup from one single function Entry point ",
+  "enabledByDefault": true,
+  "loadLevel": 1,
+  "tags": [],
+
+  "_metadata": {
+    "jsonVersion": 3.0,
+    "className": "PluginDescriptor",
+    "classVersion": 1.0,
+    "user": "luca",
+    "lastPath": "",
+    "timestamp": "Thu Aug  7 13:21:42 2025"
+  }
+}

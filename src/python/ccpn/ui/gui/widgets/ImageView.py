@@ -1,12 +1,8 @@
-import sys
-
-from PyQt5.QtCore import QSize
+from PyQt5.QtCore import QSize, QByteArray
 from PyQt5.QtGui import QPixmap
 from PyQt5 import QtCore, QtWidgets, QtGui, QtSvg
-from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow
 
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.Frame import Frame
 
 
 class ImageView(Widget):
@@ -21,7 +17,8 @@ class ImageView(Widget):
     _sizeHint = QSize()
 
     def __init__(self, parent=None, pixmap=None, **kwds) -> None:
-        super().__init__(parent=parent)
+        super().__init__(parent=parent, **kwds)
+
         self._pixmap = None
         self.scaledImage = None
         self.setPixmap(pixmap)
@@ -100,8 +97,9 @@ class ImageViewSVG(Widget):
     """
     _sizeHint = QSize()
 
-    def __init__(self, parent=None, svg: str | None = None, **kwds) -> None:
-        super().__init__(parent=parent)
+    def __init__(self, parent=None, svg: str | QByteArray | None = None, **kwds) -> None:
+        super().__init__(parent=parent, **kwds)
+
         self._svg = None
         self.svg = svg
 
@@ -156,10 +154,17 @@ if __name__ == '__main__':
 
     topDir = Path.aPath(Path.getTopDirectory())
 
+    svg1 = (f'{topDir}' + r'/internal/launcher/Images/trace.svg')
+
+    # # comment out to test path,
+    # # uncomment to test QByteArray
+    # with open(svg1, "rb") as f:
+    #     svg1 = QByteArray(f.read())
+
     image = ImageView(parent=None,
                       pixmap=QPixmap(f'{topDir}' + '/internal/launcher/Images/trace.png'))
     image2 = ImageViewSVG(parent=None,
-                          svg=(f'{topDir}' + r'/internal/launcher/Images/trace.svg'))
+                          svg=svg1)
 
     split.addWidget(image)
     split.addWidget(image2)
@@ -167,8 +172,3 @@ if __name__ == '__main__':
     window.show()
     window.raise_()
     app.start()
-
-
-
-
-

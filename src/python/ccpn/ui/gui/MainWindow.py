@@ -1883,11 +1883,12 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
             navigateToCurrentPeakPosition(self.application, selectClickedPeak=True, allStrips=False)
 
-
     def centreZOnPeak(self):
-        if self.current.peaks and self.current.strip:
-            pass
+        """Centre the displays strips on the current peaks Z position"""
+        if (peak := self.current.peaks) and (strip := self.current.strip):
+            from ccpn.ui.gui.lib.SpectrumDisplayLib import navigateToCurrentPeakZ
 
+            navigateToCurrentPeakZ(strip.spectrumDisplay, peak[0])
 
     def calibrateFromPeaks(self):
         """Calibrate the current strip from the selected peaks

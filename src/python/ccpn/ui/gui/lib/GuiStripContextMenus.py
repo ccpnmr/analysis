@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-11 16:50:56 +0100 (Mon, August 11, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-13 14:25:35 +0100 (Wed, August 13, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -1118,6 +1118,7 @@ def _get1dPeakMenuItems(menuId) -> list:
         _separator(),
 
         _centreOnSelectedPeak(),
+        _centreZOnSelectedPeak(),
         _navigateToPeakPosMenuItem(menuId),
         _markPeaksItem()
         ]
@@ -1324,6 +1325,7 @@ def _getNdPeakMenuItems(menuId) -> list:
         _separator(),
 
         _centreOnSelectedPeak(),
+        _centreZOnSelectedPeak(),
         _navigateToPeakPosMenuItem(menuId),
         _markPeaksItem(),
         ]

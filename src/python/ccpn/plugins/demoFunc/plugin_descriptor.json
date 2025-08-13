@@ -1,5 +1,5 @@
 {
-  "name": "My func",
+  "name": "My func [DEMO]",
   "version": "0.0.1",
   "author": "John Doe",
   "entryPoint": "demoFunc.plugin:run",
@@ -8,6 +8,7 @@
   "enabledByDefault": true,
   "loadLevel": 1,
   "tags": [],
+  "menuIcon": "icn.png",
 
   "_metadata": {
     "jsonVersion": 3.0,

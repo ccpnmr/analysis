@@ -1,5 +1,5 @@
 {
-  "name": "My Popup",
+  "name": "My Popup [DEMO]",
   "version": "0.0.1",
   "author": "John Doe",
   "entryPoint": "demoPopup.popup:MyPopupPlugin",
@@ -9,6 +9,8 @@
   "loadLevel": 3,
   "menuTitle": "My Popup",
   "tags": [],
+  "menuIcon": "icn.png",
+
 
   "_metadata": {
     "jsonVersion": 3.0,

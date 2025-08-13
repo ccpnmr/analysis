@@ -1,5 +1,5 @@
 {
-  "name": "My module",
+  "name": "My module [DEMO]",
   "version": "0.0.1",
   "author": "John Doe",
   "entryPoint": "demoModule.plugin:MyCcpnModule",
@@ -9,6 +9,7 @@
   "loadLevel": 3,
   "menuTitle": "My Module",
   "tags": [],
+  "menuIcon": "icn.png",
 
   "_metadata": {
     "jsonVersion": 3.0,

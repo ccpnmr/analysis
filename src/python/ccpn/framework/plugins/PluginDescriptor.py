@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-12 19:40:42 +0100 (Tue, August 12, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-13 12:18:38 +0100 (Wed, August 13, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -138,6 +138,16 @@ class PluginDescriptor(CcpNmrJson):
             filePath = filePath.filepath / validName
         self.save(filePath)
         return filePath
+
+    def getIconPath(self):
+        """Get the absolute Icon Path if defined in the Descriptor """
+        if not self.menuIcon:
+            return
+        iconRelPath = aPath(self.menuIcon)
+        absPath = self.rootDir / iconRelPath
+        return absPath
+
+
 
 
 PluginDescriptor.register()

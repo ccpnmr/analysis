@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-12 19:40:42 +0100 (Tue, August 12, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-13 11:01:08 +0100 (Wed, August 13, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -94,11 +94,14 @@ class PluginManager:
         self._registerPluginRootPath(self.ccpnPluginsDirPath)
 
         # Plugin Load Workflow
-        # ~ 1. Discover descriptors
+        # ~~ Discover descriptors
         self._descriptors: dict[str, PluginDescriptor] = {}
         self.discoverPlugins()
 
-        # ~ 2.	Load from Resolved entry points
+        #  ~~ Set AutoEnabled in CCPN Preferences/Plugins unless they were previously disabled by the user
+        self._setAutoEnabledToPreferences()
+
+        #  ~~ Load from Resolved entry points
         self._registeredPlugins: dict[str, dict[str, Any]] = {} # it’s a dictionary of plugin records see "pluginRegistry" property
         if autoLoad:
             self._loadPlugins(level=0)
@@ -443,8 +446,10 @@ class PluginManager:
         :param key: Either 'enabledPlugins' or 'disabledPlugins'
         :return: List of plugin names, or empty list if unavailable
         """
+        foundDescriptors = list(self._descriptors.keys())
         pluginsPrefs = getattr(self.preferences, "plugins", None)
-        return list(getattr(pluginsPrefs, key, [])) if pluginsPrefs else []
+        foundInPreferences = list(getattr(pluginsPrefs, key, [])) if pluginsPrefs else []
+        return [i for i in foundInPreferences if i in foundDescriptors]
 
     def _setPluginEnabledInPreferences(self, name: str, enabled: bool) -> None:
         """
@@ -453,6 +458,8 @@ class PluginManager:
         :param name: Plugin name
         :param enabled: True to enable, False to disable
         """
+        if name not in self._descriptors:
+            raise ValueError('Cannot enable/disable a non available Plugin')
         pluginsPrefs = getattr(self.preferences, "plugins", None)
         if not pluginsPrefs:
             return
@@ -464,6 +471,14 @@ class PluginManager:
         target = pluginsPrefs.enabledPlugins if enabled else pluginsPrefs.disabledPlugins
         target.append(name)
 
+    def _setAutoEnabledToPreferences(self):
+        """We need to ensure the plugins with the descriptors defined as AutoEnabled are set as enabled in the preferences list. Note a plugin could have been seen before and already disabled by the user, in that case
+         it will appear in preferences as disabled"""
+        autoEnabledList = [i for i in self._descriptors if self._descriptors[i].enabledByDefault]
+        disabledList = self.getDisabledPlugins()
+        for i in autoEnabledList:
+            if i not in disabledList:
+                self._setPluginEnabledInPreferences(i, True)
 
 
 # m = PluginManager()

@@ -47,7 +47,7 @@ ScrollableFrame(parent=None, showBorder=False, fShape=None, fShadow=None,
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -58,9 +58,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:21:19 +0100 (Fri, August 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2025-08-13 11:01:08 +0100 (Wed, August 13, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -198,6 +198,18 @@ class ScrollableFrame(Frame):
                  setLayout=False, showBorder=False, fShape=None, fShadow=None,
                  minimumSizes=(50, 50), scrollBarPolicies=('asNeeded', 'asNeeded'),
                  margins=(0, 0, 0, 0), **kwds):
+        """
+
+        :param parent:
+        :param setLayout:
+        :param showBorder:
+        :param fShape:
+        :param fShadow:
+        :param minimumSizes:
+        :param scrollBarPolicies:
+        :param margins: (left: int, top: int, right: int, bottom: int)
+        :param kwds:
+        """
 
         # define a scroll area; check kwds if these apply to grid
         kw1 = {}

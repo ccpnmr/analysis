@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-12 19:40:43 +0100 (Tue, August 12, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-13 11:01:08 +0100 (Wed, August 13, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -270,7 +270,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self._populate()
 
         tabs = tuple(self.tabWidget.widget(ii) for ii in range(self.tabWidget.count()))
-        w = max(tab.sizeHint().width() for tab in tabs) + 150
+        w = max(tab.sizeHint().width() for tab in tabs) + 160
         h = max(tab.sizeHint().height() for tab in tabs)
         h = max((h, 800))
         self._size = QtCore.QSize(w, h)
@@ -884,46 +884,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
 
     def _setPluginsTabWidgents(self, parent):
-        from ccpn.framework.plugins import pluginNamespaces as pluginVariables
+        from ccpn.framework.plugins._PluginPreferencesWidgets import PluginPreferencesFrame
         row = 0
-        #==== Enabled ====#
+        frame = PluginPreferencesFrame(parent, grid=(0,0))
 
-        pluginManager = self.application.pluginManager
 
-        row += 1
-        _makeLine(parent, grid=(row, 0), )
-        row += 1
-
-        # Alphabetically Sorted for start. Once plugins will grow, we can think of funcy systems.
-        descriptorsDict = dict(sorted(pluginManager._descriptors.items()))
-        for pluginName, descriptor in descriptorsDict.items():
-            isEnabled = pluginManager.isLoaded(pluginName)
-            _label = _makeLabel(parent, text=f'{pluginName}', grid=(row, 0))
-            _checkBox = CheckBox(parent, grid=(row, 1), hAlign='l', hPolicy='minimal', tipText='Set Enabled/Disabled', checked=isEnabled,
-                                 callback=partial(self._toggleEnablePlugin, pluginName), spacing=(0, 0))
-            row += 1
-            _versionValueLabel = Label(parent, grid=(row, 1), hAlign='l', hPolicy='minimal', text=f'<i>Version:</i> {descriptor.version}')
-            row += 1
-            _authorValueLabel = Label(parent, grid=(row, 1), hAlign='l', hPolicy='minimal', text=f'<i>Author:</i> {descriptor.author}')
-            row += 1
-            _moreButton = Button(parent, grid=(row, 1), hAlign='l', hPolicy='minimal', text='More...', enabled=False,
-                                 callback=partial(self._showPluginMorePopup, pluginName), spacing=(0, 0))
-            row += 1
-            _makeLine(parent, grid=(row, 0), )
-            row += 1
-
-    def _toggleEnablePlugin(self, pluginName, checked):
-        """     Update the plugin preferences to reflect the plugin's enabled state. load/unload if enabled/disabled  """
-        pluginManager = self.application.pluginManager
-        pluginManager.enablePluginOnPreferences(pluginName, checked)
-        # todo: we need to check if we can load/unload as well safely
-        # if checked:
-        #     pluginManager.loadPlugin(pluginName)
-        # else:
-        #     pluginManager.unloadPlugin(pluginName)
-
-    def _showPluginMorePopup(self, pluginName, ):
-        print('NIY', pluginName)
 
     def _setMacroEditorTabWidgets(self, parent):
         row = 0

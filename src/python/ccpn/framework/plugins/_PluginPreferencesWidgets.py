@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-13 12:18:38 +0100 (Wed, August 13, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-14 09:51:03 +0100 (Thu, August 14, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ __date__ = "$Date: 2025-08-06 15:08:39 +0100 (Wed, August 06, 2025) $"
 from functools import partial
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QSpacerItem, QSizePolicy
 
 from PyQt5.QtGui import QPixmap
 from ccpn.util.Logging import getLogger
@@ -82,21 +83,24 @@ class PluginPreferencesFrame(Frame):
         row = 0
         _label = Label(self._controlToolFrame, text='Install New From', grid=(row, 0), hAlign='r', bold=False)
         installNewFromButton = ButtonList(self._controlToolFrame, grid=(row, 1), hAlign='l', hPolicy='fixed', texts=['Disk...', 'Url...'], callbacks=[None, None], enabled=False)
+
         row += 1
         _label = Label(self._controlToolFrame, text='Filter By', grid=(row, 0), hAlign='r', bold=False)
         self.filterPulldown = FilteringPulldownList(self._controlToolFrame, orientation='l', texts=FILTERS, grid=(row,1), enabled=False, )
-        # self.filterPulldown.setFixedWidth(PulldownListsMinimumWidth)
         row += 1
         _label = Label(self._controlToolFrame, text='Bulk Actions', grid=(row, 0), hAlign='r', bold=False)
         actionButtons = ButtonList(self._controlToolFrame, grid=(row, 1), hAlign='l', hPolicy='fixed',  texts=['Disable All', 'Enable All', 'Update All'], callbacks=[None]*3, enabled=False)
 
         row += 1
-        result = LabeledHLine(self._controlToolFrame, text='Available Plugins', grid=(row, 0), gridSpan=(1, 2), colour=self._lineColour, height=30, enabled=False)
 
+        self._controlToolFrame.getLayout().setAlignment(Qt.AlignCenter)
+        self._controlToolFrame.getLayout().setContentsMargins(50,10,50,10)
 
     def _buildPluginList(self):
 
         row = 0
+        result = LabeledHLine(self._pluginListFrameWidget, text='Available Plugins', grid=(row, 0), gridSpan=(1, 2), colour=self._lineColour, height=30, enabled=False)
+
         row += 1
         # Alphabetically Sorted for start. Once plugins will grow, we can think of funcy systems.
         descriptorsDict = dict(sorted(self.pluginManager._descriptors.items()))
@@ -114,8 +118,8 @@ class PluginPreferencesFrame(Frame):
             outerFrame = Frame(self._pluginListFrameWidget, setLayout=True, grid=(row,0) , showBorder=True,
                            fShape='styledPanel', fShadow='raised', margins=(10,10,10,10))
             outerFrame.getLayout().setAlignment(Qt.AlignCenter)
-            iconFrame = Frame(outerFrame, setLayout=True, grid=(0,0))
-            _icon = Label(iconFrame,  grid=(0, 0), hAlign='l',  icon=pixmap,)
+            _icon = Label(outerFrame, grid=(0, 0), icon=pixmap, )
+            outerFrame.getLayout().addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 1)
 
             frame =  Frame(outerFrame, setLayout=True, grid=(0,1))
             _innerRow = 0

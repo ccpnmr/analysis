@@ -25,7 +25,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-12 19:40:42 +0100 (Tue, August 12, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-14 09:51:03 +0100 (Thu, August 14, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -37,9 +37,10 @@ __date__ = "$Date: 2021-06-23 18:02:28 +0100 (Wed, June 23, 2021) $"
 #=========================================================================================
 
 
-#######################################
-############  Core objects ############
-#######################################
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~~~~~~     Core Objects      ~~~~~~~
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
@@ -76,9 +77,9 @@ from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Multiplet import Multiplet
 from ccpn.core.Collection import Collection
 
-############################################
-############   UI Core objects       #######
-############################################
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~~~~~~  UI Core objects     ~~~~~~~
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from ccpn.ui._implementation.Window import Window
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
@@ -89,28 +90,32 @@ from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui._implementation.PeakListView import PeakListView
 from ccpn.ui._implementation.IntegralListView import IntegralListView
 
-#######################################
-############  LIB objects       #######
-#######################################
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~~~~~~  LIB objects     ~~~~~~~
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from ccpn.framework.plugins.PluginBase import PluginBase
 from ccpn.framework.plugins.Plugin_GUI_Module import PluginGUIModule
 from ccpn.framework.plugins.Plugin_GUI_Popup import PluginBasePopup
 
 
-#######################################
-############  Core functions    #######
-#######################################
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~~~~~~    Core functions     ~~~~~~~
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, SimplePeak
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~~~~~~     UI functions       ~~~~~~~
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-#######################################
-############  UI functions      #######
-#######################################
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~~~~~~     LIB functions       ~~~~~~~
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-#######################################
-############  LIB functions      ######
-#######################################
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import Path, aPath

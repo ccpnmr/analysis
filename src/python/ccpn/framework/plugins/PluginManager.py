@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-13 11:01:08 +0100 (Wed, August 13, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-14 09:51:03 +0100 (Thu, August 14, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -365,8 +365,8 @@ class PluginManager:
         """
         name = descriptor.name
 
-        # try:
-        if True:
+        try:
+        # if True:
             resolvedEntryPoint = PluginLoader.resolveForDescriptor(descriptor)
             getLogger().info(f"\u2003{name} loaded. \n")
 
@@ -375,9 +375,9 @@ class PluginManager:
                 pluginVariables.RESOLVED_ENTRY_POINT:  resolvedEntryPoint,
                 }
 
-        # except Exception as e:
-        #     getLogger().warning(f"Failed to load plugin '{name}': {e}")
-        #     return None
+        except Exception as e:
+            getLogger().warning(f"Failed to load plugin '{name}': {e}")
+            return None
 
     def _downloadAndExtract(self, url: str, targetDir: aPath) -> Optional[aPath]:
         """

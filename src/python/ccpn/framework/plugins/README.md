@@ -69,14 +69,31 @@ myplugin/
 ## 🔁 Plugin `loadLevel` Comparison
 
 
-| Level | `loadLevel`  | When It Loads                 | Intended Use                        | When Entry Point Executes       |
-|-------|--------------|-------------------------------|-------------------------------------|---------------------------------|
-| 0     | `startup`    | During application startup    | Core services, patchers, observers  | Immediately at startup          |
-| 1     | `ui`         | After UI is initialised       | Panels, UI components, integrations | After UI is ready (auto)        |
-| 2     | `onDemand`   | When user explicitly triggers | Scripts, tools, export actions      | When user triggers (menu/click) |
-
+| Level | `loadLevel` | When It Loads                 | Intended Use                        | When Entry Point Executes       |
+| ----- | ----------- | ----------------------------- | ----------------------------------- | ------------------------------- |
+| 0     | `startup`   | During application startup    | Core services, patchers, observers  | Immediately at startup          |
+| 1     | `ui`        | After UI is initialised       | Panels, UI components, integrations | After UI is ready (auto)        |
+| 2     | `onDemand`  | When user explicitly triggers | Scripts, tools, export actions      | When user triggers (menu/click) |
 
 > All plugins are **discovered** at startup via their `plugin_descriptor.json`,
 > but only those matching the current `loadLevel` are **loaded and executed**.
 
----
+
+## CCPN code Plugin management file structure
+
+  ```python
+  ccpn/
+└─ framework/
+      └─ plugins/
+            ├─ pluginNamespaces.py
+            ├─ PluginDescriptor.py
+            ├─ PluginLoader.py
+            ├─ PluginScanner.py
+            ├─ PluginManager.py
+            ├─ PluginBase.py
+            ├─ PluginUiBase.py
+            ├─ hookHub.py            #pluggy integration
+            └─ external/
+                ├─ externalToolRunner.py
+                └─ toolJob.py         # runner + (optional) watcher coordination---
+  ```

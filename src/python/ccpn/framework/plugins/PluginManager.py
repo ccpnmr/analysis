@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-14 09:51:03 +0100 (Thu, August 14, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-14 17:51:40 +0100 (Thu, August 14, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,8 @@ from ccpn.framework.plugins.PluginDescriptor import PluginDescriptor
 from ccpn.framework.plugins.PluginLoader import PluginLoader
 from ccpn.framework.plugins import pluginNamespaces as pluginVariables
 from ccpn.framework.plugins.PluginBase import PluginBase
+from ccpn.framework.plugins.PluginExternalToolRunner import ExternalProcessRunner
+from ccpn.framework.plugins.PluginFileWatcher import PluginFileWatcher
 
 class PluginManager:
     """
@@ -77,7 +79,6 @@ class PluginManager:
         4.	Store Load plugin — Store in the registry dict with metadata and loaded module
         5.	Integrate / initialise — start or hook into UI, menus, pipelines, etc.
 
-
     """
 
     classVersion = 1.0
@@ -93,6 +94,10 @@ class PluginManager:
         self._registerPluginRootPath(self.userPluginsPath)
         self._registerPluginRootPath(self.ccpnPluginsDirPath)
 
+        # Utility Tools
+        self.externalProcessRunner = ExternalProcessRunner
+        self.fileWatcher = PluginFileWatcher
+
         # Plugin Load Workflow
         # ~~ Discover descriptors
         self._descriptors: dict[str, PluginDescriptor] = {}
@@ -105,9 +110,6 @@ class PluginManager:
         self._registeredPlugins: dict[str, dict[str, Any]] = {} # it’s a dictionary of plugin records see "pluginRegistry" property
         if autoLoad:
             self._loadPlugins(level=0)
-            # ~3 Integrate / initialise
-            self._initialisePlugins(level=pluginVariables.PLUGIN_LOAD_STARTUP)
-
 
     # ----------------------
     # Public API
@@ -313,32 +315,6 @@ class PluginManager:
             if pluginRecord := self._loadFromDescriptor(descriptor):
                 self.pluginRegistry[descriptor.name] = pluginRecord
                 return pluginRecord
-
-    def _initialisePlugins(self, level:int) -> None:
-        """
-        Initialise all registered plugins that are callable.
-        """
-        for name, pluginRegister in self.pluginRegistry.items():
-            descriptor = pluginRegister.get(pluginVariables.DESCRIPTOR)
-            if descriptor.loadLevel == level:
-                self._initialisePlugin(name)
-
-
-    def _initialisePlugin(self, name):
-        pluginRegister = self.pluginRegistry.get(name)
-        resolved = pluginRegister.get(pluginVariables.RESOLVED_ENTRY_POINT)
-        try:
-            if isinstance(resolved, type):
-                # Got a class, instantiate; then grab .run
-                instance = resolved()  # pass deps if needed
-                entry = getattr(instance, "run")
-            elif callable(resolved):
-                entry = resolved
-            else:
-                entry = resolved  # handle module/object case as needed
-            return entry
-        except Exception as e:
-            getLogger().exception(f"Error while initialising plugin '{name}': {e}")
 
     def _registerPluginRootPath(self, pluginRoot: aPath) -> None:
         """

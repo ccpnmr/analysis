@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-12 19:40:42 +0100 (Tue, August 12, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-14 17:51:39 +0100 (Thu, August 14, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -27,12 +27,9 @@ __date__ = "$Date: 2025-08-06 15:08:39 +0100 (Wed, August 06, 2025) $"
 # Start of code
 #=========================================================================================
 
-from typing import Any, Optional, Iterable
+import subprocess
+from typing import Any, Iterable, Mapping, Optional, Sequence, Union
 from ccpn.util.traits.TraitBase import TraitBase
-from ccpn.util.traits.CcpNmrTraits import Unicode, Dict, List, Bool, Int, Float
-from ccpn.framework.plugins import pluginNamespaces as pluginVariables
-from ccpn.util.Path import aPath
-from ccpn.util.Logging import getLogger
 
 
 
@@ -132,6 +129,86 @@ class PluginBase(TraitBase):
 
     def buildGUI(self):
         pass
+
+    def runCommandAndWait(self, toolPath: str, args: Optional[Sequence[str]] = None, *,
+                          workDir: Optional[str] = None,
+                          env: Optional[Mapping[str, str]] = None,
+                          shell: bool = False,
+                          inputData: Optional[Union[str, bytes]] = None,
+                          text: bool = True,
+                          timeout: Optional[float] = None,
+                          check: bool = False,
+                          captureOutput: bool = True,
+                          extraEnv: Optional[Mapping[str, str]] = None,
+                          cwd: Optional[str] = None):
+        """
+        Run an external command and wait for it to complete.
+
+        :param toolPath: Full path to the executable to run.
+        :param args: Extra arguments for the tool.
+        :param workDir: Working directory for the process.
+        :param env: Environment variables overlay.
+        :param shell: If True, run in a shell (use with care).
+        :param inputData: Data to send to stdin.
+        :param text: If True, decode stdout/stderr to strings.
+        :param timeout: Seconds before killing the process.
+        :param check: If True, raise if the return code is non-zero.
+        :param captureOutput: If False, inherit parent stdio.
+        :param extraEnv: Additional env vars merged at call time.
+        :param cwd: Per-call working directory override.
+        :return: ExternalRunResult.
+        """
+        pluginManager = self.application.pluginManager
+        runner = pluginManager.externalProcessRunner(tool=toolPath, workDir=workDir, env=env, shell=shell)
+        return runner.run(args=args, inputData=inputData, text=text, timeout=timeout,
+                          check=check, captureOutput=captureOutput, extraEnv=extraEnv, cwd=cwd)
+
+    def runCommandOnBackground(self, toolPath: str, args: Optional[Sequence[str]] = None, *,
+                               workDir: Optional[str] = None,
+                               env: Optional[Mapping[str, str]] = None,
+                               shell: bool = False,
+                               text: bool = True,
+                               extraEnv: Optional[Mapping[str, str]] = None,
+                               cwd: Optional[str] = None,
+                               stdout: int = subprocess.PIPE,
+                               stderr: int = subprocess.PIPE,
+                               stdin: int = subprocess.PIPE,
+                               bufsize: int = 1):
+        """
+        Launch an external command without waiting for it to complete.
+
+        :param toolPath: Full path to the executable to run.
+        :param args: Extra arguments for the tool.
+        :param workDir: Working directory for the process.
+        :param env: Environment variables overlay.
+        :param shell: If True, run in a shell (use with care).
+        :param text: If True, decode stdout/stderr to strings.
+        :param extraEnv: Additional env vars merged at call time.
+        :param cwd: Per-call working directory override.
+        :param stdout: File descriptor for process stdout.
+        :param stderr: File descriptor for process stderr.
+        :param stdin: File descriptor for process stdin.
+        :param bufsize: Buffer size for I/O streams.
+        :return: subprocess.Popen object.
+        """
+        pluginManager = self.application.pluginManager
+        runner = pluginManager.externalProcessRunner(tool=toolPath, workDir=workDir, env=env, shell=shell)
+        return runner.popen(args=args, text=text, extraEnv=extraEnv, cwd=cwd,
+                            stdout=stdout, stderr=stderr, stdin=stdin, bufsize=bufsize)
+
+
+    def startFileWatcher(self, pathsToWatch, callbackFunc, delaySeconds=0.5, includeSuffixes=None, excludeSuffixes=None,
+                                             recursive=True, trackDirectories=False):
+        """
+        Create and start a file watcher for this plugin.
+        For parameter details, see the `PluginFileWatcher` class documentation.
+        """
+        pluginManager = self.application.pluginManager
+        watcher = pluginManager.fileWatcher(self.application, plugin=self.name, paths=pathsToWatch,
+                                            callback=callbackFunc, delaySeconds=delaySeconds,
+                                            includeSuffixes=includeSuffixes, excludeSuffixes=excludeSuffixes,
+                                            recursive=recursive, trackDirectories=trackDirectories)
+        return watcher
 
     def show(self) -> None:
         from ccpn.framework.plugins.Plugin_GUI_Module import PluginGUIModule

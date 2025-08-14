@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-12 19:40:42 +0100 (Tue, August 12, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-14 17:51:39 +0100 (Thu, August 14, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -273,8 +273,7 @@ class Framework(NotifierBase, GuiBase):
         self.ui = self._getUI()
         # load any UI level plugins [not the On-Demand GUI (menu-activated plugins are lazy-loaded at run time)]
         self.pluginManager._loadPlugins(level=1)
-        QTimer.singleShot(0, lambda: self.pluginManager._initialisePlugins(level=1)) #needs defer until the window is ready.
-
+        # QTimer.singleShot(0, lambda: self.pluginManager._initialisePlugins(level=1)) #needs defer until the window is ready.
 
 
     #-----------------------------------------------------------------------------------------
@@ -522,7 +521,6 @@ class Framework(NotifierBase, GuiBase):
 
         # load any UI level plugins [not the On-Demand GUI (menu-activated plugins are lazy-loaded at run time)]
         self.pluginManager._loadPlugins(level=1)
-        self.pluginManager._initialisePlugins(level=1)
 
     def _cleanup(self):
         """Cleanup at the end of program execution; i.e. once the command loop

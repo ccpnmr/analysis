@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-09 15:55:47 +0100 (Fri, May 09, 2025) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-08-14 16:55:47 +0100 (Thu, August 14, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -324,6 +324,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.specToExport = None
         self._scalingModeIndex = 0
         self._useFontSetting = None
+        self.exitFilename = None
 
         self._initialiseStripList()
 
@@ -388,6 +389,21 @@ class ExportStripToFilePopup(ExportDialogABC):
     def initialise(self, userFrame):
         """Create the widgets for the userFrame
         """
+        from ccpn.ui.gui.widgets.Splitter import Splitter
+
+        self._verticalSplit = Splitter(self.mainWidget, horizontal=True)
+        self.mainWidget.getLayout().addWidget(self._verticalSplit, 1, 0)
+
+        self._verticalSplit.setChildrenCollapsible(False)
+
+        self._leftWidget = Frame(None, setLayout=True, showBorder=True)
+        # self._rightWidget = Frame(None, setLayout=True, showBorder=True)
+
+        self._initRightWidget()
+
+        self._verticalSplit.addWidget(userFrame)
+        self._verticalSplit.addWidget(self._image)
+
         sFrame = ScrollableFrame(userFrame, setLayout=True,
                                  scrollBarPolicies=('never', 'asNeeded'),
                                  spacing=DEFAULTSPACING, margins=TABMARGINS,
@@ -495,6 +511,28 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         sFrame.getLayout().setRowStretch(row, 100)
         sFrame.addSpacer(5, 5, expandX=True, expandY=True, grid=(row, 3))
+
+    def _initRightWidget(self):
+        from ccpn.ui.gui.widgets.ImageView import ImageViewSVG
+        self._image = ImageViewSVG(None, svg=None)
+
+    def _updateImageWidget(self, params: dict = None):
+        from PyQt5.QtCore import QByteArray
+
+        if not params:
+            return
+        if not (glWidgetRef := params[GLWIDGET]) or not (glWidget := glWidgetRef()):
+            getLogger().warning(f'{self.__class__.__name__}.exportToFile - glWidget is not defined')
+            return
+
+        with catchExceptions(errorStringTemplate='Error writing file; "%s"', printTraceBack=True):
+            params[GLEXPORTDPI] = 20
+            if svgExport := glWidget.exportToSVG(params=params):
+                svg = svgExport.writeSVGToMem()
+                svgExport.clear()
+
+        self._image.setSvg(QByteArray(svg.encode()))
+        self._image.repaint()
 
     def _setupRangeWidget(self, row, userFrame):
         """Set up the widgets for the range frame
@@ -1757,6 +1795,8 @@ class ExportStripToFilePopup(ExportDialogABC):
             super()._postInit()
         self._revertButton = self.getButton(self.RESETBUTTON)
 
+        self._updateImageWidget(params=self.buildParameters())
+
     def _closeDialog(self):
         self._applyChanges()
         self._rejectDialog()
@@ -1894,6 +1934,8 @@ class ExportStripToFilePopup(ExportDialogABC):
         """
         if not self._changes.enabled:
             return None
+
+        self._updateImageWidget(params=self.buildParameters())
 
         applyState = True
         revertState = False

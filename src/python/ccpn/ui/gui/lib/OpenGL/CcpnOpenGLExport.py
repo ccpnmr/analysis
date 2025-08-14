@@ -16,9 +16,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-02 11:23:06 +0100 (Fri, May 02, 2025) $"
-__version__ = "$Revision: 3.3.2 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-08-14 16:55:46 +0100 (Thu, August 14, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2247,6 +2247,41 @@ class GLExporter():
                     x += dx
 
             c.save(self.filename)
+
+    def writeSVGToMem(self):
+        from reportlab.graphics.renderSVG import SVGCanvas, draw, drawToString
+        from io import StringIO
+
+        with catchExceptions(errorStringTemplate='Error writing SVG file: "%s"', printTraceBack=False):
+
+            if (rows := (self.params[GLSTRIPDIRECTION] == 'Y')):
+                w, h = sum(self.stripWidths), self.stripHeights[0]
+                x = y = 0
+            else:
+                w, h = self.stripWidths[0], sum(self.stripHeights)
+                x, y = 0, h
+
+            # create a canvas to contain all the strips/spacers/axes
+            c = SVGCanvas((w, h))
+            for plt, dx, dy in zip(self._mainPlots, self.stripWidths, self.stripHeights):
+
+                if not rows:
+                    y -= dy
+
+                # translate each plot to the correct place in the canvas
+                plt.translate(x, y)
+
+                # draw into the common canvas
+                # originally used renderSVG.drawToFile
+                draw(plt, c, 0, 0, showBoundary=False)
+
+                # update the co-ordinates for the next plot
+                if rows:
+                    x += dx
+            s = StringIO()
+            c.save(s)
+
+            return s.getvalue()
 
     def writePDFFile(self):
         """

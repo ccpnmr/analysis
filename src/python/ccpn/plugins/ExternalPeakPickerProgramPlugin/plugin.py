@@ -1,11 +1,75 @@
-
-
+from typing import Any, Optional
+from functools import partial
 import pandas as pd
 from ccpn.api import PluginBase, PluginGUIModule, aPath, undo
+from ccpn.api import PluginBase, PluginGUIModule
+from collections import OrderedDict as od
+import ccpn.ui.gui.widgets.PulldownListsForObjects as objectPulldowns
+import ccpn.ui.gui.widgets.CompoundWidgets as compoundWidget
+
+SettingsWidgetFixedWidths = (200, 350, 350)
+SOURCE_PEAKLIST = 'SOURCE_PEAKLIST'
+WORKING_DIR = 'WORKING_DIR'
+OUTPUT_FILE = 'OUTPUT_FILE'
+RUN_BUTTON = 'RUN_BUTTON'
 
 class DemoGuiModule(PluginGUIModule):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+
+    def getWidgetDefinitions(self) :
+        self.widgetDefinitions = od((
+            (SOURCE_PEAKLIST,
+             {'label': 'PeakList',
+              'tipText': 'Select a PeakList',
+              'callBack': None,
+              'type': objectPulldowns.PeakListPulldown,
+              'kwds': {'labelText': 'PeakList',
+                       'tipText': 'Select a PeakList',
+                       'filterFunction': None,
+                       'showSelectName':True,
+                       'objectName': SOURCE_PEAKLIST,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+            (WORKING_DIR,
+             {'label'  : 'Working Dir',
+              'tipText': 'Select the working directory',
+              'enabled': True,
+              'type'   : compoundWidget.EntryPathCompoundWidget,
+              '_init'  : None,
+              'kwds'   : {
+                  'labelText'   :  'Working Dir',
+                  'tipText'     : 'Select the working directory',
+                  'entryText'   : str(self.plugin._workDirPath),
+                  'fixedWidths' : SettingsWidgetFixedWidths,
+                  'compoundKwds': {'lineEditMinimumWidth': 300}
+                  }}),
+            (OUTPUT_FILE,
+             {'label'  : 'Output File',
+              'tipText': 'Select an output File',
+              'enabled': True,
+              'type'   : compoundWidget.EntryPathCompoundWidget,
+              '_init'  : None,
+              'kwds'   : {
+                  'labelText'   : 'Output File',
+                  'tipText'     : 'Select an output File',
+                  'entryText'   : str(self.plugin.outputPath),
+                  'fixedWidths' : SettingsWidgetFixedWidths,
+                  'compoundKwds': {'lineEditMinimumWidth': 300}
+                  }}),
+            (RUN_BUTTON,
+             {'label'   : 'Run The Plugin',
+              'tipText' : 'Run The Plugin',
+              'callBack': self._runCallback,
+              'type'    : compoundWidget.ButtonCompoundWidget,
+              '_init'   : None,
+              'kwds'    : {'labelText'  : 'Run',
+                           'text'       : 'Execute',  # this is the Button name
+                           'hAlign'     : 'left',
+                           'tipText'    : 'Run The Plugin',
+                           'fixedWidths': SettingsWidgetFixedWidths}}),
+            ))
+        return self.widgetDefinitions
+
+
+
 
 
 class MyPickerModule(PluginBase):
@@ -20,30 +84,38 @@ class MyPickerModule(PluginBase):
         self.inputPath = self._workDirPath / aPath('GB1_HSQC.ucsf')
         self.outputPath = self._workDirPath / aPath('GB1_peaks.csv')
 
-        self.runCommandOnBackground(self.execPath, args=[self.inputPath, self.outputPath])
-        self.startFileWatcher([self._workDirPath], callbackFunc=self._onFileChanged, includeSuffixes={'.csv'})
 
-    def _onFileChanged(self, info):
-        print('INFO', info)
-        project = self.application.project
+    def run(self, **kwargs: Any):
+        selectedPeakListPid = kwargs.get(SOURCE_PEAKLIST)
+        outputPath = kwargs.get(OUTPUT_FILE)
+        workDirPath = kwargs.get(WORKING_DIR)
+        pl = self.application.project.getByPid(selectedPeakListPid)
+        if not pl:
+            # show warning
+            return
+        sp = pl.spectrum
+        inputPath = sp.filePath
+        self.runCommandOnBackground(self.execPath, args=[inputPath, outputPath])
+        self.startFileWatcher([workDirPath],
+                              callbackFunc=partial(self._onFileChanged, pl, outputPath),
+                              includeSuffixes={'.csv'})
 
-        for spectrum in project.spectra:
-            if str(spectrum.filePath) != str(self.inputPath):
-                continue
-            peakList = spectrum.peakLists[-1]
-            # Map coords -> peak object
-            existing = {tuple(map(float, (*p.ppmPositions, p.height))): p
-                        for p in peakList.peaks}
+    def _onFileChanged(self, peakList, outputPath, infoD):
+        print('INFO', infoD)
 
-            # Read CSV
-            df = pd.read_csv(self.outputPath).dropna(subset=['x', 'y', 'height'])
-            file_coords = {tuple(map(float, (x, y, h))) for x, y, h in zip(df['x'], df['y'], df['height'])}
+        # Map coords -> peak object
+        existing = {tuple(map(float, (*p.ppmPositions, p.height))): p
+                    for p in peakList.peaks}
 
-            # Delete peaks missing in CSV
-            for coord in set(existing) - file_coords:
-                existing[coord].delete()
+        # Read CSV
+        df = pd.read_csv(outputPath).dropna(subset=['x', 'y', 'height'])
+        file_coords = {tuple(map(float, (x, y, h))) for x, y, h in zip(df['x'], df['y'], df['height'])}
 
-            # Add peaks missing in current list
-            for coord in file_coords - set(existing):
-                x, y, h = coord
-                peakList.newPeak(ppmPositions=(x, y), height=h)
+        # Delete peaks missing in CSV
+        for coord in set(existing) - file_coords:
+            existing[coord].delete()
+
+        # Add peaks missing in current list
+        for coord in file_coords - set(existing):
+            x, y, h = coord
+            peakList.newPeak(ppmPositions=(x, y), height=h)

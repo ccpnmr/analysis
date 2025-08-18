@@ -1,0 +1,22 @@
+{
+  "name": "My External Program [DEMO]",
+  "version": "1.0.0",
+  "author": "The Picker",
+  "entryPoint": "ExternalPeakPickerProgramPlugin.plugin:MyPickerModule",
+  "type": "",
+  "description": "A plugin to show how to run an external Program from CcpNmr with custom arguments and automatically interact through a common output file",
+  "enabledByDefault": true,
+  "loadLevel": 3,
+  "menuTitle": "My External Picker Module",
+  "tags": [],
+  "menuIcon": "icn.png",
+
+  "_metadata": {
+    "jsonVersion": 3.0,
+    "className": "PluginDescriptor",
+    "classVersion": 1.0,
+    "user": "luca",
+    "lastPath": "",
+    "timestamp": "Thu Aug  7 13:21:42 2025"
+  }
+}

@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-14 17:51:40 +0100 (Thu, August 14, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-18 13:10:29 +0100 (Mon, August 18, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -253,6 +253,7 @@ class PluginFileWatcherBase:
     def addPath(self, path: PathLike) -> None: ...
     def removePath(self, path: PathLike) -> None: ...
     def clear(self) -> None: ...
+    def stop(self) -> None: ...
     def isWatching(self, path: PathLike) -> bool: ...
 
     @contextmanager
@@ -367,6 +368,45 @@ class QtPluginFileWatcher(PluginFileWatcherBase):
         self._fileState.clear()
         self._watchedDirs.clear()
         self._roots.clear()
+
+    def clear(self) -> None:
+        files = self._fsw.files()
+        dirs = self._fsw.directories()
+        if files:
+            self._fsw.removePaths(files)
+        if dirs:
+            self._fsw.removePaths(dirs)
+        # Disconnect (ok if already disconnected)
+        try:
+            self._fsw.fileChanged.disconnect()
+        except Exception:
+            pass
+        try:
+            self._fsw.directoryChanged.disconnect()
+        except Exception:
+            pass
+        # Kill timers
+        for t in self._timers.values():
+            try:
+                t.stop(); t.deleteLater()
+            except Exception:
+                pass
+        self._timers.clear()
+        # Reset bookkeeping
+        self._dirSnapshots.clear()
+        self._fileState.clear()
+        self._watchedDirs.clear()
+        self._roots.clear()
+
+
+    def stop(self) -> None:
+        """Full teardown (call when you’re done for good)."""
+        self.clear()
+        try:
+            self._fsw.deleteLater()
+        except Exception:
+            pass
+
 
     def isWatching(self, path: PluginFileWatcherBase.PathLike) -> bool:
         sP = str(aPath(path).resolve())

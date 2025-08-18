@@ -25,7 +25,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-14 09:51:03 +0100 (Thu, August 14, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-18 13:10:29 +0100 (Mon, August 18, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -104,6 +104,7 @@ from ccpn.framework.plugins.Plugin_GUI_Popup import PluginBasePopup
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, SimplePeak
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar as undo
 
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##  ~~~~~~     UI functions       ~~~~~~~

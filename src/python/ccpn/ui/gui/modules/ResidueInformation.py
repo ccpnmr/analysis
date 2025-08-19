@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-11 16:51:49 +0100 (Mon, August 11, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-19 10:01:58 +0100 (Tue, August 19, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -59,6 +59,8 @@ from ccpn.util.UpdateQueue import UpdateQueue
 ALL = '<all>'
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 AMINO_ACID_SVG_DIR = ccpnResourcesPath / 'AminoAcids'
+ALLOWED_AA_SVG = ['ala', 'arg', 'asn', 'asp', 'cys', 'gln', 'glu', 'gly', 'his', 'ile',
+                  'leu', 'lys', 'met', 'phe', 'pro', 'ser', 'thr', 'trp', 'tyr', 'val']
 
 
 class ResidueInformation(CcpnModule):
@@ -351,8 +353,8 @@ class ResidueInformation(CcpnModule):
         """
         self.selectedResidueType = value
         self._getResidues()
-
-        self._image.setSvg(f'{AMINO_ACID_SVG_DIR / value.lower()}.svg')
+        if value.lower() in ALLOWED_AA_SVG:
+            self._image.setSvg(f'{AMINO_ACID_SVG_DIR / value.lower()}.svg')
 
     def _updateTable(self, data):
         """Process notifier from core objects.

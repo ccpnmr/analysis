@@ -24,13 +24,11 @@ It is **not**:
 
 ## How to Use
 
-# How to Use
-
 1. Run the program and make sure the plugin is enabled in **Preferences → Plugins**.  
 2. Open the demo spectrum located in the `ThePeakPickerProgram` directory (`GB1_HSQC.ucsf`).  
 3. Load this spectrum into **Version3**.  
 4. From the **Main Menu → Plugins**, select **"My External Program [DEMO]"**.  
-   - A module or popup will appear.  
+   - A module or popup will appear (see below how to switch).  
 5. In the module:  
    - Select the **PeakList**.  
    - Select the **Output File** (you can keep the default).  
@@ -44,3 +42,18 @@ It is **not**:
 **That’s it! 🎉**  
 Peaks from the external program are synchronised back into Analysis automatically.
 
+## GUI Module or Popup
+
+This plugin provides two alternative GUI implementations: one as a **module** and one as a **popup**.  
+
+To switch between them, open the `plugin_description.json` file and change the `entryPoint` value:
+
+- For the **popup** version:
+  ```json
+  "entryPoint": "ExternalPeakPickerProgramPlugin.pluginAsPopup:MyPickerModule",
+    ```
+  
+- For the **module** version:
+  ```json
+  "entryPoint": "ExternalPeakPickerProgramPlugin.pluginAsModule:MyPickerModule",
+    ```

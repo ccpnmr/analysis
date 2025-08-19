@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-13 14:25:35 +0100 (Wed, August 13, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-19 10:00:01 +0100 (Tue, August 19, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -84,11 +84,17 @@ def navigateToCurrentPeakZ(display, peak):
 
     Assumes the final axis of the strips axisCodes is the Z axis.
     """
+    if len(peak.position) < 3:
+        getLogger().info(f'Peak ({peak}) does not have a z axis'
+                         f'# position to navigate to.')
+        return
+
     for strip in display.strips:
         peakPosReordered = peak.reorderValues(peak.position, strip.axisCodes)
         newPos = (*strip.positions[:-1], peakPosReordered[-1])
 
         navigateToPositionInStrip(strip,  positions=newPos)
+
 
 def navigateToCurrentNmrResiduePosition(application):
     """

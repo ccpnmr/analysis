@@ -19,6 +19,8 @@ class PluginBasePopup(CcpnDialogMainWidget):
         self.frameWidgets = FrameBase(parent=self.mainWidget, guiObject=self)
         self.widgetDefinitions = self.getWidgetDefinitions()
         self.frameWidgets.initWidgets(self.widgetDefinitions)
+        self.setOkButton(callback=self._runCallback, text='Run ', enabled=True)
+        self.setCloseButton(callback=self.reject, tipText='Close')
 
     def getWidgetDefinitions(self) -> od:
         """ Override in subclass. Define the widgets in an orderedDict.
@@ -34,6 +36,9 @@ class PluginBasePopup(CcpnDialogMainWidget):
             ))
         """
         return od()
+
+    def _runCallback(self, *args, **kwargs):
+        self.plugin.run(**self.getSettingsAsDict())
 
     def getWidget(self, name):
         return self.frameWidgets.getWidget(name)

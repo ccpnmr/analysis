@@ -1,18 +1,20 @@
 from typing import Any, Optional
 from functools import partial
 import pandas as pd
-from ccpn.api import PluginBase, PluginGUIModule, aPath, undo
+from ccpn.api import PluginBase, PluginGUIModule, aPath, undo, PluginBasePopup, showWarning
 from collections import OrderedDict as od
 import ccpn.ui.gui.widgets.PulldownListsForObjects as objectPulldowns
 import ccpn.ui.gui.widgets.CompoundWidgets as compoundWidget
 
-SettingsWidgetFixedWidths = (200, 350, 350)
+SettingsWidgetFixedWidths = (200, 200, 250)
 SOURCE_PEAKLIST = 'SOURCE_PEAKLIST'
 WORKING_DIR = 'WORKING_DIR'
 OUTPUT_FILE = 'OUTPUT_FILE'
-RUN_BUTTON = 'RUN_BUTTON'
+RUN_BUTTON = 'Run'
 
-class DemoGuiModule(PluginGUIModule):
+class DemoGuiPopup(PluginBasePopup):
+    FIXEDWIDTH = True
+    FIXEDHEIGHT = False
 
     def getWidgetDefinitions(self) :
         self.widgetDefinitions = od((
@@ -53,25 +55,22 @@ class DemoGuiModule(PluginGUIModule):
                   'fixedWidths' : SettingsWidgetFixedWidths,
                   'compoundKwds': {'lineEditMinimumWidth': 300}
                   }}),
-            (RUN_BUTTON,
-             {'label'   : 'Run The Plugin',
-              'tipText' : 'Run The Plugin',
-              'callBack': self._runCallback,
-              'type'    : compoundWidget.ButtonCompoundWidget,
-              '_init'   : None,
-              'kwds'    : {'labelText'  : 'Run',
-                           'text'       : 'Execute',  # this is the Button name
-                           'hAlign'     : 'left',
-                           'tipText'    : 'Run The Plugin',
-                           'fixedWidths': SettingsWidgetFixedWidths}}),
             ))
         return self.widgetDefinitions
+
+    def _runCallback(self, *args, **kwargs):
+        #  disable the run Button
+        button = self.getButton(self.OKBUTTON)
+        if button is not None:
+            button.setEnabled(False)
+        # call the main method
+        super()._runCallback(*args, **kwargs)
 
 
 class MyPickerModule(PluginBase):
     def __init__(self,  descriptor, application):
         super().__init__(descriptor, application)
-        self.ui = DemoGuiModule
+        self.ui = DemoGuiPopup
         self._workDirName = 'ThePeakPickerProgram'
         self._exeRelPath = aPath('DemoPeakPicker.sh')
         self._workDirPath = self.rootDir / aPath(self._workDirName)
@@ -79,7 +78,7 @@ class MyPickerModule(PluginBase):
         self.execPath = self._workDirPath / self._exeRelPath
         self.inputPath = self._workDirPath / aPath('GB1_HSQC.ucsf')
         self.outputPath = self._workDirPath / aPath('GB1_peaks.csv')
-
+        self._fileWatcher = None
 
     def run(self, **kwargs: Any):
         selectedPeakListPid = kwargs.get(SOURCE_PEAKLIST)
@@ -88,13 +87,15 @@ class MyPickerModule(PluginBase):
         pl = self.application.project.getByPid(selectedPeakListPid)
         if not pl:
             # show warning
+            showWarning('No Input PeakList', 'Select a peakList to start')
             return
         sp = pl.spectrum
         inputPath = sp.filePath
         self.runCommandOnBackground(self.execPath, args=[inputPath, outputPath])
-        self.startFileWatcher([workDirPath],
+        _fileWatcher = self.startFileWatcher([workDirPath],
                               callbackFunc=partial(self._onFileChanged, pl, outputPath),
                               includeSuffixes={'.csv'})
+        self._fileWatcher = _fileWatcher
 
     def _onFileChanged(self, peakList, outputPath, infoD):
         print('INFO', infoD)
@@ -115,3 +116,8 @@ class MyPickerModule(PluginBase):
         for coord in file_coords - set(existing):
             x, y, h = coord
             peakList.newPeak(ppmPositions=(x, y), height=h)
+
+    def close(self) -> None:
+        # stop the file watcher
+        if self._fileWatcher is not None:
+            self._fileWatcher.stop()

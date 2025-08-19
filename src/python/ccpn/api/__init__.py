@@ -25,7 +25,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-18 17:38:25 +0100 (Mon, August 18, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-19 10:48:01 +0100 (Tue, August 19, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -111,6 +111,7 @@ from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar as undo
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import ccpn.ui.gui.widgets.CompoundWidgets as compoundWidget
+from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning, showMulti, showMessage
 
 
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

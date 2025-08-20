@@ -23,7 +23,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-12 19:40:42 +0100 (Tue, August 12, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-20 12:43:21 +0100 (Wed, August 20, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -35,10 +35,8 @@ __date__ = "$Date: 2025-08-06 15:08:39 +0100 (Wed, August 06, 2025) $"
 #=========================================================================================
 
 
-import importlib
-from types import ModuleType
+import importlib, sys, types
 from typing import Any, Optional, Tuple
-
 
 class PluginLoader:
     """
@@ -133,3 +131,22 @@ class PluginLoader:
                 raise ValueError("Empty segment in attribute chain.")
             current = getattr(current, part)
         return current
+
+    @staticmethod
+    def _purgeModules(packageOrModule: str) -> None:
+        """
+        Remove a package/module and its submodules from sys.modules.
+
+        Example:
+            'myplugin' → drop 'myplugin' and 'myplugin.*'
+        """
+        prefix = packageOrModule + "."
+        to_drop = [
+            m for m in list(sys.modules)
+            if m == packageOrModule or m.startswith(prefix)
+            ]
+        for m in to_drop:
+            mod = sys.modules.get(m)
+            # NOTE (future): if plugins need cleanup, define a __plugin_teardown__()
+            # function inside the module to release resources (threads, files, etc.)
+            sys.modules.pop(m, None)

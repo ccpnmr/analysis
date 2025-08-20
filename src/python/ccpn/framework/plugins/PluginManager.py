@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-14 17:51:40 +0100 (Thu, August 14, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-20 12:43:21 +0100 (Wed, August 20, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -42,17 +42,17 @@ __date__ = "$Date: 2025-08-06 15:08:39 +0100 (Wed, August 06, 2025) $"
 #=========================================================================================
 
 import sys
-import importlib
+import importlib, sys, types
 import io
 import zipfile
 import requests
 from functools import partial
 from types import ModuleType
 from typing import Any, Callable, Dict, List, Optional
-from ccpn.util.Path import aPath
+from ccpn.util.Path import aPath, fetchDir
 from ccpn.framework.Preferences import Preferences
 from ccpn.util.Logging import getLogger
-from ccpn.framework.PathsAndUrls import pluginPath
+from ccpn.framework.PathsAndUrls import pluginPath, userCcpnPath
 from ccpn.framework.plugins.PluginDescriptor import PluginDescriptor
 from ccpn.framework.plugins.PluginLoader import PluginLoader
 from ccpn.framework.plugins import pluginNamespaces as pluginVariables
@@ -172,6 +172,7 @@ class PluginManager:
             - Both internal and external scans may be enabled simultaneously.
         """
         from ccpn.framework.plugins.PluginScanner import PluginScanner
+        self._descriptors.clear()
         descriptors = []
         if internal:
             descriptors = PluginScanner(self.ccpnPluginsDirPath).scan()
@@ -221,24 +222,6 @@ class PluginManager:
         self._userPluginsDirPath = path
 
 
-    def unloadPlugin(self, pluginName: str) -> None:
-        """
-        Unload a plugin by name. Removes it from the plugin registry and sys.modules
-        if loaded. This is a best-effort operation: side effects from the plugin
-        (e.g., monkey-patching) must be manually reverted if needed.
-
-        :param pluginName: Name of the plugin to unload.
-        """
-        pluginRecord = self.pluginRegistry.get(pluginName)
-        if not pluginRecord:
-            getLogger().warning(f"Plugin '{pluginName}' is not currently loaded.")
-            return
-
-        module = pluginRecord.get(pluginVariables.MODULE)
-        # self._unloadPluginModule(module) #todo
-        # Remove from registry
-        self.pluginRegistry.pop(pluginName, None)
-        self._setPluginEnabledInPreferences(pluginName, enabled=False)
 
 
     # ------------------------------------------------------------------------------------------------------
@@ -315,6 +298,78 @@ class PluginManager:
             if pluginRecord := self._loadFromDescriptor(descriptor):
                 self.pluginRegistry[descriptor.name] = pluginRecord
                 return pluginRecord
+
+
+    def unloadPlugin(self, pluginName: str, setEnable:bool=True) -> None:
+        """
+        Unload a plugin by name.
+        Best‑effort unload:
+          1) call shutdown hooks
+          2) unhook UI/watchers/etc. NIY
+          3) purge sys.modules for the plugin package/submodules
+          4) drop registry entry
+        """
+        reg = self.pluginRegistry.get(pluginName)
+        if not reg:
+            getLogger().warning(f"Plugin '{pluginName}' is not currently loaded.")
+            return
+
+        # 1) shutdown hooks
+        obj = reg.get(pluginVariables.RESOLVED_ENTRY_POINT)
+        try:
+            if hasattr(obj, "close") and callable(obj.close):
+                obj.close()
+        except Exception as e:
+            getLogger().warning(f"[PluginManager] {pluginName}.close() raised: {e}")
+
+        # 2) TODO: unhook everything attached by the plugin like
+        #    - disconnect Qt signals / remove menus & actions
+        #    - stop file watchers, timers, threads, subprocesses
+        #    - unregister event/notifier subscriptions,  hooks
+        #    - revert monkey patches if any
+
+        # 3) purge modules by entry point’s module name
+        descriptor = reg.get(pluginVariables.DESCRIPTOR)
+        if descriptor:
+            try:
+                modulePath, attrChain = PluginLoader._splitModuleAndAttrs(descriptor.entryPoint)
+                PluginLoader._purgeModules(modulePath)
+            except Exception as e:
+                getLogger().warning(f"[PluginManager] purge skipped for '{pluginName}': {e}")
+
+        # 4) drop registry entry
+        self.pluginRegistry.pop(pluginName, None)
+
+        #  5) disable it
+        self._setPluginEnabledInPreferences(pluginName, enabled=setEnable)
+
+
+    def reloadPlugin(self, pluginName: str, *, setEnabled: bool = True) -> Optional[dict[str, Any]]:
+        """
+        Full reload from entryPoint string:
+          - unload
+          - import fresh
+          - (optionally) instantiate/initialise
+          - re‑register record
+        Returns the new registry record or None on failure.
+        """
+        descr = self._descriptors.get(pluginName)
+        if not descr:
+            raise RuntimeError(f"Reload failed: '{pluginName}' not found")
+        reg = self.pluginRegistry.get(pluginName)
+
+        if not reg: # never loaded before
+            return self._loadPluginByName(pluginName)
+        # unload first
+        try:
+            self.unloadPlugin(pluginName)
+        except Exception as e:
+            getLogger().warning(f"[PluginManager] unload before reload failed for '{pluginName}': {e}")
+
+        # Load fresh
+        self.discoverPlugins()
+        return self._loadPluginByName(pluginName)
+
 
     def _registerPluginRootPath(self, pluginRoot: aPath) -> None:
         """
@@ -409,11 +464,15 @@ class PluginManager:
         """
         Resolve the user plugin path from preferences if available.
         Returns:
-            The path from preferences.general.userPluginPath, or None if not set.
+            The path from preferences.general.userPluginPath, or fetch default if not set.
         """
         if not self.preferences or not hasattr(self.preferences, "general"):
             return None
-        return getattr(self.preferences.general, "userPluginPath", None)
+        userPluginPath = getattr(self.preferences.general, "userPluginPath", None)
+        if userPluginPath is None or not aPath(userPluginPath).exists():
+            userPluginPath = fetchDir(userCcpnPath, 'plugins')
+            setattr(self.preferences.general, "userPluginPath", userPluginPath)
+        return userPluginPath
 
     def _getPluginListFromPreferences(self, key: str) -> list[str]:
         """

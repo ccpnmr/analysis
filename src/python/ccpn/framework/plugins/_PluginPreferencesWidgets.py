@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-14 09:51:03 +0100 (Thu, August 14, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-20 12:43:21 +0100 (Wed, August 20, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ from functools import partial
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSpacerItem, QSizePolicy
-
+from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning, showMessage, showYesNo
 from PyQt5.QtGui import QPixmap
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Application import getApplication
@@ -49,6 +49,10 @@ import ccpn.ui.gui.widgets.CompoundWidgets as cw
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 
 FILTERS = ['All', 'Enabled', 'Disabled', 'Built-in', 'Installed']
+RELOAD = 'Reload'
+LOAD = 'Load'
+UPDATE = 'Update'
+MORE = 'More...'
 
 class PluginPreferencesFrame(Frame):
     """
@@ -114,7 +118,6 @@ class PluginPreferencesFrame(Frame):
                     )
 
             # ~~ widgets
-
             outerFrame = Frame(self._pluginListFrameWidget, setLayout=True, grid=(row,0) , showBorder=True,
                            fShape='styledPanel', fShadow='raised', margins=(10,10,10,10))
             outerFrame.getLayout().setAlignment(Qt.AlignCenter)
@@ -127,15 +130,46 @@ class PluginPreferencesFrame(Frame):
             _checkBox = CheckBox(frame, grid=(_innerRow, 1), hAlign='l', hPolicy='minimal', tipText='Set Enabled/Disabled', checked=isEnabled,
                                  callback=partial(self._toggleEnablePlugin, pluginName),)
             _innerRow += 1
-            _updateButton = ButtonList(frame, grid=(_innerRow, 1), hAlign='l', hPolicy='minimal', texts=['Update', 'More...'], callbacks=[None]*2, enabled=False,
+            _updateButton = ButtonList(frame, grid=(_innerRow, 1), hAlign='l', hPolicy='minimal', texts=[RELOAD, UPDATE, MORE],
+                                       callbacks=[partial(self._reloadPlugin, pluginName), None, None],
+                                       enabled=True,
                                  callback=None, spacing=(0, 0))
+            self._toggleReloadNameButton(_updateButton.getButton(RELOAD), pluginName)
+            _updateButton.getButton(UPDATE).setEnabled(False)
+            _updateButton.getButton(MORE).setEnabled(False)
+
             _versionValueLabel = Label(frame, grid=(_innerRow, 0), hAlign='r', hPolicy='minimal', text=f'<i>Version:</i> {descriptor.version}')
             _innerRow += 1
             _authorValueLabel = Label(frame, grid=(_innerRow, 0), hAlign='r', hPolicy='minimal', text=f'<i>Author:</i> {descriptor.author}')
 
             row += 1
 
+    def _toggleReloadNameButton(self, button, pluginName):
+        isLoaded = self.pluginManager.isLoaded(pluginName)
+        button.setText(LOAD if not isLoaded else RELOAD)
+
+
     def _toggleEnablePlugin(self, pluginName, checked):
         """  Update the plugin preferences to reflect the plugin's enabled state. load/unload if enabled/disabled  """
         pluginManager = self.application.pluginManager
         pluginManager.enablePluginOnPreferences(pluginName, checked)
+
+    def _reloadPlugin(self, pluginName):
+        isEnabled = self.pluginManager.isEnabled(pluginName)
+        if not isEnabled:
+            showWarning('Plugin Not Enabled', 'Please enable the plugin by ticking the checkbox next to its name.')
+            return
+        try:
+            self.pluginManager.reloadPlugin(pluginName)
+        except Exception as err:
+            msg = f'Error reloading Plugin; {pluginName}.\n{err}'
+            getLogger().warning(msg)
+            showWarning('Reload Failed', msg)
+            return
+
+        # let's redo the menus if needed
+        pluginDescriptor = self.pluginManager._descriptors.get(pluginName)
+        if pluginDescriptor is not None and not pluginDescriptor.menuTitle in [None, '']:
+            # we could reload the titles only if it has changed.
+            self.pluginManager._registerLazyMenus(self.application.mainWindow)
+        self._toggleReloadNameButton(self.sender(), pluginName)

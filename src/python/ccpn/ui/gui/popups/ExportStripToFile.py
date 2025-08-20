@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-14 16:55:47 +0100 (Thu, August 14, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-20 12:46:37 +0100 (Wed, August 20, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,8 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from dataclasses import dataclass
 from functools import partial, singledispatchmethod
 from typing import Optional, Callable
+
+from PyQt5.QtCore import QByteArray
 
 from ccpn.core.lib.ContextManagers import catchExceptions, queueStateChange
 from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
@@ -514,11 +516,10 @@ class ExportStripToFilePopup(ExportDialogABC):
 
     def _initRightWidget(self):
         from ccpn.ui.gui.widgets.ImageView import ImageViewSVG
+
         self._image = ImageViewSVG(None, svg=None)
 
     def _updateImageWidget(self, params: dict = None):
-        from PyQt5.QtCore import QByteArray
-
         if not params:
             return
         if not (glWidgetRef := params[GLWIDGET]) or not (glWidget := glWidgetRef()):
@@ -533,6 +534,12 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         self._image.setSvg(QByteArray(svg.encode()))
         self._image.repaint()
+
+    def _imagePreviewCheckboxCallback(self):
+        if self._userCheckbox.isChecked():
+            self._image.setVisible(True)
+        else:
+            self._image.setVisible(False)
 
     def _setupRangeWidget(self, row, userFrame):
         """Set up the widgets for the range frame
@@ -1508,7 +1515,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         selectedList = self.treeView.getCheckStateItems()
         self._populateTreeView(selectedList)
 
-    def _populateTreeView(self, selectList: dict | None=None):
+    def _populateTreeView(self, selectList: dict | None = None):
         self.treeView.clear()
 
         printItems = []
@@ -1786,6 +1793,11 @@ class ExportStripToFilePopup(ExportDialogABC):
                            tipText='Close the dialog\nAny changes to the print settings are discarded', enabled=True)
         self.setDefaultButton(self.CANCELBUTTON)
 
+        self._setUserCheckbox(callback=self._imagePreviewCheckboxCallback, initState=True, labelText='Show Preview',
+                              tipText='Toggle the render preview, turning '
+                                      'it off will improve the '
+                                      'responsiveness of the widget')
+
     def _postInit(self):
         """post-initialise functions
         CCPN-Internal to be called at the end of __init__
@@ -1934,8 +1946,8 @@ class ExportStripToFilePopup(ExportDialogABC):
         """
         if not self._changes.enabled:
             return None
-
-        self._updateImageWidget(params=self.buildParameters())
+        if self._userCheckbox.isChecked():
+            self._updateImageWidget(params=self.buildParameters())
 
         applyState = True
         revertState = False

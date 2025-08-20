@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-20 12:46:37 +0100 (Wed, August 20, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-20 15:00:38 +0100 (Wed, August 20, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -407,7 +407,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._verticalSplit.addWidget(self._image)
 
         sFrame = ScrollableFrame(userFrame, setLayout=True,
-                                 scrollBarPolicies=('never', 'asNeeded'),
+                                 scrollBarPolicies=('asNeeded', 'asNeeded'),
                                  spacing=DEFAULTSPACING, margins=TABMARGINS,
                                  grid=(0, 0), gridSpan=(1, 3))
 
@@ -513,6 +513,7 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         sFrame.getLayout().setRowStretch(row, 100)
         sFrame.addSpacer(5, 5, expandX=True, expandY=True, grid=(row, 3))
+        self._verticalSplit.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
     def _initRightWidget(self):
         from ccpn.ui.gui.widgets.ImageView import ImageViewSVG

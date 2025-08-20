@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-22 16:55:43 +0100 (Thu, May 22, 2025) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-08-20 12:45:02 +0100 (Wed, August 20, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -459,6 +459,22 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
                                              enableIcons=self.ENABLEICONS,
                                              **self._buttonOptions)
         self.dialogButtons.setContentsMargins(0, 18, 0, 0)
+
+    def _setUserCheckbox(self, initState, labelText, tipText, callback):
+        from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget  # circular import :|
+
+        grid = (3, 0)
+        gridSpan = (1, 2) if self._orientation.startswith('h') else (1, 2)  # reserved
+
+        self._userCheckbox = CheckBoxCompoundWidget(self,
+                                                    grid=grid, gridSpan=gridSpan, hAlign='left',
+                                                    orientation='right', stretch=(0, 0),
+                                                    labelText=labelText,
+                                                    tipText=tipText,
+                                                    checked=initState, callback=callback
+                                                    )
+        spc = self._userCheckbox.sizeHint().height()
+        self._userCheckbox.setContentsMargins(0, spc // 4, 0, 0)
 
     def _setDontShow(self):
         from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget  # circular import :|

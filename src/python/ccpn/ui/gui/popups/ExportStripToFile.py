@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-20 15:00:38 +0100 (Wed, August 20, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-21 15:19:04 +0100 (Thu, August 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -393,18 +393,15 @@ class ExportStripToFilePopup(ExportDialogABC):
         """
         from ccpn.ui.gui.widgets.Splitter import Splitter
 
-        self._verticalSplit = Splitter(self.mainWidget, horizontal=True)
-        self.mainWidget.getLayout().addWidget(self._verticalSplit, 1, 0)
+        _verticalSplit = Splitter(self.mainWidget, horizontal=True)
+        self.mainWidget.getLayout().addWidget(_verticalSplit, 1, 0)
 
-        self._verticalSplit.setChildrenCollapsible(False)
-
-        self._leftWidget = Frame(None, setLayout=True, showBorder=True)
-        # self._rightWidget = Frame(None, setLayout=True, showBorder=True)
+        _verticalSplit.setChildrenCollapsible(False)
 
         self._initRightWidget()
 
-        self._verticalSplit.addWidget(userFrame)
-        self._verticalSplit.addWidget(self._image)
+        _verticalSplit.addWidget(userFrame)
+        _verticalSplit.addWidget(self._image)
 
         sFrame = ScrollableFrame(userFrame, setLayout=True,
                                  scrollBarPolicies=('asNeeded', 'asNeeded'),
@@ -513,14 +510,19 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         sFrame.getLayout().setRowStretch(row, 100)
         sFrame.addSpacer(5, 5, expandX=True, expandY=True, grid=(row, 3))
-        self._verticalSplit.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        _verticalSplit.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
     def _initRightWidget(self):
+        """Initialise the widget for the splitters right frame."""
         from ccpn.ui.gui.widgets.ImageView import ImageViewSVG
 
         self._image = ImageViewSVG(None, svg=None)
 
     def _updateImageWidget(self, params: dict = None):
+        """Update the _imageWidget
+
+        Exports a svg to memory based on the params given
+        """
         if not params:
             return
         if not (glWidgetRef := params[GLWIDGET]) or not (glWidget := glWidgetRef()):
@@ -537,6 +539,8 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._image.repaint()
 
     def _imagePreviewCheckboxCallback(self):
+        """Toggle the _image widget based on the userCheckbox.
+        """
         if self._userCheckbox.isChecked():
             self._image.setVisible(True)
         else:

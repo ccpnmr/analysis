@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-14 16:55:46 +0100 (Thu, August 14, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-21 15:19:03 +0100 (Thu, August 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -2249,6 +2249,8 @@ class GLExporter():
             c.save(self.filename)
 
     def writeSVGToMem(self):
+        """Same as writeSVGFile doesn't save to disk but instead returns a string
+        """
         from reportlab.graphics.renderSVG import SVGCanvas, draw, drawToString
         from io import StringIO
 

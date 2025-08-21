@@ -2024,6 +2024,8 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
             self.listButtons.setIndex(self.NMRCHAINBUTTON)
 
     def _nmrChainsSelectionCallback(self):
+        """Sets nmrChains/nmrChain based on type of widget ncWidget is.
+        """
         if not isinstance(self.ncWidget, NmrChainSelectionWidget):
             return
 

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-20 12:45:02 +0100 (Wed, August 20, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-21 15:19:03 +0100 (Thu, August 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -460,11 +460,13 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base, metaclass=_DialogHook):
                                              **self._buttonOptions)
         self.dialogButtons.setContentsMargins(0, 18, 0, 0)
 
-    def _setUserCheckbox(self, initState, labelText, tipText, callback):
+    def _setUserCheckbox(self, initState : bool, labelText : str, tipText : str, callback : callable):
+        """Add a custom checkbox to the dialog box
+        """
         from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget  # circular import :|
 
         grid = (3, 0)
-        gridSpan = (1, 2) if self._orientation.startswith('h') else (1, 2)  # reserved
+        gridSpan = (1, 2) if self._orientation.startswith('h') else (1, 2)
 
         self._userCheckbox = CheckBoxCompoundWidget(self,
                                                     grid=grid, gridSpan=gridSpan, hAlign='left',

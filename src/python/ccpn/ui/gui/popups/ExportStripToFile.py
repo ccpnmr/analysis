@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-21 15:19:04 +0100 (Thu, August 21, 2025) $"
+__dateModified__ = "$dateModified: 2025-08-21 15:26:06 +0100 (Thu, August 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -543,6 +543,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         """
         if self._userCheckbox.isChecked():
             self._image.setVisible(True)
+            self._updateImageWidget(self.buildParameters())
         else:
             self._image.setVisible(False)
 

@@ -1888,7 +1888,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         if (peak := self.current.peaks) and (strip := self.current.strip):
             from ccpn.ui.gui.lib.SpectrumDisplayLib import navigateToCurrentPeakZ
 
-            navigateToCurrentPeakZ(strip.spectrumDisplay, peak[0])
+            navigateToCurrentPeakZ(strip, peak[0])
 
     def calibrateFromPeaks(self):
         """Calibrate the current strip from the selected peaks

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-19 10:00:01 +0100 (Tue, August 19, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-01 10:34:19 +0100 (Mon, September 01, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -31,9 +31,11 @@ import numpy as np
 from typing import List
 
 from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.Peak import Peak
 # from ccpn.core.Peak import Peak
 # from ccpn.core.Project import Project
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.ui.gui.lib.Strip import Strip
 from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, navigateToNmrAtomsInStrip
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar
 from ccpn.util.Logging import getLogger
@@ -79,7 +81,7 @@ def navigateToCurrentPeakPosition(application, selectFirstPeak=False, selectClic
         navigateToPositionInStrip(cStrip, peak.position, peak.axisCodes)
 
 
-def navigateToCurrentPeakZ(display, peak):
+def navigateToCurrentPeakZ(strip: Strip, peak: Peak):
     """Navigates to a peaks Z position for all strips in the display
 
     Assumes the final axis of the strips axisCodes is the Z axis.
@@ -89,11 +91,10 @@ def navigateToCurrentPeakZ(display, peak):
                          f'# position to navigate to.')
         return
 
-    for strip in display.strips:
-        peakPosReordered = peak.reorderValues(peak.position, strip.axisCodes)
-        newPos = (*strip.positions[:-1], peakPosReordered[-1])
+    peakPosReordered = peak.reorderValues(peak.position, strip.axisCodes)
+    newPos = (*strip.positions[:-1], peakPosReordered[-1])
 
-        navigateToPositionInStrip(strip,  positions=newPos)
+    navigateToPositionInStrip(strip,  positions=newPos)
 
 
 def navigateToCurrentNmrResiduePosition(application):

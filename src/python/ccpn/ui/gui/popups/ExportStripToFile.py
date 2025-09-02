@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-21 15:26:06 +0100 (Thu, August 21, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-02 15:53:03 +0100 (Tue, September 02, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -517,6 +517,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         from ccpn.ui.gui.widgets.ImageView import ImageViewSVG
 
         self._image = ImageViewSVG(None, svg=None)
+        self._image.setVisible(False)
 
     def _updateImageWidget(self, params: dict = None):
         """Update the _imageWidget
@@ -1799,7 +1800,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                            tipText='Close the dialog\nAny changes to the print settings are discarded', enabled=True)
         self.setDefaultButton(self.CANCELBUTTON)
 
-        self._setUserCheckbox(callback=self._imagePreviewCheckboxCallback, initState=True, labelText='Show Preview',
+        self._setUserCheckbox(callback=self._imagePreviewCheckboxCallback, initState=False, labelText='Show Preview',
                               tipText='Toggle the render preview, turning '
                                       'it off will improve the '
                                       'responsiveness of the widget')
@@ -1813,7 +1814,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             super()._postInit()
         self._revertButton = self.getButton(self.RESETBUTTON)
 
-        self._updateImageWidget(params=self.buildParameters())
+        # self._updateImageWidget(params=self.buildParameters())
 
     def _closeDialog(self):
         self._applyChanges()

@@ -137,6 +137,7 @@ class ImageViewSVG(Widget):
 
         painter = QtGui.QPainter(self)
         self.renderer.render(painter)
+        painter.end()
 
 
 if __name__ == '__main__':

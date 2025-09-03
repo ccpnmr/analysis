@@ -31,7 +31,10 @@ class NefDatabaseSearchPopup(CcpnDialog):
         # popupLayoutFrame = Widget(self,
         #                           setLayout=True,
         #                           grid=(0, 0))
-        self.metabolitesTableWidget = Table(self,
+        metaboliteTableFrame = Frame(self,
+                                     setLayout=True,
+                                     grid=(0, 0))
+        self.metabolitesTableWidget = Table(metaboliteTableFrame,
                                             multiSelect=False,
                                             df=df,
                                             grid=(0, 0),
@@ -45,9 +48,12 @@ class NefDatabaseSearchPopup(CcpnDialog):
         self.metabolitesTableWidget.setEditable(False)
         # self.metabolitesTableWidget.clicked.connect(self._selectMetabolite)
 
-        self.simulationTableWidget = Table(self,
+        simulationTableFrame = Frame(self,
+                                     setLayout=True,
+                                     grid=(1, 0))
+        self.simulationTableWidget = Table(simulationTableFrame,
                                            df=pd.DataFrame(data=None, columns=simulationColumns),
-                                           grid=(1, 0),
+                                           grid=(0, 0),
                                            selectionCallback=self._simulationTableSelection,
                                            borderWidth=4,
                                            minimumHeight=200,
@@ -84,4 +90,3 @@ class NefDatabaseSearchPopup(CcpnDialog):
         self.simulatedSpectrumId = simulatedSpectrumId
         self.fileData = fileData
         self.buttons.buttons[1].setEnabled(True)
-

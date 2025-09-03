@@ -26,6 +26,7 @@ class NefDatabaseSearchPopup(CcpnDialog):
         self.caller = caller
         self.spectrum = spectrum
         self.simulatedSpectrum = None
+        self.fileData = None
         df = self.caller.metaData
         # popupLayoutFrame = Widget(self,
         #                           setLayout=True,
@@ -55,9 +56,10 @@ class NefDatabaseSearchPopup(CcpnDialog):
                                            multiSelect=False)
         self.simulationTableWidget.setEditable(False)
         self.buttons = ButtonList(self, texts=['Close', 'Ok'],
-                                  callbacks=[self.accept, self.accept],
+                                  callbacks=[self.reject, self.accept],
                                   tipTexts=['Close window', 'Confirm simulation choice'],
                                   grid=(2, 0), hAlign='r')
+        self.buttons.buttons[1].setEnabled(False)
         # self.setFixedWidth(500)
         self.setBaseSize(500, 750)
 
@@ -81,48 +83,5 @@ class NefDatabaseSearchPopup(CcpnDialog):
         fileData = self.caller.getFileData(metaboliteName)
         self.simulatedSpectrumId = simulatedSpectrumId
         self.fileData = fileData
-        # if fileData is None:
-        #     return None
-        # # Check for the target simulation.
-        # try:
-        #     multiplets, signals, ssm = self.caller.getSimulationData(fileData, simulatedSpectrumId)
-        # except Exception as es:
-        #     getLogger().warning(f'Could not load spectrum parameter data for simulation: {es}')
-        #     return None
-        # # Make the substance object.
-        # try:
-        #     self.substance = self.caller.nefReader.load_ccpn_substance(self.project, self.caller.getMetaboliteData(fileData))
-        # except Exception as es:
-        #     getLogger().warning(f'Could not load substance data for simulation: {es}')
-        #     return None
-        # # Make the sample object.
-        # try:
-        #     if sampleName is None:
-        #         sampleName = fileData[simulatedSpectrumId].get('ccpn_sample').removeprefix('ccpn_sample_')
-        #     self.sample = self.caller.nefReader.load_ccpn_sample(self.project, fileData[f'ccpn_sample_{sampleName}'])
-        # except Exception as es:
-        #     getLogger().warning(f'Could not load sample data for simulation: {es}')
-        #     return None
-        # simulationType = fileData[simulatedSpectrumId]['ccpn_spectrum_type']
-        # if simulationType != 'spin_system' and origin != 'unknown_substance':
-        #     frequency = round(float(fileData[simulatedSpectrumId]['nef_spectrum_dimension'].data[0]['spectrometer_frequency']) / 10) * 10
-        # points = self.spectrum.pointCounts[0]
-        # referenceValue = self.spectrum.referenceValues[0]
-        # spectralWidth = self.spectrum.spectralWidths[0]
-        # limits = (referenceValue, referenceValue - spectralWidth)
-        # simulatedSpectrum = createSimulatedSpectrum(self.project,
-        #                                             name=simulatedSpectrumId,
-        #                                             multiplets=multiplets,
-        #                                             signals=signals,
-        #                                             ssm=ssm,
-        #                                             widthScale=1.0,
-        #                                             referenceOffset=0.0,
-        #                                             frequency=frequency,
-        #                                             temperature=None,
-        #                                             points=points,
-        #                                             limits=limits,
-        #                                             noiseLevel=self.spectrum.noiseLevel,
-        #                                             spectrum=None,
-        #                                             origin=origin)
-        # self.simulatedSpectrum = simulatedSpectrum
+        self.buttons.buttons[1].setEnabled(True)
 

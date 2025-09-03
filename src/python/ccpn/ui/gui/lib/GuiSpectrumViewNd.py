@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-08-11 11:59:37 +0100 (Mon, August 11, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-09-03 15:09:47 +0100 (Wed, September 03, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -141,6 +141,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         if not self.isDisplayed:
             return
 
+    # information for spectrum view might be best placed here
     @property
     def traceScale(self) -> float:
         """Scale for trace in this spectrumView"""
@@ -245,17 +246,15 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             if True:  # numDims < 3 or self._application.preferences.general.generateSinglePlaneContours:
                 dataArrays = tuple()
 
-                for position, dataArray in self._getPlaneData():
+                for position, dataArray in self._getPlaneData():  # gets plane of the data to build contours
                     # overlay all the planes into a single plane
                     dataArrays += (dataArray,)
                     # break
 
-                # moved to C Code
-                # if len(dataArrays) > 1 and not self._application.preferences.general.generateSinglePlaneContours:
-                #     sum = dataArrays[0]
-                #     for ii in range(1, len(dataArrays)):
-                #         sum = np.max(sum, dataArrays[ii].clip(0.0, 1e16)) + np.min(sum, dataArrays[ii].clip(-1e16, 0.0))
-                #     dataArrays = (sum,)
+                # calc min, max, mean etc
+                self.traceMax = np.max(dataArrays)
+                self.traceMin = np.min(dataArrays)
+                self.traceMean = np.mean(dataArrays)
 
                 # build the contours
                 contourList = Contourer2d.contourerGLList(dataArrays,
@@ -524,8 +523,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             #                                                              xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim))
             # GWV reverted to getSliceData
             data = self.spectrum.getSliceData(position=pointInt, sliceDim=sliceDim)
-            if self._traceScale is None:
-                self._traceScale = 1.0 / max(data) * 0.5
+            # potentially here for scaling default
+            if self.traceScale is None:
+                self.traceScale = 1.0 / self.traceMax
         return data
 
     def _getVisibleSpectrumViewParams(self, dimRange=None, delta=None, stacking=None,

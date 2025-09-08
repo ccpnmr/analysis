@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-08-11 11:17:20 +0100 (Mon, August 11, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-08 16:30:35 +0100 (Mon, September 08, 2025) $"
 __version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ import traceback
 import re
 import signal
 import pandas as pd
+import numpy as np
 from functools import partial
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QPainter
@@ -1250,6 +1251,24 @@ class BlankedPartial(object):
                 self._obj._finaliseAction(self._trigger)
 
 
+def _equal(a, b, **_):
+    """
+    Checks if two objects are equal, handling Python primitives and NumPy/Pandas arrays.
+    There is a more comprehension deep_equal in CHeckEqual.
+    """
+    # first check that match
+    if type(a) != type(b):
+        return False
+    elif isinstance(a, (np.ndarray, np.generic)):
+        # For arrays, use np.array_equal to check for equivalence
+        return np.array_equal(a, b)
+    elif isinstance(a, (pd.Series, pd.DataFrame)):
+        return a.equals(b)
+    else:
+        # For standard Python objects, the simple '==' works
+        return a == b
+
+
 def ccpNmrV3CoreSetter(doNotify=True, noUndo=False, **actionKwds):
     """A decorator wrap the property setters method in an undo block and triggering the
     'change' notification if doNotify=True
@@ -1262,13 +1281,10 @@ def ccpNmrV3CoreSetter(doNotify=True, noUndo=False, **actionKwds):
         self = args[0]  # this is the object
         # value = args[1]
 
-        application = getApplication()  # pass it in to reduce overhead
-
         oldValue = getattr(self, func.__name__)
-
+        application = getApplication()  # pass it in to reduce overhead
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
-
                 try:
                     # call the wrapped function
                     result = func(*args, **kwds)
@@ -1276,7 +1292,7 @@ def ccpNmrV3CoreSetter(doNotify=True, noUndo=False, **actionKwds):
                     raise
                 finally:
                     # currently block all items from the spectrum-/peakList-Views, etc.
-                    if not noUndo and (args[1] != oldValue):
+                    if not noUndo and not _equal(args[1], oldValue):
                         addUndoItem(undo=BlankedPartial(func, self, ('change', actionKwds), False, self, oldValue),
                                     redo=BlankedPartial(func, self, ('change', actionKwds), False, self, args[1]))
         if doNotify:
@@ -1526,6 +1542,77 @@ def main():
     print(f'>>> {application.project._undo}')
     for value in application.project._undo:
         print(f'>>>   {value}')
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    deep_equal = _equal
+    print("### Deep Equal Examples ###")
+
+    # --- primitives ---
+    print("int vs int:", deep_equal(5, 5))
+    print("int vs float (strict=False):", deep_equal(5, 5.0))
+    print("int vs float (strict=True):", deep_equal(5, 5.0, strict_type=True))
+    print("nan vs nan (equal_nan=True):", deep_equal(float("nan"), float("nan"), equal_nan=True))
+    print("nan vs nan (equal_nan=False):", deep_equal(float("nan"), float("nan"), equal_nan=False))
+
+    # --- numpy ---
+    arr1 = np.array([1.0, 2.0, np.nan])
+    arr2 = np.array([1.0, 2.0, np.nan])
+    print("NumPy arrays with NaN:", deep_equal(arr1, arr2))
+    print("NumPy arrays tolerant compare:", deep_equal([1.0, 2.0000001], [1.0, 2.0], rtol=1e-6))
+
+    # numpy scalar vs Python scalar
+    print("np.int64 vs int:", deep_equal(np.int64(42), 42))
+
+    # --- pandas ---
+    s1 = pd.Series([1, 2, np.nan], name="x")
+    s2 = pd.Series([1, 2, np.nan], name="x")
+    s3 = pd.Series([1, 2, np.nan], name="y")
+    print("Series equal:", deep_equal(s1, s2))
+    print("Series with different names (check_names=True):", deep_equal(s1, s3))
+    print("Series with different names (check_names=False):", deep_equal(s1, s3, pandas_check_names=False))
+
+    df1 = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
+    df2 = pd.DataFrame({"b": [3, 4], "a": [1, 2]})
+    print("DataFrames column order ignored:", deep_equal(df1, df2, pandas_check_like=True))
+    print("DataFrames column order required:", deep_equal(df1, df2, pandas_check_like=False))
+
+    print("Series to DataFame equal:", deep_equal(s1, df1))
+
+    # --- containers ---
+    print("List vs tuple:", deep_equal([1, 2], (1, 2)))
+    print("List vs tuple strict:", deep_equal([1, 2], (1, 2), strict_type=True))
+    print("Unordered sequence compare:", deep_equal([1, 2, 3], [3, 2, 1], sequence_unordered=True))
+
+    print("Dicts equal:", deep_equal({"a": 1, "b": 2}, {"b": 2, "a": 1}))
+    print("Sets equal:", deep_equal({1, 2, 3}, {3, 2, 1}))
+
+
+    from dataclasses import dataclass
+    from datetime import datetime, timedelta, timezone
+
+    # --- dataclass ---
+    @dataclass
+    class Point:
+        x: int
+        y: int
+
+
+    p1 = Point(1, 2)
+    p2 = Point(1, 2)
+    p3 = Point(2, 3)
+    print("Dataclass equal:", deep_equal(p1, p2))
+    print("Dataclass not equal:", deep_equal(p1, p3))
+
+    # --- datetime ---
+    dt1 = datetime(2020, 1, 1, 12, tzinfo=timezone.utc)
+    dt2 = datetime(2020, 1, 1, 7, tzinfo=timezone(timedelta(hours=-5)))
+    print("Timezone-aware datetimes (normalize_tz=True):", deep_equal(dt1, dt2))
+    print("Timezone-aware datetimes (normalize_tz=False):", deep_equal(dt1, dt2, normalize_tz=False))
+
+    # --- tricky ---
+    print("None vs NaN (none_equals_nan=True):", deep_equal(None, float("nan")))
+    print("None vs NaN (none_equals_nan=False):", deep_equal(None, float("nan"), none_equals_nan=False))
 
 
 if __name__ == '__main__':

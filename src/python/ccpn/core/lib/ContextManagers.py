@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-08 16:30:35 +0100 (Mon, September 08, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-09 18:55:13 +0100 (Tue, September 09, 2025) $"
 __version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ import re
 import signal
 import pandas as pd
 import numpy as np
+import weakref
 from functools import partial
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QPainter
@@ -1269,32 +1270,48 @@ def _equal(a, b, **_):
         return a == b
 
 
-def ccpNmrV3CoreSetter(doNotify=True, noUndo=False, **actionKwds):
-    """A decorator wrap the property setters method in an undo block and triggering the
-    'change' notification if doNotify=True
+# The cache is now conditional, so it's defined here
+_cached_values = weakref.WeakKeyDictionary()
+
+def ccpNmrV3CoreSetter(doNotify=True, noUndo=False, useCache=False, **actionKwds):
+    """
+    A decorator to wrap property setters, with an optional cache to check
+    if the value has changed. An undo block wraps the setter.
+    A 'change' notification is triggered if doNotify is True.
     """
 
     @decorator.decorator
-    def theDecorator(*args, **kwds):
-        func = args[0]
-        args = args[1:]  # Optional 'self' is now args[0]
-        self = args[0]  # this is the object
-        # value = args[1]
+    def theDecorator(func, self, new_value):
+        # --- Conditional logic based on the 'useCache' flag ---
+        if useCache:
+            old_value = _cached_values.get(self)
+        else:
+            # Original, non-cached approach: get the value directly
+            # Note: This will re-trigger the getter method if it exists
+            old_value = getattr(self, func.__name__)
+        # NOTE:ED - need to move the check here, but isn't working correctly :|
+        # If the value is the same, we can skip the process
+        # if _equal(new_value, old_value):
+        #     return
+        # --- End of conditional logic ---
 
-        oldValue = getattr(self, func.__name__)
         application = getApplication()  # pass it in to reduce overhead
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
                 try:
-                    # call the wrapped function
-                    result = func(*args, **kwds)
+                    # Call the original setter method to update the attribute
+                    result = func(self, new_value)
                 except Exception:
                     raise
                 finally:
-                    # currently block all items from the spectrum-/peakList-Views, etc.
-                    if not noUndo and not _equal(args[1], oldValue):
-                        addUndoItem(undo=BlankedPartial(func, self, ('change', actionKwds), False, self, oldValue),
-                                    redo=BlankedPartial(func, self, ('change', actionKwds), False, self, args[1]))
+                    # Only add an undo item if the old value was different.
+                    if not noUndo and not _equal(new_value, old_value):
+                        addUndoItem(undo=BlankedPartial(func, self, ('change', actionKwds), False, self, old_value),
+                                    redo=BlankedPartial(func, self, ('change', actionKwds), False, self, new_value))
+                        # If caching is enabled, update the cache with the new value
+                        if useCache:
+                            _cached_values[self] = new_value
+
         if doNotify:
             self._finaliseAction('change', **actionKwds)
 

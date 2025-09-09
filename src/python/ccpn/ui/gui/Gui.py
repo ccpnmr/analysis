@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-07-31 15:06:06 +0100 (Thu, July 31, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-09 19:02:06 +0100 (Tue, September 09, 2025) $"
 __version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
@@ -61,7 +61,8 @@ from ccpnmodel.ccpncore.memops.ApiError import ApiError
 
 
 _FOREGROUND = '_foregroundColour'
-_ACTIONGEOMETRIES = '_actionGeometries'
+_BACKGROUND = '_backgroundColour'
+_COLOURENABLED = '_colourEnabled'
 
 
 #-----------------------------------------------------------------------------------------
@@ -145,26 +146,69 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
     #         # draw new focus-border
     #         self._drawBorder(element, painter, widget, col=Base._highlightVivid)
 
-    def drawControl(self, element, option, painter, widget=None):
-        # if element in {QtWidgets.QStyle.CE_TabBarTab,
-        #                }:
-        #     # Customise the highlight color for the tab-widget
-        #     if Base._highlightVivid is not None:
-        #         option.palette.setColor(option.palette.Highlight, Base._highlightVivid)
-        if (element in {QtWidgets.QStyle.CE_MenuItem, } and
-                isinstance(option, QtWidgets.QStyleOptionMenuItem) and
-                (_actionGeometries := getattr(widget, _ACTIONGEOMETRIES, None)) and
-                (action := _actionGeometries.get(str(option.rect))) and
-                (colour := action.property(_FOREGROUND))):
-            # NOTE:ED - should move this exclusively to the menu-module
-            # Customise the foreground colour for the menu-item from the QAction
-            # - menu-items don't have a stylesheet or palette
-            option.palette.setColor(option.palette.Text, colour)
-        super().drawControl(element, option, painter, widget)
-        # if element in {QtWidgets.QStyle.CE_ItemViewItem, } and (option.state & QtWidgets.QStyle.State_HasFocus):
-        #     # draw border inside the listWidget/listView/TreeView
-        #     #   - draws border inside pulldowns though, shame :(
-        #     self._drawBorder(element, painter, widget, col=Base._highlightVivid)
+    # NOTE:ED - moved the menuItem proxyStyle to Menu.py
+    # def drawControl(self, element, option, painter, widget=None):
+    #     # if element in {QtWidgets.QStyle.CE_TabBarTab,
+    #     #                }:
+    #     #     # Customise the highlight color for the tab-widget
+    #     #     if Base._highlightVivid is not None:
+    #     #         option.palette.setColor(option.palette.Highlight, Base._highlightVivid)
+    #     if (element in {QtWidgets.QStyle.CE_MenuItem, } and
+    #             isinstance(option, QtWidgets.QStyleOptionMenuItem) and
+    #             widget is not None and
+    #             (_colourEnabled := getattr(widget, _COLOURENABLED, False))):
+    #
+    #         # Find the action whose geometry contains the option's rectangle
+    #         # action = None
+    #         # for act in widget.actions():
+    #         #     if act.isSeparator() or not act.isVisible():
+    #         #         continue
+    #         #     if widget.actionGeometry(act).contains(option.rect.center()):
+    #         #         action = act
+    #         #         break
+    #
+    #         if action := next((act for act in widget.actions()
+    #                            if not act.isSeparator() and
+    #                               act.isVisible() and
+    #                               widget.actionGeometry(act).contains(option.rect.center())), None):
+    #             # if (element in {QtWidgets.QStyle.CE_MenuItem, } and
+    #             #         isinstance(option, QtWidgets.QStyleOptionMenuItem) and
+    #             #         (_actionGeometries := getattr(widget, _ACTIONGEOMETRIES, None)) and
+    #             #         (action := _actionGeometries.get(str(option.rect)))):
+    #             if colour := action.property(_FOREGROUND):
+    #                 # NOTE:ED - should move this exclusively to the menu-module
+    #                 # Customise the foreground colour for the menu-item from the QAction
+    #                 # - menu-items don't have a stylesheet or palette
+    #                 option.palette.setColor(option.palette.Text, colour)
+    #             if colour := action.property(_BACKGROUND):
+    #                 # Customise the background colour
+    #                 self._paint_background(painter, widget, colour)
+    #
+    #     super().drawControl(element, option, painter, widget)
+    #     # if element in {QtWidgets.QStyle.CE_ItemViewItem, } and (option.state & QtWidgets.QStyle.State_HasFocus):
+    #     #     # draw border inside the listWidget/listView/TreeView
+    #     #     #   - draws border inside pulldowns though, shame :(
+    #     #     self._drawBorder(element, painter, widget, col=Base._highlightVivid)
+    #
+    # def _paint_background(self, painter: QtGui.QPainter, widget: QtWidgets.QWidget | None,
+    #                       colour: QtGui.QColor | bool = True):
+    #     if not widget:
+    #         return
+    #     painter.save()
+    #     try:
+    #         wind = widget.rect()
+    #         # paint the new background
+    #         painter.translate(0.5, 0.5)  # move to pixel-centre
+    #         painter.setRenderHint(QtGui.QPainter.Antialiasing, True)
+    #         if isinstance(colour, bool):
+    #             colour = QtGui.QColor('808080')
+    #             colour.setAlpha(15)  # very feint to overlay the background like alternateBase
+    #         painter.fillRect(wind.adjusted(0, 0, -4, -4), colour)
+    #     except Exception:
+    #         ...
+    #     finally:
+    #         painter.translate(-0.5, -0.5)
+    #         painter.restore()
 
     def drawComplexControl(self, control: QtWidgets.QStyle.ComplexControl,
                            option: QtWidgets.QStyleOptionComplex,

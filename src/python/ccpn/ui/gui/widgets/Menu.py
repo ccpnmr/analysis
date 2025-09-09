@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-07-31 15:06:08 +0100 (Thu, July 31, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-09 19:02:06 +0100 (Tue, September 09, 2025) $"
 __version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
@@ -41,10 +41,61 @@ HOWTOSMENU = 'How-Tos'
 PLUGINSMENU = 'User Plugins'
 CCPNPLUGINSMENU = 'CCPN Plugins'
 
+_FOREGROUND = '_foregroundColour'
+_BACKGROUND = '_backgroundColour'
+_COLOURENABLED = '_colourEnabled'
+
+
+class _MenuProxyStyle(QtWidgets.QProxyStyle):
+    """Class to handle foreground/background colours in menuItems.
+    """
+
+    def drawControl(self, element, option, painter, widget=None):
+        if (element in {QtWidgets.QStyle.CE_MenuItem, } and
+                isinstance(option, QtWidgets.QStyleOptionMenuItem) and
+                widget is not None and
+                (_colourEnabled := getattr(widget, _COLOURENABLED, False))):
+            if action := next((act for act in widget.actions()
+                               if not act.isSeparator() and
+                                  act.isVisible() and
+                                  widget.actionGeometry(act).contains(option.rect.center())), None):
+                if colour := action.property(_FOREGROUND):
+                    # NOTE:ED - should move this exclusively to the menu-module
+                    # Customise the foreground colour for the menu-item from the QAction
+                    # - menu-items don't have a stylesheet or palette
+                    option.palette.setColor(option.palette.Text, colour)
+                if colour := action.property(_BACKGROUND):
+                    # Customise the background colour
+                    self._paint_background(painter, widget, colour)
+        super().drawControl(element, option, painter, widget)
+
+    def _paint_background(self, painter: QtGui.QPainter, widget: QtWidgets.QWidget | None,
+                          colour: QtGui.QColor | bool = True):
+        if not widget:
+            return
+        painter.save()
+        try:
+            wind = widget.rect()
+            # paint the new background
+            painter.translate(0.5, 0.5)  # move to pixel-centre
+            painter.setRenderHint(QtGui.QPainter.Antialiasing, True)
+            if isinstance(colour, bool):
+                colour = QtGui.QColor('808080')
+                colour.setAlpha(15)  # very feint to overlay the background like alternateBase
+            painter.fillRect(wind.adjusted(0, 0, -4, -4), colour)
+        except Exception:
+            ...
+        finally:
+            painter.translate(-0.5, -0.5)
+            painter.restore()
+
+
+#=========================================================================================
+# Menu
+#=========================================================================================
 
 class Menu(QtWidgets.QMenu, Base):
     _colourEnabled = False
-    _actionGeometries = None
     _filter = None
 
     def __init__(self, title, parent, isFloatWidget=False, **kwds):
@@ -56,6 +107,9 @@ class Menu(QtWidgets.QMenu, Base):
         self.setTitle(title)
         self.isFloatWidget = isFloatWidget
         self.setToolTipsVisible(True)
+        # patch for icon sizes in menus, etc.
+        styles = QtWidgets.QStyleFactory()
+        self.setStyle(_MenuProxyStyle(styles.create('fusion')))
 
     def addItem(self, text, shortcut=None, callback=None, checked=True, checkable=False, icon=None, toolTip=None,
                 **kwargs):
@@ -103,13 +157,14 @@ class Menu(QtWidgets.QMenu, Base):
         if targetAction:
             self.insertAction(targetAction, action)
 
-    def showEvent(self, event: QtGui.QShowEvent) -> None:
-        super().showEvent(event)
-        if self._colourEnabled:
-            # if _colourEnabled defined for this menu then build a dict of the actionGeometry's
-            # these can be used in the QProxyStyle to provide access the QAction
-            self._actionGeometries = {str(self.actionGeometry(action)): action
-                                      for action in self.actions()}
+    # NOTE:ED - not required now - delete soon
+    # def showEvent(self, event: QtGui.QShowEvent) -> None:
+    #     super().showEvent(event)
+    #     if self._colourEnabled:
+    #         # if _colourEnabled defined for this menu then build a dict of the actionGeometry's
+    #         # these can be used in the QProxyStyle to provide access the QAction
+    #         self._actionGeometries = {str(self.actionGeometry(action)): action
+    #                                   for action in self.actions()}
 
     def setColourEnabled(self, value):
         if not isinstance(value, bool):

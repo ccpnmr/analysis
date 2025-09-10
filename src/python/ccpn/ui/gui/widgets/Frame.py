@@ -47,7 +47,7 @@ ScrollableFrame(parent=None, showBorder=False, fShape=None, fShadow=None,
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -59,8 +59,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-08-23 19:21:19 +0100 (Fri, August 23, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__dateModified__ = "$dateModified: 2025-09-10 16:48:09 +0100 (Wed, September 10, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -69,6 +69,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+__all__ = ['ClippableFrame', 'Frame', 'OpenGLOverlayFrame', 'ScrollableFrame', 'ScrollOpenGLOverlayFrame']
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
@@ -79,6 +81,10 @@ from ccpn.ui.gui.widgets.Font import getFont
 from ccpn.ui.gui.guiSettings import (CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND,
                                      CCPNGLWIDGET_HEXHIGHLIGHT, getColours)
 
+
+#=========================================================================================
+# Frame
+#=========================================================================================
 
 class Frame(QtWidgets.QFrame, Base):
     FRAME_DICT = {
@@ -190,6 +196,10 @@ class Frame(QtWidgets.QFrame, Base):
     #     super().setMaximumHeight(int(p_int))
 
 
+#=========================================================================================
+# ScrollableFrame
+#=========================================================================================
+
 class ScrollableFrame(Frame):
     """A scrollable frame
     """
@@ -247,6 +257,10 @@ class ScrollableFrame(Frame):
         """
         self._cornerDisplay = ScrollBarVisibilityWatcher(self._scrollArea)
 
+
+#=========================================================================================
+# OpenGLOverlayFrame
+#=========================================================================================
 
 class OpenGLOverlayFrame(Frame):
     AUTOFILLBACKGROUND = False
@@ -384,6 +398,10 @@ class OpenGLOverlayFrame(Frame):
         self.update()
 
 
+#=========================================================================================
+# ScrollOpenGLOverlayFrame
+#=========================================================================================
+
 class ScrollOpenGLOverlayFrame(OpenGLOverlayFrame):
     """
     A scrollable frame
@@ -438,11 +456,61 @@ class ScrollOpenGLOverlayFrame(OpenGLOverlayFrame):
         return self._scrollArea
 
 
-if __name__ == '__main__':
+#=========================================================================================
+# ClippableFrame
+#=========================================================================================
+
+class ClippableFrame(Frame):
+
+    def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None,
+                 setLayout=False, **kwds):
+
+        kwOuter = {}
+        for key in 'grid gridSpan stretch hAlign vAlign hPolicy vPolicy'.split():
+            if key in kwds:
+                kwOuter[key] = kwds[key]
+                del (kwds[key])
+
+        # Intermediate ignored-frame
+        outer = Frame(parent=parent, setLayout=True, **kwOuter)
+        sizePolicy = outer.sizePolicy()
+        # Pass through the remaining parameters
+        super().__init__(outer, showBorder=showBorder, fShape=fShape, fShadow=fShadow, setLayout=setLayout,
+                         grid=(0, 0), **kwds)
+        # Copy the requirements from the intermediate frame
+        if setLayout:
+            self.getLayout().setAlignment(outer.getLayout().alignment())
+            # This is the important instruction to enforce fixed size
+            self.getLayout().setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        # Carry over the non-ignored policy from the intermediate frame
+        if sizePolicy.horizontalPolicy() == QtWidgets.QSizePolicy.Ignored:
+            sizePolicy.setHorizontalPolicy(QtWidgets.QSizePolicy.Fixed)
+        if sizePolicy.verticalPolicy() == QtWidgets.QSizePolicy.Ignored:
+            sizePolicy.setVerticalPolicy(QtWidgets.QSizePolicy.Fixed)
+        self.setSizePolicy(sizePolicy)
+
+        # KEEP:ED - for the minute
+        # # outer ignored-frame
+        # _outer = Frame(parent=_topWidget, grid=(row, 0), gridSpan=(1, 6), setLayout=True,
+        #                hAlign='left', vAlign='top')
+        # _outer.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Fixed)
+        # # _outer.getLayout().setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        # # _outer.setContentsMargins(hh, hh, hh, hh)
+        # # _outer.getLayout().setColumnStretch(1, 2)
+        # # inner static-frame
+        # self._moduleHeaderFrame = Frame(parent=_outer, grid=(0, 0), setLayout=True)
+        # self._moduleHeaderFrame.layout().setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        # self._moduleHeaderFrame.layout().setAlignment(_outer.getLayout().alignment())
+
+
+#=========================================================================================
+# main -testing
+#=========================================================================================
+
+def _main():
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.BasePopup import BasePopup
     from ccpn.ui.gui.widgets.Label import Label
-
 
     class TestPopup(BasePopup):
         def body(self, parent):
@@ -479,3 +547,7 @@ if __name__ == '__main__':
     popup = TestPopup(title='Test Frame')
     popup.resize(200, 400)
     app.start()
+
+
+if __name__ == '__main__':
+    _main()

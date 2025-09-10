@@ -59,9 +59,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-08-11 11:59:37 +0100 (Mon, August 11, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-09-10 16:07:09 +0100 (Wed, September 10, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -4666,7 +4666,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
             # if ph0 is not None and ph1 is not None and pivot is not None:
             #     data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
-            y = positionPixel[1] + spectrumView._traceScale * (self.axisT - self.axisB) * data
+            y = positionPixel[1] + spectrumView.traceScale * (self.axisT - self.axisB) * data
             _posColour = spectrumView.posColours[0]
             colR, colG, colB = _posColour[0:3]
 
@@ -4716,7 +4716,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
                 data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
             y = spectrumView.spectrum.getPpmArray(dimension=dim)
-            x = positionPixel[0] + spectrumView._traceScale * (self.axisL - self.axisR) * data
+            x = positionPixel[0] + spectrumView.traceScale * (self.axisL - self.axisR) * data
             _posColour = spectrumView.posColours[0]
             colR, colG, colB = _posColour[0:3]
 
@@ -4936,7 +4936,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
                     if self.is1D:
                         trace.vertices[1::2] = preData
                     else:
-                        y = positionPixel[1] + specView._traceScale * (self.axisT - self.axisB) * preData
+                        y = positionPixel[1] + specView.traceScale * (self.axisT - self.axisB) * preData
                         y = np.append(y, (positionPixel[1], positionPixel[1]))
                         trace.vertices[1::2] = y
 
@@ -4966,7 +4966,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
                     if self.is1D:
                         trace.vertices[::2] = preData
                     else:
-                        x = positionPixel[0] + specView._traceScale * (self.axisL - self.axisR) * preData
+                        x = positionPixel[0] + specView.traceScale * (self.axisL - self.axisR) * preData
                         x = np.append(x, (positionPixel[0], positionPixel[0]))
                         trace.vertices[::2] = x
 

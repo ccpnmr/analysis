@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-09 19:02:06 +0100 (Tue, September 09, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-10 12:02:33 +0100 (Wed, September 10, 2025) $"
 __version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
@@ -328,7 +328,8 @@ def _hide_empty_submenus(menu: QtWidgets.QMenu,
             # Check if the submenu has any visible actions
             visible_actions = [a for a in submenu.actions() if a.isVisible()]
             if not visible_actions and _depth >= minDepth:
-                action.setVisible(True)
+                action.setVisible(False)
+                # Action is hidden, but colour kept for debugging
                 action.setProperty(_FOREGROUND, QtGui.QColor('red'))
             else:
                 action.setVisible(True)
@@ -357,6 +358,10 @@ def _flatten_single_item_submenus(menu: QtWidgets.QMenu,
                 newAct.setText(f'{action.text()}\t{newAct.text()}')
                 # Insert the single action in its place
                 menu.insertAction(action, newAct)
+                # Copy the colours from the original menu item
+                # Note, there may be a conflict with existing properties
+                newAct.setProperty(_FOREGROUND, action.property(_FOREGROUND))
+                newAct.setProperty(_BACKGROUND, action.property(_BACKGROUND))
                 # Remove the original submenu
                 menu.removeAction(action)
 

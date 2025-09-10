@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-10 18:01:46 +0000 (Fri, January 10, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-09-10 18:22:04 +0100 (Wed, September 10, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,8 +39,8 @@ from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib.Pid import Pid, remapSeparators
-from ccpn.core.lib.ContextManagers import newObject, newV3Object, renameObject, \
-    undoStackBlocking, undoBlock, ccpNmrV3CoreSetter
+from ccpn.core.lib.ContextManagers import (newObject, newV3Object, renameObject,
+                                           undoStackBlocking, undoBlock, ccpNmrV3CoreSetter)
 from ccpn.util.decorators import logCommand
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.DataEnum import DataEnum
@@ -525,8 +525,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             return self._data.loc[uniqueId]
         except Exception as es:
-            raise ValueError(
-                f'{self.className}._getByUniqueId: error getting row, uniqueId {uniqueId} in {self}  -  {es}') from None
+            raise ValueError(f'{self.className}._getByUniqueId: error getting row, '
+                             f'uniqueId {uniqueId} in {self}  -  {es}') from None
 
     def _getAttribute(self, uniqueId, name, attribType):
         """Get the named attribute from the chemicalShift with supplied uniqueId
@@ -538,8 +538,8 @@ class ChemicalShiftList(AbstractWrapperObject):
             _val = self._data.at[uniqueId, name]
             return None if (_val is None or (_val != _val)) else attribType(_val)
         except Exception as es:
-            raise ValueError(
-                f'{self.className}._getAttribute: error getting attribute {name} in {self}  -  {es}') from None
+            raise ValueError(f'{self.className}._getAttribute: error getting attribute '
+                             f'{name} in {self}  -  {es}') from None
 
     def _setAttribute(self, uniqueId, name, value):
         """Set the attribute of the chemicalShift with the supplied uniqueId
@@ -547,8 +547,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             self._data.at[uniqueId, name] = value
         except Exception as es:
-            raise ValueError(
-                f'{self.className}._setAttribute: error setting attribute {name} in {self}  -  {es}') from None
+            raise ValueError(f'{self.className}._setAttribute: error setting attribute '
+                             f'{name} in {self}  -  {es}') from None
 
     def _getAttributes(self, uniqueId, startName, endName, attribTypes):
         """Get the named attributes from the chemicalShift with supplied uniqueId
@@ -562,8 +562,8 @@ class ChemicalShiftList(AbstractWrapperObject):
                          zip(_val, attribTypes))
 
         except Exception as es:
-            raise ValueError(
-                f'{self.className}._getAttributes: error getting attributes {startName}|{endName} in {self}  -  {es}') from None
+            raise ValueError(f'{self.className}._getAttributes: error getting attributes '
+                             f'{startName}|{endName} in {self}  -  {es}') from None
 
     def _setAttributes(self, uniqueId, startName, endName, value):
         """Set the attributes of the chemicalShift with the supplied uniqueId
@@ -571,8 +571,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             self._data.loc[uniqueId, startName:endName] = value
         except Exception as es:
-            raise ValueError(
-                f'{self.className}._setAttributes: error setting attributes {startName}|{endName} in {self}  -  {es}') from None
+            raise ValueError(f'{self.className}._setAttributes: error setting attributes '
+                             f'{startName}|{endName} in {self}  -  {es}') from None
 
     def _undoRedoShifts(self, shifts):
         """update the shifts after undo/redo
@@ -695,7 +695,17 @@ class ChemicalShiftList(AbstractWrapperObject):
 
             # drop any duplicates and merge back in the Nones which must be kept
             _data.reset_index(drop=True, inplace=True)
-            _noDupes = _data.drop_duplicates(CS_NMRATOM).merge(_data[_data[CS_NMRATOM].isnull()], how='outer')
+            _noDupes = (_data
+                        .drop_duplicates(CS_NMRATOM)
+                        .merge(_data[_data[CS_NMRATOM].isnull()],
+                               how='outer')
+                        )
+            # _noDupes_assert = (_data
+            #                    .drop_duplicates(CS_NMRATOM)
+            #                    .merge(_data[_data[CS_NMRATOM].isnull()].astype({CS_NMRATOM: 'object'}),
+            #                           how='outer')
+            #                    )
+            # assert _noDupes.equals(_noDupes_assert)
             _noDupes.sort_values(CS_UNIQUEID, inplace=True, )
             if len(_noDupes) != oldLen:
                 # log a warning and update the dataFrame
@@ -879,9 +889,8 @@ class ChemicalShiftList(AbstractWrapperObject):
             # raise an error if there are any assigned peaks
             _val = _shs[0]
             if _val.assignedPeaks:
-                raise ValueError(
-                    f'{self.className}.deleteChemicalShift: cannot delete chemicalShift with assigned peaks')
-
+                raise ValueError(f'{self.className}.deleteChemicalShift: '
+                                 f'cannot delete chemicalShift with assigned peaks')
             self._deleteChemicalShiftObject(rows)
 
     def _deleteChemicalShiftObject(self, rows):

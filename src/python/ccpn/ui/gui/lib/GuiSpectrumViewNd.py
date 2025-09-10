@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-03 15:09:47 +0100 (Wed, September 03, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-10 16:07:47 +0100 (Wed, September 10, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -81,6 +81,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         # have to have this set before _setupBorderItem called
         self._application = self.strip.spectrumDisplay.mainWindow.application
+        self.preferences = self._application.preferences
+        self._globalTraceScale = self.preferences.general.traceGlobalScale
 
         GuiSpectrumView.__init__(self)
 
@@ -145,12 +147,17 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     @property
     def traceScale(self) -> float:
         """Scale for trace in this spectrumView"""
-        return self._traceScale
+        if self._traceScale is None:
+            self._traceScale = (1.0 / self.traceMax)
+        return self._traceScale * self.preferences.general.traceGlobalScale
 
     @traceScale.setter
     def traceScale(self, value):
         """Setter for scale for trace in this spectrumView"""
         self._traceScale = value
+        self._updateTraceScale()
+
+    def _updateTraceScale(self):
         self.strip._updateTraces()
         self._updatePhasing()
 

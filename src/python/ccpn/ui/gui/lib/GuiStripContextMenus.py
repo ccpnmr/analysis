@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-13 14:25:35 +0100 (Wed, August 13, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-10 16:07:47 +0100 (Wed, September 10, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -937,6 +937,11 @@ def _decreaseTraceScaleItem(strip):
                     shortcut='TD', icon='icons/tracescale-down', callback=strip.spectrumDisplay.decreaseTraceScale)
 
 
+def _showTraceScaleBalloon(strip):
+    return _SCMitem(name='Show Trace Scale Balloon',
+                    typeItem=ItemTypes.get(ITEM), tooltip='Show Trace Scale Balloon',
+                    shortcut='TB', icon='icons/tracescale-down', callback=strip.spectrumDisplay.showTraceScaleBalloon)
+
 def _setPivotItem(strip):
     return _SCMitem(name='Set Pivot',
                     typeItem=ItemTypes.get(ITEM), toolTip='Set pivot value',
@@ -1277,6 +1282,7 @@ def _getNdPhasingMenu(guiStripNd) -> Menu:
         _removeAllTracesItem(guiStripNd),
         _increaseTraceScaleItem(guiStripNd),
         _decreaseTraceScaleItem(guiStripNd),
+        _showTraceScaleBalloon(guiStripNd),
         _setPivotItem(guiStripNd),
         _showActivePhaseTraceItem(guiStripNd),
         _separator(),

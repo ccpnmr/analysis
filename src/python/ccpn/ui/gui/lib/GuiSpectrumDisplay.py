@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-08-11 11:59:36 +0100 (Mon, August 11, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-09-10 16:07:47 +0100 (Wed, September 10, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -3207,6 +3207,17 @@ class GuiSpectrumDisplay(CcpnModule):
     def updateTraces(self):
         for strip in self.strips:
             strip._updateTraces()
+
+    def showTraceScaleBalloon(self):
+        from ccpn.ui.gui.popups.TraceScaleBalloon import TraceScaleBalloon
+        balloon = TraceScaleBalloon(parent=self, mainWindow=self.mainWindow)
+
+        # get the desired position of the popup
+        pos = QtGui.QCursor().pos()
+        _size = balloon.centralWidgetSize / 2
+        popupPos = pos - QtCore.QPoint(_size.width(), _size.height())
+        # show the editPopup near the mouse position
+        balloon.showAt(popupPos)
 
     @logCommand(get='self')
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],

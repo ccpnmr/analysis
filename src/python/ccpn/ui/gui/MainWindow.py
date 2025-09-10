@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-12 19:40:43 +0100 (Tue, August 12, 2025) $"
-__version__ = "$Revision: 3.3.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-09-10 16:46:25 +0100 (Wed, September 10, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -397,8 +397,9 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                         }
                         QMenuBar { color: palette(text); }
                         QMenuBar::item:disabled { color: palette(dark); }
-                        QProgressBar { text-align: center; }
                         """
+                        # QProgressBar { text-align: center; }  # this messes with the colours :|
+
         # there is also some weird stuff with the qprogressbar text-colour:
         #   the left-edge of the text-label is its local 0%, the right-edge its local 100%,
         #   and the text-label is coloured highlighttedtext|text based on the progress %

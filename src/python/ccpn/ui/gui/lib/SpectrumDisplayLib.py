@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-01 10:34:19 +0100 (Mon, September 01, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-12 15:39:51 +0100 (Fri, September 12, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -92,8 +92,7 @@ def navigateToCurrentPeakZ(strip: Strip, peak: Peak):
         return
 
     peakPosReordered = peak.reorderValues(peak.position, strip.axisCodes)
-    newPos = (*strip.positions[:-1], peakPosReordered[-1])
-
+    newPos = (*strip.positions[:2], *peakPosReordered[2:])
     navigateToPositionInStrip(strip,  positions=newPos)
 
 

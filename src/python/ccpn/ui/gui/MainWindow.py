@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-10 16:46:25 +0100 (Wed, September 10, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-09-15 16:27:31 +0100 (Mon, September 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1974,6 +1974,16 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
                 else:
                     getLogger().warning('Current strip is not 1D')
+
+    def extractSliceAtPeakPosition(self):
+        peak = self.application.current.peak
+
+        if not peak:
+            getLogger().warning('No peak selected')
+            return
+
+        peak._extractSliceAtPeakPosition()
+
 
     @logCommand('mainWindow.')
     def refitCurrentPeaks(self, singularMode=False):

@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-10 16:07:47 +0100 (Wed, September 10, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-15 16:27:31 +0100 (Mon, September 15, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -505,6 +505,7 @@ def _centreOnSelectedPeak():
                     typeItem=ItemTypes.get(ITEM), toolTip='Centre the current strip on the first selected peak',
                     callback=_app.mainWindow.centreOnSelectedPeak)
 
+
 def _centreZOnSelectedPeak():
     from ccpn.framework.Application import getApplication
 
@@ -513,6 +514,16 @@ def _centreZOnSelectedPeak():
     return _SCMitem(name='Centre Z axis on Selected Peak',
                     typeItem=ItemTypes.get(ITEM), toolTip='Centre Z axes on the current peak',
                     callback=_app.mainWindow.centreZOnPeak)
+
+
+def _extractSliceAtPeakPosition():
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+    return _SCMitem(name='Save trace(s) as 1D',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Extract Slice from peak position', shortcut='XS',
+                    callback=_app.mainWindow.extractSliceAtPeakPosition)
+
 
 def _refitPeakItem():
     from ccpn.framework.Application import getApplication
@@ -1314,6 +1325,7 @@ def _getNdPeakMenuItems(menuId) -> list:
         _estimateVolumesItem(menuId),
         _estimateCurrentVolumesItem(),
         _reorderPeakListAxesItem(),
+        _extractSliceAtPeakPosition(),
         _separator(),
 
         _arrangePeakLabelsItem(),

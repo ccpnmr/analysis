@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-15 16:27:31 +0100 (Mon, September 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-15 16:33:46 +0100 (Mon, September 15, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -516,7 +516,7 @@ def _centreZOnSelectedPeak():
                     callback=_app.mainWindow.centreZOnPeak)
 
 
-def _extractSliceAtPeakPosition():
+def _extractSliceAtPeakPositionItem():
     from ccpn.framework.Application import getApplication
 
     _app = getApplication()
@@ -1325,7 +1325,7 @@ def _getNdPeakMenuItems(menuId) -> list:
         _estimateVolumesItem(menuId),
         _estimateCurrentVolumesItem(),
         _reorderPeakListAxesItem(),
-        _extractSliceAtPeakPosition(),
+        _extractSliceAtPeakPositionItem(),
         _separator(),
 
         _arrangePeakLabelsItem(),

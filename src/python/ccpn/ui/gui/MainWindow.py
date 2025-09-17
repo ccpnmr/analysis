@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-15 16:33:45 +0100 (Mon, September 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-17 14:53:16 +0100 (Wed, September 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -2198,6 +2198,11 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """
         if self.application.current.strip:
             self.application.current.strip.spectrumDisplay.toggleVTrace()
+
+    def showTraceScaleBalloon(self, window: 'GuiWindow'):
+        """Opens the trace scale balloon"""
+        if strip := self.application.current.strip:
+            strip.spectrumDisplay.showTraceScaleBalloon()
 
     def toggleLastAxisOnly(self, window: 'GuiWindow'):
         """

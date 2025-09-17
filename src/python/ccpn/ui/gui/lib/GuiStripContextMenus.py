@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-15 16:33:46 +0100 (Mon, September 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-17 14:53:16 +0100 (Wed, September 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -283,6 +283,12 @@ def _toggleVerticalTraceItem(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Toggle Vertical Trace On/Off',
                     checkable=True, checked=False, shortcut='TV', stripMethodName='vTraceAction',
                     callback=strip.toggleVerticalTrace)
+
+
+def _showTraceScaleBalloon(strip):
+    return _SCMitem(name='Show Trace Scale Balloon',
+                    typeItem=ItemTypes.get(ITEM), tooltip='Show Trace Scale Balloon',
+                    shortcut='TS', icon='icons/tracescale-up', callback=strip.spectrumDisplay.showTraceScaleBalloon)
 
 
 def _phasingConsoleItem(strip):
@@ -948,10 +954,6 @@ def _decreaseTraceScaleItem(strip):
                     shortcut='TD', icon='icons/tracescale-down', callback=strip.spectrumDisplay.decreaseTraceScale)
 
 
-def _showTraceScaleBalloon(strip):
-    return _SCMitem(name='Show Trace Scale Balloon',
-                    typeItem=ItemTypes.get(ITEM), tooltip='Show Trace Scale Balloon',
-                    shortcut='TB', icon='icons/tracescale-down', callback=strip.spectrumDisplay.showTraceScaleBalloon)
 
 def _setPivotItem(strip):
     return _SCMitem(name='Set Pivot',
@@ -1202,6 +1204,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _calibrateXY(guiStripNd),
         _toggleHorizontalTraceItem(guiStripNd),
         _toggleVerticalTraceItem(guiStripNd),
+        _showTraceScaleBalloon(guiStripNd),
         _phasingConsoleItem(guiStripNd),
         _separator(),
 

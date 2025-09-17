@@ -13,20 +13,28 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 
 
 class SmallScienceSpinBox(VariableScientificSpinBox):
+    """A Custom double spin box for the TraceScale Balloon
+
+    Subclass required for allowing very small numbers using scientific notation
+    As well as for subclassing stepBy.
+    """
     def __init__(self, parent, specView, precision, *args, **kwargs):
         self.view = specView
         self.precision = precision
-
+        # Has to be this way around or self.precision causes and error.
         super().__init__(parent, *args, **kwargs)
 
     def textFromValue(self, value):
+        """Same as superclass but removes check for small numbers"""
         return self.formatFloat(value)
 
     def formatFloat(self, value):
+        """Same as superclass but removes precision differences"""
         string = self._qLocale.toString(float(value), 'g', self.precision)
         return re.sub(r"e(-|\+?)0*(\d+)", r"e\1\2", string.replace("e+", "e"))
 
     def stepBy(self, step):
+        """Subclassed to do the same thing as the TU and TD shortcuts"""
         if step == 1:
             self.view.traceScale *= 1.4
             self.update()
@@ -35,7 +43,7 @@ class SmallScienceSpinBox(VariableScientificSpinBox):
             self.update()
 
     def update(self):
-        # added to refresh global trace scale.
+        """Refresh the traceScale values in GUI"""
         self.view._updateTraceScale()
         self.setValue(self.view.traceScale)
 
@@ -62,7 +70,6 @@ class TraceScaleBalloon(SpeechBalloon):
         # simplest way to make the popup function as modal and disappear as required
         self.setWindowFlags(int(self.windowFlags()) | QtCore.Qt.Popup)
         self._metrics.corner_radius = 3
-        self._metrics.pointer_height = 0
 
         self.globalSpinBox = None
         self.spinBoxes = []
@@ -74,6 +81,18 @@ class TraceScaleBalloon(SpeechBalloon):
         """Return the sizeHint for the central widget
         """
         return self._central_widget_size()
+
+    def estimateHeight(self):
+        """Estiamtes the hight of the speech balloon based on
+        number of spinboxes and padding used.
+
+        This only exists because I couldn't get qt to report accurate
+        sizes.
+        """
+        boxNum = len(self.spinBoxes) + 2
+        boxHeight = self.globalSpinBox.geometry().height()
+        padding = 40
+        return (boxNum * boxHeight) + padding
 
     def setWidgets(self):
         """add the widgets"""
@@ -92,15 +111,19 @@ class TraceScaleBalloon(SpeechBalloon):
         for row, view in enumerate(self.project.spectrumViews):
             row += 1
 
-            label = Label(parent=_frame, text=view.pid, grid=(row, 0))
+            Label(parent=_frame, text=view.pid, grid=(row, 0))
             spinBox = SmallScienceSpinBox(parent=_frame, value=view.traceScale, min=-1e11, max=1e11,
                                           grid=(row, 1), specView=view, precision=4)
             spinBox.setValue(view.traceScale)  # from call arg doesnt work for some reason.
-            spinBox.setMinimumWidth(250)
+            spinBox.setMinimumWidth(150)
 
             self.spinBoxes.append(spinBox)
 
     def globalSpinBoxCallback(self, _value):
+        """Callback for the global spin box
+
+        changes global trace scale preferences and updates all traces.
+        """
         self.preferences.general.traceGlobalScale = self.globalSpinBox.value() / 100
 
         for spinBox in self.spinBoxes:

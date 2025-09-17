@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-10 16:07:47 +0100 (Wed, September 10, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-17 14:09:54 +0100 (Wed, September 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -3212,11 +3212,15 @@ class GuiSpectrumDisplay(CcpnModule):
         from ccpn.ui.gui.popups.TraceScaleBalloon import TraceScaleBalloon
         balloon = TraceScaleBalloon(parent=self, mainWindow=self.mainWindow)
 
-        # get the desired position of the popup
-        pos = QtGui.QCursor().pos()
-        _size = balloon.centralWidgetSize / 2
-        popupPos = pos - QtCore.QPoint(_size.width(), _size.height())
-        # show the editPopup near the mouse position
+        _geometry = self._stripFrameScrollArea.geometry()
+        _topLeft = self.mapToGlobal(_geometry.topLeft())
+
+        height = balloon.estimateHeight()
+        spacer = 10
+
+        balloon.setFixedWidth((_geometry.width() - spacer))
+        popupPos = QtCore.QPoint(_topLeft.x(), _topLeft.y() + int(height / 2) + spacer)
+
         balloon.showAt(popupPos)
 
     @logCommand(get='self')

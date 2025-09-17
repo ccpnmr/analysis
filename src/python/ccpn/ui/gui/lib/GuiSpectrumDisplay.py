@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-17 14:09:54 +0100 (Wed, September 17, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-17 14:28:44 +0100 (Wed, September 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -3218,7 +3218,9 @@ class GuiSpectrumDisplay(CcpnModule):
         height = balloon.estimateHeight()
         spacer = 10
 
-        balloon.setFixedWidth((_geometry.width() - spacer))
+        if _geometry.width() > 250:
+            balloon.setFixedWidth((_geometry.width() - spacer))
+
         popupPos = QtCore.QPoint(_topLeft.x(), _topLeft.y() + int(height / 2) + spacer)
 
         balloon.showAt(popupPos)

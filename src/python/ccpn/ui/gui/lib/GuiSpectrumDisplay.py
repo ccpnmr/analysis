@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-17 14:28:44 +0100 (Wed, September 17, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-18 14:35:04 +0100 (Thu, September 18, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -2193,7 +2193,9 @@ class GuiSpectrumDisplay(CcpnModule):
             for strip in self.strips:
                 for spectrumView in strip.spectrumViews:
                     if spectrumView.traceScale is not None:
-                        spectrumView.traceScale *= 1.4
+                        # Needs to be _traceScale to ensure not
+                        # multiplying the global scaling
+                        spectrumView._traceScale *= 1.4
 
                 # spawn a redraw of the strip
                 strip._updatePivot()
@@ -2205,7 +2207,9 @@ class GuiSpectrumDisplay(CcpnModule):
             for strip in self.strips:
                 for spectrumView in strip.spectrumViews:
                     if spectrumView.traceScale is not None:
-                        spectrumView.traceScale /= 1.4
+                        # Needs to be _traceScale to ensure not
+                        # multiplying the global scaling
+                        spectrumView._traceScale /= 1.4
 
                 # spawn a redraw of the strip
                 strip._updatePivot()

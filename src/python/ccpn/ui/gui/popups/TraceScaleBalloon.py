@@ -12,40 +12,36 @@ from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 
 
-class SmallScienceSpinBox(VariableScientificSpinBox):
+class TraceSpinBox(DoubleSpinbox):
     """A Custom double spin box for the TraceScale Balloon
 
     Subclass required for allowing very small numbers using scientific notation
     As well as for subclassing stepBy.
     """
-    def __init__(self, parent, specView, precision, *args, **kwargs):
+    def __init__(self, parent, specView, *args, **kwargs):
+        super().__init__(parent, value=1.0, decimals=2, *args, **kwargs)
         self.view = specView
-        self.precision = precision
-        # Has to be this way around or self.precision causes and error.
-        super().__init__(parent, *args, **kwargs)
-
-    def textFromValue(self, value):
-        """Same as superclass but removes check for small numbers"""
-        return self.formatFloat(value)
-
-    def formatFloat(self, value):
-        """Same as superclass but removes precision differences"""
-        string = self._qLocale.toString(float(value), 'g', self.precision)
-        return re.sub(r"e(-|\+?)0*(\d+)", r"e\1\2", string.replace("e+", "e"))
+        self.traceScaleDefault = 1.0 / self.view.traceMax
+        # first call in case the trace scale has not already been calc'd
+        _ = self.view.traceScale
+        # needs to be _traceScale to keep independent of the global scale
+        boxDefault = (self.view._traceScale / self.traceScaleDefault)
+        self.setValue(boxDefault)
 
     def stepBy(self, step):
         """Subclassed to do the same thing as the TU and TD shortcuts"""
         if step == 1:
-            self.view.traceScale *= 1.4
+            self.setValue(self.get() * 1.4)
             self.update()
         if step == -1:
-            self.view.traceScale /= 1.4
+            self.setValue(self.get() / 1.4)
             self.update()
 
     def update(self):
         """Refresh the traceScale values in GUI"""
+        self.view._traceScale = self.get() * self.traceScaleDefault
         self.view._updateTraceScale()
-        self.setValue(self.view.traceScale)
+        # self.setValue(self.view.traceScale)
 
 
 class TraceScaleBalloon(SpeechBalloon):
@@ -73,8 +69,10 @@ class TraceScaleBalloon(SpeechBalloon):
 
         self.globalSpinBox = None
         self.spinBoxes = []
+        self.tempTraces = {}
 
         self.setWidgets()
+        # self.setTempTraces()
 
     @property
     def centralWidgetSize(self):
@@ -101,33 +99,25 @@ class TraceScaleBalloon(SpeechBalloon):
         self.setCentralWidget(_frame)
 
         # Set global slider and label
-        prefsValue = self.preferences.general.traceGlobalScale * 100
+        # prefsValue = self.preferences.general.traceGlobalScale
         Label(parent=_frame, text='Global Trace Multiplier', grid=(0, 0))
-        self.globalSpinBox = Spinbox(parent=_frame, value=int(prefsValue),
-                                     showButtons=True, grid=(0, 1),
-                                     callback=self.globalSpinBoxCallback,
-                                     min=0, max=99999, step=10)
+        self.globalSpinBox = DoubleSpinbox(parent=_frame, value=self._parent.displayTraceScale,
+                                           showButtons=True, grid=(0, 1),
+                                           callback=self.globalSpinBoxCallback,
+                                           min=0, max=99999, step=0.1, decimal=3)
 
-        for row, view in enumerate(self.project.spectrumViews):
+        for row, view in enumerate(self._parent.spectrumViews):
             row += 1
 
             Label(parent=_frame, text=view.pid, grid=(row, 0))
-            spinBox = SmallScienceSpinBox(parent=_frame, value=view.traceScale, min=-1e11, max=1e11,
-                                          grid=(row, 1), specView=view, precision=4)
-            spinBox.setValue(view.traceScale)  # from call arg doesnt work for some reason.
+            spinBox = TraceSpinBox(parent=_frame, min=-9999, max=9999,
+                                          grid=(row, 1), specView=view)
             spinBox.setMinimumWidth(150)
 
             self.spinBoxes.append(spinBox)
 
-    def globalSpinBoxCallback(self, _value):
-        """Callback for the global spin box
-
-        changes global trace scale preferences and updates all traces.
-        """
-        self.preferences.general.traceGlobalScale = self.globalSpinBox.value() / 100
-
-        for spinBox in self.spinBoxes:
-            spinBox.update()
+    def globalSpinBoxCallback(self):
+        self._parent.displayTraceScale = self.globalSpinBox.get()
 
 
 def main():

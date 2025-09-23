@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-18 14:35:04 +0100 (Thu, September 18, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-23 16:14:51 +0100 (Tue, September 23, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -270,6 +270,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self._phasingTraceScale = 1.0e-7
         self.stripScaleFactor = 1.0
+
+        self.displayTraceScale = 1.0
 
         self._registerNotifiers()
 
@@ -3220,9 +3222,10 @@ class GuiSpectrumDisplay(CcpnModule):
         _topLeft = self.mapToGlobal(_geometry.topLeft())
 
         height = balloon.estimateHeight()
+        # width = balloon.estimateWidth()
         spacer = 10
 
-        if _geometry.width() > 250:
+        if _geometry.width() > 300:
             balloon.setFixedWidth((_geometry.width() - spacer))
 
         popupPos = QtCore.QPoint(_topLeft.x(), _topLeft.y() + int(height / 2) + spacer)

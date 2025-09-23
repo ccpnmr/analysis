@@ -108,7 +108,6 @@
         "zPlaneNavigationMode"                 : 0,
         "traceColour"                          : null,
         "traceIncludeNegative"                 : false,
-        "traceGlobalScale"                     : 1.0,
         "aliasEnabled"                         : true,
         "aliasShade"                           : 20,
         "stripArrangement"                     : 0,

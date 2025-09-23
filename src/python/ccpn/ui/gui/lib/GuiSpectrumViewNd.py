@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-17 14:09:55 +0100 (Wed, September 17, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-23 16:14:51 +0100 (Tue, September 23, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -82,7 +82,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         # have to have this set before _setupBorderItem called
         self._application = self.strip.spectrumDisplay.mainWindow.application
         self.preferences = self._application.preferences
-        self._globalTraceScale = self.preferences.general.traceGlobalScale
 
         GuiSpectrumView.__init__(self)
 
@@ -149,7 +148,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         """Scale for trace in this spectrumView"""
         if self._traceScale is None:
             self._traceScale = (1.0 / self.traceMax)
-        return self._traceScale * self.preferences.general.traceGlobalScale
+        return self._traceScale * self.strip.spectrumDisplay.displayTraceScale
 
     @traceScale.setter
     def traceScale(self, value):
@@ -260,9 +259,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                     # break
 
                 # calc min, max, mean etc
-                self.traceMax = np.max(dataArrays)
-                self.traceMin = np.min(dataArrays)
-                self.traceMean = np.mean(dataArrays)
+                self.traceMax = float(np.max(dataArrays))
+                self.traceMin = float(np.min(dataArrays))
+                self.traceMean = float(np.mean(dataArrays))
 
                 # build the contours
                 contourList = Contourer2d.contourerGLList(dataArrays,

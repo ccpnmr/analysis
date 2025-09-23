@@ -1,15 +1,12 @@
-import re
-from functools import partial
-from PyQt5 import QtCore, QtWidgets
-from math import isclose
+from PyQt5 import QtCore
 
-from ccpn.ui.gui.widgets.CompoundWidgets import SpinBoxCompoundWidget
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, VariableScientificSpinBox
-
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
+
+SPINBOX_WIDTH = 150
+PADDING = 40
 
 
 class TraceSpinBox(DoubleSpinbox):
@@ -41,7 +38,6 @@ class TraceSpinBox(DoubleSpinbox):
         """Refresh the traceScale values in GUI"""
         self.view._traceScale = self.get() * self.traceScaleDefault
         self.view._updateTraceScale()
-        # self.setValue(self.view.traceScale)
 
 
 class TraceScaleBalloon(SpeechBalloon):
@@ -69,10 +65,10 @@ class TraceScaleBalloon(SpeechBalloon):
 
         self.globalSpinBox = None
         self.spinBoxes = []
+        self.largestLabel = 0
         self.tempTraces = {}
 
         self.setWidgets()
-        # self.setTempTraces()
 
     @property
     def centralWidgetSize(self):
@@ -81,7 +77,7 @@ class TraceScaleBalloon(SpeechBalloon):
         return self._central_widget_size()
 
     def estimateHeight(self):
-        """Estiamtes the hight of the speech balloon based on
+        """Estimates the height of the speech balloon based on
         number of spinboxes and padding used.
 
         This only exists because I couldn't get qt to report accurate
@@ -89,8 +85,16 @@ class TraceScaleBalloon(SpeechBalloon):
         """
         boxNum = len(self.spinBoxes) + 2
         boxHeight = self.globalSpinBox.geometry().height()
-        padding = 40
-        return (boxNum * boxHeight) + padding
+        return (boxNum * boxHeight) + PADDING
+
+    def estimateWidth(self):
+        """Estimates the width of the speech balloon including pointer
+        based on the label and spinbox sizes, padding and pointer width
+
+        This only exists because I couldn't get qt to report accurate
+        sizes.
+        """
+        return self.largestLabel + SPINBOX_WIDTH + PADDING + self._metrics.pointer_width
 
     def setWidgets(self):
         """add the widgets"""
@@ -99,8 +103,7 @@ class TraceScaleBalloon(SpeechBalloon):
         self.setCentralWidget(_frame)
 
         # Set global slider and label
-        # prefsValue = self.preferences.general.traceGlobalScale
-        Label(parent=_frame, text='Global Trace Multiplier', grid=(0, 0))
+        label = Label(parent=_frame, text='Trace Multiplier', grid=(0, 0))
         self.globalSpinBox = DoubleSpinbox(parent=_frame, value=self._parent.displayTraceScale,
                                            showButtons=True, grid=(0, 1),
                                            callback=self.globalSpinBoxCallback,
@@ -112,7 +115,10 @@ class TraceScaleBalloon(SpeechBalloon):
             Label(parent=_frame, text=view.pid, grid=(row, 0))
             spinBox = TraceSpinBox(parent=_frame, min=-9999, max=9999,
                                           grid=(row, 1), specView=view)
-            spinBox.setMinimumWidth(150)
+
+            spinBox.setMinimumWidth(SPINBOX_WIDTH)
+            if label.width() > self.largestLabel:
+                self.largestLabel = label.width()
 
             self.spinBoxes.append(spinBox)
 

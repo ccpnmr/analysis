@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-09 18:55:13 +0100 (Tue, September 09, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__dateModified__ = "$dateModified: 2025-09-26 18:37:41 +0100 (Fri, September 26, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1387,7 +1387,7 @@ def ccpNmrV3CoreSetter(doNotify=True, noUndo=False, useCache=False, **actionKwds
         # --- End of conditional logic ---
 
         application = getApplication()  # pass it in to reduce overhead
-        with notificationBlanking(application=application):
+        with notificationBlanking():
             with undoStackBlocking(application=application) as addUndoItem:
                 try:
                     # Call the original setter method to update the attribute

@@ -83,7 +83,7 @@ objCopy2.print()
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -95,8 +95,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-11-18 11:44:29 +0000 (Mon, November 18, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-09-26 18:37:42 +0100 (Fri, September 26, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -515,7 +515,7 @@ class List(_List, _CcpNmrTrait):
     Fixing default_value problem
     """
 
-    def __init__(self, default_value=[], minlen=0, maxlen=sys.maxsize, **kwargs):
+    def __init__(self, trait=None, default_value=[], minlen=0, maxlen=sys.maxsize, **kwargs):
         """
         Initialise the object
         :param default_value: the default value of the list
@@ -524,7 +524,7 @@ class List(_List, _CcpNmrTrait):
         :param kwargs: optional keyword arguments
         """
 
-        _List.__init__(self, default_value=default_value, minlen=minlen, maxlen=maxlen, **kwargs)
+        _List.__init__(self, trait=trait, default_value=default_value, minlen=minlen, maxlen=maxlen, **kwargs)
         _CcpNmrTrait.__init__(self)
 
         if default_value is not None:

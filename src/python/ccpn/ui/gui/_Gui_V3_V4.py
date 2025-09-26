@@ -266,26 +266,26 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
     #                              }:
     #         # draw new focus-border
     #         self._drawBorder(element, painter, widget, col=Base._highlightVivid)
-
-    def drawControl(self, element, option, painter, widget=None):
-        # if element in {QtWidgets.QStyle.CE_TabBarTab,
-        #                }:
-        #     # Customise the highlight color for the tab-widget
-        #     if Base._highlightVivid is not None:
-        #         option.palette.setColor(option.palette.Highlight, Base._highlightVivid)
-        if (element in {QtWidgets.QStyle.CE_MenuItem,} and
-              isinstance(option, QtWidgets.QStyleOptionMenuItem) and
-                (_actionGeometries := getattr(widget, '_actionGeometries', None)) and
-                (action := _actionGeometries.get(str(option.rect))) and
-                (colour := getattr(action, '_foregroundColour', None))):
-            # Customise the foreground colour for the menu-item from the QAction
-            # - menu-items don't have a stylesheet or palette
-            option.palette.setColor(option.palette.Text, colour)
-        super().drawControl(element, option, painter, widget)
-        # if element in {QtWidgets.QStyle.CE_ItemViewItem, } and (option.state & QtWidgets.QStyle.State_HasFocus):
-        #     # draw border inside the listWidget/listView/TreeView
-        #     #   - draws border inside pulldowns though, shame :(
-        #     self._drawBorder(element, painter, widget, col=Base._highlightVivid)
+    #
+    # def drawControl(self, element, option, painter, widget=None):
+    #     # if element in {QtWidgets.QStyle.CE_TabBarTab,
+    #     #                }:
+    #     #     # Customise the highlight color for the tab-widget
+    #     #     if Base._highlightVivid is not None:
+    #     #         option.palette.setColor(option.palette.Highlight, Base._highlightVivid)
+    #     if (element in {QtWidgets.QStyle.CE_MenuItem,} and
+    #           isinstance(option, QtWidgets.QStyleOptionMenuItem) and
+    #             (_actionGeometries := getattr(widget, '_actionGeometries', None)) and
+    #             (action := _actionGeometries.get(str(option.rect))) and
+    #             (colour := getattr(action, '_foregroundColour', None))):
+    #         # Customise the foreground colour for the menu-item from the QAction
+    #         # - menu-items don't have a stylesheet or palette
+    #         option.palette.setColor(option.palette.Text, colour)
+    #     super().drawControl(element, option, painter, widget)
+    #     # if element in {QtWidgets.QStyle.CE_ItemViewItem, } and (option.state & QtWidgets.QStyle.State_HasFocus):
+    #     #     # draw border inside the listWidget/listView/TreeView
+    #     #     #   - draws border inside pulldowns though, shame :(
+    #     #     self._drawBorder(element, painter, widget, col=Base._highlightVivid)
 
     def drawComplexControl(self, control: QtWidgets.QStyle.ComplexControl,
                            option: QtWidgets.QStyleOptionComplex,

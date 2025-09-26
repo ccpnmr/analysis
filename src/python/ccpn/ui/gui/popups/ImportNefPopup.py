@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-29 14:42:41 +0100 (Thu, May 29, 2025) $"
-__version__ = "$Revision: 3.3.3 $"
+__dateModified__ = "$dateModified: 2025-09-26 15:43:19 +0100 (Fri, September 26, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2911,7 +2911,7 @@ class NefDictFrame(Frame):
 
         # changed to verify with the button
         # if not self._primaryProject and self.verifyCheckBox.isChecked():
-        warnings, errors = self._nefLoader._verifyNef(self.project, self._nefDict, selection=None)
+        _warnings, _errors, _messages = self._nefLoader._verifyNef(self.project, self._nefDict, selection=None)
 
         try:
             self.valid = self._nefLoader.isValid
@@ -2994,7 +2994,7 @@ class NefDictFrame(Frame):
                 self._traverseTree(self.nefTreeView.headerItem, self._getTreeState, dd)
 
                 self.nefTreeView._populateTreeView(self.project)
-                warnings, errors = self._nefLoader._verifyNef(self.project, self._nefDict, selection=None)
+                _warnings, _errors, _messages = self._nefLoader._verifyNef(self.project, self._nefDict, selection=None)
 
                 try:
                     self.valid = self._nefLoader.isValid

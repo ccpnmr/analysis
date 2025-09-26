@@ -18,15 +18,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-07-22 16:20:14 +0100 (Tue, July 22, 2025) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-09-08 18:38:38 +0100 (Mon, September 08, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -41,8 +40,7 @@ from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.lib.alignWidgets import alignWidgets
 
-from ccpn.ui.gui.popups.PreferencesPopup import DEFAULTSPACING
-from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget, RadioButtonsCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
@@ -50,7 +48,6 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.Font import getTextDimensionsFromFont, getFontHeight
 from ccpn.ui.gui.widgets.CompoundWidgets import (CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget,
@@ -90,6 +87,8 @@ from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpn.util.Logging import getLogger
 
 from collections import OrderedDict
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 
 
 ALL = '<Use all>'
@@ -294,6 +293,7 @@ class AssignmentInspectorSettings(Widget):
 class PickAndAssignSettings(Widget):
     """Settings widget for the pick and assign module.
     """
+
     def __init__(self, parent=None, mainWindow=None, **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -2287,14 +2287,14 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
 
 
 class ObjectSelectionWidget(ListCompoundWidget):
-    KLASS = None
+    KLASS: type[AbstractWrapperObject] | type[V3CoreObjectABC] | None = None
     listChanged = Signal()
 
     mainWindow = WeakRefDescriptor()
     application = WeakRefDescriptor()
     project = WeakRefDescriptor()
 
-    def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',
+    def __init__(self, parent=None, mainWindow=None, *, vAlign='top', stretch=(0, 0), hAlign='left',
                  vPolicy='minimal', fixedWidths=(None, None, None), orientation='left',
                  labelText=None, tipText=None,
                  texts=None, callback=None, objectWidgetChangedCallback=None,
@@ -2526,13 +2526,9 @@ class UniqueNmrResidueTypeSelectionWidget(ObjectSelectionWidget):
 
         ## could add some priority list to show on top.
         ll = [SelectToAdd] + self.standardListItems
-        uniqueNames = set()
-        if self.project:
-            for obj in getattr(self.project, self.KLASS._pluralLinkName, []):
-                uniqueNames.add(obj.residueType)
-        uniqueNames = list(uniqueNames)
-        uniqueNames.sort(reverse=False)
-        complete = ll + list(uniqueNames)
+        uniqueNames = {obj.residueType for obj in getattr(self.project, self.KLASS._pluralLinkName, [])} \
+            if self.project else set()
+        complete = ll + sorted(list(uniqueNames), reverse=False)
         self.pulldownList.setData(texts=complete)
 
 
@@ -2576,8 +2572,8 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
     """
     KLASS = SpectrumDisplay
 
-    def __init__(self, axisCodeFilter=None, **kwds):
-        super().__init__(**kwds)
+    def __init__(self, parent=None, mainWindow=None, *, axisCodeFilter=None, **kwds):
+        super().__init__(parent, mainWindow, **kwds)
 
         self.axisCodeFilter = axisCodeFilter
 

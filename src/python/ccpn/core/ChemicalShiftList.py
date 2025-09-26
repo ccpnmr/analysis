@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-10 18:01:46 +0000 (Fri, January 10, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-09-10 18:22:04 +0100 (Wed, September 10, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,8 +39,8 @@ from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib.Pid import Pid, remapSeparators
-from ccpn.core.lib.ContextManagers import newObject, newV3Object, renameObject, \
-    undoStackBlocking, undoBlock, ccpNmrV3CoreSetter
+from ccpn.core.lib.ContextManagers import (newObject, newV3Object, renameObject,
+                                           undoStackBlocking, undoBlock, ccpNmrV3CoreSetter)
 from ccpn.util.decorators import logCommand
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.DataEnum import DataEnum
@@ -536,8 +536,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             return self._data.loc[uniqueId]
         except Exception as es:
-            raise ValueError(f'{self.className}._getByUniqueId: error getting row, uniqueId '
-                             f'{uniqueId} in {self}  -  {es}') from None
+            raise ValueError(f'{self.className}._getByUniqueId: error getting row '
+                             f'uniqueId {uniqueId} in {self}  -  {es}') from None
 
     def _getAttribute(self, uniqueId, name, attribType):
         """Get the named attribute from the chemicalShift with supplied uniqueId
@@ -706,7 +706,17 @@ class ChemicalShiftList(AbstractWrapperObject):
 
             # drop any duplicates and merge back in the Nones which must be kept
             _data.reset_index(drop=True, inplace=True)
-            _noDupes = _data.drop_duplicates(CS_NMRATOM).merge(_data[_data[CS_NMRATOM].isnull()], how='outer')
+            _noDupes = (_data
+                        .drop_duplicates(CS_NMRATOM)
+                        .merge(_data[_data[CS_NMRATOM].isnull()],
+                               how='outer')
+                        )
+            # _noDupes_assert = (_data
+            #                    .drop_duplicates(CS_NMRATOM)
+            #                    .merge(_data[_data[CS_NMRATOM].isnull()].astype({CS_NMRATOM: 'object'}),
+            #                           how='outer')
+            #                    )
+            # assert _noDupes.equals(_noDupes_assert)
             _noDupes.sort_values(CS_UNIQUEID, inplace=True, )
             if len(_noDupes) != oldLen:
                 # log a warning and update the dataFrame
@@ -892,7 +902,6 @@ class ChemicalShiftList(AbstractWrapperObject):
             if _val.assignedPeaks:
                 raise ValueError(f'{self.className}.deleteChemicalShift: '
                                  f'cannot delete chemicalShift with assigned peaks')
-
             self._deleteChemicalShiftObject(rows)
 
     def _deleteChemicalShiftObject(self, rows):

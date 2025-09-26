@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-29 14:42:41 +0100 (Thu, May 29, 2025) $"
-__version__ = "$Revision: 3.3.3 $"
+__dateModified__ = "$dateModified: 2025-09-26 15:43:18 +0100 (Fri, September 26, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2354,8 +2354,9 @@ class CcpnNefReader(CcpnNefContent):
         self.application = application
         self.mode = mode
         self._saveFrameName = None
-        self.warnings = []
-        self.errors = []
+        self.warnings = ()
+        self.errors = ()
+        self.messages = ()
         self.setImportAll(True)
         self.testing = testing
 
@@ -2514,7 +2515,7 @@ class CcpnNefReader(CcpnNefContent):
 
     def verifyProject(self, project: Project, dataBlock: StarIo.NmrDataBlock,
                       projectIsEmpty: bool = True,
-                      selection: typing.Optional[dict] = None):
+                      selection: typing.Optional[dict] = None) -> tuple[tuple, tuple, tuple]:
         """Verify import of selection from dataBlock into existing/empty Project
         """
         # Initialise mapping dicts
@@ -2523,8 +2524,9 @@ class CcpnNefReader(CcpnNefContent):
         if not hasattr(self, '_nmrResidueMap') or projectIsEmpty:
             self._nmrResidueMap = {}
 
-        self.warnings = []
-        self.errors = []
+        self.warnings = ()
+        self.errors = ()
+        self.messages = ()
         self.project = project
         self.defaultChainCode = None
         dataBlock._rowErrors = AttrDict()
@@ -2534,7 +2536,8 @@ class CcpnNefReader(CcpnNefContent):
                                                                             projectIsEmpty=projectIsEmpty,
                                                                             selection=selection))
 
-        return (tuple(self.warnings or ()), tuple(self.errors or ()))
+        # return (tuple(self.warnings or ()), tuple(self.errors or ()))
+        return self.warnings, self.errors, self.messages
 
     @staticmethod
     def _getErrors(project, item: StarIo.NmrDataBlock | StarIo.NmrSaveFrame | StarIo.NmrLoop):
@@ -2548,11 +2551,11 @@ class CcpnNefReader(CcpnNefContent):
                 leaderName = name + ' - '
                 leaderNameSpace = ' ' * len(leaderName)
                 viewList = list(thisSet or ['empty'])
-                print('{}{}{}'.format(leader, leaderName, [ss for ss in thisSet]))
+                sys.stderr.write('{}{}{}\n'.format(leader, leaderName, [ss for ss in thisSet]))
 
                 # CMAX = 7
                 # for cCount, v in enumerate(viewList[:CMAX+1]):
-                #     print('{}{}{}'.format(leader, leaderName,
+                #     sys.stderr.write('{}{}{}\n'.format(leader, leaderName,
                 #                           v if cCount < CMAX else
                 #                           '... {} more'.format(len(viewList) - CMAX)))
                 #     leader = leaderSpace
@@ -2993,7 +2996,7 @@ class CcpnNefReader(CcpnNefContent):
                 viewList = list(thisSet or ['empty'])
                 CMAX = 7
                 for cCount, v in enumerate(viewList[:CMAX + 1]):
-                    print('{}{}{}'.format(leader, leaderName,
+                    sys.stderr.write('{}{}{}\n'.format(leader, leaderName,
                                           v if cCount < CMAX else
                                           '... {} more'.format(len(viewList) - CMAX)))
                     leader = leaderSpace
@@ -3058,7 +3061,7 @@ class CcpnNefReader(CcpnNefContent):
 
         t0 = time.time()
 
-        self.warnings = []
+        self.warnings = ()
         self.project = project
         self.defaultChainCode = None
         self._deferredItems = []
@@ -3189,7 +3192,7 @@ class CcpnNefReader(CcpnNefContent):
 
         t0 = time.time()
 
-        self.warnings = []
+        self.warnings = ()
         self.project = project
         self.defaultChainCode = None
 
@@ -3273,7 +3276,7 @@ class CcpnNefReader(CcpnNefContent):
 
         if getattr(saveFrame, ROWERRORATTR, None) is None:
             # reset the errors for the loop/saveframe/datablock
-            print(f'==> _verifyLoops  {saveFrame}')
+            self.warning(f'==> _verifyLoops  {saveFrame}')
             saveFrame._rowErrors = AttrDict()
         for tag, ccpnTag in mapping.items():
             if tag not in excludeList and ccpnTag == _isALoop:
@@ -5848,22 +5851,25 @@ class CcpnNefReader(CcpnNefContent):
                 except (RuntimeError, ValueError) as es:
                     getLogger().warning(f'{es}')
 
-            framecode = saveFrame.get('chemical_shift_list') or ''  # may actually be 'None'
-            cslName = framecode[len('nef_chemical_shift_list_'):]
-            # Defaults to the specified shiftList or the first shiftList (there should be only one, but we want the read to work)
-            # if (csl := (self.frameCode2Object.get(framecode) or project.fetchChemicalShiftList(cslName))):
-            #         # self.defaultChemicalShiftList)):
-            #     spectrum.chemicalShiftList = csl
-            if csl := (self.frameCode2Object.get(framecode) or
+            if framecode := saveFrame.get('chemical_shift_list'):  # or ''  # may actually be 'None'
+                cslName = framecode[len('nef_chemical_shift_list_'):]
+                # Defaults to the specified shiftList or the first shiftList (there should be only one, but we want the read to work)
+                # if (csl := (self.frameCode2Object.get(framecode) or project.fetchChemicalShiftList(cslName))):
+                #         # self.defaultChemicalShiftList)):
+                #     spectrum.chemicalShiftList = csl
+                if csl := (self.frameCode2Object.get(framecode) or
                        (cslName and (project.getChemicalShiftList(cslName) or
                                      project.newChemicalShiftList(cslName))) or
                        self.defaultChemicalShiftList):
-                spectrum.chemicalShiftList = csl
-            # print(f'==> chemicalshiftlist {framecode}     {cslName}     {csl}')
+                    spectrum.chemicalShiftList = csl
+            else:
+                self.warning(f'missing chemical_shift_list in {category}:{spectrumName}')
 
-            framecode = saveFrame.get('ccpn_sample')
-            if (sample := self.frameCode2Object.get(framecode)):
-                spectrum.sample = sample
+            if framecode := saveFrame.get('ccpn_sample'):
+                if (sample := self.frameCode2Object.get(framecode)):
+                    spectrum.sample = sample
+            else:
+                getLogger().warning(f'missing ccpn_sample in {category}:{spectrumName}')
 
             # set the experimentName and -Type if available - not mandatory
             if expName:
@@ -8071,17 +8077,19 @@ class CcpnNefReader(CcpnNefContent):
         #
         return parameters, loopNames
 
-    def error(self, message: str, source, objects: Optional[tuple] = None):
+    def error(self, message: str, source, objects: tuple | None = None):
         """Update the error log with the message
         """
-        # # MUST BE SUBCLASSED
-        # raise NotImplementedError("Code error: function not implemented")
         template = "Error in saveFrame {}: {}"
-        self.errors.append((template.format(self._saveFrameName, message), source, objects))
+        self.errors += ((template.format(self._saveFrameName, message), source, objects),)
 
     def warning(self, message: str, loopName=None):
-        template = "in saveFrame %s:\n%s"
-        self.warnings.append(template % (self._saveFrameName, message))
+        template = "in saveFrame %s (%s):\n%s" if loopName else "in saveFrame %s%s:\n%s"
+        self.warnings += (template % (self._saveFrameName, loopName, message),)
+
+    def info(self, message: str, loopName=None):
+        template = "in saveFrame %s (%s):\n%s" if loopName else "in saveFrame %s%s:\n%s"
+        self.messages += (template % (self._saveFrameName, loopName, message),)
 
     def produceNmrChain(self, chainCode: str = None):
         """Get NmrChain, correcting for possible errors"""

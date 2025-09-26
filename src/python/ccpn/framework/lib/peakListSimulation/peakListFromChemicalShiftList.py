@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Vicky Higman $"
-__dateModified__ = "$dateModified: 2025-03-26 14:26:47 +0000 (Wed, March 26, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-09-01 10:53:22 +0100 (Mon, September 01, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -426,6 +426,20 @@ class SimulatedSpectrum_NCO(SimulatedSpectrumByExperimentTypeABC):
                             ]
                            ]
 
+class SimulatedSpectrum_hCOH(SimulatedSpectrumByExperimentTypeABC):
+
+    experimentType      = 'hCOH'
+    isotopeCodes        = ['1H', '13C']
+    axisCodes           = ['Hn', 'C']
+    spectralWidths      = [16, 30]
+    referenceValues     = [14, 190]
+    peakAtomNameMappers = [
+                            [
+                            HAtomNamesMapper(),
+                            COM1AtomNamesMapper()
+                            ]
+                           ]
+
 class SimulatedSpectrum_CC(SimulatedSpectrumByExperimentTypeABC):
 
     experimentType      = 'CC TOCSY; CC (relayed)'
@@ -769,6 +783,7 @@ CSL2SPECTRUM_DICT = OrderedDict([
                             (SimulatedSpectrum_CC.experimentType, SimulatedSpectrum_CC),
                             (SimulatedSpectrum_NCA.experimentType, SimulatedSpectrum_NCA),
                             (SimulatedSpectrum_NCO.experimentType, SimulatedSpectrum_NCO),
+                            (SimulatedSpectrum_hCOH.experimentType, SimulatedSpectrum_hCOH),
                             (SimulatedSpectrum_CANCO.experimentType, SimulatedSpectrum_CANCO),
                             (SimulatedSpectrum_CANcoCX.experimentType, SimulatedSpectrum_CANcoCX),
                             (SimulatedSpectrum_NCACX.experimentType, SimulatedSpectrum_NCACX),

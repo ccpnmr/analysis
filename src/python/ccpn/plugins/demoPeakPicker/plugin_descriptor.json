@@ -1,0 +1,21 @@
+{
+  "name": "My Peak-Picker [DEMO]",
+  "version": "0.0.1",
+  "author": "John Doe",
+  "entryPoint": "demoPeakPicker.PeakPickerPlugin:MyPeakPicker",
+  "type": "",
+  "description": "A plugin to show how to add a custom Peak-Picker to the program",
+  "enabledByDefault": true,
+  "loadLevel": 0,
+  "tags": [],
+  "menuIcon": "icn_picker.png",
+
+  "_metadata": {
+    "jsonVersion": 3.0,
+    "className": "PluginDescriptor",
+    "classVersion": 1.0,
+    "user": "luca",
+    "lastPath": "",
+    "timestamp": "Thu Aug  7 13:21:42 2025"
+  }
+}

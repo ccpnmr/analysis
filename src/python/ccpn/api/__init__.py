@@ -13,9 +13,10 @@ Examples of import usage:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -23,9 +24,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:46 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2025-08-19 10:48:01 +0100 (Tue, August 19, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,9 +37,10 @@ __date__ = "$Date: 2021-06-23 18:02:28 +0100 (Wed, June 23, 2021) $"
 #=========================================================================================
 
 
-#######################################
-############  Core objects ############
-#######################################
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~~~~~~     Core Objects      ~~~~~~~
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
@@ -75,9 +77,9 @@ from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Multiplet import Multiplet
 from ccpn.core.Collection import Collection
 
-############################################
-############   UI Core objects       #######
-############################################
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~~~~~~  UI Core objects     ~~~~~~~
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # from ccpn.ui._implementation.Window import Window
 # from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
@@ -88,24 +90,35 @@ from ccpn.core.Collection import Collection
 # from ccpn.ui._implementation.PeakListView import PeakListView
 # from ccpn.ui._implementation.IntegralListView import IntegralListView
 
-#######################################
-############  LIB objects       #######
-#######################################
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~~~~~~  LIB objects     ~~~~~~~
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+from ccpn.framework.plugins.PluginBase import PluginBase
+from ccpn.framework.plugins.Plugin_GUI_Module import PluginGUIModule
+from ccpn.framework.plugins.Plugin_GUI_Popup import PluginBasePopup
 
 
-#######################################
-############  Core functions    #######
-#######################################
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~~~~~~    Core functions     ~~~~~~~
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, SimplePeak
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar as undo
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~~~~~~     UI functions       ~~~~~~~
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+import ccpn.ui.gui.widgets.CompoundWidgets as compoundWidget
+from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning, showMulti, showMessage
 
 
-#######################################
-############  UI functions      #######
-#######################################
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~~~~~~     LIB functions       ~~~~~~~
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-#######################################
-############  LIB functions      ######
-#######################################
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import Path, aPath

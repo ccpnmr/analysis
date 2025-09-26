@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-08-01 16:00:34 +0100 (Fri, August 01, 2025) $"
-__version__ = "$Revision: 3.3.3 $"
+__dateModified__ = "$dateModified: 2025-09-10 12:02:32 +0100 (Wed, September 10, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -41,10 +41,12 @@ MENU = 'Menu'
 ITEM = 'Item'
 SEPARATOR = 'Separator'
 
+# It would probably be better to use the methods, e.g. `Menu.addMenu`, and add an `addSeparator` function here
+# that calls menu.addSeparator() to remove the args and kwds
 ItemTypes = {
     MENU     : Menu.addMenu.__name__,
     ITEM     : Menu.addItem.__name__,
-    SEPARATOR: Menu._addSeparator.__name__
+    SEPARATOR: Menu._addSeparator.__name__  # a method to catch the args of the generic call
     }
 
 _ARRANGELABELS = 'Auto-arrange All Labels'

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,21 +15,19 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2024-12-04 14:36:51 +0000 (Wed, December 04, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-09-08 15:54:40 +0100 (Mon, September 08, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
-
-from traitlets import TraitError
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
+from traitlets import TraitError
 from ccpn.core.testing.WrapperTesting import WrapperTesting, fixCheckAllValid
 
 
@@ -142,6 +140,7 @@ class ChemicalShiftTestNew(WrapperTesting):
         self.undo.undo()
         self.assertEqual(sh.nmrAtom, None)
         self.undo.redo()
+        self.assertEqual(sh.nmrAtom, nmrAtom)
 
         with self.assertRaises(ValueError) as e:
             sh.nmrAtom = 42
@@ -152,9 +151,11 @@ class ChemicalShiftTestNew(WrapperTesting):
         for atr in (CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME):
             with self.assertRaisesRegex(ValueError, 'instance expected a unicode string'):
                 setattr(sh, atr, 42)
-            with self.assertRaisesRegex((RuntimeError, ValueError),
+            if getattr(sh, atr, '_Undefined_') != None:
+                # setters are skipped of the value hasn't changed; hence no raised error
+                with self.assertRaisesRegex((RuntimeError, ValueError),
                                         'derived value, cannot modify when nmrAtom is set'):
-                setattr(sh, atr, None)
+                    setattr(sh, atr, None)
 
         # for atr in (CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME):
         #     setattr(sh, atr, None)

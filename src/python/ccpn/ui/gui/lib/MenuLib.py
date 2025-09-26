@@ -19,14 +19,13 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-07-31 15:06:07 +0100 (Thu, July 31, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-10 12:02:33 +0100 (Wed, September 10, 2025) $"
 __version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
 __date__ = "$Date: 2025-07-03 17:28:00 +0100 (Thu, July 03, 2025) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -41,7 +40,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 
 _STRIP = '_strip'
 _FOREGROUND = '_foregroundColour'
-_ACTIONGEOMETRIES = '_actionGeometries'
+_BACKGROUND = '_backgroundColour'
 _BLANKISOTOPECODE = ' - '
 
 if TYPE_CHECKING:
@@ -211,9 +210,6 @@ def _addGroupMenuItems(menuFunc: Menu, pStrips: list[_CoreStrip], currentStrip: 
         # permutation list is list of tuples
         # each element is list of indices to fetch from currentStrip and map to strip
         permutationList1: list[tuple[int | None, ...]] = list(product(*(ii or (None,) for ii in indices)))
-        # remove any duplicates (if required)
-        if not allowMenuDuplicates:
-            permutationList1 = [pp for pp in permutationList1 if len(pp) == len(set(pp))]
         max_k = max(len(axisCodes), len(strip.axisCodes))
         # Generate combinations of enumerated permutations
         posMap: list[tuple[tuple[int, int | None], ...]] = [combi
@@ -222,30 +218,44 @@ def _addGroupMenuItems(menuFunc: Menu, pStrips: list[_CoreStrip], currentStrip: 
                                                             for combi in combinations(enumerate(perm), k)
                                                             ]
 
+        def _duplicate_count(t):
+            # This returns the number of duplicates
+            return len(t) - len({item[1] for item in t})
+
+        # The sorted() function will sort by the first key (length) and then the second key (count)
+        posMap = sorted(posMap, key=lambda t: (len(t), _duplicate_count(t)))
         # Map all the permutations of mapped indices into fixed-length lists
-        orderedPerms: OrderedDict[str, list[int | None]] = OrderedDict()
+        orderedPerms: OrderedDict[str, tuple[list[int | None], int]] = OrderedDict()
         for perm0 in posMap:
             permList0: list[int | None] = [None] * len(strip.axisCodes)
             for cc in perm0:
                 if cc and cc[0] < len(permList0):
                     permList0[cc[0]] = cc[1]
-            orderedPerms[str(permList0)] = permList0
+            orderedPerms[str(permList0)] = permList0, _duplicate_count(perm0)
 
         firstShow = 0
         # get this list first, and then create the menus as required
-        permList = [(_pc, _perm1)
-                    for _perm1 in orderedPerms.values()
+        permList = [(_pc, _perm1, dCount)
+                    for _perm1, dCount in orderedPerms.values()
                     if (_pc := _perm1.count(None)) != len(_perm1)]
-        for pc, perm2 in permList:
+        lastDCount = 0
+        for pc, perm2, dCount in permList:
+            if dCount != lastDCount:
+                _stripMenu.addSeparator()
+            lastDCount = dCount
+            if not allowMenuDuplicates and dCount:
+                continue
             if pc != firstShow:
                 # insert separator above the next group
                 _stripMenu.addSeparator()
                 firstShow = perm2.count(None)
             # add the menu items
-            _createCommonMenuItem(includeAxisCodes, label, _stripMenu,
-                                  perm2, position, strip, prefix='',
-                                  showBlankDimensions=showBlankDimensions,
-                                  )
+            action = _createCommonMenuItem(includeAxisCodes, label, _stripMenu,
+                                           perm2, position, strip, prefix='',
+                                           showBlankDimensions=showBlankDimensions,
+                                           )
+            if dCount:
+                action.setProperty(_BACKGROUND, True)
 
     return _previousMenuItem, _currentMenuItem
 
@@ -319,6 +329,8 @@ def _hide_empty_submenus(menu: QtWidgets.QMenu,
             visible_actions = [a for a in submenu.actions() if a.isVisible()]
             if not visible_actions and _depth >= minDepth:
                 action.setVisible(False)
+                # Action is hidden, but colour kept for debugging
+                action.setProperty(_FOREGROUND, QtGui.QColor('red'))
             else:
                 action.setVisible(True)
 
@@ -346,6 +358,10 @@ def _flatten_single_item_submenus(menu: QtWidgets.QMenu,
                 newAct.setText(f'{action.text()}\t{newAct.text()}')
                 # Insert the single action in its place
                 menu.insertAction(action, newAct)
+                # Copy the colours from the original menu item
+                # Note, there may be a conflict with existing properties
+                newAct.setProperty(_FOREGROUND, action.property(_FOREGROUND))
+                newAct.setProperty(_BACKGROUND, action.property(_BACKGROUND))
                 # Remove the original submenu
                 menu.removeAction(action)
 

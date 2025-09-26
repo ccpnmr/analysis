@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-08-11 11:59:37 +0100 (Mon, August 11, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-09 19:02:06 +0100 (Tue, September 09, 2025) $"
 __version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
@@ -81,7 +81,6 @@ AxisMenu = 'AxisMenu'
 PhasingMenu = 'PhasingMenu'
 _STRIP = '_strip'
 _FOREGROUND = '_foregroundColour'
-_ACTIONGEOMETRIES = '_actionGeometries'
 
 
 #=========================================================================================

@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-08-11 11:17:21 +0100 (Mon, August 11, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2025-08-14 17:51:39 +0100 (Thu, August 14, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -88,7 +88,8 @@ from ccpn.framework.PathsAndUrls import \
     ccpnCodePath, \
     CCPN_DIRECTORY_SUFFIX
 from ccpn.framework.lib.resources.Resources import Resources
-
+from ccpn.framework.plugins.PluginManager import PluginManager
+from ccpn.framework.plugins import pluginNamespaces as pluginVariables
 from ccpn.ui.gui.widgets import MessageDialog
 
 from ccpn.util.decorators import deprecated
@@ -232,6 +233,9 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         self._disableQueueException = getattr(self.args, 'disableQueueException', False)
         self._applicationReadOnlyMode = getattr(self.args, 'readOnly', False)
 
+        # Plugin Manager
+        self.pluginManager = PluginManager(self) # we add the PluginManager as early as possible so that we can initiate no UI plugins (if any) required at start-up
+
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
 
@@ -249,6 +253,9 @@ class Framework(HasCcpNmrProperties, NotifierBase):
 
         # get a user interface; nb. ui.start() is called by the application
         self._ui = self._getUI()
+        # load any UI level plugins [not the On-Demand GUI (menu-activated plugins are lazy-loaded at run time)]
+        self.pluginManager._loadPlugins(level=1)
+        # QTimer.singleShot(0, lambda: self.pluginManager._initialisePlugins(level=1)) #needs defer until the window is ready.
 
     #-----------------------------------------------------------------------------------------
     # properties of Framework
@@ -508,6 +515,9 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
         self.ui.startUi()
         # self._cleanup()
+
+        # load any UI level plugins [not the On-Demand GUI (menu-activated plugins are lazy-loaded at run time)]
+        self.pluginManager._loadPlugins(level=1)
 
     # GWV 18/2/24: nevr called/used!
     # def _cleanup(self):

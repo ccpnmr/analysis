@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-07-31 15:06:08 +0100 (Thu, July 31, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2025-08-13 11:01:08 +0100 (Wed, August 13, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -270,7 +270,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self._populate()
 
         tabs = tuple(self.tabWidget.widget(ii) for ii in range(self.tabWidget.count()))
-        w = max(tab.sizeHint().width() for tab in tabs) + 150
+        w = max(tab.sizeHint().width() for tab in tabs) + 160
         h = max(tab.sizeHint().height() for tab in tabs)
         h = max((h, 800))
         self._size = QtCore.QSize(w, h)
@@ -516,7 +516,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                    (self._setPeaksTabWidgets, 'Peaks'),
                                    (self._setExternalProgramsTabWidgets, 'External Programs'),
                                    (self._setAppearanceTabWidgets, 'Appearance'),
-                                   (self._setMacroEditorTabWidgets, 'Macro Editor')
+                                   (self._setMacroEditorTabWidgets, 'Macro Editor'),
+                                    (self._setPluginsTabWidgents, 'Plugins')
                                    ):
             fr = ScrollableFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
                                  scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
@@ -880,6 +881,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 2), gridSpan=(1, 1))
+
+
+    def _setPluginsTabWidgents(self, parent):
+        from ccpn.framework.plugins._PluginPreferencesWidgets import PluginPreferencesFrame
+        row = 0
+        frame = PluginPreferencesFrame(parent, grid=(0,0))
+
+
 
     def _setMacroEditorTabWidgets(self, parent):
         row = 0

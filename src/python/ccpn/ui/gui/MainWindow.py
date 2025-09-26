@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-22 16:55:43 +0100 (Thu, May 22, 2025) $"
-__version__ = "$Revision: 3.3.3 $"
+__dateModified__ = "$dateModified: 2025-09-10 16:46:25 +0100 (Wed, September 10, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -446,8 +446,9 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                         }
                         QMenuBar { color: palette(text); }
                         QMenuBar::item:disabled { color: palette(dark); }
-                        QProgressBar { text-align: center; }
                         """
+                        # QProgressBar { text-align: center; }  # this messes with the colours :|
+
         # there is also some weird stuff with the qprogressbar text-colour:
         #   the left-edge of the text-label is its local 0%, the right-edge its local 100%,
         #   and the text-label is coloured highlighttedtext|text based on the progress %
@@ -916,6 +917,8 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         _useNativeMenus = getPreferences().get(USE_NATIVE_MENUS)
         self._menuBarManager = MenuBarManager(mainWindow=self, menuDefs=self.ui._menuDefs)
         self._menuBarManager.makeMenus(useNativeMenus=_useNativeMenus)
+        # #TODO:ED needs fixing
+        # self.application.pluginManager._registerLazyMenus(self)
 
     #     # self._menuBar = self.menuBar()
     #     # for m in self.ui._menuDefs:
@@ -1440,7 +1443,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
     # def _fillCcpnPluginsMenu(self):
     #
-    #     from ccpn.plugins import loadedPlugins
+    #     from ccpn._old_plugins import loadedPlugins
     #
     #     pluginsMenu = self.searchMenuAction(CCPN_PLUGINS)
     #     pluginsMenu.clear()
@@ -1452,11 +1455,11 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     #
     # def _reloadCcpnPlugins(self):
     # GWV 12/2/24: Core functionality as Framework._reloadPlugins
-    # from ccpn import plugins
+    # from ccpn import _old_plugins
     # from importlib import reload
     # from ccpn.util.Path import aPath
     #
-    # reload(plugins)
+    # reload(_old_plugins)
     #
     # pluginUserPath = self.application.preferences.general.userPluginPath
     # import importlib.util
@@ -1475,7 +1478,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
     #
     # def _fillUserPluginsMenu(self):
     #
-    #     from ccpn.plugins import loadedUserPlugins
+    #     from ccpn._old_plugins import loadedUserPlugins
     #
     #     pluginsMenu = self.searchMenuAction(USER_PLUGINS)
     #     pluginsMenu.clear()

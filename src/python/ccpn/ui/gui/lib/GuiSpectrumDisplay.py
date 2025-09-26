@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-08-11 11:59:36 +0100 (Mon, August 11, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__dateModified__ = "$dateModified: 2025-09-26 19:16:21 +0100 (Fri, September 26, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -2935,7 +2935,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 getLogger().debug('displaySpectrum: Spectrum %s already in display %s' % (spectrum, self))
                 for _sv in _specViews:
                     _sv._refreshColours()
-            return _specViews[0]
+                return _specViews[0]
 
         # _getDimensionsMapping will check the match for axisCodes
         displayOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)

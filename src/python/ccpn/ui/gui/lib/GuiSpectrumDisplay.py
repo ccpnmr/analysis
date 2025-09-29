@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-23 16:42:47 +0100 (Tue, September 23, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-29 15:59:39 +0100 (Mon, September 29, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -3215,21 +3215,11 @@ class GuiSpectrumDisplay(CcpnModule):
             strip._updateTraces()
 
     def showTraceScaleBalloon(self):
+        """Shows the trace scale editor popup."""
         from ccpn.ui.gui.popups.TraceScaleBalloon import TraceScaleBalloon
         balloon = TraceScaleBalloon(parent=self, mainWindow=self.mainWindow)
 
-        _geometry = self._stripFrameScrollArea.geometry()
-        _topLeft = self.mapToGlobal(_geometry.topLeft())
-
-        height = balloon.estimateHeight()
-        width = balloon.estimateWidth()
-        spacer = 10
-
-        if _geometry.width() > width + spacer * 4:
-            balloon.setFixedWidth((_geometry.width() - spacer))
-
-        popupPos = QtCore.QPoint(_topLeft.x(), _topLeft.y() + int(height / 2) + spacer)
-
+        popupPos = QtGui.QCursor().pos()
         balloon.showAt(popupPos)
 
     @logCommand(get='self')

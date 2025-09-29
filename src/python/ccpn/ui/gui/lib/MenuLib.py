@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-10 12:02:33 +0100 (Wed, September 10, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-29 16:26:36 +0100 (Mon, September 29, 2025) $"
 __version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
@@ -351,10 +351,10 @@ def _flatten_single_item_submenus(menu: QtWidgets.QMenu,
             # Recurse into the submenu first
             _flatten_single_item_submenus(submenu, minDepth, _depth + 1)
 
-            visible_actions = [act for act in submenu.actions()]
-            if len(visible_actions) == 2 and _depth >= minDepth:
-                # the first is empty and seems to be linked to the menuItem - not checked yet
-                newAct = visible_actions[1]
+            visible_actions = [act for act in submenu.actions() if act.text()]
+            if len(visible_actions) == 1 and _depth >= minDepth:
+                # Check only those items with .text() the others should be submenus
+                newAct = visible_actions[0]
                 newAct.setText(f'{action.text()}\t{newAct.text()}')
                 # Insert the single action in its place
                 menu.insertAction(action, newAct)

@@ -1,5 +1,8 @@
 """Module Documentation here
 """
+from __future__ import annotations
+
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -15,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-10 12:02:33 +0100 (Wed, September 10, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-29 16:26:36 +0100 (Mon, September 29, 2025) $"
 __version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
@@ -28,11 +31,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 __all__ = ['Menu', 'MenuBar']
 
+from typing import TYPE_CHECKING
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.Translation import translator
 
+
+if TYPE_CHECKING:
+    from ccpn.ui.gui.lib.MenuLib import _MenuEventFilter
 
 # GWV 9/2/24: now in gui.Menus
 # VIEW_SHOW_MODULES = 'Show/hide Modules'
@@ -140,7 +147,7 @@ class _MenuProxyStyle(QtWidgets.QProxyStyle):
 
 class Menu(QtWidgets.QMenu, Base):
     _colourEnabled = False
-    _filter = None
+    _filter: _MenuEventFilter | None = None
 
     def __init__(self, title, parent, isFloatWidget=False, **kwds):
         super().__init__(parent)
@@ -156,9 +163,9 @@ class Menu(QtWidgets.QMenu, Base):
         self.setStyle(_MenuProxyStyle(styles.create('fusion')))
 
     def addItem(self, text, shortcut=None, callback=None,
-                      checked=True, checkable=False, enabled=True,
-                      icon=None, toolTip=None,
-                      **kwargs
+                checked=True, checkable=False, enabled=True,
+                icon=None, toolTip=None,
+                **kwargs
                 ):
         action = Action(self.getParent(), text, callback=callback, shortcut=shortcut,
                         checked=checked, checkable=checkable, enabled=enabled,

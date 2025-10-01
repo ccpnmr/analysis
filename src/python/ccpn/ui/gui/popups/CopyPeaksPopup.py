@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-29 11:00:48 +0100 (Mon, September 29, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-01 15:39:12 +0100 (Wed, October 01, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -123,6 +123,9 @@ class CopyPeaks(CcpnDialog):
                                            grid=(row, 0))
         self.inputPeaksListWidget = ListWidget(self, multiSelect=True, callback=self._activateCopy, tipText=tipText,
                                                grid=(row, 1))
+
+        self.inputPeaksWidget.itemSelectionChanged.connect(self._activateCopy)
+        self.inputPeaksListWidget.itemSelectionChanged.connect(self._activateCopy)
         row += 1
         checkBoxTexts = [_SnapToExtremum, _RefitPeaks, _RefitPeaksAtPosition, _RecalculateVolume]
         checkBoxTipTexts = [_tipTextSnapToExtremum, _tipTextRefitPeaks, _tipTextRefitPeaksAtPosition,
@@ -318,9 +321,10 @@ class CopyPeaks(CcpnDialog):
         self.selectFromPullDown.select(spectrum)
 
     def _activateCopy(self):
-        if len(self.inputPeaksListWidget.getSelectedObjects()) > 0 and len(
-                self.inputPeaksWidget.getSelectedObjects()) > 0:
+        if self.inputPeaksListWidget.getSelectedObjects() and self.inputPeaksWidget.getSelectedObjects():
             self.copyButtons.buttons[1].setDisabled(False)
+        else:
+            self.copyButtons.buttons[1].setDisabled(True)
 
     def _copyButton(self):
         includeAllProperties = self.copyOptionsRadioButtons.getSelectedText() == _IncludeAllPeakProperties
@@ -347,7 +351,10 @@ class CopyPeaks(CcpnDialog):
                             progress.checkCancel()
                             progress.setValue((numPeaks * listNumber + peakNumber) // pDiv)
                             peak.copyTo(peakList, includeAllProperties=includeAllProperties)
-                            self._executeAfterCopyPeaks(peakList)
+
+                    for peakList in peakLists:
+                        self._executeAfterCopyPeaks(peakList)
+
             getLogger().info('Peaks copied. Finished')
 
         if es := progress.error:

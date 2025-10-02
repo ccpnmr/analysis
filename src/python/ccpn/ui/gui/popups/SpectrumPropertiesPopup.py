@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-13 18:50:06 +0000 (Thu, March 13, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-10-02 16:51:15 +0100 (Thu, October 02, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -3037,7 +3037,13 @@ class ColourFrameABC(Frame):
             self.positiveColourBox = PulldownList(self, vAlign='t', grid=(row, 1))
             self.positiveColourButton = Button(self, grid=(row, 2), vAlign='t', hAlign='l',
                                                icon='icons/colours', hPolicy='fixed')
+            self.positiveColourApplyToButton = Button(self, grid=(row, 3), text='Apply to Spectra',
+                                                      vAlign='t', hAlign='r', hPolicy='fixed',
+                                                      callback=self._copyPositiveContourColour, enabled=False)
+
             self.positiveColourButton.clicked.connect(partial(self._queueChangePosSpectrumColour, self.spectrumGroup))
+            self.positiveColourBox.currentTextChanged.connect(self._updateApplyToButtons)
+
             row += 1
 
         if self.NEGATIVECOLOUR:
@@ -3046,7 +3052,13 @@ class ColourFrameABC(Frame):
             self.negativeColourBox = PulldownList(self, vAlign='t', grid=(row, 1))
             self.negativeColourButton = Button(self, grid=(row, 2), vAlign='t', hAlign='l',
                                                icon='icons/colours', hPolicy='fixed')
+            self.negativeColourApplyToButton = Button(self, grid=(row, 3), text='Apply to Spectra',
+                                                      vAlign='t', hAlign='r', hPolicy='fixed',
+                                                      callback=self._copyNegativeContourColour, enabled=False)
+
             self.negativeColourButton.clicked.connect(partial(self._queueChangeNegSpectrumColour, self.spectrumGroup))
+            self.negativeColourBox.currentTextChanged.connect(self._updateApplyToButtons)
+
             row += 1
 
         if self.SLICECOLOUR:
@@ -3168,6 +3180,31 @@ class ColourFrameABC(Frame):
 
         _value = newColour or None
         spectrumGroup.negativeContourColour = _value
+
+    def _copyPositiveContourColour(self):
+        name = self.positiveColourBox.currentText()
+        colour = getSpectrumColour(name, defaultReturn='#')
+
+        for tab in self._container._colourTabsNd.tabs:
+            _setColourPulldown(tab.positiveColourBox, colour)
+
+    def _copyNegativeContourColour(self):
+        name = self.negativeColourBox.currentText()
+        colour = getSpectrumColour(name, defaultReturn='#')
+
+        for tab in self._container._colourTabsNd.tabs:
+            _setColourPulldown(tab.negativeColourBox, colour)
+
+    def _updateApplyToButtons(self):
+        if self.positiveColourBox.getText():
+            self.positiveColourApplyToButton.setEnabled(True)
+        else:
+            self.positiveColourApplyToButton.setEnabled(False)
+
+        if self.negativeColourBox.getText():
+            self.negativeColourApplyToButton.setEnabled(True)
+        else:
+            self.negativeColourApplyToButton.setEnabled(False)
 
     # spectrum sliceColour button and pulldown
     def _queueChangeSliceColour(self, spectrumGroup):

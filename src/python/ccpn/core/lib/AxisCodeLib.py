@@ -4,19 +4,20 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
-                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-24 17:14:14 +0100 (Fri, September 24, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2025-10-02 14:32:04 +0100 (Thu, October 02, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,8 +26,46 @@ __date__ = "$Date: 2021-06-28 18:11:16 +0100 (Mon, June 28, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+__all__ = ["axisCodeMatch", "doAxisCodesMatch", "getAxisCodeMatch", "getAxisCodeMatchIndices"]
+
+import sys
 import itertools
 from collections import OrderedDict
+
+
+_DEBUG = False
+
+
+class _consoleStyle():
+    """Colors class:reset all colors with colors.reset; two
+    subclasses fg for foreground
+    and bg for background colour; use as colors.subclass.colorname.
+    i.e. colors.fg.red or colors.bg.greenalso, the generic bold, disable,
+    underline, reverse, strike through,
+    and invisible work with the main class i.e. colors.bold
+    """
+    # Smaller version of that defined in Common to remove any non-built-in imports
+    reset = '\033[0m'
+
+
+    class fg:
+        darkred = '\033[31m'
+        darkyellow = '\033[33m'
+        lightgrey = '\033[37m'
+        red = '\033[91m'
+        green = '\033[92m'
+        yellow = '\033[93m'
+        blue = '\033[94m'
+        magenta = '\033[95m'
+        white = '\033[97m'
+
+
+def _write(*text):
+    """Debug - write output"""
+    sys.stderr.write(f'{_consoleStyle.fg.lightgrey}{__name__.split(".")[-1]}:  '
+                     f'{" ".join(map(lambda val: str(val), text))}'
+                     f'{_consoleStyle.reset}\n')
 
 
 def _matchSingleAxisCodeLength(code1, code2):
@@ -37,7 +76,8 @@ def _matchSingleAxisCodeLength(code1, code2):
     return (100 + 800 // (lenDiff + 1))
 
 
-def _matchSingleAxisCode(code1: str = None, code2: str = None, exactMatch: bool = False, allowLowercase=True, mismatch=0) -> int:
+def _matchSingleAxisCode(code1: str = None, code2: str = None, exactMatch: bool = False,
+                         allowLowercase=True, mismatch=0) -> int:
     """number of matching characters
     code1, code2 = strings
     e.g. 'Hn1', 'H1'
@@ -75,7 +115,8 @@ def _matchSingleAxisCode(code1: str = None, code2: str = None, exactMatch: bool 
     ss = 0
 
     # add extra tests from v2.4
-    if (code1.startswith('MQ') and not code2.startswith('MQ')) or (code2.startswith('MQ') and not code1.startswith('MQ')):
+    if ((code1.startswith('MQ') and not code2.startswith('MQ')) or
+            (code2.startswith('MQ') and not code1.startswith('MQ'))):
         return mismatch
     # char followed by digit already accounted for
 
@@ -100,7 +141,8 @@ def _matchSingleAxisCode(code1: str = None, code2: str = None, exactMatch: bool 
     return (1000 + ss) if ss else mismatch
 
 
-def _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=True, allMatches=False, exactMatch=False):
+def _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=True,
+                        allMatches=False, exactMatch=False):
     """get mapping tuple so that axisCodes[result[ii]] matches refAxisCodes[ii]
     all axisCodes must match, but result can contain None if refAxisCodes is longer
     if axisCodes contain duplicates, you will get one of possible matches
@@ -114,6 +156,8 @@ def _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=True, allMatche
     matches = []
     for code in axisCodes:
         matches.append([_matchSingleAxisCode(code, x, exactMatch=exactMatch, mismatch=mismatch) for x in refAxisCodes])
+    if _DEBUG:
+        _write(matches)
 
     values = list(range(len(axisCodes))) + [None] * lenDifference
     _results = []
@@ -125,7 +169,8 @@ def _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=True, allMatche
                 _score = matches[jj][ii]
                 if _score <= 0:
                     perm[ii] = None
-                score += _score
+                else:
+                    score += _score
         if score > 0:
             _results.append((score, tuple(perm)))
 
@@ -169,6 +214,10 @@ def _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=True, allMatche
             return _results and _results[0] and _results[0][1]
 
 
+#=========================================================================================
+# matching functions
+#=========================================================================================
+
 def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False, checkBoundAtoms=False) -> OrderedDict:
     """Return an OrderedDict containing the mapping from the refAxisCodes to axisCodes
 
@@ -208,7 +257,8 @@ def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False
     """
 
     _found = OrderedDict()
-    _matches = _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=checkBoundAtoms, allMatches=allMatches, exactMatch=exactMatch)
+    _matches = _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=checkBoundAtoms,
+                                   allMatches=allMatches, exactMatch=exactMatch)
     if allMatches:
         for _match in _matches or ():
             for ii, ind in enumerate(_match):
@@ -230,7 +280,10 @@ def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False
     return OrderedDict()
 
 
-def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatches=False, checkBoundAtoms=False):
+def getAxisCodeMatchIndices(axisCodes, refAxisCodes,
+                            exactMatch=False,
+                            allMatches=False,
+                            checkBoundAtoms=False):
     """Return a tuple containing the indices for each axis code in axisCodes in refAxisCodes
 
     Only the best match is returned for each code, elements not found in refAxisCodes will be marked as 'None'
@@ -241,7 +294,7 @@ def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatche
 
         ->  (1, 0, None)
 
-                i.e axisCodes[0] = 'Hn' which maps to refAxisCodes[indices[0]] = 'Hn'
+                i.e. axisCodes[0] = 'Hn' which maps to refAxisCodes[indices[0]] = 'Hn'
 
     for similar repeated axis codes, possibly from matching isotopeCodes:
 
@@ -251,8 +304,13 @@ def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatche
 
     """
 
-    _found = OrderedDict()
-    _matches = _axisCodeMapIndices(axisCodes, refAxisCodes, checkBoundAtoms=checkBoundAtoms, allMatches=allMatches, exactMatch=exactMatch)
+    _found: dict[str, int | tuple[int, ...]] = OrderedDict()
+    _matches = _axisCodeMapIndices(axisCodes, refAxisCodes,
+                                   checkBoundAtoms=checkBoundAtoms,
+                                   allMatches=allMatches,
+                                   exactMatch=exactMatch)
+    if _DEBUG:
+        _write(_matches)
     if allMatches:
         for _match in _matches or ():
             for ii, ind in enumerate(_match):
@@ -280,8 +338,7 @@ def axisCodeMatch(axisCode, refAxisCodes):
         if indx == 0:
             # We have a match
             return refAxisCodes[ii]
-    else:
-        return None
+    return None
 
 
 def doAxisCodesMatch(axisCodes, refAxisCodes):
@@ -292,5 +349,4 @@ def doAxisCodesMatch(axisCodes, refAxisCodes):
     for code1, code2 in zip(axisCodes, refAxisCodes):
         if not _matchSingleAxisCode(code1, code2):
             return False
-
     return True

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-09 19:02:06 +0100 (Tue, September 09, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-02 14:32:05 +0100 (Thu, October 02, 2025) $"
 __version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar
 from ccpn.ui.gui.guiSettings import (getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND, GUISTRIP_PIVOT,
                                      ZPlaneNavigationModes)
-from ccpn.ui.gui.lib.MenuLib import _addItemsToNavigateMenu
+from ccpn.ui.gui.lib.MenuLib import addItemsToNavigateMenu
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_FULLATOMNAME, AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
 from ccpn.util.decorators import logCommand
@@ -886,10 +886,10 @@ class GuiStrip(Frame):
         allowMenuDuplicates = ((prefs := getPreferences()) and prefs.general.get('allowMenuDuplicates'))
         showBlankDimensions = ((prefs := getPreferences()) and prefs.general.get('showBlankDimensions'))
         if peaks and self._navigateToPeakMenuSelected:
-            _addItemsToNavigateMenu(self, peaks[0].position, peaks[0].axisCodes, 'Peak',
-                                    self._navigateToPeakMenuSelected,
-                                    includeAxisCodes=True, allowMenuDuplicates=allowMenuDuplicates,
-                                    showBlankDimensions=showBlankDimensions)
+            addItemsToNavigateMenu(self, peaks[0].position, peaks[0].axisCodes, 'Peak',
+                                   self._navigateToPeakMenuSelected,
+                                   includeAxisCodes=True, allowMenuDuplicates=allowMenuDuplicates,
+                                   showBlankDimensions=showBlankDimensions)
 
     def _addItemsToNavigateToCursorPosMenu(self):
         """Copied from old viewbox. This function apparently takes the current cursorPosition
@@ -905,10 +905,10 @@ class GuiStrip(Frame):
         if None in position:
             return
 
-        _addItemsToNavigateMenu(self, position, self.axisCodes, 'Cursor',
-                                self.navigateCursorMenu,
-                                includeAxisCodes=True, allowMenuDuplicates=allowMenuDuplicates,
-                                showBlankDimensions=showBlankDimensions)
+        addItemsToNavigateMenu(self, position, self.axisCodes, 'Cursor',
+                               self.navigateCursorMenu,
+                               includeAxisCodes=True, allowMenuDuplicates=allowMenuDuplicates,
+                               showBlankDimensions=showBlankDimensions)
 
     def markAxisIndices(self, indices=None):
         """Mark the X/Y/XY axisCodes by index

@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-29 16:26:36 +0100 (Mon, September 29, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-02 14:32:05 +0100 (Thu, October 02, 2025) $"
 __version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
@@ -30,8 +30,10 @@ __date__ = "$Date: 2025-07-03 17:28:00 +0100 (Thu, July 03, 2025) $"
 # Start of code
 #=========================================================================================
 
+__all__ = ["addItemsToNavigateMenu", "MenuEventFilter"]
+
 from typing import TYPE_CHECKING, TypeVar, Generic
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 from functools import partial
 import weakref
 from PyQt5 import QtWidgets, QtGui, QtCore
@@ -41,7 +43,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 _STRIP = '_strip'
 _FOREGROUND = '_foregroundColour'
 _BACKGROUND = '_backgroundColour'
-_BLANKISOTOPECODE = ' - '
+_BLANK_ISOTOPE_CODE = ' - '
 
 if TYPE_CHECKING:
     from ccpn.ui.gui.modules.SpectrumDisplay import (SpectrumDisplay1d as _SpectrumDisplay1d,
@@ -52,10 +54,10 @@ _CoreStrip = TypeVar('_CoreStrip', bound='_Strip1d | _StripNd')
 _CoreSpectrumDisplay = TypeVar('_CoreSpectrumDisplay', bound='_SpectrumDisplay1d | _SpectrumDisplayNd')
 
 
-def _addItemsToNavigateMenu(self: _CoreStrip, position: list[float], axisCodes: list[str], label: str, menuFunc: Menu,
-                            includeAxisCodes: bool = True, allowMenuDuplicates: bool = False,
-                            showBlankDimensions: bool = False,
-                            ):
+def addItemsToNavigateMenu(self: _CoreStrip, position: list[float], axisCodes: list[str], label: str, menuFunc: Menu,
+                           includeAxisCodes: bool = True, allowMenuDuplicates: bool = False,
+                           showBlankDimensions: bool = False,
+                           ):
     """Adds item to navigate to a section of the context-menu.
 
     :param self: The instance of the class calling this function, a strip UI element.
@@ -85,7 +87,7 @@ def _addItemsToNavigateMenu(self: _CoreStrip, position: list[float], axisCodes: 
     currentStrip = self
     if not getattr(menuFunc, '_filter', None):
         # add a menu-filter to show/hide strip overlays as the mouse is moved over menu-actions
-        menuFunc._filter = _MenuEventFilter(menuFunc)
+        menuFunc._filter = MenuEventFilter(menuFunc)
     menuFunc.setEnabled(True)
 
     # the first section for the current spectrumDisplay/strip
@@ -218,12 +220,15 @@ def _addGroupMenuItems(menuFunc: Menu, pStrips: list[_CoreStrip], currentStrip: 
                                                             for combi in combinations(enumerate(perm), k)
                                                             ]
 
-        def _duplicate_count(t):
+        def _duplicate_count(t, size):
             # This returns the number of duplicates
-            return len(t) - len({item[1] for item in t})
+            counts = dict(filter(lambda itm: itm[0] is not None and itm[1] > 1, Counter(t).items()))
+            offset = sum(counts.values())
+            return (offset +
+                    size * size * len(dict(filter(lambda itm: itm[0] is not None and itm[1] > 1,
+                                                  Counter(t).items())))
+                    )
 
-        # The sorted() function will sort by the first key (length) and then the second key (count)
-        posMap = sorted(posMap, key=lambda t: (len(t), _duplicate_count(t)))
         # Map all the permutations of mapped indices into fixed-length lists
         orderedPerms: OrderedDict[str, tuple[list[int | None], int]] = OrderedDict()
         for perm0 in posMap:
@@ -231,19 +236,22 @@ def _addGroupMenuItems(menuFunc: Menu, pStrips: list[_CoreStrip], currentStrip: 
             for cc in perm0:
                 if cc and cc[0] < len(permList0):
                     permList0[cc[0]] = cc[1]
-            orderedPerms[str(permList0)] = permList0, _duplicate_count(perm0)
+            orderedPerms[str(permList0)] = permList0, _duplicate_count(permList0, max_k)
 
         firstShow = 0
         # get this list first, and then create the menus as required
         permList = [(_pc, _perm1, dCount)
                     for _perm1, dCount in orderedPerms.values()
-                    if (_pc := _perm1.count(None)) != len(_perm1)]
+                    if (_pc := _perm1.count(None)) != len(_perm1)  # Discard all Nones
+                    ]
+        # Sort by (length, duplicate-count)
+        permList = sorted(permList, key=lambda perm: (max_k - perm[0], perm[2]))
         lastDCount = 0
         for pc, perm2, dCount in permList:
             if dCount != lastDCount:
                 _stripMenu.addSeparator()
             lastDCount = dCount
-            if not allowMenuDuplicates and dCount:
+            if not allowMenuDuplicates and bool(dCount):  # 'bool' required otherwise strange result
                 continue
             if pc != firstShow:
                 # insert separator above the next group
@@ -253,6 +261,7 @@ def _addGroupMenuItems(menuFunc: Menu, pStrips: list[_CoreStrip], currentStrip: 
             action = _createCommonMenuItem(includeAxisCodes, label, _stripMenu,
                                            perm2, position, strip, prefix='',
                                            showBlankDimensions=showBlankDimensions,
+                                           includeDuplicateToolTip=bool(dCount),
                                            )
             if dCount:
                 action.setProperty(_BACKGROUND, True)
@@ -291,7 +300,7 @@ def _addNewMenu(text: str, menuFunc: Menu, strip: _CoreStrip, currentStrip: _Cor
     _stripMenu.setColourEnabled(True)  # enable foreground-colours for this menu
     if not getattr(_stripMenu, '_filter', None):
         # add a menu-filter to show/hide strip overlays as move the mouse over actions in menu
-        _stripMenu._filter = _MenuEventFilter(_stripMenu)
+        _stripMenu._filter = MenuEventFilter(_stripMenu)
     # this is a menu, so need to grab the attached QAction first
     stripAction = _stripMenu.menuAction()
     stripAction.setProperty(_STRIP, strip)
@@ -326,7 +335,7 @@ def _hide_empty_submenus(menu: QtWidgets.QMenu,
             # Recurse into the submenu first
             _hide_empty_submenus(submenu, minDepth, _depth + 1)
             # Check if the submenu has any visible actions
-            visible_actions = [a for a in submenu.actions() if a.isVisible()]
+            visible_actions = [a for a in submenu.actions() if a.isVisible() and a.text()]
             if not visible_actions and _depth >= minDepth:
                 action.setVisible(False)
                 # Action is hidden, but colour kept for debugging
@@ -370,6 +379,7 @@ def _createMenuItemForNavigate(navigateAxes: list[str | None], navigatePos: list
                                showPos: list[str | float | None],
                                strip: _CoreStrip, menuFunc: Menu, label: str,
                                includeAxisCodes: bool = True, showBlankDimensions: bool = False,
+                               includeDuplicateToolTip: bool = False,
                                prefix: str | None = None) -> QtWidgets.QAction:
     """Creates a QAction for navigating to a specific position within a strip.
 
@@ -389,6 +399,8 @@ def _createMenuItemForNavigate(navigateAxes: list[str | None], navigatePos: list
     :type includeAxisCodes: bool
     :param showBlankDimensions: If True, include blank axis-codes in 'Navigate to:' menu item text. Defaults to False.
     :type showBlankDimensions: bool
+    :param includeDuplicateToolTip: If True, include information on duplicated axis-codes in the tooltip.
+    :type includeDuplicateToolTip: bool
     :param prefix: An optional prefix for the menu item text. Defaults to None, in which case strip.pid is used.
     :type prefix: str | None
     :return: The newly created QAction.
@@ -397,20 +409,29 @@ def _createMenuItemForNavigate(navigateAxes: list[str | None], navigatePos: list
     from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
 
     prefix = strip.pid if prefix is None else prefix
+    keys = [_key if isinstance(_key, str) else str(round(float(_key), 3)) for _key in showPos]
     if includeAxisCodes:
-        item = ', '.join([f"{cc}:{str(x if isinstance(x, str) else round(x, 3))}"
-                          for x, cc in zip(showPos, strip.axisCodes)
-                          if (x != _BLANKISOTOPECODE) or showBlankDimensions
+        item = ', '.join([f"{cc}:{key}"
+                          for key, cc in zip(keys, strip.axisCodes)
+                          if (key != _BLANK_ISOTOPE_CODE) or showBlankDimensions
                           ])
     else:
-        item = ', '.join([str(x if isinstance(x, str) else round(x, 3)) for x in showPos
-                          if (x != _BLANKISOTOPECODE) or showBlankDimensions
+        item = ', '.join([key for key in keys
+                          if (key != _BLANK_ISOTOPE_CODE) or showBlankDimensions
                           ])
-    tooltipItem = ', '.join([f"{cc}:{str(x if isinstance(x, str) else round(x, 3))}"
-                             for x, cc in zip(showPos, strip.axisCodes)
+    tooltipItem = ', '.join([f"{cc}:{key}"
+                             for key, cc in zip(keys, strip.axisCodes)
                              ])  # detailed tooltip
     text = f'{prefix} {item}'  # not sure whether prefix will work now - brackets not necessary?
     toolTip = f'Show cursor in strip {str(strip.id)} at {label} position ({tooltipItem})'
+    _duplicates: OrderedDict[str, list] = OrderedDict((kk, []) for kk in keys)
+    for x, cc in zip(keys, strip.axisCodes):
+        _duplicates[x].append(cc)
+    _duplicates = OrderedDict(filter(lambda itm: len(itm[1]) > 1 and itm[0] != _BLANK_ISOTOPE_CODE,
+                                     _duplicates.items()))
+    if includeDuplicateToolTip and _duplicates:
+        _dupList = '\n    '.join(f"{', '.join(val)}: {k}" for k, val in _duplicates.items())
+        toolTip += f'\nContains duplicates for:\n    {_dupList}'
     if strip.visibleRegion().isEmpty():
         toolTip += '\n(strip is not in visible region of spectrumDisplay)'
     action = menuFunc.addItem(text=text,
@@ -425,6 +446,7 @@ def _createMenuItemForNavigate(navigateAxes: list[str | None], navigatePos: list
 def _createCommonMenuItem(includeAxisCodes: bool, label: str, menuFunc: Menu,
                           perm: list[int | None], position: list[float], strip: _CoreStrip,
                           prefix: str | None = None, showBlankDimensions: bool = False,
+                          includeDuplicateToolTip: bool = False,
                           ) -> QtWidgets.QAction:
     """Helper function to create a common menu item with formatted text and navigation functionality.
 
@@ -444,6 +466,8 @@ def _createCommonMenuItem(includeAxisCodes: bool, label: str, menuFunc: Menu,
     :type prefix: str | None
     :param showBlankDimensions: If True, include blank axis-codes in 'Navigate to:' menu item text. Defaults to False.
     :type showBlankDimensions: bool
+    :param includeDuplicateToolTip: If True, include information on duplicated axis-codes in the tooltip.
+    :type includeDuplicateToolTip: bool
     :return: The newly created QAction.
     :rtype: QtWidgets.QAction
     """
@@ -456,10 +480,11 @@ def _createCommonMenuItem(includeAxisCodes: bool, label: str, menuFunc: Menu,
             navigatePos.append(position[ii])
             navigateAxes.append(strip.axisCodes[jj])
         else:
-            showPos.append(_BLANKISOTOPECODE)
+            showPos.append(_BLANK_ISOTOPE_CODE)
             # empty navigatePos and navigateAxes ignored by navigateToPositionInStrip
     return _createMenuItemForNavigate(navigateAxes, navigatePos, showPos, strip, menuFunc, label,
                                       includeAxisCodes=includeAxisCodes, showBlankDimensions=showBlankDimensions,
+                                      includeDuplicateToolTip=includeDuplicateToolTip,
                                       prefix=prefix)
 
 
@@ -467,7 +492,7 @@ def _createCommonMenuItem(includeAxisCodes: bool, label: str, menuFunc: Menu,
 # _MenuEventFilter
 #=========================================================================================
 
-class _MenuEventFilter(QtCore.QObject, Generic[_CoreStrip]):
+class MenuEventFilter(QtCore.QObject, Generic[_CoreStrip]):
     """An event filter for QMenu that handles mouse-events to show/hide strip-overlays
     as the mouse enters/leaves menu items.
     """

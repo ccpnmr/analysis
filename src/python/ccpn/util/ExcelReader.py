@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Morgan Hayward $"
-__dateModified__ = "$dateModified: 2025-08-27 08:06:33 +0100 (Wed, August 27, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-02 11:40:06 +0100 (Thu, October 02, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -202,34 +202,6 @@ INTER_SHEET_SPECTRUM_PROPERITES = {'spectrumPath'     : 'path',
                                    'spectrumName'     : 'name',
                                    'spectrumGroupName': 'spectrumGroupName'}
 
-# SUBSTANCE_PROPERTIES = [comment, smiles, synonyms, molecularMass, empiricalFormula, atomCount,
-#                         hBondAcceptorCount, hBondDonorCount, bondCount, ringCount, polarSurfaceArea,
-#                         logPartitionCoefficient, userCode, ]
-#
-# SUBSTANCES_SHEET_COLUMNS = [SUBSTANCE_NAME,
-#                                         SPECTRUM_PATH,
-#                                         SPECTRUM_GROUP_NAME,
-#                                         SPECTRUMHEXCOLOUR,
-#                                         SPECTRUMGROUPHEXCOLOUR, EXP_TYPE] \
-#                                        + SUBSTANCE_PROPERTIES
-#
-# SAMPLE_SHEET_COLUMNS = [SAMPLE_NAME,
-#                         SPECTRUM_GROUP_NAME,
-#                         SPECTRUM_PATH,
-#                         SPECTRUM_NAME,
-#                         SPECTRUMHEXCOLOUR,
-#                         SPECTRUMGROUPHEXCOLOUR] \
-#                        + SAMPLE_PROPERTIES
-#
-# SERIES_SHEET_COLUMNS = [
-#     SPECTRUM_GROUP_NAME,
-#     SPECTRUM_PATH,
-#     SPECTRUM_NAME,
-#     SERIES_VALUE,
-#     SERIES_UNIT,
-#     SPECTRUMHEXCOLOUR,
-#     SPECTRUMGROUPHEXCOLOUR]
-
 TOP_SG_COLOURS = ['red',
                   'blue',
                   'purple',
@@ -316,10 +288,7 @@ class ExcelReader(object):
         :param excelPath: excel file path
 
         This reader will process excel files containing one or more sheets.
-        The file needs to contain  either the word Substances or Samples in the sheets name.
-
-        The user can load a file only with Substances or Samples sheet or both. Or a file with enumerate sheets
-        called eg Samples_Exp_1000, Samples_Exp_1001 etc.
+        The file needs to contain sheets with Spectra, Sample and/or Substance in the name.
 
         The project will create new Substances and/or Samples and SpectrumGroups only once for a given name.
         Therefore, dropping twice the same file, or giving two sheets with same sample/substance/spectrumGroup name
@@ -329,13 +298,9 @@ class ExcelReader(object):
 
         Reader Steps:
 
-        - Parse the sheet/s and return a dataframe for each sheet containing at least the str name Substances or Samples
-        - Create Substances and/or samples if not existing in the project else skip with warning
-        - For each row create a dict and link to the obj eg. {Substance: {its dataframe row as dict}
-        - Create SpectrumGroups if not existing in the project else add a suffix
-        - Load spectra on project and dispatch to the object. (e.g. SU.referenceSpectra, SA.spectra, SG.spectra)
-        - set all attributes for each object as in the wrapper
-
+        - Parse the sheet/s and return a dataframe for each sheet titled as Spectra, Samples, Substance, SampleComponent objects.
+        - Sheets with multiple object data, e.g. Spectra data in a Substance sheet, have the additional data extracted into a new Dataframe representing a shhet of its own.
+        - Sheets are parsed in order of Substance, Sample, SampleComponent, Spectra with each row treated as a separate object.
 
         """
         self._totalProcessesCount = 0
@@ -344,11 +309,9 @@ class ExcelReader(object):
         self.spectrumLinks = {}
         self._project = project
         self.excelPath = aPath(excelPath)
-        self._project.excelPath = self.excelPath
         self.pandasFile = pd.ExcelFile(self.excelPath)
         self.sheets = self._getSheets(self.pandasFile)
         self.dataframes = self._getDataFrameFromSheets(self.sheets)
-        self._project.dataFrames = self.dataframes
         self.extraDataFrames = {SUBSTANCE       : [],
                                 SAMPLE          : [],
                                 SAMPLE_COMPONENT: [],
@@ -356,7 +319,8 @@ class ExcelReader(object):
                                 SPECTRUM_GROUP  : []}
 
     def load(self):
-        """Load the actual data in the project
+        """
+        Load the actual data in the project.
         """
         if SERIES in self.sheets:
             getLogger().info('Loading Series...')
@@ -383,41 +347,6 @@ class ExcelReader(object):
                         self._loadSpectra(dataFrame, progress, progressVal)
                         progressVal += (len(dataFrame))
 
-        # self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
-        # self._project.excelSubstancesDicts = self.substancesDicts
-        # self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
-        # self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
-        # self._totalProcessesCount = 5
-        #
-        # processCount = 1
-        # #### Loading Substances metadata #######
-        # getLogger().info('Loading Substances metadata...')
-        # self._dispatchAttrsToObjs(self.substancesDicts, processCount=processCount, sheetName='Substances')
-        # processCount += 1
-        #
-        # #### Loading Substances Spectra #######
-        # getLogger().info('Loading Substances Spectra...')
-        # self._loadSpectraForSheet(self.substancesDicts, processCount=processCount, sheetName='Substances')
-        # processCount += 1
-        #
-        # #### Loading Samples metadata #######
-        # getLogger().info('Loading Samples metadata...')
-        # self._dispatchAttrsToObjs(self.samplesDicts, processCount=processCount, sheetName='Samples')
-        # processCount += 1
-        #
-        # #### Loading Substances Spectra #######
-        # getLogger().info('Loading Samples Spectra...')
-        # self._loadSpectraForSheet(self.samplesDicts, processCount=processCount, sheetName='Samples')
-        # processCount += 1
-        #
-        # #### Loading SpectrumGroups #######
-        # getLogger().info('Loading SpectrumGroups...')
-        # self._fillSpectrumGroups(processCount=processCount, sheetName='')
-        #
-        # getLogger().info('Loading from Excel completed...')
-
-        # self._project.unblankNotification()
-
     #=========================================================================================
     # Parse Excel:
     #=========================================================================================
@@ -433,15 +362,13 @@ class ExcelReader(object):
         return dataFrame
 
     def _getDataFrameFromSheets(self, sheetNamesList):
-        """Reads sheets containing the names SUBSTANCES, SAMPLES, SAMPLE_COMPONENT, SERIES and/or SPECTRA and creates a dataFrame for each.
-        Returns a dictionary of each sheet type."""
+        """
+        Reads sheets containing the names SUBSTANCES, SAMPLES, SAMPLE_COMPONENT, SERIES and/or SPECTRA and creates a dataFrame for each.
+        Uses the regEx expressions in SHEET_NAME_RE to determine what sheet names refer to which objects.
+        Returns a dictionary of each sheet type.
+        """
         targetNames = [SUBSTANCE, SAMPLE, SAMPLE_COMPONENT, SERIES, SPECTRA]
-        # dataFrames = {targetName: [self._getDataFrameFromSheet(sheetName) for sheetName in sheetNamesList if targetName in sheetName] for targetName in targetNames}
         dataFrames = {targetName: [] for targetName in targetNames}
-        # for sheetName in sheetNamesList:
-        #     for targetName in targetNames:
-        #         if targetName in sheetName and not (targetName == SAMPLE and SAMPLE_COMPONENT in sheetName):
-        #             dataFrames[targetName].append(self._getDataFrameFromSheet(sheetName))
         for sheetName in sheetNamesList:
             for targetName, regEx in SHEET_NAME_RE.items():
                 if re.match(regEx, sheetName.lower()):
@@ -476,27 +403,6 @@ class ExcelReader(object):
     # Create Substances:
     #=========================================================================================
 
-    # def _createSubstancesDataFrames(self, dataframesList):
-    #     """Creates substances in the project if not already present, For each substance link a dictionary of all its values
-    #      from the dataframe row. """
-    #     from ccpn.core.Substance import _newSubstance
-    #
-    #     substancesDataFrames = []
-    #     for dataFrame in dataframesList:
-    #         for dataFrameAsDict in dataFrame.to_dict(orient="index").values():
-    #             if SUBSTANCE_NAME in dataFrame.columns:
-    #                 for key, value in dataFrameAsDict.items():
-    #                     if key == SUBSTANCE_NAME:
-    #                         if self._project is not None:
-    #                             if not self._project.getByPid('SU:' + str(value) + '.'):
-    #                                 substance = _newSubstance(self._project, name=str(value))
-    #                                 substancesDataFrames.append({substance: dataFrameAsDict})
-    #                             else:
-    #                                 getLogger().warning('Impossible to create substance %s. A substance with the same name already '
-    #                                                     'exsists in the project. ' % value)
-    #
-    #     return substancesDataFrames
-
     def _createSubstances(self, substancesDf):
         """Create Substance object from the data in the Substance sheet."""
         spectraDf = self._checkForSpectrumData(substancesDf)
@@ -521,45 +427,6 @@ class ExcelReader(object):
     #=========================================================================================
     # Create Samples:
     #=========================================================================================
-
-    # def _createSamplesDataDicts(self, dataframesList):
-    #     """Creates samples in the project if not already present, For each sample link a dictionary of all its values
-    #      from the dataframe row. """
-    #     samplesDataFrames = []
-    #     ## first creates samples without duplicates,
-    #     samples = self._createSamples(dataframesList)
-    #     if len(samples) > 0:
-    #         ## Second creates dataframes to dispatch the properties,
-    #         for dataFrame in dataframesList:
-    #             for dataFrameAsDict in dataFrame.to_dict(orient="index").values():
-    #                 if SAMPLE_NAME in dataFrame.columns:
-    #                     for key, value in dataFrameAsDict.items():
-    #                         if key == SAMPLE_NAME:
-    #                             if self._project is not None:
-    #                                 sample = self._project.getByPid('SA:' + str(value))
-    #                                 if sample is not None:
-    #                                     samplesDataFrames.append({sample: dataFrameAsDict})
-    #
-    #     return samplesDataFrames
-    #
-    # def _createSamples(self, dataframesList):
-    #     from ccpn.util.Common import naturalSortList
-    #     from ccpn.core.Sample import _newSample
-    #
-    #     samples = []
-    #     for dataFrame in dataframesList:
-    #         if SAMPLE_NAME in dataFrame.columns:
-    #             saNames = list(set((dataFrame[SAMPLE_NAME])))
-    #             saNames = naturalSortList(saNames, False)
-    #             for name in saNames:
-    #                 if not self._project.getByPid('SA:' + str(name)):
-    #                     sample = _newSample(self._project, name=str(name))
-    #                     samples.append(sample)
-    #
-    #                 else:
-    #                     getLogger().warning('Impossible to create sample %s. A sample with the same name already '
-    #                                         'exsists in the project. ' % name)
-    #     return samples
 
     def _createSamples(self, samplesDf):
         """Handles a dataframe of Samples and passes each row to _createSample to make a Sample object."""
@@ -594,90 +461,15 @@ class ExcelReader(object):
                 continue
             sample = self.sampleLinks[line['sampleName']]
             properties = {key: value(line[key]) for key, value in SAMPLE_COMPONENT_PROPERTIES.items() if line.notna()[key]}
-            # substance = self.substanceLinks[line['substanceName']] if line.notna()['substanceName'] else None
-            # properties['name'] = substance.name
-            # sample = samplesDf.loc[samplesDf['name'] == line['sampleName'], 'sample'].iloc[0]
             sampleComponent = self._createSampleComponent(sample, **properties)
-            # sampleComponentsDf.at[index, 'sampleComponent'] = sampleComponent
-        # return sampleComponentsDf
 
     def _createSampleComponent(self, sample, **properties):
         sampleComponent = _newSampleComponent(sample, **properties)
         return sampleComponent
 
     #=========================================================================================
-    # Load Spectra:
+    # Create Spectrum Groups:
     #=========================================================================================
-
-    # def _loadSpectra(self, samplesDf, spectraDf):
-    #     return
-    #     """Load the spectra from the data in the Spectra sheet, apply any modifications e.g. colour, and assign to a Sample."""
-    #     spectraDf['spectrum'] = ''
-    #     with progressHandler(title='Loading',
-    #                          maximum=len(spectraDf),
-    #                          text='Loading Spectra',
-    #                          hideCancelButton=True) as progress:
-    #         for index, line in spectraDf.iterrows():
-    #             # Get some variables.
-    #             spectrumDirectory = Path(line['spectrumDirectory'])
-    #             spectrumFileName = str(line['spectrumFileName'])
-    #             spectrumName = str(line['name']) if line.notna()['name'] else None
-    #             spectrumGroupName = str(line['spectrumGroupName']) if line.notna()['spectrumGroupName'] else None
-    #             sampleName = line['sampleName']
-    #             experimentType = str(line['experimentType']) if line.notna()['experimentType'] else None
-    #             # Load the spectrum.
-    #             fullPath = spectrumDirectory.joinpath(spectrumFileName)
-    #             spectrum = application.loadData(str(fullPath))[0]
-    #             # Make any modifications to the spectrum.
-    #             if spectrumName is not None:
-    #                 if spectrumName != spectrum.name:
-    #                     spectrum.rename(spectrumName)
-    #             else:
-    #                 spectraDf.at[index, 'name'] = spectrumFileName
-    #             if experimentType is not None:
-    #                 spectrum.experimentType = experimentType
-    #             if isinstance(line['sliceColour'], str):
-    #                 spectrum.sliceColour = line['sliceColour']
-    #             # Assign the spectra to their SpectrumGroups.
-    #             if spectrumGroupName in [spectrumGroup.name for spectrumGroup in project.spectrumGroups]:
-    #                 spectrumGroup = project.getByPid(f'SG:{spectrumGroupName}')
-    #                 spectrumGroup.addSpectrum(spectrum)
-    #             elif spectrumGroupName is not None:
-    #                 project.newSpectrumGroup(name=spectrumGroupName, spectra=[spectrum])
-    #             # Assign the spectrum to its Sample.
-    #             if sampleName in samplesDf['name'].values:
-    #                 sample = samplesDf.loc[samplesDf['name'] == sampleName, 'sample'].iloc[0]
-    #                 spectrum.sample = sample
-    #             # Add the sample object to the record.
-    #             spectraDf.at[index, 'spectrum'] = spectrum
-    #             progress.setValue(index)
-    #     return spectraDf
-
-    ######################################################################################################################
-    ######################            CREATE SPECTRUM GROUPS                ##############################################
-    ######################################################################################################################
-
-    def _createSpectrumGroups(self, dataframesList):
-        """Creates SpectrumGroup in the project if not already present. Otherwise finds another name a creates new one.
-        dropping the same file over and over will create new spectrum groups each time"""
-        spectrumGroups = []
-        for dataFrame in dataframesList:
-            if SPECTRUM_GROUP_NAME in dataFrame.columns:
-                for groupName in list(set((dataFrame[SPECTRUM_GROUP_NAME]))):
-                    # name = self._checkDuplicatedSpectrumGroupName(groupName)
-                    newSG = self._createNewSpectrumGroup(groupName)
-                    self._tempSpectrumGroupsSpectra[groupName] = []
-                    spectrumGroups.append(newSG)
-        return spectrumGroups
-
-    ##keep this code
-    # def _checkDuplicatedSpectrumGroupName(self, name):
-    #   'Checks in the preject if a spectrumGroup name exists already and returns a new available name '
-    #   if self._project:
-    #     for sg in self._project.spectrumGroups:
-    #       if sg.name == name:
-    #         name += '@'
-    #     return name
 
     def _createNewSpectrumGroup(self, name):
         from ccpn.core.SpectrumGroup import _newSpectrumGroup
@@ -689,11 +481,14 @@ class ExcelReader(object):
                 getLogger().warning('Impossible to create the spectrumGroup %s. A spectrumGroup with the same name already '
                                     'exsists in the project. ' % name)
 
-    ######################################################################################################################
-    ######################             LOAD SPECTRA ON PROJECT              ##############################################
-    ######################################################################################################################
+    #=========================================================================================
+    # Load Spectra:
+    #=========================================================================================
 
     def _loadSpectumFromPath(self, path, dct, obj=None):
+        """
+        Load method used by the _loadSeries method.
+        """
 
         newSpectrum = None
         excelSpectrumPath = aPath(str(path))
@@ -750,6 +545,9 @@ class ExcelReader(object):
             progress.setValue(int(progressVal))
 
     def _buildGlobalPath(self, pathProperty):
+        """
+        Ensures the path property is global.
+        """
         excelSpectrumPath = aPath(pathProperty)
         if excelSpectrumPath.exists():
             ### We have the absolute (full path)
@@ -835,9 +633,9 @@ class ExcelReader(object):
             self._addDefaultSpectrumColours = False
             return sp
 
-    ######################################################################################################################
-    ######################              ADD SPECTRUM TO RELATIVE OBJECTS              ####################################
-    ######################################################################################################################
+    #=========================================================================================
+    # Add spectrum to relative objects:
+    #=========================================================================================
 
     def _linkSpectrumToObj(self, obj, spectrum, dct):
         from ccpn.core.Sample import Sample
@@ -882,9 +680,9 @@ class ExcelReader(object):
                     for sp in spectra:
                         sp.sliceColour = hexColour
 
-    ######################################################################################################################
-    ######################            DISPATCH ATTRIBUTES TO RELATIVE OBJECTS         ####################################
-    ######################################################################################################################
+    #=========================================================================================
+    # Dispatch attributes to relative objects:
+    #=========================================================================================
 
     def _dispatchAttrsToObjs(self, dataDicts, processCount, sheetName):
         from ccpn.core.Sample import Sample
@@ -935,25 +733,9 @@ class ExcelReader(object):
         if len(value) > 0:
             return value[0][1]
 
-    ######################################################################################################################
-    ######################                    ADD SAMPLE COMPONENTS                   ####################################
-    ######################################################################################################################
-
-    # def _createSampleComponents(self, sample, data):
-    #     from ccpn.core.SampleComponent import _newComponent
-    #
-    #     sampleComponentsNames = [[header, sampleComponentName] for header, sampleComponentName in data.items() if
-    #                              header == SAMPLE_COMPONENTS and sampleComponentName != NOTGIVEN]
-    #     if len(sample.sampleComponents) == 0:
-    #         if len(sampleComponentsNames) > 0:
-    #             # check if is , or ; separated
-    #             splitter = ','
-    #             if ';' in sampleComponentsNames[0][1]:
-    #                 splitter = ';'
-    #             for name in sampleComponentsNames[0][1].split(splitter):
-    #                 if not self._project.getByPid('SC:' + str(name)):
-    #                     sampleComponent = _newComponent(sample, name=(str(name)))
-    #                     sampleComponent.role = 'Compound'
+    #=========================================================================================
+    # Utility methods:
+    #=========================================================================================
 
     def _tidyDataFrame(self, dataFrame, properties, propertySynonyms):
         """
@@ -968,6 +750,10 @@ class ExcelReader(object):
         return dataFrame
 
     def _checkForSpectrumData(self, dataFrame):
+        """
+        Checks if there are any columns of a Dataframe that are spectrum properties.
+        If so, the spectra properties are extracted and reformed into a Spectrum dataframe to be parsed later.
+        """
         columns = [column for column in dataFrame.columns if column in INTER_SHEET_SPECTRUM_PROPERITES.keys()]
         spectraDf = pd.DataFrame(data=dataFrame[columns], columns=columns)
         if not spectraDf.empty:
@@ -976,6 +762,10 @@ class ExcelReader(object):
         return spectraDf
 
     def _checkForSampleComponents(self, dataFrame):
+        """
+        Checks for a SampleComponents column.
+        If present, creates a new Dataframe with the SampleComponent data for parsing later.
+        """
         if 'sampleComponents' in dataFrame.columns:
             for index, row in dataFrame.iterrows():
                 sampleName = row['sampleName']
@@ -985,6 +775,10 @@ class ExcelReader(object):
                 self.dataframes[SAMPLE_COMPONENT].append(sampleComponentDf)
 
     def _convertStringToList(self, listString):
+        """
+        Convenience method for converting a string into a list.
+        Handles , or ; as a separator.
+        """
         splitter = ','
         if ';' in listString:
             splitter = ';'

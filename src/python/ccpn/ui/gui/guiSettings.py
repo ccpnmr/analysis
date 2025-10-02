@@ -5,7 +5,7 @@ Settings used in gui modules, widgets and popups
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-06 12:35:04 +0100 (Fri, September 06, 2024) $"
-__version__ = "$Revision: 3.2.6 $"
+__dateModified__ = "$dateModified: 2025-10-02 14:32:04 +0100 (Thu, October 02, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -58,6 +58,9 @@ class FontSizes(DataEnum):
 
 
 class FontSettings():
+    """A class to maintain font definitions as derived from preferences;
+    generate a dict of ((fontName, size, bold, italic), Font-instance) pairs
+    """
 
     def __init__(self, preferences):
 
@@ -264,6 +267,32 @@ HIGHLIGHT_BORDER = 'HIGHLIGHT_BORDER'
 HIGHLIGHT_VIVID = 'HIGHLIGHT_VIVID'
 HIGHLIGHT_FEINT = 'HIGHLIGHT_FEINT'
 PALETTE = 'PALETTE'
+
+# Dictionary to map the Qt definitions to a string
+# Facilitates inserting 'palette(<name>)' into stylesheets
+PALETTE_ROLE_TO_STYLESHEET_NAME = {
+    QtGui.QPalette.WindowText     : "window-text",  # 0
+    QtGui.QPalette.Button         : "button",  # 1
+    QtGui.QPalette.Light          : "light",  # 2
+    QtGui.QPalette.Midlight       : "midlight",  # 3
+    QtGui.QPalette.Dark           : "dark",  # 4
+    QtGui.QPalette.Mid            : "mid",  # 5
+    QtGui.QPalette.Text           : "text",  # 6
+    QtGui.QPalette.BrightText     : "bright-text",  # 7
+    QtGui.QPalette.ButtonText     : "button-text",  # 8
+    QtGui.QPalette.Base           : "base",  # 9
+    QtGui.QPalette.Window         : "window",  # 10
+    QtGui.QPalette.Shadow         : "shadow",  # 11
+    QtGui.QPalette.Highlight      : "highlight",  # 12
+    QtGui.QPalette.HighlightedText: "highlighted-text",  # 13
+    QtGui.QPalette.Link           : "link",  # 14
+    QtGui.QPalette.LinkVisited    : "link-visited",  # 15
+    QtGui.QPalette.AlternateBase  : "alternate-base",  # 16
+    QtGui.QPalette.NoRole         : "norole",  # 17
+    QtGui.QPalette.ToolTipBase    : "tooltip-base",  # 18
+    QtGui.QPalette.ToolTipText    : "tooltip-text",  # 19
+    QtGui.QPalette.PlaceholderText: "placeholder-text",  # 20
+    }
 
 #----------------------------------------------------------------------------------------------
 # Colours

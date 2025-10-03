@@ -4361,7 +4361,7 @@ def saveToStream(stream, topObject, mapping=None, comment=None, simplified=True,
   strapp('<?xml version="1.0" encoding="UTF-8"?>\n')
 
   if (comment):
-    strapp("<!--%s-->\n" % comment.replace('--','\-\-'))
+    strapp("<!--%s-->\n" % comment.replace('--',r'\-\-'))
 
   guid = mapping.get('guid')
   release = mapping.get('globalRelease')

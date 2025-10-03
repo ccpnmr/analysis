@@ -11,7 +11,7 @@ import random
 import numpy as np
 from contextlib import nullcontext
 from collections import defaultdict
-from scipy.integrate import trapz, simps
+from scipy.integrate import trapezoid, simps
 import time
 from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks
 from ccpn.util.decorators import profile
@@ -89,7 +89,7 @@ def newMockObjects(nSpectraToCreate = 1):
             lw = random.choice(np.arange(0, 0.1, 0.001))
             height = abs(np.max(noise) * random.choice(np.arange(10, 50, 1)))
             l = _lorentzian(sp.positions, pos, lw, intensity=height)
-            integ = trapz(l)
+            integ = trapezoid(l)
             values.append((pos, lw, height, integ))
             peakLines.append(l)
         sp.intensities = noise + sum(peakLines)

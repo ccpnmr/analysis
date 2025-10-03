@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-14 17:51:39 +0100 (Thu, August 14, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-03 15:23:26 +0100 (Fri, October 03, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -1363,6 +1363,7 @@ class Framework(HasCcpNmrProperties, NotifierBase):
         self.project._updateLoggerState(readOnly=self.project.isReadOnly)
         # if self.mainWindow:
         #     self.mainWindow._setReadOnlyIcon()
+        #     self.mainWindow.statusBar().showMessage(f'Loading objects completed.')
 
         return objs
 

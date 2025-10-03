@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-04-18 14:07:47 +0100 (Thu, April 18, 2024) $"
-__version__ = "$Revision: 3.2.4 $"
+__dateModified__ = "$dateModified: 2025-10-03 16:10:42 +0100 (Fri, October 03, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,10 +31,9 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 
 from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, SimplePeak
 import numpy as np
-from scipy.integrate import trapz
+from scipy.integrate import trapezoid
 from lmfit.models import LorentzianModel, GaussianModel
 from ccpn.util.UnitConverters import  _getSpUnitConversionArguments, _pnt2hz
-from scipy.integrate import quad
 from ccpn.util.Logging import getLogger
 from scipy import spatial, signal
 from ccpn.framework.Application import getApplication
@@ -276,7 +275,7 @@ class PeakPicker1D(PeakPickerABC):
                     indicesInRange = (x >= fwhmLeft) & (x <= fwhmRight)
                     xRange = x[indicesInRange]
                     yRange = y[indicesInRange]
-                    volume = float(trapz(yRange, xRange))
+                    volume = float(trapezoid(yRange, xRange))
                     peak.volume = abs(volume)
                 except Exception as err:
                     peak.volume = None

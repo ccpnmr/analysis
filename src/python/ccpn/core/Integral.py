@@ -4,7 +4,7 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-19 13:49:47 +0100 (Thu, September 19, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__dateModified__ = "$dateModified: 2025-10-03 16:10:41 +0100 (Fri, October 03, 2025) $"
+__version__ = "$Revision: 3.3.2.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import numpy as np
 from typing import Optional, Tuple, Sequence, List, Union
-from scipy.integrate import trapz
+from scipy.integrate import trapezoid
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Integral as ApiIntegral
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakDim as ApiPeakDim
@@ -373,7 +373,7 @@ class Integral(AbstractWrapperObject):
                         index01 = np.where((x <= limit2) & (x >= limit1))
                         values = spectrum.intensities[index01]
                         if len(values) > 0 and all(values):
-                            self.value = float(trapz(values))
+                            self.value = float(trapezoid(values))
 
                             # small change, only calculate if there is a peak
                             if self.peak:

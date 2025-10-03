@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Morgan Hayward $"
-__dateModified__ = "$dateModified: 2025-10-02 11:40:06 +0100 (Thu, October 02, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-03 10:20:01 +0100 (Fri, October 03, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -586,11 +586,17 @@ class ExcelReader(object):
         if experimentType is not None:
             spectrum.experimentType = experimentType  # use exp name as it is much faster and safer to save than exp type.
         # Handle spectrum colouring and contours.
-        spectrum.sliceColour = properties.get(SPECTRUMHEXCOLOUR, spectrum.sliceColour)
-        spectrum.positiveContourColour = properties.get(POSITIVECONTOURCOLOUR, spectrum.positiveContourColour)
-        spectrum.negativeContourColour = properties.get(NEGATIVECONTOURCOLOUR, spectrum.negativeContourColour)
-        spectrum.positiveContourBase = properties.get(POSITIVECONTOURBASE, spectrum.positiveContourBase)
-        spectrum.negativeContourBase = properties.get(NEGATIVECONTOURBASE, spectrum.negativeContourBase)
+        # for property in ['sliceColour', POSITIVECONTOURCOLOUR, NEGATIVECONTOURCOLOUR, POSITIVECONTOURBASE, NEGATIVECONTOURBASE]:
+        if properties.get('sliceColour') is not None:
+            spectrum.sliceColour = properties.get('sliceColour')
+        if properties.get(POSITIVECONTOURCOLOUR) is not None:
+            spectrum.sliceColour = properties.get(POSITIVECONTOURCOLOUR)
+        if properties.get(NEGATIVECONTOURCOLOUR) is not None:
+            spectrum.sliceColour = properties.get(NEGATIVECONTOURCOLOUR)
+        if properties.get(POSITIVECONTOURBASE) is not None:
+            spectrum.sliceColour = properties.get(POSITIVECONTOURBASE)
+        if properties.get(NEGATIVECONTOURBASE) is not None:
+            spectrum.sliceColour = properties.get(NEGATIVECONTOURBASE)
         incNeg = properties.get(INCLUDENEGATIVECONTOURS)
         includeNegativeContours = False if incNeg in ['no', 'N', 'No', 'n', None, NOTGIVEN] else True
         spectrum.includeNegativeContours = includeNegativeContours

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Morgan Hayward $"
-__dateModified__ = "$dateModified: 2025-10-03 10:20:01 +0100 (Fri, October 03, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-03 13:00:35 +0100 (Fri, October 03, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -58,8 +58,9 @@ SPECTRUM_GROUP = 'SpectrumGroup'
 SHEET_NAME_RE = {SUBSTANCE       : '^.*substance(?!.*type)',
                  SAMPLE          : '^.*sample(?!.*component|.*comp)',
                  SAMPLE_COMPONENT: '.*?sample.*?component',
-                 SPECTRA         : '^.*spectr(um|a)(?!.*type|group)',
-                 SPECTRUM_GROUP  : '^.*spectr(um|a).*?group'}
+                 SPECTRA         : '^.*spectr(um|a)(?!.*type|.*group)',
+                 SPECTRUM_GROUP  : '^.*spectr(um|a).*?group'
+                 }
 
 # """REFERENCES PAGE"""
 SPECTRUM_GROUP_NAME = 'spectrumGroupName'
@@ -189,11 +190,11 @@ SPECTRUM_PROPERTIES = {'name'                   : str,
                        'positiveContourBase'    : float,
                        'negativeContourBase'    : float,
                        'includeNegativeContours': bool,
-                       'spectrumGroupName'          : str,
-                       'spectrumGroupNames'         : str}
+                       'spectrumGroupName'      : str,
+                       'spectrumGroupNames'     : str}
 
-SPECTRUM_PROPERTY_SYNONYMS = {'spectrumName': 'name',
-                              'spectrumPath': 'path',
+SPECTRUM_PROPERTY_SYNONYMS = {'spectrumName' : 'name',
+                              'spectrumPath' : 'path',
                               'spectrumGroup': 'spectrumGroupName',
                               'spectrumGroup': 'spectrumGroupNames'}
 
@@ -346,6 +347,8 @@ class ExcelReader(object):
                         progress.setValue(int(progressVal))
                         self._loadSpectra(dataFrame, progress, progressVal)
                         progressVal += (len(dataFrame))
+        for dataFrame in self.dataframes[SPECTRUM_GROUP]:
+            self._createSpectrumGroups(dataFrame)
 
     #=========================================================================================
     # Parse Excel:
@@ -367,7 +370,7 @@ class ExcelReader(object):
         Uses the regEx expressions in SHEET_NAME_RE to determine what sheet names refer to which objects.
         Returns a dictionary of each sheet type.
         """
-        targetNames = [SUBSTANCE, SAMPLE, SAMPLE_COMPONENT, SERIES, SPECTRA]
+        targetNames = [SUBSTANCE, SAMPLE, SAMPLE_COMPONENT, SERIES, SPECTRA, SPECTRUM_GROUP]
         dataFrames = {targetName: [] for targetName in targetNames}
         for sheetName in sheetNamesList:
             for targetName, regEx in SHEET_NAME_RE.items():
@@ -481,6 +484,20 @@ class ExcelReader(object):
                 getLogger().warning('Impossible to create the spectrumGroup %s. A spectrumGroup with the same name already '
                                     'exsists in the project. ' % name)
 
+    def _createSpectrumGroups(self, spectrumGroupsDf):
+        # spectrumGroupsDf = self._tidyDataFrame(spectrumGroupsDf, SPECTRUM_GROUP_PROPERTIES, SPECTRUM_GROUP_PROPERTY_SYNONYMS)
+        for index, row in spectrumGroupsDf.iterrows():
+            spectrumGroupName = str(row['name'])
+            spectrumName = str(row['spectrumName'])
+            spectrum = self._project.getByPid('SP:' + spectrumName)
+            if not spectrum:
+                continue
+            spectrumGroup = self._project.getByPid('SG:' + spectrumGroupName)
+            if not spectrumGroup:
+                spectrumGroup = _newSpectrumGroup(self._project, name=spectrumGroupName)
+            if spectrum not in spectrumGroup.spectra:
+                spectrumGroup.addSpectrum(spectrum)
+
     #=========================================================================================
     # Load Spectra:
     #=========================================================================================
@@ -517,6 +534,7 @@ class ExcelReader(object):
         """
         Handles a dataframe of spectra details to load the spectra into the project.
         """
+        self._checkForSpectrumGroups(spectraDf)
         spectraDf = self._tidyDataFrame(spectraDf, SPECTRUM_PROPERTIES, SPECTRUM_PROPERTY_SYNONYMS)
         for index, line in spectraDf.iterrows():
             properties = {key: value(line[key]) for key, value in SPECTRUM_PROPERTIES.items() if line.notna()[key]}
@@ -532,15 +550,6 @@ class ExcelReader(object):
             # Assign reference substances if appropriate:
             if 'substanceName' in line.keys() and line.get('substanceName') in self.substanceLinks.keys():
                 spectrum.referenceSubstances += (self.substanceLinks[line.get('substanceName')],)
-            # Assign to spectrum groups if appropriate.
-            spectrumGroups = []
-            if 'spectrumGroups' in line.keys():
-                spectrumGroupNames = self._convertStringToList(line['spectrumGroups'])
-                spectrumGroups = [_newSpectrumGroup(self._project, str(spectrumGroupName)) if not self._project.getByPid('SG:' + str(spectrumGroupName)) else self._project.getByPid('SG:' + str(spectrumGroupName)) for spectrumGroupName in spectrumGroupNames]
-            elif 'spectrumGroupName' in line.keys():
-                spectrumGroupName = str(line['spectrumGroupName'])
-                spectrumGroups = [_newSpectrumGroup(self._project, spectrumGroupName)] if not self._project.getByPid('SG:' + spectrumGroupName) else [self._project.getByPid('SG:' + spectrumGroupName)]
-            self._assignSpectrumToSpectrumGroups(spectrum, spectrumGroups)
             progressVal += 1
             progress.setValue(int(progressVal))
 
@@ -767,6 +776,30 @@ class ExcelReader(object):
             self.dataframes[SPECTRA].append(spectraDf)
         return spectraDf
 
+    def _checkForSpectrumGroups(self, dataFrame):
+        """
+        Checks for Spectrum Group assignments in the Spectra pages and makes a spectrumGroup dataframe if so.
+        Prioritises spectrumGroups column over spectrumGroup column if both are present.
+        Collects spectrum group assignments into another dataframe for later parsing.
+        """
+        columns = ['name', 'spectrumName']
+        spectrumGroupDf = None
+        if 'spectrumGroups' in dataFrame.columns:
+            data = {'name': [],
+                    'spectrumName': []}
+            for index, row in dataFrame.iterrows():
+                spectrumGroupNames = self._convertStringToList(str(row['spectrumGroups']))
+                spectrumName = str(row['name'])
+                for spectrumGroupName in spectrumGroupNames:
+                    data['name'].append(spectrumGroupName)
+                    data['spectrumName'].append(spectrumName)
+            spectrumGroupDf = pd.DataFrame(data=data, columns=columns)
+            spectrumGroupDf.drop_duplicates()
+        elif 'spectrumGroupName' in dataFrame.columns:
+            spectrumGroupDf = pd.DataFrame(data=dataFrame[['spectrumGroupName', 'name']], columns=columns)
+        if spectrumGroupDf is not None:
+            self.dataframes[SPECTRUM_GROUP].append(spectrumGroupDf)
+
     def _checkForSampleComponents(self, dataFrame):
         """
         Checks for a SampleComponents column.
@@ -790,4 +823,3 @@ class ExcelReader(object):
             splitter = ';'
         stringAsList = listString.split(splitter)
         return stringAsList
-

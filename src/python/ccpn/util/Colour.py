@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-03 13:20:31 +0100 (Tue, September 03, 2024) $"
-__version__ = "$Revision: 3.2.5 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-10-06 15:09:08 +0100 (Mon, October 06, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1047,6 +1047,21 @@ def interpolateColourHex(hexColor1, hexColor2, value, alpha=1.0):
 
     result = [(col1 + (col2 - col1) * value) for col1, col2 in zip(colour1, colour2)]
     return '#%02x%02x%02x' % (int(result[0]), int(result[1]), int(result[2]))
+
+
+def interpolateHexColours(colours, numSteps):
+    """Takes a list of Hex colours as input and
+     interpolates the colours based on the number of steps.
+
+     10 colours 100 steps will return a list of 100 new hex colours
+     evenly spaced between the provided 10 hex colours.
+     """
+    space = np.linspace(0, len(colours) - 1, numSteps + 1)
+
+    return [interpolateColourHex(colours[int(np.floor(num))],
+                                 colours[int(np.ceil(num))],
+                                 num - int(np.floor(num)))
+            for num in space]
 
 
 # ('darkredshade', ('#7f6060', '#7f4d4d', '#7f3939', '#7f2626', '#7f1313', '#7f0000', '#6c0000', '#590000', '#460000', '#330000')),

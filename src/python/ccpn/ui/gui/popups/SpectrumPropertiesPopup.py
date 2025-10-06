@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-10-02 16:51:15 +0100 (Thu, October 02, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-06 15:09:55 +0100 (Mon, October 06, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -70,7 +70,8 @@ from ccpn.ui.gui.lib.DynamicSizeAdjust import dynamicSizeAdjust
 
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Colour import (spectrumColours, addNewColour, fillColourPulldown,
-                              colourNameNoSpace, _setColourPulldown, getSpectrumColour)
+                              colourNameNoSpace, _setColourPulldown, getSpectrumColour, colorSchemeTable,
+                              interpolateHexColours)
 from ccpn.util.isotopes import isotopeRecords
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import getAttributeTipText
@@ -3185,15 +3186,32 @@ class ColourFrameABC(Frame):
         name = self.positiveColourBox.currentText()
         colour = getSpectrumColour(name, defaultReturn='#')
 
-        for tab in self._container._colourTabsNd.tabs:
-            _setColourPulldown(tab.positiveColourBox, colour)
+        numTabs = len(self._container._colourTabsNd.tabs)
+
+        if isRange := (colour[0] != '#'):
+            colourSpace = interpolateHexColours(colorSchemeTable.get(colour), numSteps=numTabs)
+
+        for index, tab in enumerate(self._container._colourTabsNd.tabs):
+            if not isRange:
+                _setColourPulldown(tab.positiveColourBox, colour)
+            elif isRange:
+                _setColourPulldown(tab.positiveColourBox, colourSpace[index])
 
     def _copyNegativeContourColour(self):
         name = self.negativeColourBox.currentText()
         colour = getSpectrumColour(name, defaultReturn='#')
 
-        for tab in self._container._colourTabsNd.tabs:
-            _setColourPulldown(tab.negativeColourBox, colour)
+        numTabs = len(self._container._colourTabsNd.tabs)
+
+        if isRange := (colour[0] != '#'):
+            colourSpace = interpolateHexColours(colorSchemeTable.get(colour), numSteps=numTabs)
+
+        for index, tab in enumerate(self._container._colourTabsNd.tabs):
+            if not isRange:
+                _setColourPulldown(tab.negativeColourBox, colour)
+            elif isRange:
+                _setColourPulldown(tab.negativeColourBox, colourSpace[index])
+
 
     def _updateApplyToButtons(self):
         if self.positiveColourBox.getText():

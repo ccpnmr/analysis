@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-09 20:33:18 +0000 (Thu, January 09, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-10-09 13:28:21 +0100 (Thu, October 09, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,10 +27,13 @@ __date__ = "$Date: 2025-01-09 12:39:07 +0100 (Thu, January 09, 2025) $"
 # Start of code
 #=========================================================================================
 
+__all__ = ["maintable", "maintablemodel"]
+
 from PyQt5 import QtCore
 
 # do not remove - required to stop circular imports :|
-import ccpn.core
+import ccpn.core  # type: ignore
+from itertools import product
 from ccpn.ui.gui.widgets.table.Table import Table
 
 
@@ -66,29 +69,10 @@ def maintable():
                   'ambiguous glutamine/glutamic acid', 'histidine',
                   'isoleucine', 'leucine', 'lysine', 'methionine', 'phenylalanine',
                   'proline', 'serine', 'threonine', 'tryptophan', 'tyrosine', 'valine']
-    data = [[aminoAcids[0], 150, 300, 900, float('nan'), 80.1, 'delta'],
-            [aminoAcids[1], 200, 500, 300, float('nan'), 34.2, ['help', 'more', 'chips']],
-            [aminoAcids[2], 100, np.nan, 1000, True, -float('Inf'), 'charlie'],
-            [aminoAcids[3], 999, np.inf, 500, False, float('Inf'), 'echo'],
-            [aminoAcids[4], 300, -np.inf, 450, 700, 150.3, 'bravo']
-            ]
-
     # multiIndex columnHeaders
     cols = ["No", "Toyota", "Ford", "Tesla", "Nio", "Other", "NO"]
     rowIndex = ["AAA", "BBB", "CCC", "DDD", "EEE"]  # duplicate index
 
-    for ii in range(MAX_ROWS):
-        chrs = ''.join(chr(random.randint(65, 68)) for _ in range(5))
-        rowIndex.append(chrs[:3])
-        data.append([aminoAcids[5 + ii],
-                     300 + random.randint(1, MAX_ROWS),
-                     random.random() * 1e6,
-                     450 + random.randint(-100, 400),
-                     700 + random.randint(-MAX_ROWS, MAX_ROWS),
-                     150.3 + random.random() * 1e2,
-                     f'bravo{chrs[3:]}' if ii % 2 else f'delta{chrs[3:]}'])
-
-    df = pd.DataFrame(data, columns=cols, index=rowIndex)
     # show the example table
     app = TestApplication()
 
@@ -97,71 +81,115 @@ def maintable():
     myStyle = _MyAppProxyStyle(styles.create('fusion'))
     app.setStyle(myStyle)
 
-    win = QtWidgets.QMainWindow()
-    frame = QtWidgets.QFrame()
     layout = QtWidgets.QGridLayout()
+    frame = QtWidgets.QFrame()
     frame.setLayout(layout)
-
-    table = Table(None, df=df, focusBorderWidth=1, cellPadding=11,
-                  showGrid=True, gridColour=None,
-                  setWidthToColumns=False, setHeightToRows=False, _resize=True,
-                  selectionCallbackEnabled=False, actionCallbackEnabled=False)
-
-    # these two need to be done together - HACK for the minute, need to add a method
-    table.model()._enableCheckBoxes = True  # make boolean appear as checkboxes (disables double-click on boolean)
-    table.model().defaultFlags = ENABLED | SELECTABLE | CHECKABLE  # checkboxes are clickable
-    table.setEditable(False)  # double-clicking disabled (doesn't affect checkboxes)
-
-    for row in range(table.rowCount() * 2 // 3):
-        for col in range(table.columnCount()):
-            table.setBackground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x404040))
-            table.setForeground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x808080))
-    for row in range(table.rowCount() // 2):
-        for col in range(table.columnCount() // 2):
-            table.setBorderVisible(row, col, True)
-
-    table.setForeground(0, 0, QtCore.Qt.green)
-    # will be return the id of one of TableMenuABC subclasses
-    # instance-based signal
-    TableMenuABC._parent.connect(_printClassNoId, table.searchMenu)
-    # # class-based signal
-    TableMenuABC._parent.connect(_printClassId)
-
-    # set some background colours
-    cells = ((0, 0, '#80c0ff', '#ffe055'),
-             (1, 1, '#fe83cc', '#90efab'), (1, 2, '#fe83cc', '#90efab'),
-             (2, 3, '#83fbcc', '#a0a0cc'),
-             (3, 2, '#e0ff87', '#344546'), (3, 3, '#e0ff87', '#344546'), (3, 4, '#e0ff87', '#344546'),
-             (3, 5, '#e0ff87', '#344546'),
-             (4, 2, '#e0f08a', '#030840'), (4, 3, '#e0f08a', '#401254'), (4, 4, '#e0f08a', '#401254'),
-             (4, 5, '#e0f08a', '#401254'),
-             (6, 2, '#70a04f', '#246482'), (6, 6, '#70a04f', '#246377'),
-             (7, 1, '#eebb43', '#378773'), (7, 2, '#eebb43', '#822846'),
-             (8, 4, '#7090ef', '#b84dc5'), (8, 5, '#7090ef', '#010135'),
-             (9, 0, '#30f06f', '#015002'), (9, 1, '#30f06f', '#ab46cd'),
-             (10, 2, '#e0d0e6', '#015002'), (10, 3, '#e0d0e6', '#015002'), (10, 4, '#e0d0e6', '#015002'),
-             (11, 2, '#e0d0e6', '#015002'), (11, 3, '#e0d0e6', '#015002'), (11, 4, '#e0d0e6', '#015002'),
-             )
-
-    for row, col, backCol, foreCol in cells:
-        if 0 <= row < (table.rowCount() * 2 // 3) and 0 <= col < table.columnCount():
-            table.setBackground(row, col, backCol)
-            table.setForeground(row, col, foreCol)
-
-    # set the horizontalHeader information
-    header = table.horizontalHeader()
-    # test a single stretching column
-    header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
-    header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
-    header.setStretchLastSection(False)
-
+    win = QtWidgets.QMainWindow()
     win.setCentralWidget(frame)
-    frame.layout().addWidget(table, 0, 0)
+
+    # The window may collapse to the title-bar
+    win.setMinimumSize(100, 1)
+    # The frame is constrained to the combined minimum sizes of the tables
+    layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+    # Constrain the window to the minimum size of the frame, and hence the combined minimum sizes of the tables
+    # win.layout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+
+    first_iter = True
+    for table_row, table_column in product(range(2), range(2)):
+        _rowIndex = rowIndex[:]
+        # Create an array of random-ish information
+        data = [[aminoAcids[0], 150, 300, 900, float('nan'), 80.1, 'delta'],
+                [aminoAcids[1], 200, 500, 300, float('nan'), 34.2, ['help', 'more', 'chips']],
+                [aminoAcids[2], 100, np.nan, 1000, True, -float('Inf'), 'charlie'],
+                [aminoAcids[3], 999, np.inf, 500, False, float('Inf'), 'echo'],
+                [aminoAcids[4], 300, -np.inf, 450, 700, 150.3, 'bravo']
+                ]
+        # Add some more rows with random data
+        for ii in range(MAX_ROWS):
+            chrs = ''.join(chr(random.randint(65, 68)) for _ in range(5))
+            _rowIndex.append(chrs[:3])
+            data.append([aminoAcids[5 + ii],
+                         300 + random.randint(1, MAX_ROWS * 10),
+                         random.random() * 1e6,
+                         450 + random.randint(-100, 400),
+                         700 + random.randint(-MAX_ROWS, MAX_ROWS),
+                         150.3 + random.random() * 1e2,
+                         f'bravo{chrs[3:]}' if ii % 2 else f'delta{chrs[3:]}'])
+        # Compile into a pandas dataFrame
+        df = pd.DataFrame(data, columns=cols, index=_rowIndex)
+
+        # Create a table-widget
+        table = Table(None, df=df, focusBorderWidth=1, cellPadding=11,
+                      showGrid=True, gridColour=None,
+                      setWidthToColumns=False, setHeightToRows=False, _resize=True,
+                      selectionCallbackEnabled=False, actionCallbackEnabled=False)
+
+        # these two need to be done together - HACK for the minute, need to add a method
+        table.model()._enableCheckBoxes = True  # make boolean appear as checkboxes (disables double-click on boolean)
+        table.model().defaultFlags = ENABLED | SELECTABLE | CHECKABLE  # checkboxes are clickable
+        table.setEditable(False)  # double-clicking disabled (doesn't affect checkboxes)
+
+        for row in range(table.rowCount() * 2 // 3):
+            for col in range(table.columnCount()):
+                table.setBackground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x404040))
+                table.setForeground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x808080))
+        for row in range(table.rowCount() // 2):
+            for col in range(table.columnCount() // 2):
+                table.setBorderVisible(row, col, True)
+
+        table.setForeground(0, 0, QtCore.Qt.green)
+        # will be return the id of one of TableMenuABC subclasses
+        # instance-based signal
+        table.searchMenu.connectToParent(_printClassNoId)  #, table.searchMenu)
+        if first_iter:
+            # class-based signal
+            type(table.searchMenu).connectToParent(_printClassId)
+            first_iter = False
+
+        # set some background colours
+        cells = ((0, 0, '#80c0ff', '#ffe055'),
+                 (1, 1, '#fe83cc', '#90efab'), (1, 2, '#fe83cc', '#90efab'),
+                 (2, 3, '#83fbcc', '#a0a0cc'),
+                 (3, 2, '#e0ff87', '#344546'), (3, 3, '#e0ff87', '#344546'), (3, 4, '#e0ff87', '#344546'),
+                 (3, 5, '#e0ff87', '#344546'),
+                 (4, 2, '#e0f08a', '#030840'), (4, 3, '#e0f08a', '#401254'), (4, 4, '#e0f08a', '#401254'),
+                 (4, 5, '#e0f08a', '#401254'),
+                 (6, 2, '#70a04f', '#246482'), (6, 6, '#70a04f', '#246377'),
+                 (7, 1, '#eebb43', '#378773'), (7, 2, '#eebb43', '#822846'),
+                 (8, 4, '#7090ef', '#b84dc5'), (8, 5, '#7090ef', '#010135'),
+                 (9, 0, '#30f06f', '#015002'), (9, 1, '#30f06f', '#ab46cd'),
+                 (10, 2, '#e0d0e6', '#015002'), (10, 3, '#e0d0e6', '#015002'), (10, 4, '#e0d0e6', '#015002'),
+                 (11, 2, '#e0d0e6', '#015002'), (11, 3, '#e0d0e6', '#015002'), (11, 4, '#e0d0e6', '#015002'),
+                 )
+
+        for row, col, backCol, foreCol in cells:
+            if 0 <= row < (table.rowCount() * 2 // 3) and 0 <= col < table.columnCount():
+                table.setBackground(row, col, backCol)
+                table.setForeground(row, col, foreCol)
+
+        # set the horizontalHeader information
+        header = table.horizontalHeader()
+        # test a single stretching column
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
+        header.setStretchLastSection(False)
+
+        layout.addWidget(table, table_row, table_column)
+        # default minimum height appears to default to the height of the horizontal scroll bar,
+        # and the height of the arrow-boxes of the vertical scrollbar
+        # table.setMinimumHeight(1)
+        # Set the vertical scroll bar policy (e.g. only visible when needed)
+        table.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        # print(hex(id(table)))
+
+    layout.setRowStretch(0, 3)
+    layout.setRowStretch(1, 2)
+    layout.setColumnStretch(0, 2)
+    layout.setColumnStretch(1, 3)
 
     win.setWindowTitle(f'Testing {table.__class__.__name__}')
     win.show()
 
-    print(hex(id(table)))
     app.start()
 
 

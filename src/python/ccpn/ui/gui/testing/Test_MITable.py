@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-09 13:52:33 +0000 (Thu, January 09, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-10-09 13:28:21 +0100 (Thu, October 09, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,10 +27,15 @@ __date__ = "$Date: 2025-01-09 12:52:41 +0100 (Thu, January 09, 2025) $"
 # Start of code
 #=========================================================================================
 
-# do not remove - required to stop circular imports :|
-import ccpn.core
+__all__ = ["mainMITable"]
 
+from PyQt5 import QtCore
+
+# do not remove - required to stop circular imports :|
+import ccpn.core  # type: ignore
+from itertools import product
 from ccpn.ui.gui.widgets.table.MITable import MITable
+from ccpn.ui.gui.testing.Test_Table import _printClassId, _printClassNoId
 
 
 def mainMITable():
@@ -43,10 +48,11 @@ def mainMITable():
     import pandas as pd
     import numpy as np
     import random
+    from ast import literal_eval
+    from PyQt5 import QtWidgets, QtGui, QtCore
+    from ccpn.ui.gui.widgets.table._TableCommon import CHECKABLE, ENABLED, SELECTABLE
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.Gui import _MyAppProxyStyle
-    from PyQt5 import QtWidgets, QtGui, QtCore
-    from ast import literal_eval
 
     _useMulti = True
     aminoAcids = ['alanine', 'arginine',
@@ -55,17 +61,17 @@ def mainMITable():
                   'ambiguous glu...', 'histidine',
                   'isoleucine', 'leucine', 'lysine', 'methionine', 'phenylalanine',
                   'proline', 'serine', 'threonine', 'tryptophan', 'tyrosine', 'valine']
-    data = [[aminoAcids[0], 150, 300, 900, float('nan'), 80.1, 'delta', 'help', 0, 1, aminoAcids[0], 150, 300, 900,
-             float('nan'), 80.1, 'delta', 'help'],
-            [aminoAcids[1], 200, 500, 300, float('nan'), 34.2, ['help', 'more', 'chips'], 12, 2, 3, aminoAcids[1], 200,
-             500, 300, float('nan'), 34.2, ['help', 'more', 'chips'], 12],
-            [aminoAcids[2], 100, np.nan, 1000, True, -float('Inf'), 'charlie', 'baaa', 4, 5, aminoAcids[2], 100, np.nan,
-             1000, True, -float('Inf'), 'charlie', 'baaa'],
-            [aminoAcids[3], 999, np.inf, 500, False, float('Inf'), 'echo', True, 6, 7, aminoAcids[3], 999, np.inf, 500,
-             False, float('Inf'), 'echo', True],
-            [aminoAcids[4], 300, -np.inf, 450, 700, 150.3, 'bravo', False, 8, 9, aminoAcids[4], 300, -np.inf, 450, 700,
-             150.3, 'bravo', False]
-            ]
+    # data = [[aminoAcids[0], 150, 300, 900, float('nan'), 80.1, 'delta', 'help', 0, 1, aminoAcids[0], 150, 300, 900,
+    #          float('nan'), 80.1, 'delta', 'help'],
+    #         [aminoAcids[1], 200, 500, 300, float('nan'), 34.2, ['help', 'more', 'chips'], 12, 2, 3, aminoAcids[1], 200,
+    #          500, 300, float('nan'), 34.2, ['help', 'more', 'chips'], 12],
+    #         [aminoAcids[2], 100, np.nan, 1000, True, -float('Inf'), 'charlie', 'baaa', 4, 5, aminoAcids[2], 100, np.nan,
+    #          1000, True, -float('Inf'), 'charlie', 'baaa'],
+    #         [aminoAcids[3], 999, np.inf, 500, False, float('Inf'), 'echo', True, 6, 7, aminoAcids[3], 999, np.inf, 500,
+    #          False, float('Inf'), 'echo', True],
+    #         [aminoAcids[4], 300, -np.inf, 450, 700, 150.3, 'bravo', False, 8, 9, aminoAcids[4], 300, -np.inf, 450, 700,
+    #          150.3, 'bravo', False]
+    #         ]
 
     if _useMulti:
         multiIndex = [
@@ -82,29 +88,29 @@ def mainMITable():
             chrs = ''.join(chr(random.randint(65, 68)) for _ in range(5))
             if len(multiIndex) < 12:
                 multiIndex.append((chrs[0], chrs[1:3], chrs[3:]))
-            if len(data) < 12:
-                data.append([aminoAcids[5 + ii],
-                             300 + random.randint(1, MAX_ROWS),
-                             random.random() * 1e6,
-                             450 + random.randint(-100, 400),
-                             700 + random.randint(-MAX_ROWS, MAX_ROWS),
-                             150.3 + random.random() * 1e2,
-                             f'bravo{chrs[3:]}' if ii % 2 else f'delta{chrs[3:]}',
-                             random.randint(0, 3),
-                             random.randint(2, 5),
-                             aminoAcids[5 + ii],
-                             300 + random.randint(1, MAX_ROWS),
-                             random.random() * 1e6,
-                             450 + random.randint(-100, 400),
-                             700 + random.randint(-MAX_ROWS, MAX_ROWS),
-                             150.3 + random.random() * 1e2,
-                             f'bravo{chrs[3:]}' if ii % 2 else f'delta{chrs[3:]}',
-                             ])
+        #     if len(data) < 12:
+        #         data.append([aminoAcids[5 + ii],
+        #                      300 + random.randint(1, MAX_ROWS),
+        #                      random.random() * 1e6,
+        #                      450 + random.randint(-100, 400),
+        #                      700 + random.randint(-MAX_ROWS, MAX_ROWS),
+        #                      150.3 + random.random() * 1e2,
+        #                      f'bravo{chrs[3:]}' if ii % 2 else f'delta{chrs[3:]}',
+        #                      random.randint(0, 3),
+        #                      random.randint(2, 5),
+        #                      aminoAcids[5 + ii],
+        #                      300 + random.randint(1, MAX_ROWS),
+        #                      random.random() * 1e6,
+        #                      450 + random.randint(-100, 400),
+        #                      700 + random.randint(-MAX_ROWS, MAX_ROWS),
+        #                      150.3 + random.random() * 1e2,
+        #                      f'bravo{chrs[3:]}' if ii % 2 else f'delta{chrs[3:]}',
+        #                      ])
 
-        rowIndex = pd.MultiIndex.from_tuples(multiIndex)
+        rowIndex: pd.MultiIndex = pd.MultiIndex.from_tuples(multiIndex)
 
         # multiIndex columnHeaders
-        cols = pd.MultiIndex.from_tuples([
+        cols: pd.MultiIndex = pd.MultiIndex.from_tuples([
             ("CCPN", "CCPN", "Again"),
             ("testing", "testing", "Not again"),
             ("Sheep", "Dog", "Llama"),
@@ -127,10 +133,10 @@ def mainMITable():
 
     else:
         # multiIndex columnHeaders
-        cols = ("No", "Toyota", "Ford", "Tesla\nWAAAAH!", "Nio", "Other", "NO", "YES")
-        rowIndex = ("AAA", "BBB", "CCC", "DDD", "EEE")
+        cols: tuple = ("No", "Toyota", "Ford", "Tesla\nWAAAAH!", "Nio", "Other", "NO", "YES")
+        rowIndex: tuple = ("AAA", "BBB", "CCC", "DDD", "EEE")
 
-    df = pd.DataFrame(data, columns=cols, index=rowIndex)
+    # df = pd.DataFrame(data, columns=cols, index=rowIndex)
     # show the example table
     app = TestApplication()
 
@@ -139,10 +145,126 @@ def mainMITable():
     myStyle = _MyAppProxyStyle(styles.create('fusion'))
     app.setStyle(myStyle)
 
-    win = QtWidgets.QMainWindow()
-    frame = QtWidgets.QFrame()
     layout = QtWidgets.QGridLayout()
+    frame = QtWidgets.QFrame()
     frame.setLayout(layout)
+    win = QtWidgets.QMainWindow()
+    win.setCentralWidget(frame)
+
+    # The window may collapse to the title-bar
+    win.setMinimumSize(100, 1)
+    # The frame is constrained to the combined minimum sizes of the tables
+    layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+    # Constrain the window to the minimum size of the frame, and hence the combined minimum sizes of the tables
+    # win.layout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+
+    first_iter = True
+    for table_row, table_column in product(range(2), range(2)):
+        _rowIndex = rowIndex[:]
+
+        data = [[aminoAcids[0], 150, 300, 900, float('nan'), 80.1, 'delta', 'help', 0, 1, aminoAcids[0], 150, 300, 900,
+                 float('nan'), 80.1, 'delta', 'help'],
+                [aminoAcids[1], 200, 500, 300, float('nan'), 34.2, ['help', 'more', 'chips'], 12, 2, 3, aminoAcids[1],
+                 200,
+                 500, 300, float('nan'), 34.2, ['help', 'more', 'chips'], 12],
+                [aminoAcids[2], 100, np.nan, 1000, True, -float('Inf'), 'charlie', 'baaa', 4, 5, aminoAcids[2], 100,
+                 np.nan,
+                 1000, True, -float('Inf'), 'charlie', 'baaa'],
+                [aminoAcids[3], 999, np.inf, 500, False, float('Inf'), 'echo', True, 6, 7, aminoAcids[3], 999, np.inf,
+                 500,
+                 False, float('Inf'), 'echo', True],
+                [aminoAcids[4], 300, -np.inf, 450, 700, 150.3, 'bravo', False, 8, 9, aminoAcids[4], 300, -np.inf, 450,
+                 700,
+                 150.3, 'bravo', False]
+                ]
+        for ii in range(MAX_ROWS):
+            chrs = ''.join(chr(random.randint(65, 68)) for _ in range(5))
+            # if len(multiIndex) < 12:
+            #     multiIndex.append((chrs[0], chrs[1:3], chrs[3:]))
+            if len(data) < 12:
+                data.append([aminoAcids[5 + ii],
+                             300 + random.randint(1, MAX_ROWS),
+                             random.random() * 1e6,
+                             450 + random.randint(-100, 400),
+                             700 + random.randint(-MAX_ROWS, MAX_ROWS),
+                             150.3 + random.random() * 1e2,
+                             f'bravo{chrs[3:]}' if ii % 2 else f'delta{chrs[3:]}',
+                             random.randint(0, 3),
+                             random.randint(2, 5),
+                             aminoAcids[5 + ii],
+                             300 + random.randint(1, MAX_ROWS),
+                             random.random() * 1e6,
+                             450 + random.randint(-100, 400),
+                             700 + random.randint(-MAX_ROWS, MAX_ROWS),
+                             150.3 + random.random() * 1e2,
+                             f'bravo{chrs[3:]}' if ii % 2 else f'delta{chrs[3:]}',
+                             ])
+
+        df = pd.DataFrame(data, columns=cols, index=_rowIndex)
+
+        # Create a table-widget
+        table = MITable(None, df=df, showGrid=True, showHorizontalHeader=True, dividerColour='orange',
+                        selectionCallbackEnabled=False, actionCallbackEnabled=False)
+        table.setEditable(True)
+        table.setTextElideMode(QtCore.Qt.ElideMiddle)
+
+        # these two need to be done together - HACK for the minute, need to add a method
+        table.model()._enableCheckBoxes = True  # make boolean appear as checkboxes (disables double-click on boolean)
+        table.model().defaultFlags = ENABLED | SELECTABLE | CHECKABLE  # checkboxes are clickable
+        table.setEditable(False)  # double-clicking disabled (doesn't affect checkboxes)
+
+        # set random colours
+        for row in range(table.rowCount() * 2 // 3):
+            for col in range(table.columnCount()):
+                table.setBackground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x404040))
+                table.setForeground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x808080))
+        for row in range(table.rowCount() // 2):
+            for col in range(table.columnCount() // 2):
+                table.setBorderVisible(row, col, True)
+
+        table.setForeground(0, 0, QtCore.Qt.green)
+        # will be return the id of one of TableMenuABC subclasses
+        # instance-based signal
+        table.searchMenu.connectToParent(_printClassNoId)
+        if first_iter:
+            # class-based signal
+            type(table.searchMenu).connectToParent(_printClassId)
+            first_iter = False
+
+        # set some background colours
+        cells = ((0, 0, '#80c0ff', '#ffe055'),
+                 (1, 1, '#fe83cc', '#90efab'), (1, 2, '#fe83cc', '#90efab'),
+                 (2, 3, '#83fbcc', '#a0a0cc'),
+                 (3, 2, '#e0ff87', '#344546'), (3, 3, '#e0ff87', '#344546'), (3, 4, '#e0ff87', '#344546'),
+                 (3, 5, '#e0ff87', '#344546'),
+                 (4, 2, '#e0f08a', '#030840'), (4, 3, '#e0f08a', '#401254'), (4, 4, '#e0f08a', '#401254'),
+                 (4, 5, '#e0f08a', '#401254'),
+                 (6, 2, '#70a04f', '#246482'), (6, 6, '#70a04f', '#246377'),
+                 (7, 1, '#eebb43', '#378773'), (7, 2, '#eebb43', '#822846'),
+                 (8, 4, '#7090ef', '#b84dc5'), (8, 5, '#7090ef', '#010135'),
+                 (9, 0, '#30f06f', '#015002'), (9, 1, '#30f06f', '#ab46cd'),
+                 (10, 2, '#e0d0e6', '#015002'), (10, 3, '#e0d0e6', '#015002'), (10, 4, '#e0d0e6', '#015002'),
+                 (11, 2, '#e0d0e6', '#015002'), (11, 3, '#e0d0e6', '#015002'), (11, 4, '#e0d0e6', '#015002'),
+                 )
+
+        for row, col, backCol, foreCol in cells:
+            if 0 <= row < (table.rowCount() * 2 // 3) and 0 <= col < table.columnCount():
+                table.setBackground(row, col, backCol)
+                table.setForeground(row, col, foreCol)
+
+        tt = table._df.columns.tolist()
+        print(tt, tt[0], type(tt[0]))
+
+        time.sleep(0.5)
+        table.resizeColumnsToContents()
+        table.resizeRowsToContents()
+
+        layout.addWidget(table, table_row, table_column)
+
+    layout.setRowStretch(0, 3)
+    layout.setRowStretch(1, 2)
+    layout.setColumnStretch(0, 2)
+    layout.setColumnStretch(1, 3)
 
     with contextlib.suppress(Exception):
         # recovers the df, but the index/columns are mangled, need resetting as MultiIndex
@@ -150,52 +272,6 @@ def mainMITable():
         _reload = pd.read_json(dfOut, orient='columns')
         _reload.columns = pd.MultiIndex.from_tuples([literal_eval(ss) for ss in _reload.columns.tolist()])
         _reload.index = pd.MultiIndex.from_tuples([literal_eval(ss) for ss in _reload.index.tolist()])
-
-    # show the table
-    table = MITable(None, df=df, showGrid=True, showHorizontalHeader=True, dividerColour='orange',
-                    selectionCallbackEnabled=False, actionCallbackEnabled=False)
-    table.setEditable(True)
-    table.setTextElideMode(QtCore.Qt.ElideMiddle)
-
-    # set random colours
-    for row in range(table.rowCount() * 2 // 3):
-        for col in range(table.columnCount()):
-            table.setBackground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x404040))
-            table.setForeground(row, col, QtGui.QColor(random.randint(0, 256**3) & 0x3f3f3f | 0x808080))
-    for row in range(table.rowCount() // 2):
-        for col in range(table.columnCount() // 2):
-            table.setBorderVisible(row, col, True)
-
-    # set some background colours
-    cells = ((0, 0, '#80c0ff', '#ffe055'),
-             (1, 1, '#fe83cc', '#90efab'), (1, 2, '#fe83cc', '#90efab'),
-             (2, 3, '#83fbcc', '#a0a0cc'),
-             (3, 2, '#e0ff87', '#344546'), (3, 3, '#e0ff87', '#344546'), (3, 4, '#e0ff87', '#344546'),
-             (3, 5, '#e0ff87', '#344546'),
-             (4, 2, '#e0f08a', '#030840'), (4, 3, '#e0f08a', '#401254'), (4, 4, '#e0f08a', '#401254'),
-             (4, 5, '#e0f08a', '#401254'),
-             (6, 2, '#70a04f', '#246482'), (6, 6, '#70a04f', '#246377'),
-             (7, 1, '#eebb43', '#378773'), (7, 2, '#eebb43', '#822846'),
-             (8, 4, '#7090ef', '#b84dc5'), (8, 5, '#7090ef', '#010135'),
-             (9, 0, '#30f06f', '#015002'), (9, 1, '#30f06f', '#ab46cd'),
-             (10, 2, '#e0d0e6', '#015002'), (10, 3, '#e0d0e6', '#015002'), (10, 4, '#e0d0e6', '#015002'),
-             (11, 2, '#e0d0e6', '#015002'), (11, 3, '#e0d0e6', '#015002'), (11, 4, '#e0d0e6', '#015002'),
-             )
-
-    for row, col, backCol, foreCol in cells:
-        if 0 <= row < (table.rowCount() * 2 // 3) and 0 <= col < table.columnCount():
-            table.setBackground(row, col, backCol)
-            table.setForeground(row, col, foreCol)
-
-    tt = table._df.columns.tolist()
-    print(tt, tt[0], type(tt[0]))
-
-    time.sleep(0.5)
-    table.resizeColumnsToContents()
-    table.resizeRowsToContents()
-
-    win.setCentralWidget(frame)
-    frame.layout().addWidget(table, 0, 0)
 
     win.setWindowTitle(f'Testing {table.__class__.__name__}')
     win.show()

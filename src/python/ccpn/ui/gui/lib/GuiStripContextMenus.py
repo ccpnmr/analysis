@@ -19,9 +19,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-10 12:02:32 +0100 (Wed, September 10, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-09-17 14:53:16 +0100 (Wed, September 17, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -285,6 +285,12 @@ def _toggleVerticalTraceItem(strip):
                     callback=strip.toggleVerticalTrace)
 
 
+def _showTraceScaleBalloon(strip):
+    return _SCMitem(name='Show Trace Scale Balloon',
+                    typeItem=ItemTypes.get(ITEM), tooltip='Show Trace Scale Balloon',
+                    shortcut='TS', icon='icons/tracescale-up', callback=strip.spectrumDisplay.showTraceScaleBalloon)
+
+
 def _phasingConsoleItem(strip):
     return _SCMitem(name='Enter Phasing-Console',
                     typeItem=ItemTypes.get(ITEM), icon='icons/phase-console', toolTip='Enter Phasing-Console',
@@ -504,6 +510,25 @@ def _centreOnSelectedPeak():
     return _SCMitem(name='Centre on Selected Peak',
                     typeItem=ItemTypes.get(ITEM), toolTip='Centre the current strip on the first selected peak',
                     callback=_app.mainWindow.centreOnSelectedPeak)
+
+
+def _centreZOnSelectedPeak():
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+
+    return _SCMitem(name='Centre Z axis on Selected Peak',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Centre Z axes on the current peak',
+                    callback=_app.mainWindow.centreZOnPeak)
+
+
+def _extractSliceAtPeakPositionItem():
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+    return _SCMitem(name='Save trace(s) as 1D',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Extract Slice from peak position', shortcut='XS',
+                    callback=_app.mainWindow.extractSliceAtPeakPosition)
 
 
 def _refitPeakItem():
@@ -929,6 +954,7 @@ def _decreaseTraceScaleItem(strip):
                     shortcut='TD', icon='icons/tracescale-down', callback=strip.spectrumDisplay.decreaseTraceScale)
 
 
+
 def _setPivotItem(strip):
     return _SCMitem(name='Set Pivot',
                     typeItem=ItemTypes.get(ITEM), toolTip='Set pivot value',
@@ -1110,6 +1136,7 @@ def _get1dPeakMenuItems(menuId) -> list:
         _separator(),
 
         _centreOnSelectedPeak(),
+        _centreZOnSelectedPeak(),
         _navigateToPeakPosMenuItem(menuId),
         _markPeaksItem()
         ]
@@ -1177,6 +1204,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _calibrateXY(guiStripNd),
         _toggleHorizontalTraceItem(guiStripNd),
         _toggleVerticalTraceItem(guiStripNd),
+        _showTraceScaleBalloon(guiStripNd),
         _phasingConsoleItem(guiStripNd),
         _separator(),
 
@@ -1268,6 +1296,7 @@ def _getNdPhasingMenu(guiStripNd) -> Menu:
         _removeAllTracesItem(guiStripNd),
         _increaseTraceScaleItem(guiStripNd),
         _decreaseTraceScaleItem(guiStripNd),
+        _showTraceScaleBalloon(guiStripNd),
         _setPivotItem(guiStripNd),
         _showActivePhaseTraceItem(guiStripNd),
         _separator(),
@@ -1299,6 +1328,7 @@ def _getNdPeakMenuItems(menuId) -> list:
         _estimateVolumesItem(menuId),
         _estimateCurrentVolumesItem(),
         _reorderPeakListAxesItem(),
+        _extractSliceAtPeakPositionItem(),
         _separator(),
 
         _arrangePeakLabelsItem(),
@@ -1316,6 +1346,7 @@ def _getNdPeakMenuItems(menuId) -> list:
         _separator(),
 
         _centreOnSelectedPeak(),
+        _centreZOnSelectedPeak(),
         _navigateToPeakPosMenuItem(menuId),
         _markPeaksItem(),
         ]

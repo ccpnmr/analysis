@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-10 16:46:25 +0100 (Wed, September 10, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-09-17 14:53:16 +0100 (Wed, September 17, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1883,6 +1883,13 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
             navigateToCurrentPeakPosition(self.application, selectClickedPeak=True, allStrips=False)
 
+    def centreZOnPeak(self):
+        """Centre the displays strips on the current peaks Z position"""
+        if (peak := self.current.peaks) and (strip := self.current.strip):
+            from ccpn.ui.gui.lib.SpectrumDisplayLib import navigateToCurrentPeakZ
+
+            navigateToCurrentPeakZ(strip, peak[0])
+
     def calibrateFromPeaks(self):
         """Calibrate the current strip from the selected peaks
         """
@@ -1967,6 +1974,15 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
                 else:
                     getLogger().warning('Current strip is not 1D')
+
+    def extractSliceAtPeakPosition(self):
+        peak = self.application.current.peak
+
+        if not peak:
+            getLogger().warning('No peak selected')
+            return
+
+        peak._extractSliceAtPeakPosition()
 
     @logCommand('mainWindow.')
     def refitCurrentPeaks(self, singularMode=False):
@@ -2182,6 +2198,11 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """
         if self.application.current.strip:
             self.application.current.strip.spectrumDisplay.toggleVTrace()
+
+    def showTraceScaleBalloon(self, window: 'GuiWindow'):
+        """Opens the trace scale balloon"""
+        if strip := self.application.current.strip:
+            strip.spectrumDisplay.showTraceScaleBalloon()
 
     def toggleLastAxisOnly(self, window: 'GuiWindow'):
         """

@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-07 16:32:28 +0000 (Tue, January 07, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-08-19 14:59:56 +0100 (Tue, August 19, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -68,7 +68,7 @@ class StripPlotPopup(CcpnDialogMainWidget):
                                              includePeakLists=includePeakLists,
                                              includeNmrChains=includeNmrChains,
                                              includeNmrChainPullSelection=includeNmrChainPullSelection,
-                                             includeSpectrumTable=includeSpectrumTable,
+                                             includeSpectrumTable=includeSpectrumTable, nmrChainList=True,
                                              defaultSpectrum=NO_STRIP,
                                              grid=(1, 0), gridSpan=(1, 3))
 
@@ -107,8 +107,9 @@ class StripPlotPopup(CcpnDialogMainWidget):
     def _popupNmrChain(self, spectrumDisplays):
         """Make strip from nmrResidues of selected nmrChain
         """
-        if self._newStripPlotWidget.nmrChain:
-            if (nmrRes := self._newStripPlotWidget.nmrChain.nmrResidues):
+        if self._newStripPlotWidget.nmrChains:
+            nmrRes = [nmrRes for nmrChain in self._newStripPlotWidget.nmrChains for nmrRes in nmrChain.nmrResidues]
+            if nmrRes:
                 with progressManager(self, 'Making Strip Plot...'):
                     self._buildStrips(nmrResidues=nmrRes, spectrumDisplays=spectrumDisplays)
             else:

@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-09 20:41:17 +0000 (Thu, January 09, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-08-19 10:01:58 +0100 (Tue, August 19, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -24,15 +24,19 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
 from itertools import product
+
+from PyQt5 import QtGui, QtWidgets, QtCore
 import pandas as pd
+
 from ccpn.core.Chain import Chain
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.AssignmentLib import CCP_CODES
+from ccpn.framework.PathsAndUrls import ccpnResourcesPath
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.widgets.ImageView import ImageViewSVG
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -54,6 +58,9 @@ from ccpn.util.UpdateQueue import UpdateQueue
 
 ALL = '<all>'
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
+AMINO_ACID_SVG_DIR = ccpnResourcesPath / 'AminoAcids'
+ALLOWED_AA_SVG = ['ala', 'arg', 'asn', 'asp', 'cys', 'gln', 'glu', 'gly', 'his', 'ile',
+                  'leu', 'lys', 'met', 'phe', 'pro', 'ser', 'thr', 'trp', 'tyr', 'val']
 
 
 class ResidueInformation(CcpnModule):
@@ -126,9 +133,73 @@ class ResidueInformation(CcpnModule):
         self._queueActive = None
         self._lock = QtCore.QMutex()
 
+    # def _setWidgets(self, kwds, mainWindow):
+    #     """Set up the widgets
+    #     """
+    #     self._moduleSettings = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
+    #                                      includeDisplaySettings=self.includeDisplaySettings,
+    #                                      includeSequentialStrips=self.includeSequentialStrips,
+    #                                      includePeakLists=self.includePeakLists,
+    #                                      includeNmrChains=self.includeNmrChains,
+    #                                      includeSpectrumTable=self.includeSpectrumTable,
+    #                                      activePulldownClass=self.activePulldownClass,
+    #                                      grid=(0, 0))
+    #     # add a splitter to contain the residue table and the sequence module
+    #     self.splitter = Splitter(self.mainWidget, horizontal=False)
+    #     self._sequenceWidgetFrame = Frame(None, setLayout=True)
+    #     self.mainWidget.getLayout().addWidget(self.splitter, 1, 0)
+    #     # initialise the sequence module
+    #     self.thisSequenceWidget = SequenceWidget(moduleParent=self,
+    #                                              parent=self._sequenceWidgetFrame,
+    #                                              mainWindow=mainWindow,
+    #                                              chains=self.project.chains)
+    #     # add a scroll area to contain the residue table
+    #     self._widgetScrollArea = ScrollArea(parent=self.mainWidget, grid=(0, 0),
+    #                                         scrollBarPolicies=('asNeeded', 'asNeeded'), **kwds)
+    #     self._widgetScrollArea.setWidgetResizable(True)
+    #     self._scrollWidget = Widget(parent=self._widgetScrollArea, setLayout=True)
+    #     self._widgetScrollArea.setWidget(self._scrollWidget)
+    #     self._scrollWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+    #     # insert into the mainWidget
+    #     self.splitter.addWidget(self._widgetScrollArea)
+    #     self.splitter.addWidget(self._sequenceWidgetFrame)
+    #     self.splitter.setStretchFactor(0, 5)
+    #     self.splitter.setChildrenCollapsible(False)
+    #     # make a frame to contain the pulldown widgets
+    #     self._pulldownFrame = Frame(self._scrollWidget, setLayout=True, showBorder=False,
+    #                                 grid=(0, 0), gridSpan=(1, 2), hAlign='l')
+    #     self.chainPulldown = ChainPulldown(parent=self._pulldownFrame,
+    #                                        mainWindow=self.mainWindow, default=None,
+    #                                        #first Chain in project (if present)
+    #                                        grid=(0, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
+    #                                        showSelectName=True,
+    #                                        sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+    #                                        callback=self._selectionPulldownCallback
+    #                                        )
+    #     self.selectedChain = None
+    #     self.residueLabel = Label(self._pulldownFrame, text='Residue', grid=(0, 3))
+    #     self.residuePulldown = PulldownList(self._pulldownFrame, callback=self._setCurrentResidue,
+    #                                         grid=(0, 4))
+    #     self._residueWidthLabel = Label(self._pulldownFrame, text='Residue window width', grid=(0, 5))
+    #     self._residueWidthData = PulldownList(self._pulldownFrame, grid=(0, 6))
+    #     self._residueWidthData.setData(texts=self._textOptions)
+    #     self._residueWidthData.set(self._residueWidth)
+    #     self.residuePulldown.setData(sorted(CCP_CODES))
+    #     self.selectedResidueType = self.residuePulldown.currentText()
+    #     # set the callback after populating
+    #     self._residueWidthData.setCallback(self._setResidueWidth)
+    #     self._residueTable = _ResidueTable(self._scrollWidget, grid=(2, 0), gridSpan=(1, 1),
+    #                                        selectionCallback=self._selection,
+    #                                        actionCallback=self._action,
+    #                                        )
+    #
+    #     self.spacer = Spacer(self._scrollWidget, 5, 5,
+    #                          QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+    #                          grid=(3, 1), gridSpan=(1, 1))
+    #     self._pulldownFrame.setContentsMargins(0, 5, 5, 5)
+    #     self._scrollWidget.setContentsMargins(5, 0, 5, 0)
+
     def _setWidgets(self, kwds, mainWindow):
-        """Set up the widgets
-        """
         self._moduleSettings = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
                                          includeDisplaySettings=self.includeDisplaySettings,
                                          includeSequentialStrips=self.includeSequentialStrips,
@@ -137,28 +208,43 @@ class ResidueInformation(CcpnModule):
                                          includeSpectrumTable=self.includeSpectrumTable,
                                          activePulldownClass=self.activePulldownClass,
                                          grid=(0, 0))
-        # add a splitter to contain the residue table and the sequence module
-        self.splitter = Splitter(self.mainWidget, horizontal=False)
-        self._sequenceWidgetFrame = Frame(None, setLayout=True)
-        self.mainWidget.getLayout().addWidget(self.splitter, 1, 0)
-        # initialise the sequence module
-        self.thisSequenceWidget = SequenceWidget(moduleParent=self,
-                                                 parent=self._sequenceWidgetFrame,
-                                                 mainWindow=mainWindow,
-                                                 chains=self.project.chains)
-        # add a scroll area to contain the residue table
-        self._widgetScrollArea = ScrollArea(parent=self.mainWidget, grid=(0, 0),
-                                            scrollBarPolicies=('asNeeded', 'asNeeded'), **kwds)
-        self._widgetScrollArea.setWidgetResizable(True)
-        self._scrollWidget = Widget(parent=self._widgetScrollArea, setLayout=True)
-        self._widgetScrollArea.setWidget(self._scrollWidget)
+
+        self._horizontalSplit = Splitter(self.mainWidget, horizontal=False)
+        self.mainWidget.getLayout().addWidget(self._horizontalSplit, 1, 0)
+
+        # self._horizontalSplit.setStretchFactor(0, 5)
+        self._horizontalSplit.setChildrenCollapsible(False)
+
+        self._topWidget = Widget(None, setLayout=True, showBorder=True)
+        self._bottomWidget = Frame(None, setLayout=True, showBorder=True)
+
+        self._setTopWidget(kwds)
+        self._setBottomWidget(mainWindow)
+
+        self._setWidgetData()
+
+        self._horizontalSplit.addWidget(self._topWidget)
+        self._horizontalSplit.addWidget(self._bottomWidget)
+
+    def _setTopWidget(self, kwds):
+        self._verticalSplit = Splitter(self._topWidget, horizontal=True)
+        self._topWidget.getLayout().addWidget(self._verticalSplit, 1, 0)
+
+        self._residueTableWidget = ScrollArea(parent=self.mainWidget, grid=(0, 0),
+                                              scrollBarPolicies=('asNeeded', 'asNeeded'), **kwds)
+
+        self._setResidueTableWidget()
+        self._image = ImageViewSVG(parent=None, svg=f'{AMINO_ACID_SVG_DIR / "ala.svg"}')
+
+        self._verticalSplit.addWidget(self._residueTableWidget)
+        self._verticalSplit.addWidget(self._image)
+
+    def _setResidueTableWidget(self):
+        self._residueTableWidget.setWidgetResizable(True)
+        self._scrollWidget = Widget(parent=self._residueTableWidget, setLayout=True)
+        self._residueTableWidget.setWidget(self._scrollWidget)
         self._scrollWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        # insert into the mainWidget
-        self.splitter.addWidget(self._widgetScrollArea)
-        self.splitter.addWidget(self._sequenceWidgetFrame)
-        self.splitter.setStretchFactor(0, 5)
-        self.splitter.setChildrenCollapsible(False)
-        # make a frame to contain the pulldown widgets
+
         self._pulldownFrame = Frame(self._scrollWidget, setLayout=True, showBorder=False,
                                     grid=(0, 0), gridSpan=(1, 2), hAlign='l')
         self.chainPulldown = ChainPulldown(parent=self._pulldownFrame,
@@ -169,11 +255,32 @@ class ResidueInformation(CcpnModule):
                                            sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                            callback=self._selectionPulldownCallback
                                            )
+
         self.selectedChain = None
         self.residueLabel = Label(self._pulldownFrame, text='Residue', grid=(0, 3))
         self.residuePulldown = PulldownList(self._pulldownFrame, callback=self._setCurrentResidue,
                                             grid=(0, 4))
         self._residueWidthLabel = Label(self._pulldownFrame, text='Residue window width', grid=(0, 5))
+        self._residueWidthData = PulldownList(self._pulldownFrame, grid=(0, 6))
+
+        self._residueTable = _ResidueTable(self._scrollWidget, grid=(2, 0), gridSpan=(1, 1),
+                                           selectionCallback=self._selection,
+                                           actionCallback=self._action,
+                                           )
+        self.spacer = Spacer(self._scrollWidget, 5, 5,
+                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+                             grid=(3, 1), gridSpan=(1, 1))
+
+    def _setBottomWidget(self, mainWindow):
+        # initialise the sequence module
+        self.thisSequenceWidget = SequenceWidget(moduleParent=self,
+                                                 parent=self._bottomWidget,
+                                                 mainWindow=mainWindow,
+                                                 chains=self.project.chains)
+
+        self._bottomWidget.setContentsMargins(0, 5, 5, 5)
+
+    def _setWidgetData(self):
         self._residueWidthData = PulldownList(self._pulldownFrame, grid=(0, 6))
         self._residueWidthData.setData(texts=self._textOptions)
         self._residueWidthData.set(self._residueWidth)
@@ -181,16 +288,11 @@ class ResidueInformation(CcpnModule):
         self.selectedResidueType = self.residuePulldown.currentText()
         # set the callback after populating
         self._residueWidthData.setCallback(self._setResidueWidth)
-        self._residueTable = _ResidueTable(self._scrollWidget, grid=(2, 0), gridSpan=(1, 1),
-                                           selectionCallback=self._selection,
-                                           actionCallback=self._action,
-                                           )
 
-        self.spacer = Spacer(self._scrollWidget, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-                             grid=(3, 1), gridSpan=(1, 1))
-        self._pulldownFrame.setContentsMargins(0, 5, 5, 5)
-        self._scrollWidget.setContentsMargins(5, 0, 5, 0)
+    # def _imageCallback(self):
+    #     image = QPixmap(r'C:\Users\work\Projects\AnalysisV3\tutorials\html_files\graphics\ala.png')
+    #     # image.scaled(200, 200, QtCore.Qt.KeepAspectRatio)
+    #     self._image.setPixmap(image)
 
     def _selection(self, *args):
         """Selection callback - single-click on item in table.
@@ -251,6 +353,8 @@ class ResidueInformation(CcpnModule):
         """
         self.selectedResidueType = value
         self._getResidues()
+        if value.lower() in ALLOWED_AA_SVG:
+            self._image.setSvg(f'{AMINO_ACID_SVG_DIR / value.lower()}.svg')
 
     def _updateTable(self, data):
         """Process notifier from core objects.

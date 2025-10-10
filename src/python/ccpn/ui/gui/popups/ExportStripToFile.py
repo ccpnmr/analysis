@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-09 15:55:47 +0100 (Fri, May 09, 2025) $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-09-02 15:53:03 +0100 (Tue, September 02, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,8 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from dataclasses import dataclass
 from functools import partial, singledispatchmethod
 from typing import Optional, Callable
+
+from PyQt5.QtCore import QByteArray
 
 from ccpn.core.lib.ContextManagers import catchExceptions, queueStateChange
 from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
@@ -324,6 +326,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.specToExport = None
         self._scalingModeIndex = 0
         self._useFontSetting = None
+        self.exitFilename = None
 
         self._initialiseStripList()
 
@@ -388,8 +391,20 @@ class ExportStripToFilePopup(ExportDialogABC):
     def initialise(self, userFrame):
         """Create the widgets for the userFrame
         """
+        from ccpn.ui.gui.widgets.Splitter import Splitter
+
+        _verticalSplit = Splitter(self.mainWidget, horizontal=True)
+        self.mainWidget.getLayout().addWidget(_verticalSplit, 1, 0)
+
+        _verticalSplit.setChildrenCollapsible(False)
+
+        self._initRightWidget()
+
+        _verticalSplit.addWidget(userFrame)
+        _verticalSplit.addWidget(self._image)
+
         sFrame = ScrollableFrame(userFrame, setLayout=True,
-                                 scrollBarPolicies=('never', 'asNeeded'),
+                                 scrollBarPolicies=('asNeeded', 'asNeeded'),
                                  spacing=DEFAULTSPACING, margins=TABMARGINS,
                                  grid=(0, 0), gridSpan=(1, 3))
 
@@ -495,6 +510,43 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         sFrame.getLayout().setRowStretch(row, 100)
         sFrame.addSpacer(5, 5, expandX=True, expandY=True, grid=(row, 3))
+        _verticalSplit.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
+    def _initRightWidget(self):
+        """Initialise the widget for the splitters right frame."""
+        from ccpn.ui.gui.widgets.ImageView import ImageViewSVG
+
+        self._image = ImageViewSVG(None, svg=None)
+        self._image.setVisible(False)
+
+    def _updateImageWidget(self, params: dict = None):
+        """Update the _imageWidget
+
+        Exports a svg to memory based on the params given
+        """
+        if not params:
+            return
+        if not (glWidgetRef := params[GLWIDGET]) or not (glWidget := glWidgetRef()):
+            getLogger().warning(f'{self.__class__.__name__}.exportToFile - glWidget is not defined')
+            return
+
+        with catchExceptions(errorStringTemplate='Error writing file; "%s"', printTraceBack=True):
+            params[GLEXPORTDPI] = 20
+            if svgExport := glWidget.exportToSVG(params=params):
+                svg = svgExport.writeSVGToMem()
+                svgExport.clear()
+
+        self._image.setSvg(QByteArray(svg.encode()))
+        self._image.repaint()
+
+    def _imagePreviewCheckboxCallback(self):
+        """Toggle the _image widget based on the userCheckbox.
+        """
+        if self._userCheckbox.isChecked():
+            self._image.setVisible(True)
+            self._updateImageWidget(self.buildParameters())
+        else:
+            self._image.setVisible(False)
 
     def _setupRangeWidget(self, row, userFrame):
         """Set up the widgets for the range frame
@@ -1470,7 +1522,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         selectedList = self.treeView.getCheckStateItems()
         self._populateTreeView(selectedList)
 
-    def _populateTreeView(self, selectList: dict | None=None):
+    def _populateTreeView(self, selectList: dict | None = None):
         self.treeView.clear()
 
         printItems = []
@@ -1748,6 +1800,11 @@ class ExportStripToFilePopup(ExportDialogABC):
                            tipText='Close the dialog\nAny changes to the print settings are discarded', enabled=True)
         self.setDefaultButton(self.CANCELBUTTON)
 
+        self._setUserCheckbox(callback=self._imagePreviewCheckboxCallback, initState=False, labelText='Show Preview',
+                              tipText='Toggle the render preview, turning '
+                                      'it off will improve the '
+                                      'responsiveness of the widget')
+
     def _postInit(self):
         """post-initialise functions
         CCPN-Internal to be called at the end of __init__
@@ -1756,6 +1813,8 @@ class ExportStripToFilePopup(ExportDialogABC):
             # stop the popup from firing events
             super()._postInit()
         self._revertButton = self.getButton(self.RESETBUTTON)
+
+        # self._updateImageWidget(params=self.buildParameters())
 
     def _closeDialog(self):
         self._applyChanges()
@@ -1894,6 +1953,8 @@ class ExportStripToFilePopup(ExportDialogABC):
         """
         if not self._changes.enabled:
             return None
+        if self._userCheckbox.isChecked():
+            self._updateImageWidget(params=self.buildParameters())
 
         applyState = True
         revertState = False

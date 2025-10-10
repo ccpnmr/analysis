@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-08-11 11:59:36 +0100 (Mon, August 11, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-09-29 15:59:39 +0100 (Mon, September 29, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -270,6 +270,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self._phasingTraceScale = 1.0e-7
         self.stripScaleFactor = 1.0
+
+        self.displayTraceScale = 1.0
 
         self._registerNotifiers()
 
@@ -2193,7 +2195,9 @@ class GuiSpectrumDisplay(CcpnModule):
             for strip in self.strips:
                 for spectrumView in strip.spectrumViews:
                     if spectrumView.traceScale is not None:
-                        spectrumView.traceScale *= 1.4
+                        # Needs to be _traceScale to ensure not
+                        # multiplying the global scaling
+                        spectrumView._traceScale *= 1.4
 
                 # spawn a redraw of the strip
                 strip._updatePivot()
@@ -2205,7 +2209,9 @@ class GuiSpectrumDisplay(CcpnModule):
             for strip in self.strips:
                 for spectrumView in strip.spectrumViews:
                     if spectrumView.traceScale is not None:
-                        spectrumView.traceScale /= 1.4
+                        # Needs to be _traceScale to ensure not
+                        # multiplying the global scaling
+                        spectrumView._traceScale /= 1.4
 
                 # spawn a redraw of the strip
                 strip._updatePivot()
@@ -3207,6 +3213,14 @@ class GuiSpectrumDisplay(CcpnModule):
     def updateTraces(self):
         for strip in self.strips:
             strip._updateTraces()
+
+    def showTraceScaleBalloon(self):
+        """Shows the trace scale editor popup."""
+        from ccpn.ui.gui.popups.TraceScaleBalloon import TraceScaleBalloon
+        balloon = TraceScaleBalloon(parent=self, mainWindow=self.mainWindow)
+
+        popupPos = QtGui.QCursor().pos()
+        balloon.showAt(popupPos)
 
     @logCommand(get='self')
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],

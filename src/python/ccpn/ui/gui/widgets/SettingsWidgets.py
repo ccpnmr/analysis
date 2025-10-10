@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-10-09 16:06:31 +0100 (Thu, October 09, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-10 12:25:33 +0100 (Fri, October 10, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -175,7 +175,13 @@ class AssignmentInspectorSettings(Widget):
                                                         fixedWidths=[100, 200, 200],
                                                         axisCodeFilter=axisCodeFilter)
 
-        self.showBackboneHNCheckbox = CheckBox(parent=self.chTab, grid=(1, 0), text='Show Backbone HN')
+        self.showBackboneHNCheckbox = CheckBoxCompoundWidget(
+                self.chTab,
+                grid=(1, 0), hAlign='left',
+                orientation='left',
+                labelText='Show Backbone HN',
+                checked=False
+                )
 
     def _initGenTab(self, parent):
         """Initialise the general setttings tab"""

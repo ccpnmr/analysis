@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-07-29 18:04:24 +0100 (Tue, July 29, 2025) $"
-__version__ = "$Revision: 3.3.2.1 $"
+__dateModified__ = "$dateModified: 2025-10-10 20:46:05 +0100 (Fri, October 10, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -945,7 +945,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         self.gridList = []
         self._gridVisible = True
-        self._crosshairVisible = True
+        # self._crosshairVisible = True
         self._sideBandsVisible = True
 
         self.diagonalGLList = None
@@ -1076,7 +1076,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._matchingIsotopeCodes = False
 
         self._menuActive = False
-        self._disableCursorUpdate = False
+        # self._disableCursorUpdate = False
 
         self.globalGL = GLGlobalData(parent=self)
         self.viewports = GLViewports()
@@ -1398,12 +1398,12 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             return
 
         if aDict[GLNotifier.GLSOURCE] != self:
-            # self.cursorCoordinate = aDict[GLMOUSECOORDS]
-            # self.update()
-            mouseMovedDict = aDict[GLNotifier.GLMOUSEMOVEDDICT]
-            if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
-                exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
-                self.update(mode=PaintModes.PAINT_MOUSEONLY)
+            # # self.cursorCoordinate = aDict[GLMOUSECOORDS]
+            # # self.update()
+            # mouseMovedDict = aDict[GLNotifier.GLMOUSEMOVEDDICT]
+            # if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
+            #     exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
+            self.update(mode=PaintModes.PAINT_MOUSEONLY)
 
     def update(self, mode=PaintModes.PAINT_ALL):
         """Update the glWidget with the correct refresh mode

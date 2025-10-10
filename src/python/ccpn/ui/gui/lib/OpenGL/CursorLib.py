@@ -1,0 +1,541 @@
+"""
+Module Documentation here
+"""
+from __future__ import annotations
+
+
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, https://doi.org/10.1007/s10858-016-0060-y")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-10-10 20:46:05 +0100 (Fri, October 10, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: Ed Brooksbank $"
+__date__ = "$Date: 2025-10-10 10:23:20 +0100 (Fri, October 10, 2025) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
+from typing import Protocol, TYPE_CHECKING, TypeVar, TypeAlias
+from typing_extensions import Self
+import numpy as np
+
+from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
+from ccpn.ui.gui.lib.OpenGL import GL
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray, GLRENDERMODE_REBUILD
+from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
+
+
+if TYPE_CHECKING:
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget
+    from ccpn.ui.gui.modules.SpectrumDisplay import (SpectrumDisplay1d as _SpectrumDisplay1d,
+                                                     SpectrumDisplayNd as _SpectrumDisplayNd)
+    from ccpn.ui.gui.lib.SpectrumView import (SpectrumView as _SpectrumView1d, SpectrumView as _SpectrumViewNd)
+
+_CoreSpectrumDisplay = TypeVar("_CoreSpectrumDisplay", bound="_SpectrumDisplay1d | _SpectrumDisplayNd")
+_CoreSpectrumView = TypeVar("_CoreSpectrumView", bound="_SpectrumView1d | _SpectrumViewNd")
+
+_COORDS_TYPE: TypeAlias = dict[str | int, dict[str, list[float]]]
+
+# ----------------------------------------------------------------------
+# External “protocol” constants you already have in your project
+# Bring them from your codebase; these placeholders keep this file standalone.
+PICK = 1
+# from your_module import CoherenceOrder  # expected to be available on host usage
+
+# ----------------------------------------------------------------------
+# Tuning constants
+CURSOR_BOX_SIZE_FACTOR = 8.0  # pick box side = deltaX/deltaY * factor
+UNIT_MIN = 0.0  # normalized (ratio) space
+UNIT_MAX = 1.0
+
+
+class CursorProtocol(Protocol):
+    """A protocol defining any class that handles cursor objects."""
+
+    def attach(self, host: CcpnGLWidget) -> CursorRenderer: ...
+
+    def buildCursors(self) -> None: ...
+
+    def initialise(self, context: CcpnGLWidget): ...
+
+    disableCursorUpdate: bool
+    crosshairVisible: bool
+    doubleCrosshairVisible: bool
+
+    # @property
+    # def disableCursorUpdate(self) -> bool: ...
+    # @disableCursorUpdate.setter
+    # def disableCursorUpdate(self, value: bool): ...
+    def drawCursors(self): ...
+
+    def drawLastCursors(self): ...
+
+
+#=========================================================================================
+# CursorRenderer - base renderer for Nd displays
+#=========================================================================================
+
+class CursorRenderer:
+    """
+    Composition class that builds cursor/double-cursor geometry and uploads it
+    to the current GL draw list obtained from the host widget.
+
+    -------------------------
+    Host requirements (widget)
+    -------------------------
+    Attributes / fields:
+      - _disableCursorUpdate: bool
+      - _crosshairVisible: bool
+      - _doubleCrosshairVisible: bool
+      - _updateHTrace: bool
+      - _updateVTrace: bool
+      - _matchingIsotopeCodes: bool
+      - _orderedAxes: list-like of two objects each with .code
+      - spectrumDisplay.isotopeCodes: list[str]
+      - spectrumDisplay.phasingFrame.isVisible(): bool
+      - current.mouseMovedDict: dict or None
+      - deltaX: float
+      - deltaY: float
+      - mousePickColour: sequence[float]  (r,g,b,a)
+      - foreground: sequence[float]       (r,g,b,a)
+      - mouseCoordDQ: tuple|None (will be set)
+      - _glCursorQueue, _glCursorHead (draw list queue as you already use)
+        drawList has: .vertices, .indices, .numVertices, .colors, .defineIndexVBO()
+
+    Methods (host):
+      - _advanceGLCursor() -> None
+      - _scaleAxisToRatio(values: list[float | None]) -> list[float]
+      - getCurrentCursorCoordinate(localPos: Optional[QPointF] = None) -> list[float]
+      - underMouse() -> bool
+
+    Optional methods (if present, used; otherwise safe defaults are applied):
+      - isPickMode() -> bool
+      - isPhasingVisible() -> bool
+      - _getActiveCursorDrawList() -> Any              # if queue differs
+      - getCurrentMouseMode() -> int                   # alternative to isPickMode
+
+    Optional attributes (for quantum cursors):
+      - _firstVisible with: .isDeleted, .dimensionIndices, .spectrum.coherenceOrders
+      - CoherenceOrder enum accessible in host module scope
+    """
+
+    host: WeakRefDescriptor[CcpnGLWidget] = WeakRefDescriptor()
+    disableCursorUpdate = False
+    crosshairVisible = True
+    doubleCrosshairVisible = False
+    _numBuffers = 2
+
+    def __init__(self, host: CcpnGLWidget | None = None,
+                 *, box_size_factor: float = CURSOR_BOX_SIZE_FACTOR):
+        self.host = host
+        self.box_size_factor = float(box_size_factor)
+
+    #-----------------------------------------------------------------------------------------
+    # Lifetime/binding
+
+    def attach(self, host: CcpnGLWidget) -> Self:
+        """Bind this renderer to a host widget and return self (for chaining)."""
+        self.host = host
+        return self
+
+    #-----------------------------------------------------------------------------------------
+    # Public entry point
+
+    def buildCursors(self) -> None:
+        """Build and upload cursor geometry for the current frame."""
+        host = self._require_host
+        if self.disableCursorUpdate or not self.crosshairVisible:
+            return
+
+        # Advance cursor draw-list and get active buffer
+        self._advanceGLCursor()
+        drawList = self._glCursorQueue[self._glCursorHead]
+
+        # Reset per-frame quantum info
+        host.mouseCoordDQ = None
+        vertices: list[float] = []
+        indices: list[int] = []
+        color = host.foreground
+        newCoords: list[float | None] = [None, None]  # normalized space
+
+        # 1) PICK mode → small selection box
+        if self._isPickMode() and host.underMouse():
+            cursorCoordinate = host.getCurrentCursorCoordinate()
+            newCoords = host._scaleAxisToRatio(cursorCoordinate[:2])
+            self._addPickBox(host, vertices, indices, newCoords, size_factor=self.box_size_factor)
+            color = host.mousePickColour
+
+        # 2) Crosshair / quantum cursors (skip if phasing)
+        coords_dict = host.current.mouseMovedDict
+        if not host.spectrumDisplay.phasingFrame.isVisible() and coords_dict:
+            # Update normalized coords from dict (if present)
+            newCoords = self._updateCoordsFromDict(host, coords_dict, newCoords)
+
+            # Resolve which lists to draw + axis types
+            xPosList, yPosList, xaxisType, yaxisType = self._resolveAxisLists(host, coords_dict)
+
+            # Build simple vertical/horizontal lines
+            foundX: list[float] = []
+            foundY: list[float] = []
+            self._makeCursor(host, foundX, foundY, indices, newCoords, vertices, xPosList, yPosList)
+            # Double-quantum lines when applicable
+            self._makeQuantumCursor(host, foundX, foundY, indices, vertices,
+                                    xPosList, xaxisType, yPosList, yaxisType)
+
+        # 3) Upload to GL
+        drawList.vertices = np.array(vertices, dtype=np.float32)
+        drawList.indices = np.array(indices, dtype=np.int32)
+        drawList.numVertices = len(vertices) // 2
+        drawList.colors = np.array(color * drawList.numVertices, dtype=np.float32)
+        drawList.defineIndexVBO()
+
+    #-----------------------------------------------------------------------------------------
+    # Geometry builders
+
+    def _makeCursor(self,
+                    host: CcpnGLWidget,
+                    foundX: list[float],
+                    foundY: list[float],
+                    indices: list[int],
+                    newCoords: list[float | None],
+                    vertices: list[float],
+                    xPosList: list[float],
+                    yPosList: list[float]) -> None:
+        """
+        Generate single crosshair lines along X and Y.
+        - foundX, foundY store normalized positions so we don't overdraw overlapping lines
+        - newCoords is [rx, ry] in normalized space (can contain None)
+        """
+        # Vertical lines (constant X)
+        if not host._updateVTrace and newCoords[0] is not None:
+            for pos in xPosList:
+                x, _ = host._scaleAxisToRatio([pos, 0])
+                if all(abs(x - val) > host.deltaX for val in foundX):
+                    foundX.append(x)
+                    self._appendLine(vertices, indices, x, UNIT_MAX, x, UNIT_MIN)
+
+        # Horizontal lines (constant Y)
+        if not host._updateHTrace and newCoords[1] is not None:
+            for pos in yPosList:
+                _, y = host._scaleAxisToRatio([0, pos])
+                if all(abs(y - val) > host.deltaY for val in foundY):
+                    foundY.append(y)
+                    self._appendLine(vertices, indices, UNIT_MIN, y, UNIT_MAX, y)
+
+    def _makeQuantumCursor(self,
+                           host: CcpnGLWidget,
+                           foundX: list[float],
+                           foundY: list[float],
+                           indices: list[int],
+                           vertices: list[float],
+                           xPosList: list[float],
+                           xaxisType: int,
+                           yPosList: list[float],
+                           yaxisType: int) -> None:
+        """Generate double-quantum/zero-quantum auxiliary lines when conditions allow."""
+        if not (host._matchingIsotopeCodes and
+                host._firstVisible and
+                self.doubleCrosshairVisible):
+            return
+
+        # Case 1: single double quantum on Y (x < y)
+        if 0 < xaxisType < yaxisType < 3:
+            if len(xPosList) == 1 and len(yPosList) == 1:
+                xPosList.append(yPosList[0])
+            if len(xPosList) == 2:
+                xx = xPosList[1] - xPosList[0]  # (y - x)
+                host.mouseCoordDQ = (xx, yPosList[0] if yPosList else None, 0)
+                x_norm, _ = host._scaleAxisToRatio([xx, 0])
+                if all(abs(x_norm - val) > host.deltaX for val in foundX):
+                    foundX.append(x_norm)
+                    self._appendLine(vertices, indices, x_norm, UNIT_MAX, x_norm, UNIT_MIN)
+
+        # Case 2: single double quantum on X (y < x)
+        elif 0 < yaxisType < xaxisType < 3:
+            if len(xPosList) == 1 and len(yPosList) == 1:
+                yPosList.insert(0, xPosList[0])
+            if len(yPosList) == 2:
+                yy = yPosList[0] - yPosList[1]  # (x - y) per your original order
+                host.mouseCoordDQ = (xPosList[0] if xPosList else None, yy, 1)
+                _, y_norm = host._scaleAxisToRatio([0, yy])
+                if all(abs(y_norm - val) > host.deltaY for val in foundY):
+                    foundY.append(y_norm)
+                    self._appendLine(vertices, indices, UNIT_MIN, y_norm, UNIT_MAX, y_norm)
+
+    #-----------------------------------------------------------------------------------------
+    # Domain helpers
+
+    def initialise(self, context: CcpnGLWidget):
+        """Initialise the GL lists, hard-coded to 2 swapBuffers."""
+        # Sanity check to ensure that host has been set before doing anything else
+        _ = self._require_host
+        fmt = context.format()
+        self._numBuffers = int(fmt.swapBehavior()) or 2
+        self._glCursorQueue: tuple[GLVertexArray, ...] = ()
+        for buf in range(self._numBuffers):
+            self._glCursorQueue += (GLVertexArray(numLists=1,
+                                                  renderMode=GLRENDERMODE_REBUILD,
+                                                  blendMode=False,
+                                                  drawMode=GL.GL_LINES,
+                                                  dimension=2,
+                                                  GLContext=context),)
+        self._clearGLCursorQueue()
+        self._glCursor = GLVertexArray(numLists=1,
+                                       renderMode=GLRENDERMODE_REBUILD,
+                                       blendMode=False,
+                                       drawMode=GL.GL_LINES,
+                                       dimension=2,
+                                       GLContext=context)
+
+    def _clearGLCursorQueue(self):
+        """Clear the cursor glLists."""
+        if not self.disableCursorUpdate:
+            for glBuf in self._glCursorQueue:
+                glBuf.clearArrays()
+            self._glCursorHead = 0
+            self._glCursorTail = (self._glCursorHead - 1) % self._numBuffers
+
+    def _advanceGLCursor(self):
+        """Advance the pointers for the cursor glLists."""
+        if not self.disableCursorUpdate:
+            self._glCursorHead = (self._glCursorHead + 1) % self._numBuffers
+            self._glCursorTail = (self._glCursorHead - 1) % self._numBuffers
+
+    def drawLastCursors(self):
+        """Draw the cursors/doubleCursors."""
+        cursor = self._glCursorQueue[self._glCursorTail]
+        if cursor.indices.size:
+            cursor.drawIndexVBO()
+
+    def drawCursors(self):
+        """Draw the cursors/doubleCursors."""
+        cursor = self._glCursorQueue[self._glCursorHead]
+        if cursor.indices.size:
+            cursor.drawIndexVBO()
+
+    @staticmethod
+    def _updateCoordsFromDict(host: CcpnGLWidget,
+                              coords_dict: _COORDS_TYPE,
+                              current: list[float | None]) -> list[float | None]:
+        """Pull single x/y coordinates out of mouseMovedDict using ordered axis codes."""
+
+        newCoords = list(current) if current else [None, None]
+        atCodes = host._orderedAxes
+        if not atCodes:
+            return newCoords
+
+        full_dict: dict[str, list[float]] = coords_dict.get(AXIS_FULLATOMNAME, {})
+        x_code = atCodes[0].code
+        y_code = atCodes[1].code
+        x_list = full_dict.get(x_code, [])
+        y_list = full_dict.get(y_code, [])
+
+        if x_list:
+            newCoords[0] = x_list[0]
+        if y_list:
+            newCoords[1] = y_list[0]
+        return newCoords
+
+    @staticmethod
+    def _getAxisTypes(host: CcpnGLWidget) -> tuple[int, int]:
+        """
+        Return (xaxisType, yaxisType). Defaults to (1,1).
+        Uses host._firstVisible.spectrum.coherenceOrders and a CoherenceOrder enum.
+        """
+        from ccpn.core.lib.SpectrumLib import CoherenceOrder
+
+        xaxisType = yaxisType = 1
+        if (fv := host._firstVisible) and not fv.isDeleted:
+            idx = fv.dimensionIndices
+            spec = fv.spectrum
+            mTypes = [CoherenceOrder[co].value for co in spec.coherenceOrders]  # type: ignore
+            if len(mTypes) > max(idx[0], idx[1]):
+                xaxisType = mTypes[idx[0]]
+                yaxisType = mTypes[idx[1]]
+        return xaxisType, yaxisType
+
+    def _resolveAxisLists(self, host: CcpnGLWidget, coords_dict: _COORDS_TYPE
+                          ) -> tuple[list[float], list[float], int, int]:
+        """
+        Decide which x/y lists to use (full-atom-names vs isotope-types) and return axis-types.
+        """
+        xaxisType, yaxisType = self._getAxisTypes(host)
+
+        atCodes = host._orderedAxes
+        assert atCodes and len(atCodes) >= 2, "CursorRenderer: _orderedAxes must provide two axes"
+
+        x_code = atCodes[0].code
+        y_code = atCodes[1].code
+
+        xPosListAn = list(coords_dict[AXIS_FULLATOMNAME].get(x_code, []))
+        yPosListAn = list(coords_dict[AXIS_FULLATOMNAME].get(y_code, []))
+        matchPref = host._preferences.matchAxisCode
+
+        if matchPref == AXIS_FULLATOMNAME:
+            xPosList, yPosList = xPosListAn, yPosListAn
+        else:
+            if host._matchingIsotopeCodes and (
+                    (0 < xaxisType < yaxisType < 3) or (0 < yaxisType < xaxisType < 3)
+            ):
+                # append double-quantum cursors -> use atom-name lists as base
+                xPosList, yPosList = xPosListAn, yPosListAn
+            elif host._matchingIsotopeCodes and not self.doubleCrosshairVisible:
+                xPosList, yPosList = xPosListAn, yPosListAn
+            else:
+                atomTypes = host.spectrumDisplay.isotopeCodes
+                xPosList = list(coords_dict[AXIS_MATCHATOMTYPE].get(atomTypes[0], []))
+                yPosList = list(coords_dict[AXIS_MATCHATOMTYPE].get(atomTypes[1], []))
+
+        return xPosList, yPosList, xaxisType, yaxisType
+
+    #-----------------------------------------------------------------------------------------
+    # Small geometry utilities
+
+    @staticmethod
+    def _appendLine(vertices: list[float], indices: list[int],
+                    x1: float, y1: float, x2: float, y2: float) -> None:
+        """Append one GL_LINES segment (two vertices) and its indices."""
+        base = len(vertices) // 2
+        vertices.extend([x1, y1, x2, y2])
+        indices.extend([base, base + 1])
+
+    def _addPickBox(self, host: CcpnGLWidget, vertices: list[float], indices: list[int],
+                    coords: list[float | None], size_factor: float) -> None:
+        """
+        Add a rectangular outline centered at coords (in normalized/ratio space),
+        sized by deltaX/deltaY * size_factor.
+        """
+        x, y = coords
+        if None in [x, y]:  # coords[0] is None or coords[1] is None:
+            return
+        dx = host.deltaX * size_factor
+        dy = host.deltaY * size_factor
+
+        # Four edges (clockwise)
+        self._appendLine(vertices, indices, x - dx, y - dy, x + dx, y - dy)  # bottom
+        self._appendLine(vertices, indices, x + dx, y - dy, x + dx, y + dy)  # right
+        self._appendLine(vertices, indices, x + dx, y + dy, x - dx, y + dy)  # top
+        self._appendLine(vertices, indices, x - dx, y + dy, x - dx, y - dy)  # left
+
+    #-----------------------------------------------------------------------------------------
+    # Adapters / defaults
+
+    # def _getActiveCursorDrawList(self, host: CcpnGLWidget) -> GLVertexArray:
+    #     """Default adapter to your queue; override if you use a different mechanism."""
+    #     try:
+    #         return self._glCursorQueue[self._glCursorHead]
+    #     except Exception as exc:
+    #         raise RuntimeError("CursorRenderer requires host._glCursorQueue/_glCursorHead "
+    #                            "or an override of _getActiveCursorDrawList()") from exc
+
+    @staticmethod
+    def _isPickMode() -> bool:
+        """Return the pick-mode determined from getCurrentMouseMode()."""
+        from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
+
+        return getCurrentMouseMode() == PICK
+
+    # def _isPhasingVisible(self, host: CcpnGLWidget) -> bool:
+    #     """Prefer host.isPhasingVisible() if available; otherwise read from spectrumDisplay."""
+    #     if hasattr(host, "isPhasingVisible"):
+    #         try:
+    #             return bool(host.isPhasingVisible())
+    #         except Exception:
+    #             pass
+    #     try:
+    #         return bool(host.spectrumDisplay.phasingFrame.isVisible())
+    #     except Exception:
+    #         return False
+
+    # def _resolveCoherenceEnum(self, host: CcpnGLWidget):
+    #     """
+    #     Locate CoherenceOrder enum in host module. Override if located elsewhere.
+    #     The enum must support subscription [key] and .value.
+    #     """
+    #     # Try host attribute first
+    #     if hasattr(host, "CoherenceOrder"):
+    #         return getattr(host, "CoherenceOrder")
+    #     # Try module-level import path (customize if needed)
+    #     try:
+    #         from ccpn.core.lib.SpectrumLib import CoherenceOrder
+    #
+    #         return CoherenceOrder
+    #     except Exception as exc:
+    #         raise RuntimeError("CursorRenderer: CoherenceOrder enum not found on host. "
+    #                            "Provide host.CoherenceOrder or override _resolveCoherenceEnum().") from exc
+
+    #-----------------------------------------------------------------------------------------
+    # Internal utilities
+
+    @property
+    def _require_host(self) -> CcpnGLWidget:
+        if self.host is None:
+            raise RuntimeError("CursorRenderer is not attached to a host. "
+                               "Call `cursorHandler.attach(host)` or pass host=... in the constructor.")
+        return self.host
+
+
+#=========================================================================================
+# CursorRenderer1d - simpler for 1d displays that do not have double-quantum axes
+#=========================================================================================
+
+class CursorRenderer1d(CursorRenderer):
+
+    #-----------------------------------------------------------------------------------------
+    # Geometry builders
+
+    def _makeQuantumCursor(self,
+                           host: CcpnGLWidget,
+                           foundX: list[float],
+                           foundY: list[float],
+                           indices: list[int],
+                           vertices: list[float],
+                           xPosList: list[float],
+                           xaxisType: int,
+                           yPosList: list[float],
+                           yaxisType: int) -> None:
+        # No action required
+        ...
+
+    #-----------------------------------------------------------------------------------------
+    # Domain helpers
+
+    def _resolveAxisLists(self, host: CcpnGLWidget, coords_dict: _COORDS_TYPE
+                          ) -> tuple[list[float], list[float], int, int]:
+        """
+        Decide which x/y lists to use (full-atom-names vs isotope-types) and return axis-types.
+        """
+        matchPref = host._preferences.matchAxisCode
+        if matchPref == AXIS_FULLATOMNAME:
+            atCodes = host._orderedAxes
+            assert atCodes and len(atCodes) >= 2, "CursorRenderer: _orderedAxes must provide two axes"
+
+            x_code = atCodes[0].code
+            y_code = atCodes[1].code
+            xPosList = list(coords_dict[AXIS_FULLATOMNAME].get(x_code, []))
+            yPosList = list(coords_dict[AXIS_FULLATOMNAME].get(y_code, []))
+        else:
+            # add extra 'isotopeCode' so that 1D appears correctly
+            if host.strip.spectrumDisplay._flipped:
+                atomTypes = ('intensity',) + host.spectrumDisplay.isotopeCodes
+            else:
+                atomTypes = host.spectrumDisplay.isotopeCodes + ('intensity',)
+            xPosList = list(coords_dict[AXIS_MATCHATOMTYPE].get(atomTypes[0], []))
+            yPosList = list(coords_dict[AXIS_MATCHATOMTYPE].get(atomTypes[1], []))
+
+        return xPosList, yPosList, -1, -1

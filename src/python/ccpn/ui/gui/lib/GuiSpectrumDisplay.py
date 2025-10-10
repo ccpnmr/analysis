@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-29 15:59:39 +0100 (Mon, September 29, 2025) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-10-10 20:46:04 +0100 (Fri, October 10, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -195,6 +195,8 @@ class GuiSpectrumDisplay(CcpnModule):
     MAXMULTIPLETLABELTYPES = 0
     MAXMULTIPLETSYMBOLTYPES = 0
     MAXARROWSYMBOLTYPES = 0
+
+    phasingFrame: PhasingFrame
 
     # Sub-classed in the 1d/nD implementations
     # NB: 'self' is added to the callback in _fillToolbar using partial

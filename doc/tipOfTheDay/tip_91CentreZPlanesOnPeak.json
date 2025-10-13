@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>If you want to centre the z-planes of 3D or 4D spectra on a particular peak, but without centering the whole SpectrumDisplay (i.e. also the x and y-axes) on the peak, you can do this by <span style=%(purple)s>right-clicking on a selected peak</span> and selecting <span style=%(purple)s>Centre Z axis on Selected Peak</span>.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/CentreZPlaneOnPeak.png"
+  ]
+}

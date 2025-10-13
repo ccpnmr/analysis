@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s><span style=%(purple)s>Right-click</span> on a table column header and select <span style=%(purple)s>Column Settings...</span> to select which columns to view. Click on <span style=%(purple)s>Save</span> in the <span style=%(purple)s>User preferences</span> section of the pop-up to save these column selections as your default for this type of table.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/SaveColumnSettings.png"
+  ]
+}

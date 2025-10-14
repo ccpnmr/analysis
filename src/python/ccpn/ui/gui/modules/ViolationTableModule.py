@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-06 17:44:15 +0000 (Mon, January 06, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-10-14 17:22:06 +0100 (Tue, October 14, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,7 +27,7 @@ __date__ = "$Date: 2021-10-29 16:38:09 +0100 (Fri, October 29, 2021) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 import pandas as pd
 from collections import OrderedDict
 
@@ -121,51 +121,62 @@ class ViolationTableModule(CcpnTableModule):
         self._splitter.setContentsMargins(0, 0, 0, 0)
         self.mainWidget.getLayout().addWidget(self._splitter, 0, 0)  # MUST be inserted this way
 
-        _topWidget = self._topFrame = Frame(None, setLayout=True,  #grid=(0, 0),
-                                            )  #scrollBarPolicies=('never', 'asNeeded'))
-        _bottomWidget = self._bottomFrame = Frame(None, setLayout=True,  #grid=(1, 0),
-                                                  )  #scrollBarPolicies=('never', 'asNeeded'))
-        self._splitter.addWidget(self._topFrame)
+        _topWidget = self._topFrame = Frame(None, setLayout=True)
+        _bottomWidget = self._bottomFrame = Frame(None, setLayout=True)
+        self._splitter.addWidget(_topWidget)
         self._splitter.addWidget(_bottomWidget)
         self._splitter.setChildrenCollapsible(False)
-        self._splitter.setStretchFactor(1, 10)
-        # self._splitter.setSizes([1000, 2000])
 
         # add the guiTable to the bottom
-        self._tableWidget = _ViolationTableWidget(parent=_bottomWidget,
+        _tWidget = self._tableWidget = _ViolationTableWidget(parent=_bottomWidget,
                                                   mainWindow=self.mainWindow,
                                                   moduleParent=self,
-                                                  setLayout=True,
+                                                  # setLayout=True,
                                                   showVerticalHeader=False,
                                                   grid=(0, 0))
+        self._splitter.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.MinimumExpanding)
+        _tWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        _bottomWidget.layout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
 
         Spacer(_topWidget, 5, 5,
                QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                grid=(0, 0), gridSpan=(1, 1))
 
         row = 1
-        self._modulePulldown = KlassPulldown(parent=_topWidget,
+        # These could be implemented in the compound widgets
+        _pullFrame = Frame(parent=_topWidget, setLayout=True, grid=(row, 0), gridSpan=(1, 4), showBorder=True,
+                           hPolicy='ignored', vPolicy='fixed')
+        _pullFrame.layout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+
+        pfRow = 0
+        self._modulePulldown = KlassPulldown(parent=_pullFrame,
                                              mainWindow=self.mainWindow, default=None,
-                                             grid=(row, 0), gridSpan=(1, 2), minimumWidths=(0, 100),
+                                             grid=(pfRow, 0), gridSpan=(1, 2), minimumWidths=(0, 100),
                                              showSelectName=True,
                                              sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                              callback=self._selectionPulldownCallback,
+                                             vPolicy='fixed',
                                              )
         # fixed height
-        self._modulePulldown.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        row += 1
+        _commentFrame = Frame(parent=_topWidget, setLayout=True, grid=(row, 0), gridSpan=(1, 4), showBorder=True,
+                              hPolicy='ignored', vPolicy='fixed')
+        _commentFrame.layout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
 
-        # row += 1
-        self.labelComment = Label(_topWidget, text='comment', grid=(row, 2), hAlign='r')
-        self.lineEditComment = LineEdit(_topWidget, grid=(row, 3), gridSpan=(1, 1),
-                                        textAlignment='l', backgroundText='> Optional <')
+        self.labelComment = Label(_commentFrame, text='comment', grid=(pfRow, 0),
+                                  hPolicy='fixed')
+        self.lineEditComment = LineEdit(_commentFrame, grid=(pfRow, 1), gridSpan=(1, 1),
+                                        textAlignment='l', backgroundText='> Optional <',
+                                        )
         self.lineEditComment.editingFinished.connect(self._applyComment)
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
         # hide the metadata in a more-less-frame
         row += 1
         self._mlFrame = MoreLessFrame(_topWidget, name='Metadata', showMore=False, grid=(row, 0), gridSpan=(1, 4))
         MLContent = self._mlFrame.contentsFrame
+        # self._mlFrame.layout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        # MLContent.layout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
 
         mlrow = 0
         self.rtWidget = RestraintTablePulldown(parent=MLContent,
@@ -175,53 +186,35 @@ class ViolationTableModule(CcpnTableModule):
                                                showSelectName=True,
                                                sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                                callback=self._rtPulldownCallback,
+                                               vPolicy='fixed',
                                                )
-        self.rtWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        self.rtWidget.layout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
 
         mlrow += 1
-        Label(MLContent, text='\nmetadata', grid=(mlrow, 0), hAlign='r', vAlign='t')
-        self._metadata = Table(MLContent, showVerticalHeader=False, grid=(mlrow, 1), gridSpan=(1, 3))
-        self._metadata.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        Label(MLContent, text='\nmetadata', grid=(mlrow, 0), vAlign='t', hPolicy='fixed')
+        self._metadata = Table(MLContent, showVerticalHeader=False, grid=(mlrow, 1), gridSpan=(1, 1))
         self._metadata._enableSelectionCallback = False
         self._metadata._enableActionCallback = False
         self._metadata.setEditable(False)
 
-        mlrow += 1
-        Spacer(MLContent, 5, 5,
-               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-               grid=(mlrow, 3), gridSpan=(1, 1))
-        _topWidget.getLayout().setColumnStretch(3, 1)
-
-        row += 1
-        self._mlSpacer = Spacer(_topWidget, 5, 5,
-                                QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding,
-                                grid=(row, 3), gridSpan=(1, 1))
-        _topWidget.getLayout().setColumnStretch(3, 1)
-
-        # set the closed size of the more-less-frame
-        self._baseSize = self._mlFrame.sizeHint()
-        for item in self._mlFrame.findChildren(MoreLessFrame):
-            self._baseSize -= item.sizeHint()
-        self._mlFrame.setMaximumHeight(self._baseSize.height())
-        self._splitter.setSizes([1, 10])
-
+        # Set a callback to update the size of the splitter when the MoreLess frame has opened/closed
+        self._moreLessCallback()
         self._mlFrame.setCallback(self._moreLessCallback)
-        # assume all are initially closed
 
     def _setCallbacks(self):
         """Set the active callbacks for the module.
         """
-        self._activeCheckbox = None
-        if self.activePulldownClass:
-            self.setNotifier(self.current,
-                             [Notifier.CURRENT],
-                             targetName=self.activePulldownClass._pluralLinkName,
-                             callback=self._selectCurrentPulldownClass)
-
-            # set the active callback from the pulldown
-            self._activeCheckbox = self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget']
         self.setNotifier(self.project, [Notifier.CHANGE, Notifier.DELETE],
                          KlassTable.__name__, self._updateViolationTable, onceOnly=True)
+        if not self.activePulldownClass:
+            self._activeCheckbox = None
+            return
+        self.setNotifier(self.current,
+                         [Notifier.CURRENT],
+                         targetName=self.activePulldownClass._pluralLinkName,
+                         callback=self._selectCurrentPulldownClass)
+        # set the active callback from the pulldown
+        self._activeCheckbox = self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget']
 
     def _selectTable(self, table=None):
         """Manually select a ViolationTable from the pull-down.
@@ -371,20 +364,25 @@ class ViolationTableModule(CcpnTableModule):
     # Callbacks
     #-----------------------------------------------------------------------------------------
 
-    def _moreLessCallback(self, moreLessFrame):
+    def _moreLessCallback(self, _moreLessFrame=None):
         """Resize the opened/closed moreLessFrame.
         """
         if self._mlFrame.contentsVisible:
             # set an arbitrarily large height and remove size-constraint from spacer
-            self._mlFrame.setMaximumHeight(2000)
-            self._mlSpacer.changeSize(5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Ignored)
+            self._topFrame.setSizePolicy(QtWidgets.QSizePolicy.Ignored,
+                                         QtWidgets.QSizePolicy.MinimumExpanding)
+            height = self._topFrame.minimumSizeHint().height()
+            self._topFrame.setMinimumHeight(height)
+            self._topFrame.setMaximumHeight(10000)
+            self._splitter.setSizes([height, 10000])
         else:
             # set to minimum height and enable size-constraint for spacer
-            self._mlFrame.setMaximumHeight(self._baseSize.height())
-            self._mlSpacer.changeSize(5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding)
-
-            # force the splitter to minimise the top-section
-            self._splitter.setSizes([1, 10])
+            self._topFrame.setSizePolicy(QtWidgets.QSizePolicy.Ignored,
+                                         QtWidgets.QSizePolicy.Fixed)
+            height = self._topFrame.sizeHint().height()
+            self._topFrame.setFixedHeight(height)
+            self._splitter.setSizes([height, 10000])
+        self.updateGeometry()
 
 
 #=========================================================================================
@@ -421,7 +419,7 @@ class _ViolationTableWidget(Table):
         kwds['setLayout'] = True
 
         # Initialise the scroll widget and common settings
-        self._initTableCommonWidgets(parent, **kwds)
+        # self._initTableCommonWidgets(parent, **kwds)
         # initialise the currently attached dataFrame
         self.dataFrameObject = None
 
@@ -430,6 +428,12 @@ class _ViolationTableWidget(Table):
                          grid=(3, 0), gridSpan=(1, 6), showVerticalHeader=showVerticalHeader,
                          )
         self.moduleParent = moduleParent
+
+    def sizeHint(self):
+        return QtCore.QSize(16, 16)
+
+    def minimumSizeHint(self):
+        return QtCore.QSize(16, 16)
 
     def _postInit(self):
         from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -508,7 +512,7 @@ class _ViolationTableWidget(Table):
     #-----------------------------------------------------------------------------------------
 
     def mousePressEvent(self, e: QtGui.QMouseEvent) -> None:
-        super(_ViolationTableWidget, self).mousePressEvent(e)
+        super().mousePressEvent(e)
 
         self.setCurrent()
 

@@ -15,22 +15,20 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-10-10 13:10:05 +0100 (Fri, October 10, 2025) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-10-14 17:22:06 +0100 (Tue, October 14, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
-
-from functools import partial
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtWidgets
+from functools import partial
+from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import QObject
 
 from ccpn.ui.gui.widgets.Base import Base
@@ -42,7 +40,6 @@ from ccpn.util.Path import aPath
 class Splitter(QtWidgets.QSplitter, Base):
     """CcpNmr widgets: Splitter class
     """
-
 
     def __init__(self, parent=None, horizontal=True, collapsible=False,
                  mouseDoubleClickResize=True, **kwds):
@@ -70,11 +67,15 @@ class Splitter(QtWidgets.QSplitter, Base):
                             QSplitter::handle:horizontal {background-color: transparent; width: %dpx; image: url(%s); }
                             """ % (_height, path1, _height, path2))
 
+    def sizeHint(self):
+        # Override the built-in Qt QSize(256, 192) that can stop widgets collapsing as required
+        return QtCore.QSize(16, 16)
+
     def createHandle(self):
 
         return SplitterHandle(self, self.orientation())
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QtGui.QResizeEvent):
         """Catch resize event
         """
         self.doResize = True

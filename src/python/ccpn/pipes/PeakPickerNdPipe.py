@@ -1,9 +1,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Morgan Hayward, Victoria A Higman, Luca Mureddu",
-               "Eliza Płoskoń, Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2024-01-16 17:48:56 +0000 (Tue, January 16, 2024) $"
-__version__ = "$Revision: 3.2.2 $"
+__modifiedBy__ = "$modifiedBy: Morgan Hayward $"
+__dateModified__ = "$dateModified: 2025-10-14 16:17:58 +0100 (Tue, October 14, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -113,12 +114,14 @@ class PeakPickerNdPipe(SpectraPipe):
                 peakList = spectrum.peakLists[DefaultPeakListIndex]
                 # may create a peakPicker instance if not defined, subject to settings in preferences
                 _peakPicker = spectrum.peakPicker
+                ppmRegions = {spectrum.axisCodes[i]: spectrum.spectrumLimits[i] for i in range(len(spectrum.axisCodes))}
                 if _peakPicker:
                     _peakPicker.dropFactor = dropFactor
                     _peakPicker.setLineWidths = True
                     spectrum.pickPeaks(peakList,
                                         spectrum.positiveContourBase,
-                                        spectrum.negativeContourBase if negativePeaks else None)
+                                        spectrum.negativeContourBase if negativePeaks else None,
+                                       **ppmRegions)
 
             else:
                 getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)

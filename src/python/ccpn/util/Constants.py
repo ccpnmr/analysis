@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2023"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2023-07-31 16:47:51 +0100 (Mon, July 31, 2023) $"
-__version__ = "$Revision: 3.2.0 $"
+__dateModified__ = "$dateModified: 2025-10-15 18:13:29 +0100 (Wed, October 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,8 +28,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import re
-
 from collections import OrderedDict
+
+from ccpn.util.DataEnum import DataIntEnum
 from ccpn.util.isotopes import isotopeRecords  # NB also used from here in ccpnmodel/ccpncore/api/ccp/nmr/ExpPrototype.py.
 
 
@@ -37,8 +39,12 @@ from ccpn.util.isotopes import isotopeRecords  # NB also used from here in ccpnm
 
 ERRORSTRING = 'BADVALUE'
 MOUSEDICTSTRIP = 'strip'
-AXIS_MATCHATOMTYPE = 0
-AXIS_FULLATOMNAME = 1
+
+class AxisMatch(DataIntEnum):
+    ISOTOPE = 0, 'Isotope', 'match by isotope code'
+    FULL = 1, 'Atom Name', 'match by exact atom name'
+    PARTIAL = 2, 'Partial', 'match by isotope code and first letter of atom name'
+
 
 POSINFINITY = float('Infinity')
 NEGINFINITY = float('-Infinity')

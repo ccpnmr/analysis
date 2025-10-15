@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-10 18:54:22 +0000 (Mon, March 10, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-10-15 18:13:30 +0100 (Wed, October 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,16 +27,17 @@ __date__ = "$Date: 2020-04-03 10:29:12 +0000 (Fri, April 03, 2020) $"
 # Start of code
 #=========================================================================================
 
-from enum import Enum
+from enum import Enum, IntEnum
 from types import DynamicClassAttribute
-from typing import Any, TypeVar, Generic
-from typing_extensions import Self
+from typing import Any, TypeVar, Generic, Callable
+from typing_extensions import Self  # noqa
+import operator
 
 
-ValueType = TypeVar("ValueType")  # Type for value
-DataValueType = TypeVar("DataValueType")  # Type for dataValue
 _T = TypeVar("_T")  # Individual Type for property
-_SENTINEL = object()
+# A uniform signature for our constructors: (cls, value) -> instance
+_CT = Callable[[type, Any], object]
+_reject_bool_for_int = True
 
 
 class _TypeDynamicClassAttribute(DynamicClassAttribute, Generic[_T]):
@@ -49,44 +50,48 @@ class _TypeDynamicClassAttribute(DynamicClassAttribute, Generic[_T]):
         return super().__get__(__instance, __owner)
 
 
-class DataEnum(Generic[ValueType, DataValueType], Enum):
+class _DataEnumMixin(Enum):
     """Class to handle enumerated types with associated descriptions and dataValues.
 
-    e.g.
-        # name = value, optional description and optional dataValue
-        FLOAT = 0, 'Float', <dataValue 1>
-        INTEGER = 1, 'Integer', <dataValue 2>
-        STRING = 2, 'String', <dataValue 3>
+    *example:*
+    ::
+        class MyTest(DataEnum):
+            # name = value, optional description and optional dataValue
+            FLOAT = 0, 'Float', <dataValue 1>
+            INTEGER = 1, 'Integer', <dataValue 2>
+            STRING = 2, 'String', <dataValue 3>
     """
-    # ensure that enums are consistently defined
-    _value_: ValueType
     _description_: str | None
-    _dataValue_: DataValueType
+    _dataValue_: Any
 
-    def __new__(cls, value: ValueType, description: str = None, dataValue: DataValueType = None) -> Self:
+    def __new__(cls, value: Any, description: str | None = None, dataValue: Any = None) -> Self:
         """
         Create a new instance of an enum member.
 
         :param value: The value of the enum member.
-        :type value: ValueType
+        :type value: Any
         :param description: An optional description for the enum member.
-        :type description: str, optional
+        :type description: str | None
         :param dataValue: An optional data-value for the enum member.
-        :type dataValue: DataValueType, optional
+        :type dataValue: Any
         :return: A new instance of the enum member.
         :rtype: Self
         :raises TypeError: If the value type is inconsistent with existing members.
         """
-        obj = object.__new__(cls)
-        # Get the first existing member's value-type for consistency check
-        if (first_member := next(iter(cls.__members__.values()), _SENTINEL)) is not _SENTINEL and \
-                not isinstance(value, (expected_type := type(first_member.value))):
-            raise TypeError(f"All values in {cls.__name__} must be of type {expected_type.__name__}")
+        obj = cls._new_object(value)
         obj._value_ = value
+        # Runtime check for consistent value types among enum members
+        if (first_member := next(iter(cls.__members__.values()), None)) is not None and \
+                not isinstance(value, (expected_type := type(first_member._value_))):  # type: ignore[attr-defined]
+            raise TypeError(f"All values in {cls.__name__} must be of type {expected_type.__name__}")
         # add optional extra information
         obj._description_ = description
         obj._dataValue_ = dataValue
         return obj
+
+    @classmethod
+    def _new_object(cls, _value) -> Any:
+        return object.__new__(cls)
 
     def __repr__(self) -> str:
         """
@@ -100,60 +105,53 @@ class DataEnum(Generic[ValueType, DataValueType], Enum):
         if self._dataValue_ is not None:
             # Include dataValue if it exists.
             return f"<{self.__class__.__name__}.{self._name_}: {self._value_!r}, {self._dataValue_!r}>"
-        else:
-            return f"<{self.__class__.__name__}.{self._name_}: {self._value_!r}>"
+        return f"<{self.__class__.__name__}.{self._name_}: {self._value_!r}>"
 
-    # ensure the dataValue is read-only
-    @_TypeDynamicClassAttribute
-    def value(self) -> ValueType:
-        """Return the dataValue."""
-        return super().value
+    # @DynamicClassAttribute
+    # def value(self) -> Any:
+    #     """Return the primary value of the enum member."""
+    #     return super().value
 
-    # ensure the dataValue is read-only
-    @_TypeDynamicClassAttribute
-    def dataValue(self) -> DataValueType:
-        """Return the dataValue."""
+    @DynamicClassAttribute
+    def dataValue(self) -> Any:
+        """Return the dataValue associated with the enum member."""
         return self._dataValue_
 
-    # ensure the description is read-only
-    @_TypeDynamicClassAttribute
+    @DynamicClassAttribute
     def description(self) -> str | None:
-        """Return the description."""
+        """Return the description of the enum member."""
         return self._description_
 
     def prev(self) -> Self:
-        """Return the previous member."""
-        cls = self.__class__
-        members = list(cls)
-        index = members.index(self) - 1
-        return members[index % len(members)]
+        """Return the previous member in the enumeration order."""
+        members = list(type(self))
+        index = (members.index(self) - 1) % len(members)
+        return members[index]
 
     def next(self) -> Self:
-        """Return the next member."""
-        cls = self.__class__
-        members = list(cls)
-        index = members.index(self) + 1
-        return members[index % len(members)]
+        """Return the next member in the enumeration order."""
+        members = list(type(self))
+        index = (members.index(self) + 1) % len(members)
+        return members[index]
 
     @classmethod
-    def getByDataValue(cls, value: Any) -> Self | tuple[Self] | None:
+    def getByDataValue(cls, value: Any) -> Self | tuple[Self, ...] | None:
         """
-        Search for a member(s) by dataValue.
+        Search for member(s) by dataValue.
 
         Search the members for a matching dataValue. Return a single member if only one
         found, or a list for multiple members; otherwise, return None.
         :param str value: search parameter.
         :return: found member(s) or None.
-        :rtype: Self | tuple[Self] | None
+        :rtype: Self | tuple[Self, ...] | None
         """
-        members = tuple(val for val in list(cls) if val._dataValue_ == value)
-        if members:
-            if len(members) == 1:
-                return members[0]
-            return members
+        members = tuple(mb for mb in cls if mb._dataValue_ == value)
+        if not members:
+            return None
+        return members[0] if len(members) == 1 else members
 
     @classmethod
-    def getByDescription(cls, value: str | None) -> Self | tuple[Self] | None:
+    def getByDescription(cls, value: str | None) -> Self | tuple[Self, ...] | None:
         """
         Search for a member(s) by description.
 
@@ -161,24 +159,23 @@ class DataEnum(Generic[ValueType, DataValueType], Enum):
         found, or a list for multiple members; otherwise, return None.
         :param str value: search parameter.
         :return: found member(s) or None.
-        :rtype: Self | tuple[Self] | None
+        :rtype: Self | tuple[Self, ...] | None
         """
-        members = tuple(val for val in list(cls) if val._description_ == value)
-        if members:
-            if len(members) == 1:
-                return members[0]
-            return members
+        members = tuple(mb for mb in cls if mb._description_ == value)
+        if not members:
+            return None
+        return members[0] if len(members) == 1 else members
 
     @classmethod
-    def dataValues(cls) -> tuple[DataValueType, ...] | None:
+    def dataValues(cls) -> tuple[Any, ...] | None:
         """
         Return a tuple of all dataValues, or None if no dataValues are defined for any members.
 
         :return: Tuple of all dataValues or None if no dataValues are defined.
-        :rtype: tuple[DataValueType, ...] | None
+        :rtype: tuple[Any, ...] | None
         """
-        result = tuple(v._dataValue_ for v in cls)
-        return result if any(val is not None for val in result) else None
+        result = tuple(mb._dataValue_ for mb in cls)
+        return result if any(mb is not None for mb in result) else None
 
     @classmethod
     def descriptions(cls) -> tuple[str | None, ...] | None:
@@ -188,8 +185,8 @@ class DataEnum(Generic[ValueType, DataValueType], Enum):
         :return: Tuple of all descriptions or None if no descriptions are defined.
         :rtype: tuple[str | None, ...] | None
         """
-        result = tuple(v._description_ for v in cls)
-        return result if any(val is not None for val in result) else None
+        result = tuple(mb._description_ for mb in cls)
+        return result if any(mb is not None for mb in result) else None
 
     @classmethod
     def names(cls) -> tuple[str, ...]:
@@ -199,53 +196,76 @@ class DataEnum(Generic[ValueType, DataValueType], Enum):
         :return: Tuple of all names.
         :rtype: tuple[str, ...]
         """
-        return tuple(v._name_ for v in cls)
+        return tuple(mb._name_ for mb in cls)
 
     @classmethod
-    def values(cls) -> tuple[ValueType, ...]:
+    def values(cls) -> tuple[Any, ...]:
         """
         Return a tuple of all values.
 
         :return: Tuple of all values.
-        :rtype: tuple[ValueType, ...]
+        :rtype: tuple[Any, ...]
         """
-        return tuple(v._value_ for v in cls)
+        return tuple(mb._value_ for mb in cls)
 
     @classmethod
-    def get(cls, value: str) -> Self:
+    def get(cls, value: str, default: Any = Ellipsis) -> Self:
         """
-        Return the enumerated type from the name.
+        Return the enum member from its name.
 
-        :param value: The name of the enumerated type to retrieve.
+        :param value: The name of the enum member to retrieve.
         :type value: str
-        :return: The enumerated type corresponding to the given name.
+        :param default: An optional default value to return if the name is not found.
+        :type value: Any
+        :return: The enum member corresponding to the given name.
         :rtype: Self
-        :raises ValueError: If the name is not found in the enumeration.
+        :raises ValueError: If the name is not found and no default is provided.
         """
         try:
-            return cls.__getitem__(value)
+            return cls[value]
         except KeyError:
-            raise ValueError(f'value must be one of {repr(cls.names())}')
+            if default is Ellipsis:
+                raise ValueError(f'{value!r} is not a valid {cls.__name__}')
+            return default
+
+
+#=========================================================================================
+
+class DataIntEnum(_DataEnumMixin, IntEnum):
+
+    @classmethod
+    def _new_object(cls, value) -> int:
+        if _reject_bool_for_int and type(value) is bool:
+            raise TypeError(f"{cls.__name__} values must be int (bool not allowed)")
+        try:
+            iValue = operator.index(value)  # accepts numpy.int*, etc.
+        except Exception as exc:
+            raise TypeError(f"{cls.__name__} values must be int-like") from exc
+        return int.__new__(cls, iValue)
+
+
+class DataEnum(_DataEnumMixin, Enum):  # fallback; value is Any
+    pass
 
 
 #=========================================================================================
 
 def main():
     """
-    A few small tests for the labelled Enum
+    A few small tests for the DataEnum class.
     """
 
 
-    class Test(DataEnum):
+    class Test_mixed(DataIntEnum):
         FLOAT = 0, None, 'Float'
         INTEGER = 1, None, 'Integer'
         STRING = 2, 'Some type of string', 'String'
         OTHER = 3, None, 'Integer'
 
 
-    ll = Test.dataValues()
+    ll = Test_mixed.dataValues()
     print(ll)
-    test = Test(2)
+    test = Test_mixed(2)
     print(test)
     print(test.name)
     print(test.value)
@@ -254,26 +274,104 @@ def main():
     print(test.prev())
     print(test.next())
     print(test.next().next())
-    print(1 in [v.value for v in Test])
-    print('Integer' in [v.description for v in Test])
-    print(Test(1))
-    print(Test.STRING)
-    print(Test.dataValues() is None)
-    print(Test.get('FLOAT'))
-    print(Test.getByDescription(None))
-    print(ll[Test.get('STRING').value])
+    print(1 in [v.value for v in Test_mixed])
+    print('Integer' in [v.description for v in Test_mixed])
+    print(Test_mixed(1))
+    print(Test_mixed.STRING)
+    print(Test_mixed.dataValues() is None)
+    print(Test_mixed.get('FLOAT'))
+    print(Test_mixed.getByDescription(None))
+    print(ll[Test_mixed.get('STRING').value])  # type: ignore[index]
     try:
-        print(int(Test.get('OTHER').dataValue))
+        print(int(Test_mixed.get('OTHER').dataValue))  # type: ignore[index]
     except ValueError:
         ...
     try:
-        print(ll[Test.get('STRING').dataValue])
+        print(ll[Test_mixed.get('STRING').dataValue])  # type: ignore[index]
     except TypeError:
         ...
     try:
-        print(Test.value)
+        print(ll[Test_mixed.get('MISSING').dataValue])  # type: ignore[index]
+    except ValueError:
+        ...
+    try:
+        print(Test_mixed.value)
     except AttributeError:
         ...
+
+
+    #-----------------------------------------------------------------------------------------
+
+    class Test_OK(DataIntEnum):
+        FLOAT = 0, 'Some type of float', 'Float'
+        INTEGER = 1, 'Some type of integer', 'Integer'
+        STRING = 2, 'Some type of string', 'String'
+        OTHER = 3, 'Another integer type', 'Integer'
+
+
+    print(f"All data values: {Test_OK.dataValues()}")
+
+    #-----------------------------------------------------------------------------------------
+    # Accessing an enum member and its attributes
+    test_member = Test_OK.STRING
+    print(f"\nTesting member: {test_member}")
+    print(f"Name: {test_member.name}")
+    print(f"Value: {test_member.value}")
+    print(f"Description: {test_member.description}")
+    print(f"Data value: {test_member.dataValue}")
+
+    #-----------------------------------------------------------------------------------------
+    # Navigation
+    print(f"\nMember before {test_member.name}: {test_member.prev()}")
+    print(f"Member after {test_member.name}: {test_member.next()}")
+    print(f"Two members after: {test_member.next().next()}")
+
+    #-----------------------------------------------------------------------------------------
+    # Membership testing
+    print(f"\nIs 1 a value in Test_OK? {1 in Test_OK.values()}")
+    print(f"Is 'Some type of integer' a description? {'Some type of integer' in Test_OK.descriptions()}")  # type: ignore[operator]
+
+    #-----------------------------------------------------------------------------------------
+    # Lookups
+    print(f"\nLookup by value 1: {Test_OK(1)}")
+    print(f"Lookup by name 'FLOAT': {Test_OK.get('FLOAT')}")
+    print(f"Search for dataValue 'Integer': {Test_OK.getByDataValue('Integer')}")
+    print(f"Search for description 'Some type of float': {Test_OK.getByDescription('Some type of float')}")
+
+    #-----------------------------------------------------------------------------------------
+    # Error handling
+    try:
+        Test_OK.get('INVALID_NAME')
+    except ValueError as e:
+        print(f"\nSuccessfully caught error: {e}")
+
+    try:
+        class Test_float(DataIntEnum):  # noqa
+            FLOAT = 0.0, 'Some type of float', 'Float'
+            INTEGER = 1.0, 'Some type of integer', 'Integer'
+    except TypeError as e:
+        print(f"\nSuccessfully caught error: {e}")
+
+    try:
+        class Test_mismatch_float(DataEnum):  # noqa
+            FLOAT = 0.0, 'Some type of float', 'Float'
+            INTEGER = 1, 'Some type of integer', 'Integer'
+    except TypeError as e:
+        print(f"\nSuccessfully caught error: {e}")
+
+    try:
+        class Test_mismatch_int(DataEnum):  # noqa
+            FLOAT = 0, 'Some type of float', 'Float'
+            INTEGER = 'one', 'Some type of integer', 'Integer'
+    except TypeError as e:
+        print(f"\nSuccessfully caught error: {e}")
+
+    try:
+        class Test_mismatch_bool(DataIntEnum):  # noqa
+            FLOAT = False, 'Some type of float', 'Float'
+            INTEGER = True, 'Some type of integer', 'Integer'
+    except TypeError as e:
+        print(f"\nSuccessfully caught error: {e}")
 
 
 if __name__ == '__main__':

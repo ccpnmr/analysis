@@ -60,7 +60,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-10 20:46:04 +0100 (Fri, October 10, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-15 18:13:29 +0100 (Wed, October 15, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -131,7 +131,7 @@ from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBloc
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib import Pid
 from ccpn.util.decorators import profile
-from ccpn.util.Constants import AXIS_FULLATOMNAME
+from ccpn.util.Constants import AxisMatch
 from ccpn.util.Logging import getLogger
 
 
@@ -220,7 +220,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
     _pids = None
     _dragStartPosition = None
     tilePosition = None
-    mouseCoordDQ: tuple[float, float | None, int] | None = None
+    mouseCoordDQ: tuple[float | None, float | None, int] | None = None
 
     strip: WeakRefDescriptor[_CoreStrip] = WeakRefDescriptor()
     spectrumDisplay: WeakRefDescriptor[_CoreSpectrumDisplay] = WeakRefDescriptor()
@@ -3950,7 +3950,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
                         self.strip.marks:
 
                 # find the matching axisCodes to the display
-                exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
+                exactMatch = (self._preferences.matchAxisCode == AxisMatch.FULL.value)
                 indices = getAxisCodeMatchIndices(mark.axisCodes, self._axisCodes[:2], exactMatch=exactMatch,
                                                   allMatches=not exactMatch)
 
@@ -5791,10 +5791,10 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
 
         if aDict[GLNotifier.GLSOURCE] != self:
 
-            mouseMovedDict = aDict[GLNotifier.GLMOUSEMOVEDDICT]
+            # mouseMovedDict = aDict[GLNotifier.GLMOUSEMOVEDDICT]
 
             if self._crosshairVisible:
-                exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
+                # exactMatch = (self._preferences.matchAxisCode == AxisMatch.FULL.value)
                 self.update(mode=PaintModes.PAINT_MOUSEONLY)
 
     @Slot(dict)

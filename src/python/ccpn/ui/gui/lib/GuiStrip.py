@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-02 14:32:05 +0100 (Thu, October 02, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__dateModified__ = "$dateModified: 2025-10-15 18:13:28 +0100 (Wed, October 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,7 +45,7 @@ from ccpn.ui.gui.guiSettings import (getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPN
                                      ZPlaneNavigationModes)
 from ccpn.ui.gui.lib.MenuLib import addItemsToNavigateMenu
 from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import AXIS_FULLATOMNAME, AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
+from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT, AxisMatch
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
 from ccpn.util.UpdateScheduler import UpdateScheduler
@@ -899,7 +899,7 @@ class GuiStrip(Frame):
 
         allowMenuDuplicates = ((prefs := getPreferences()) and prefs.general.get('allowMenuDuplicates'))
         showBlankDimensions = ((prefs := getPreferences()) and prefs.general.get('showBlankDimensions'))
-        mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+        mouseDict = self.current.mouseMovedDict[AxisMatch.FULL]
         position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
                     for ax in self.axisCodes]
         if None in position:
@@ -913,7 +913,7 @@ class GuiStrip(Frame):
     def markAxisIndices(self, indices=None):
         """Mark the X/Y/XY axisCodes by index
         """
-        mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+        mouseDict = self.current.mouseMovedDict[AxisMatch.FULL]
         position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
                     for ax in self.axisCodes]
         if indices is None:
@@ -1041,7 +1041,7 @@ class GuiStrip(Frame):
         """Set up the menu for the main view for marking axis codes
         """
         axisName = axisMenu or self.markAxesMenu
-        mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+        mouseDict = self.current.mouseMovedDict[AxisMatch.FULL]
         # position = [mouseDict[ax][0] if mouseDict[ax] else None
         #             for ax in self.axisCodes if mouseDict.get(ax)]
         position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
@@ -1188,14 +1188,14 @@ class GuiStrip(Frame):
         position = None
         mouseMovedDict = self.current.mouseMovedDict
         if direction == 0:
-            for mm in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+            for mm in mouseMovedDict[AxisMatch.FULL].keys():
                 if mm[0] == self.axisCodes[0][0]:  # check the first letter?
-                    positions = mouseMovedDict[AXIS_FULLATOMNAME][mm]
+                    positions = mouseMovedDict[AxisMatch.FULL][mm]
                     position = positions[0] if positions else None
         else:
-            for mm in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+            for mm in mouseMovedDict[AxisMatch.FULL].keys():
                 if mm[0] == self.axisCodes[1][0]:
-                    positions = mouseMovedDict[AXIS_FULLATOMNAME][mm]
+                    positions = mouseMovedDict[AxisMatch.FULL][mm]
                     position = positions[0] if positions else None
 
         if position is not None:
@@ -2200,7 +2200,7 @@ class GuiStrip(Frame):
                 defaultColour = '#FF0000'
 
             # find all the positions valid for this strip
-            mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            mouseDict = self.current.mouseMovedDict[AxisMatch.FULL]
             positions = [(pos, ax) for ax in self.axisCodes for pos in mouseDict.get(ax, []) if pos is not None]
 
             if axisIndex is not None:

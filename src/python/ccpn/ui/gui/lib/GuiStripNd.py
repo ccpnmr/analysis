@@ -36,8 +36,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-03 18:56:46 +0000 (Fri, January 03, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-10-15 18:13:29 +0100 (Wed, October 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -67,7 +67,7 @@ from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, PlaneAxisWidget,
 from ccpn.util.Colour import colorSchemeTable
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
-from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT, AXIS_FULLATOMNAME
+from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT, AxisMatch
 
 
 class GuiStripNd(GuiStrip):
@@ -289,7 +289,7 @@ class GuiStripNd(GuiStrip):
                 newDisplay.displaySpectrum(spectrum)
 
             try:
-                mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+                mDict = usePosition and self.current.mouseMovedDict[AxisMatch.FULL]
                 positions = [poss[0] if (poss := mDict.get(ax)) else None
                              for ax in self.axisCodes] if usePosition else None
                 copyStripAxisPositionsAndWidths(self, newDisplay.strips[0], positions=positions)
@@ -331,7 +331,7 @@ class GuiStripNd(GuiStrip):
             return
 
         try:
-            mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            mDict = usePosition and self.current.mouseMovedDict[AxisMatch.FULL]
             positions = [poss[0] if (poss := mDict.get(ax)) else None
                          for ax in self.axisCodes] if usePosition else None
             return self._flipAxes(axisOrderIndices=(1, 0), positions=positions)
@@ -349,7 +349,7 @@ class GuiStripNd(GuiStrip):
             return
 
         try:
-            mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            mDict = usePosition and self.current.mouseMovedDict[AxisMatch.FULL]
             positions = [poss[0] if (poss := mDict.get(ax)) else None
                          for ax in self.axisCodes] if usePosition else None
             return self._flipAxes(axisOrderIndices=(2, 1, 0), positions=positions)
@@ -367,7 +367,7 @@ class GuiStripNd(GuiStrip):
             return
 
         try:
-            mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            mDict = usePosition and self.current.mouseMovedDict[AxisMatch.FULL]
             positions = [poss[0] if (poss := mDict.get(ax)) else None
                          for ax in self.axisCodes] if usePosition else None
             return self._flipAxes(axisOrderIndices=(0, 2, 1), positions=positions)

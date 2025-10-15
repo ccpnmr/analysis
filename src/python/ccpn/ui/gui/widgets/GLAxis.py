@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-10 20:46:05 +0100 (Fri, October 10, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-15 18:13:29 +0100 (Wed, October 15, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from OpenGL import GL
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import pyqtSlot as Slot, Qt
 
-from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, MOUSEDICTSTRIP
+from ccpn.util.Constants import MOUSEDICTSTRIP, AxisMatch
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.guiSettings import (getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_BACKGROUND,
                                      CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, CCPNGLWIDGET_GRID,
@@ -1402,7 +1402,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             # # self.update()
             # mouseMovedDict = aDict[GLNotifier.GLMOUSEMOVEDDICT]
             # if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
-            #     exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
+            #     exactMatch = (self._preferences.matchAxisCode == AxisMatch.FULL.value)
             self.update(mode=PaintModes.PAINT_MOUSEONLY)
 
     def update(self, mode=PaintModes.PAINT_ALL):
@@ -2213,17 +2213,22 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         except:
             # initialise a new mouse moved dict
             mouseMovedDict = {MOUSEDICTSTRIP    : None,
-                              AXIS_MATCHATOMTYPE: {},
-                              AXIS_FULLATOMNAME : {},
+                              AxisMatch.ISOTOPE: {},
+                              AxisMatch.FULL: {},
+                              AxisMatch.PARTIAL.value: {},
                               }
 
         xPos = yPos = 0
-        atTypes = mouseMovedDict[AXIS_MATCHATOMTYPE] = {}
-        atCodes = mouseMovedDict[AXIS_FULLATOMNAME] = {}
+        atTypes = mouseMovedDict[AxisMatch.ISOTOPE] = {}
+        atCodes = mouseMovedDict[AxisMatch.FULL] = {}
+        _atPrt = mouseMovedDict[AxisMatch.PARTIAL] = {}
+        chrs = max(1, self._preferences.get("matchNumChars", 0))
 
-        for n, (atomType, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self.spectrumDisplay.axes)):
-            ats = atTypes.setdefault(atomType, [])
-            atcs = atCodes.setdefault(axis.code, [])
+        for n, (isotope, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self.spectrumDisplay.axes)):
+            code = axis.code[:chrs].lower()
+            ats = atTypes.setdefault(isotope, [])
+            atcs = atCodes.setdefault(code, [])
+            _atp = _atPrt.setdefault(f"{isotope}_{code}", [])
             if n == 0:
                 xPos = pos = cursorCoordinate[0]
             elif n == 1:
@@ -2231,9 +2236,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             else:
                 # for other Nd dimensions
                 pos = axis.position
-
             ats.append(pos)
             atcs.append(pos)
+            _atp.append(pos)
 
         self.current.cursorPosition = (xPos, yPos)
         self.current.mouseMovedDict = mouseMovedDict

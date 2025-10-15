@@ -53,6 +53,7 @@
         "showCrosshair"                        : true,
         "showDoubleCrosshair"                  : true,
         "matchAxisCode"                        : 0,
+        "matchNumChars"                        : 1,
         "restoreLayoutOnOpening"               : true,
         "useDefaultAspectRatio"                : false,
         "useLockedAspectRatio"                 : false,

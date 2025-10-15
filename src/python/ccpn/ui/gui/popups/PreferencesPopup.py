@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-13 11:01:08 +0100 (Wed, August 13, 2025) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-10-15 18:13:29 +0100 (Wed, October 15, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -1202,6 +1202,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.allowMenuDuplicatesBox.setChecked(self.preferences.general.allowMenuDuplicates)
         self.showBlankDimensionsBox.setChecked(self.preferences.general.showBlankDimensions)
         self.matchAxisCode.setIndex(self.preferences.general.matchAxisCode)
+        self.matchNumCharsData.setValue(self.preferences.general.matchNumChars)
+
         self.axisOrderingOptions.setIndex(self.preferences.general.axisOrderingOptions)
         self.spectrumScalingData.setValue(float(self.preferences.general.scalingFactorStep))
         self.zoomCentre.setIndex(self.preferences.general.zoomCentreType)
@@ -1351,13 +1353,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
         _makeLine(parent, grid=(row, 0), text="Spectrum Display")
 
         row += 1
-        self.matchAxisCodeLabel = _makeLabel(parent, text="Match axis codes by", grid=(row, 0))
-        self.matchAxisCode = RadioButtons(parent, texts=['Atom type', 'Full axis code'],
+        self.matchAxisCodeLabel = _makeLabel(parent, text="Match axes by", grid=(row, 0))
+        self.matchAxisCode = RadioButtons(parent, texts=['Isotope', 'Full axis code'],
                                           callback=self._queueSetMatchAxisCode,
                                           direction='h',
                                           grid=(row, 1), hAlign='l', gridSpan=(1, 2),
                                           tipTexts=None,
                                           )
+        row += 1
+        self.matchNumCharsLabel = _makeLabel(parent, text="Characters to match", grid=(row, 0))
+        self.matchNumCharsData = Spinbox(parent, grid=(row, 1), hAlign='l', gridSpan=(1, 2), min=1, max=5, step=1)
+        self.matchNumCharsData.valueChanged.connect(partial(self._queueToggleGeneralOptions, 'matchNumChars'))
 
         row += 1
         self.axisOrderingOptionsLabel = _makeLabel(parent, text="Displayed axes order", grid=(row, 0))
@@ -2294,8 +2300,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.useProjectPath = option
 
     @queueStateChange(_verifyPopupApply)
-    def _queueToggleGeneralOptions(self, option, checked):
-        """Toggle a general checkbox option in the preferences
+    def _queueToggleGeneralOptions(self, option, state):
+        """Toggle/change a general checkbox/spinbox option in the preferences
         Requires the parameter to be called 'option' so that the decorator gives it a unique name
         in the internal updates dict
         """
@@ -2313,12 +2319,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.aliasLabelsEnabledData.setEnabled(_enabled)
             self.aliasShadeData.setEnabled(_enabled)
 
-        if checked != self.preferences.general[option]:
+        if state != self.preferences.general[option]:
             # change the enabled state of checkboxes as required
-            return partial(self._toggleGeneralOptions, option, checked)
+            return partial(self._toggleGeneralOptions, option, state)
 
-    def _toggleGeneralOptions(self, option, checked):
-        self.preferences.general[option] = checked
+    def _toggleGeneralOptions(self, option, state):
+        self.preferences.general[option] = state
 
     @queueStateChange(_verifyPopupApply)
     def _queueToggleAppearanceOptions(self, option, checked):
@@ -2705,6 +2711,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Set the matching of the axis codes across different strips
         """
         self.preferences.general.matchAxisCode = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetMatchNumChars(self):
+        value = self.matchNumCharsData.get()
+        if value != self.preferences.general.matchNumChars:
+            return partial(self._setMatchNumChars, value)
+
+    def _setMatchNumChars(self, value):
+        """Set the number of characters to use when matching axis codes.
+        """
+        self.preferences.general.matchNumChars = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetAxisOrderingOptions(self):

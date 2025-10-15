@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-10 20:46:05 +0100 (Fri, October 10, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-15 18:13:29 +0100 (Wed, October 15, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ import numpy as np
 from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray, GLRENDERMODE_REBUILD
-from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
+from ccpn.util.Constants import AxisMatch
 
 
 if TYPE_CHECKING:
@@ -180,22 +180,31 @@ class CursorRenderer:
             self._addPickBox(host, vertices, indices, newCoords, size_factor=self.box_size_factor)
             color = host.mousePickColour
 
+        print(f'buildCursors  {host.axisCodes}     {self._isPickMode() and host.underMouse()}')
+
         # 2) Crosshair / quantum cursors (skip if phasing)
-        coords_dict = host.current.mouseMovedDict
-        if not host.spectrumDisplay.phasingFrame.isVisible() and coords_dict:
+        if (not host.spectrumDisplay.phasingFrame.isVisible() and
+                (coords_dict := host.current.mouseMovedDict)):
             # Update normalized coords from dict (if present)
             newCoords = self._updateCoordsFromDict(host, coords_dict, newCoords)
+            for k, v in coords_dict.items():
+                print(f'              {str(k)}')
+                for kk, vv in v.items():
+                    print(f'                {kk:<10}: {vv}')
 
             # Resolve which lists to draw + axis types
-            xPosList, yPosList, xaxisType, yaxisType = self._resolveAxisLists(host, coords_dict)
+            xPosList, yPosList, xQuantumOrder, yQuantumOrder = self._resolveAxisLists(host, coords_dict)
 
             # Build simple vertical/horizontal lines
             foundX: list[float] = []
             foundY: list[float] = []
             self._makeCursor(host, foundX, foundY, indices, newCoords, vertices, xPosList, yPosList)
+            print(f'              {newCoords}     {xPosList}   {yPosList}')
             # Double-quantum lines when applicable
             self._makeQuantumCursor(host, foundX, foundY, indices, vertices,
-                                    xPosList, xaxisType, yPosList, yaxisType)
+                                    xPosList, xQuantumOrder, yPosList, yQuantumOrder)
+
+            print(f'              {newCoords}     {xPosList}   {yPosList}')
 
         # 3) Upload to GL
         drawList.vertices = np.array(vertices, dtype=np.float32)
@@ -244,9 +253,9 @@ class CursorRenderer:
                            indices: list[int],
                            vertices: list[float],
                            xPosList: list[float],
-                           xaxisType: int,
+                           xQuantumOrder: int,
                            yPosList: list[float],
-                           yaxisType: int) -> None:
+                           yQuantumOrder: int) -> None:
         """Generate double-quantum/zero-quantum auxiliary lines when conditions allow."""
         if not (host._matchingIsotopeCodes and
                 host._firstVisible and
@@ -254,7 +263,7 @@ class CursorRenderer:
             return
 
         # Case 1: single double quantum on Y (x < y)
-        if 0 < xaxisType < yaxisType < 3:
+        if 0 < xQuantumOrder < yQuantumOrder < 3:
             if len(xPosList) == 1 and len(yPosList) == 1:
                 xPosList.append(yPosList[0])
             if len(xPosList) == 2:
@@ -266,7 +275,7 @@ class CursorRenderer:
                     self._appendLine(vertices, indices, x_norm, UNIT_MAX, x_norm, UNIT_MIN)
 
         # Case 2: single double quantum on X (y < x)
-        elif 0 < yaxisType < xaxisType < 3:
+        elif 0 < yQuantumOrder < xQuantumOrder < 3:
             if len(xPosList) == 1 and len(yPosList) == 1:
                 yPosList.insert(0, xPosList[0])
             if len(yPosList) == 2:
@@ -339,9 +348,9 @@ class CursorRenderer:
         if not atCodes:
             return newCoords
 
-        full_dict: dict[str, list[float]] = coords_dict.get(AXIS_FULLATOMNAME, {})
-        x_code = atCodes[0].code
-        y_code = atCodes[1].code
+        full_dict: dict[str, list[float]] = coords_dict.get(AxisMatch.FULL, {})
+        x_code = atCodes[0].code[:host._preferences.matchNumChars].lower()
+        y_code = atCodes[1].code[:host._preferences.matchNumChars].lower()
         x_list = full_dict.get(x_code, [])
         y_list = full_dict.get(y_code, [])
 
@@ -352,56 +361,57 @@ class CursorRenderer:
         return newCoords
 
     @staticmethod
-    def _getAxisTypes(host: CcpnGLWidget) -> tuple[int, int]:
+    def _getQuantumOrders(host: CcpnGLWidget) -> tuple[int, int]:
         """
-        Return (xaxisType, yaxisType). Defaults to (1,1).
+        Return (xQuantumOrder, yQuantumOrder). Defaults to (1,1).
         Uses host._firstVisible.spectrum.coherenceOrders and a CoherenceOrder enum.
         """
         from ccpn.core.lib.SpectrumLib import CoherenceOrder
 
-        xaxisType = yaxisType = 1
+        xQuantumOrder = yQuantumOrder = 1
         if (fv := host._firstVisible) and not fv.isDeleted:
             idx = fv.dimensionIndices
             spec = fv.spectrum
             mTypes = [CoherenceOrder[co].value for co in spec.coherenceOrders]  # type: ignore
             if len(mTypes) > max(idx[0], idx[1]):
-                xaxisType = mTypes[idx[0]]
-                yaxisType = mTypes[idx[1]]
-        return xaxisType, yaxisType
+                xQuantumOrder = mTypes[idx[0]]
+                yQuantumOrder = mTypes[idx[1]]
+        return xQuantumOrder, yQuantumOrder
 
     def _resolveAxisLists(self, host: CcpnGLWidget, coords_dict: _COORDS_TYPE
                           ) -> tuple[list[float], list[float], int, int]:
         """
         Decide which x/y lists to use (full-atom-names vs isotope-types) and return axis-types.
         """
-        xaxisType, yaxisType = self._getAxisTypes(host)
+        xQuantumOrder, yQuantumOrder = self._getQuantumOrders(host)
 
         atCodes = host._orderedAxes
         assert atCodes and len(atCodes) >= 2, "CursorRenderer: _orderedAxes must provide two axes"
+        chrs = host._preferences.matchNumChars
 
-        x_code = atCodes[0].code
-        y_code = atCodes[1].code
+        x_code = atCodes[0].code[:chrs].lower()
+        y_code = atCodes[1].code[:chrs].lower()
 
-        xPosListAn = list(coords_dict[AXIS_FULLATOMNAME].get(x_code, []))
-        yPosListAn = list(coords_dict[AXIS_FULLATOMNAME].get(y_code, []))
+        xPosListAn = list(coords_dict[AxisMatch.FULL].get(x_code, []))
+        yPosListAn = list(coords_dict[AxisMatch.FULL].get(y_code, []))
         matchPref = host._preferences.matchAxisCode
 
-        if matchPref == AXIS_FULLATOMNAME:
+        if matchPref == AxisMatch.FULL.value:
             xPosList, yPosList = xPosListAn, yPosListAn
         else:
             if host._matchingIsotopeCodes and (
-                    (0 < xaxisType < yaxisType < 3) or (0 < yaxisType < xaxisType < 3)
+                    (0 < xQuantumOrder < yQuantumOrder < 3) or (0 < yQuantumOrder < xQuantumOrder < 3)
             ):
                 # append double-quantum cursors -> use atom-name lists as base
                 xPosList, yPosList = xPosListAn, yPosListAn
             elif host._matchingIsotopeCodes and not self.doubleCrosshairVisible:
                 xPosList, yPosList = xPosListAn, yPosListAn
             else:
-                atomTypes = host.spectrumDisplay.isotopeCodes
-                xPosList = list(coords_dict[AXIS_MATCHATOMTYPE].get(atomTypes[0], []))
-                yPosList = list(coords_dict[AXIS_MATCHATOMTYPE].get(atomTypes[1], []))
+                isotopes = host.spectrumDisplay.isotopeCodes
+                xPosList = list(coords_dict[AxisMatch.ISOTOPE].get(isotopes[0], []))
+                yPosList = list(coords_dict[AxisMatch.ISOTOPE].get(isotopes[1], []))
 
-        return xPosList, yPosList, xaxisType, yaxisType
+        return xPosList, yPosList, xQuantumOrder, yQuantumOrder
 
     #-----------------------------------------------------------------------------------------
     # Small geometry utilities
@@ -421,7 +431,7 @@ class CursorRenderer:
         sized by deltaX/deltaY * size_factor.
         """
         x, y = coords
-        if None in [x, y]:  # coords[0] is None or coords[1] is None:
+        if x is None or y is None:  # coords[0] is None or coords[1] is None:
             return
         dx = host.deltaX * size_factor
         dy = host.deltaY * size_factor
@@ -506,9 +516,9 @@ class CursorRenderer1d(CursorRenderer):
                            indices: list[int],
                            vertices: list[float],
                            xPosList: list[float],
-                           xaxisType: int,
+                           xQuantumOrder: int,
                            yPosList: list[float],
-                           yaxisType: int) -> None:
+                           yQuantumOrder: int) -> None:
         # No action required
         ...
 
@@ -521,21 +531,21 @@ class CursorRenderer1d(CursorRenderer):
         Decide which x/y lists to use (full-atom-names vs isotope-types) and return axis-types.
         """
         matchPref = host._preferences.matchAxisCode
-        if matchPref == AXIS_FULLATOMNAME:
+        if matchPref == AxisMatch.FULL.value:
             atCodes = host._orderedAxes
             assert atCodes and len(atCodes) >= 2, "CursorRenderer: _orderedAxes must provide two axes"
 
             x_code = atCodes[0].code
             y_code = atCodes[1].code
-            xPosList = list(coords_dict[AXIS_FULLATOMNAME].get(x_code, []))
-            yPosList = list(coords_dict[AXIS_FULLATOMNAME].get(y_code, []))
+            xPosList = list(coords_dict[AxisMatch.FULL].get(x_code, []))
+            yPosList = list(coords_dict[AxisMatch.FULL].get(y_code, []))
         else:
             # add extra 'isotopeCode' so that 1D appears correctly
             if host.strip.spectrumDisplay._flipped:
                 atomTypes = ('intensity',) + host.spectrumDisplay.isotopeCodes
             else:
                 atomTypes = host.spectrumDisplay.isotopeCodes + ('intensity',)
-            xPosList = list(coords_dict[AXIS_MATCHATOMTYPE].get(atomTypes[0], []))
-            yPosList = list(coords_dict[AXIS_MATCHATOMTYPE].get(atomTypes[1], []))
+            xPosList = list(coords_dict[AxisMatch.ISOTOPE].get(atomTypes[0], []))
+            yPosList = list(coords_dict[AxisMatch.ISOTOPE].get(atomTypes[1], []))
 
         return xPosList, yPosList, -1, -1

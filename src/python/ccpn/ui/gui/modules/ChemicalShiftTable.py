@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-02 14:32:05 +0100 (Thu, October 02, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__dateModified__ = "$dateModified: 2025-10-15 14:15:25 +0100 (Wed, October 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -776,7 +776,7 @@ class _NewChemicalShiftTable(_ProjectTableABC):
         self._navigateMenu.clear()
         if cShift and cShift.nmrAtom and cShift.value is not None:
             value = round(cShift.value, 3)
-            if self._navigateMenu is not None:
+            if self._navigateMenu is not None and self.current.strip:
                 # this is still a little hard-coded
                 addItemsToNavigateMenu(self.current.strip,
                                        [value], [cShift.atomName],

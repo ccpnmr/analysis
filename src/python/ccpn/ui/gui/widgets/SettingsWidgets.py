@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-10-10 12:25:33 +0100 (Fri, October 10, 2025) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-10-15 14:15:26 +0100 (Wed, October 15, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -1675,15 +1675,15 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                                            checked=activePulldownInitialState
                                            ))
 
-        row += 1
-        self.onlyRestrictedBox = CheckBoxCompoundWidget(
-                self,
-                grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                fixedWidths=(colwidth, None),
-                orientation='left',
-                labelText='Assign restricted axes only',
-                checked=True
-                )
+        # row += 1
+        # self.onlyRestrictedBox = CheckBoxCompoundWidget(
+        #         self,
+        #         grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+        #         fixedWidths=(colwidth, None),
+        #         orientation='left',
+        #         labelText='Assign restricted axes only',
+        #         checked=True
+        #         )
 
         row += 1
         texts = []

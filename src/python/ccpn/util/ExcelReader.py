@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Morgan Hayward $"
-__dateModified__ = "$dateModified: 2025-10-03 13:00:35 +0100 (Fri, October 03, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-16 14:46:01 +0100 (Thu, October 16, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -576,6 +576,7 @@ class ExcelReader(object):
                 for _globalfilePath in globalfilePaths:
                     if _globalfilePath.basename == excelSpectrumPath.basename:
                         return _globalfilePath
+        getLogger().warning(f'Could not load spectrum from path: {pathProperty}')
         return None
 
     def _loadSpectrum(self, spectrumPath, properties):

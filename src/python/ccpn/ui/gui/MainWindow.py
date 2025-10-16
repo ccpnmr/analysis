@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-17 14:53:16 +0100 (Wed, September 17, 2025) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-10-16 16:52:31 +0100 (Thu, October 16, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -2265,29 +2265,42 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         if strip:
             strip.spectrumDisplay.adjustContours()
 
-    # def toggleCrosshairAll(self):
-    #     """
-    #     Toggles whether crosshairs are displayed in all windows.
-    #     """
-    #     for window in self.project.windows:
-    #         window.toggleCrosshair()
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    def toggleGrid(self, state: bool | None = None):
+        """
+        toggle grid for the spectrum displays in this window.
+        """
+        for spectrumDisplay in self.spectrumDisplays:
+            state = spectrumDisplay.toggleGrid(state)
+        return state
 
-    def toggleCrosshair(self):
+    def toggleSideBands(self, state: bool | None = None):
+        """
+        toggle sideBands for the spectrum displays in this window.
+        """
+        for spectrumDisplay in self.spectrumDisplays:
+            state = spectrumDisplay.toggleSideBands(state)
+        return state
+
+    def toggleCrosshair(self, state: bool | None = None):
         """
         Toggles whether crosshairs are displayed in all spectrum displays
         """
         # toggle crosshairs for the spectrum displays in this window
         for spectrumDisplay in self.spectrumDisplays:
-            spectrumDisplay.toggleCrosshair()
+            state = spectrumDisplay.toggleCrosshair(state)
+        return state
 
-    def toggleDoubleCrosshair(self):
+    def toggleDoubleCrosshair(self, state: bool | None = None):
         """
         Toggles whether double-crosshairs are displayed in all spectrum displays
         """
         # toggle crosshairs for the spectrum displays in this window
         for spectrumDisplay in self.spectrumDisplays:
-            spectrumDisplay.toggleDoubleCrosshair()
+            state = spectrumDisplay.toggleDoubleCrosshair(state)
+        return state
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def showEstimateNoisePopup(self):
         """estimate the noise in the visible region of the current strip
         """
@@ -2417,34 +2430,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                     self.newMark(defaultColour, [position], [axisCode], strips=strips)
                 except Exception:
                     getLogger().warning(f'Error setting mark at position {position}')
-
-    def toggleGridAll(self):
-        """
-        Toggles grid display in all windows
-        """
-        for window in self.project.windows:
-            window.toggleGrid()
-
-    def toggleGrid(self):
-        """
-        toggle grid for the spectrum displays in this window.
-        """
-        for spectrumDisplay in self.spectrumDisplays:
-            spectrumDisplay.toggleGrid()
-
-    def toggleSideBandsAll(self):
-        """
-        Toggles sideBand display in all windows
-        """
-        for window in self.project.windows:
-            window.toggleSideBands()
-
-    def toggleSideBands(self):
-        """
-        toggle sideBands for the spectrum displays in this window.
-        """
-        for spectrumDisplay in self.spectrumDisplays:
-            spectrumDisplay.toggleSideBands()
 
     def moveToNextSpectrum(self):
         """

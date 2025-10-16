@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-17 14:53:16 +0100 (Wed, September 17, 2025) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-10-16 16:52:32 +0100 (Thu, October 16, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -139,32 +139,44 @@ def _spectrumToolBarItem(strip):
                     checkable=True, checked=True, shortcut='SB', stripMethodName='spectrumToolbarAction')
 
 
-def _crosshairItem(strip):
+def _crosshairItem(_strip):
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Crosshair',
                     typeItem=ItemTypes.get(ITEM), toolTip='Toggle Crosshair On/Off',
                     checkable=True, checked=True, shortcut='CH',
-                    callback=strip.spectrumDisplay.toggleCrosshair, stripMethodName='crosshairAction')
+                    callback=_app.toggleCrosshairAll, stripMethodName='crosshairAction')
 
 
-def _doubleCrosshairItem(strip):
+def _doubleCrosshairItem(_strip):
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Double Crosshair',
                     typeItem=ItemTypes.get(ITEM), toolTip='Toggle Double Crosshair On/Off',
-                    checkable=True, checked=True,
-                    callback=strip.spectrumDisplay.toggleDoubleCrosshair, stripMethodName='doubleCrosshairAction')
+                    checkable=True, checked=True, shortcut='DC',
+                    callback=_app.toggleDoubleCrosshairAll, stripMethodName='doubleCrosshairAction')
 
 
-def _gridItem(strip):
+def _gridItem(_strip):
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Grid',
                     typeItem=ItemTypes.get(ITEM), toolTip='Toggle Grid On/Off',
-                    callback=strip.spectrumDisplay.toggleGrid,
-                    checkable=True, checked=True, shortcut='GS', stripMethodName='gridAction')
+                    checkable=True, checked=True, shortcut='GS',
+                    callback=_app.toggleGridAll, stripMethodName='gridAction')
 
 
-def _sideBandsItem(strip):
+def _sideBandsItem(_strip):
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Show MAS Side Bands',
                     typeItem=ItemTypes.get(ITEM), toolTip='Toggle MAS Side Bands On/Off',
-                    callback=strip.spectrumDisplay.toggleSideBands,
-                    checkable=True, checked=True, stripMethodName='sideBandsAction')
+                    checkable=True, checked=True,
+                    callback=_app.toggleSideBandsAll, stripMethodName='sideBandsAction')
 
 
 def _cyclePeakLabelsItem(strip):

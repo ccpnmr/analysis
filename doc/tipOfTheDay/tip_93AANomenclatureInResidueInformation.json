@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>If you have a Chain in your project, you can find a reminder of the NEF nomenclature used for the 20 natural amino acids: go to <span style=%(purple)s>Molecule / Residue Information</span> and select the residue type of interest from the <span style=%(purple)s>Residue</span> drop-down menu. Alternatively check the <span style=%(purple)s>NEF</span> section of the CCPN online manual.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/AANomenclatureInResidueInformation.png"
+  ]
+}

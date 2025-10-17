@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>By <span style=%(purple)s>double-clicking</span> on a SpectrumGroup in the sidebar (or when setting up a SpectrumGroup), you can set the contour colours for your spectra. If you select a spectrum/rainbow colour scheme for the <span style=%(purple)s>Group Contour Colour</span> then you can <span style=%(purple)s>Auto Colour Spectra</span> in order to apply the spectrum/rainbow colours across the individual spectra.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/AutoColourSpectrumGroupSpectra.png"
+  ]
+}

@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-08-11 11:59:37 +0100 (Mon, August 11, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:10 +0100 (Fri, October 17, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,24 +36,23 @@ from typing import TypeVar, TYPE_CHECKING
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib.peakUtils import movePeak
 from ccpn.core.lib.SpectrumLib import CoherenceOrder
-from ccpn.ui.gui.guiSettings import consoleStyle
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs, GL
-from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode, PICK
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import (CcpnGLWidget, GLVertexArray, GLRENDERMODE_DRAW,
                                                GLRENDERMODE_RESCALE)
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import YAXISUNITS1D
 import ccpn.util.Phasing as Phasing
-from ccpn.util.Constants import MOUSEDICTSTRIP, AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
+from ccpn.util.Constants import MOUSEDICTSTRIP, AxisMatch, MOUSEDICTCURSOR
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.lib.OpenGL.CursorLib import CursorRenderer, CursorRenderer1d, _COORDS_TYPE
 
 
 if TYPE_CHECKING:
     from ccpn.ui.gui.lib.Strip import Strip1d as _Strip1d, StripNd as _StripNd
 
-_CoreStrip = TypeVar('_CoreStrip', bound='_Strip1d | _StripNd')
+_CoreStrip = TypeVar("_CoreStrip", bound="_Strip1d | _StripNd")
 
 
-def round_to_significant_figures(num, sig_figs=6):
+def _round_to_significant_figures(num, sig_figs=6):
     if num == 0:
         return 0
     return round(num, sig_figs - int(math.floor(math.log10(abs(num)))) - 1)
@@ -66,6 +65,9 @@ class GuiNdWidget(CcpnGLWidget):
     SPECTRUMPOSCOLOUR = 'positiveContourColour'
     SPECTRUMNEGCOLOUR = 'negativeContourColour'
     AXIS_INSIDE = False
+
+    # Define the cursor handling class
+    cursorKlass = CursorRenderer
 
     def _mouseInPeak(self, xPosition, yPosition, firstOnly=False):
         """Find the peaks under the mouse.
@@ -856,169 +858,36 @@ class GuiNdWidget(CcpnGLWidget):
         self._maxY = max(self._maxY, specVals.maxSpectrumFrequency[1])
         self._minY = min(self._minY, specVals.minSpectrumFrequency[1])
 
-    def buildCursors(self):
-        """Build and draw the cursors/doubleCursors
-        """
-        if self._disableCursorUpdate or not self._crosshairVisible:
-            return
-
-        # get the next cursor drawList
-        self._advanceGLCursor()
-        drawList = self._glCursorQueue[self._glCursorHead]
-
-        if getCurrentMouseMode() == PICK and self.underMouse():
-            x = self.deltaX * 8
-            y = self.deltaY * 8
-            cursorCoordinate = self.getCurrentCursorCoordinate()
-            newCoords = self._scaleAxisToRatio(cursorCoordinate[:2])
-            vertices = [newCoords[0] - x, newCoords[1] - y,
-                        newCoords[0] + x, newCoords[1] - y,
-                        newCoords[0] + x, newCoords[1] - y,
-                        newCoords[0] + x, newCoords[1] + y,
-                        newCoords[0] + x, newCoords[1] + y,
-                        newCoords[0] - x, newCoords[1] + y,
-                        newCoords[0] - x, newCoords[1] + y,
-                        newCoords[0] - x, newCoords[1] - y
-                        ]
-            indices = [0, 1, 2, 3, 4, 5, 6, 7]
-            col = self.mousePickColour
-        else:
-            newCoords = [None, None]
-            vertices = []
-            indices = []
-            col = self.foreground
-
-        self.mouseCoordDQ = None
-        if not self.spectrumDisplay.phasingFrame.isVisible() and (coords := self.current.mouseMovedDict):
-            atCodes = self._orderedAxes
-            xPosListAn = list(coords[AXIS_FULLATOMNAME].get(atCodes[0].code, []))
-            yPosListAn = list(coords[AXIS_FULLATOMNAME].get(atCodes[1].code, []))
-            if xPosListAn:
-                newCoords[0] = xPosListAn[0]
-            if yPosListAn:
-                newCoords[1] = yPosListAn[0]
-
-            xaxisType = yaxisType = 1
-            if self._firstVisible and not self._firstVisible.isDeleted:
-                idx = self._firstVisible.dimensionIndices
-                spec = self._firstVisible.spectrum
-                mTypes = [CoherenceOrder[co].value for co in spec.coherenceOrders]
-                xaxisType = mTypes[idx[0]]
-                yaxisType = mTypes[idx[1]]
-
-            if self._preferences.matchAxisCode == AXIS_FULLATOMNAME:
-                xPosList, yPosList = xPosListAn, yPosListAn
-            else:
-                if self._matchingIsotopeCodes and \
-                        ((0 < xaxisType < yaxisType < 3) or (0 < yaxisType < xaxisType < 3)):
-                    # append double-quantum cursors
-                    xPosList, yPosList = xPosListAn, yPosListAn
-                elif self._matchingIsotopeCodes and not self._doubleCrosshairVisible:
-                    xPosList, yPosList = xPosListAn, yPosListAn
-                else:
-                    atomTypes = self.spectrumDisplay.isotopeCodes
-                    xPosList = list(coords[AXIS_MATCHATOMTYPE].get(atomTypes[0], []))
-                    yPosList = list(coords[AXIS_MATCHATOMTYPE].get(atomTypes[1], []))
-
-            # print(f'{self.strip.pid:16}  {str(self._matchingIsotopeCodes):6}'
-            #       f'{str((0 < xaxisType < yaxisType < 3) or (0 < yaxisType < xaxisType < 3)):6}'
-            #       f'{coords} -  {xPosList}  {yPosList}')
-            foundX = []
-            foundY = []
-            # generate single-/double-/double-qunatum cursor vertices
-            self._makeCursor(foundX, foundY, indices, newCoords, vertices, xPosList, yPosList)
-            self._makeQuantumCursor(foundX, foundY, indices, vertices, xPosList, xaxisType, yPosList, yaxisType)
-
-        drawList.vertices = np.array(vertices, dtype=np.float32)
-        drawList.indices = np.array(indices, dtype=np.int32)
-        drawList.numVertices = len(vertices) // 2
-        drawList.colors = np.array(col * drawList.numVertices, dtype=np.float32)
-        # build and VBO arrays
-        drawList.defineIndexVBO()
-
-    def _makeCursor(self, foundX, foundY, indices, newCoords, vertices, xPosList, yPosList):
-        index = len(vertices) // 2
-        if not self._updateVTrace and newCoords[0] is not None:
-            for pos in xPosList:
-                x, _y = self._scaleAxisToRatio([pos, 0])
-                if all(abs(x - val) > self.deltaX for val in foundX):
-                    # store the found value so that overlaying lines are not drawn - OpenGL uses an XOR draw mode
-                    foundX.append(x)
-                    vertices.extend([x, 1.0, x, 0.0])
-                    indices.extend([index, index + 1])
-                    index += 2
-        if not self._updateHTrace and newCoords[1] is not None:
-            for pos in yPosList:
-                _x, y = self._scaleAxisToRatio([0, pos])
-                if all(abs(y - val) > self.deltaY for val in foundY):
-                    # store the found value so that overlaying lines are not drawn - OpenGL uses an XOR draw mode
-                    foundY.append(y)
-                    vertices.extend([0.0, y, 1.0, y])
-                    indices.extend([index, index + 1])
-                    index += 2
-
-    def _makeQuantumCursor(self, foundX, foundY, indices, vertices, xPosList, xaxisType, yPosList, yaxisType):
-        if self._firstVisible and self._matchingIsotopeCodes and self._doubleCrosshairVisible:
-            index = len(vertices) // 2
-            # extra zero/double-quantum axes
-            if (0 < xaxisType < yaxisType < 3):  # single double quantum (double y coord)
-                if len(xPosList) == 1 and len(yPosList) == 1:  # should always be true? (sanity check)
-                    xPosList.append(yPosList[0])  # y position to list
-                if len(xPosList) == 2:  # should always be true? (sanity check)
-                    # y is the double-quantum axis
-                    xx = xPosList[1] - xPosList[0]  # y-x (y added prev)
-                    self.mouseCoordDQ = (xx, yPosList[0], 0)  # create dqCoord flags
-                    x, _y = self._scaleAxisToRatio([xx, 0])  # openGL scaling
-                    if all(abs(x - val) > self.deltaX for val in foundX):  # checks not overlapping
-                        foundX.append(x)  # previous cursor flag
-                        vertices.extend([x, 1.0, x, 0.0])  # add the line to the array
-                        indices.extend([index, index + 1])  # indices array update
-                        index += 2  # vertArray index
-
-            elif (0 < yaxisType < xaxisType < 3):
-                if len(xPosList) == 1 and len(yPosList) == 1:
-                    yPosList.insert(0, xPosList[0])
-                if len(yPosList) == 2:
-                    # x is the double-quantum axis
-                    yy = yPosList[0] - yPosList[1]
-                    self.mouseCoordDQ = (xPosList[0], yy, 1)
-                    _x, y = self._scaleAxisToRatio([0, yy])
-                    if all(abs(y - val) > self.deltaY for val in foundY):
-                        foundY.append(y)
-                        vertices.extend([0.0, y, 1.0, y])
-                        indices.extend([index, index + 1])
-                        index += 2
-
-    def _updateMouseDict(self, cursorCoordinate):
-        try:
-            mouseMovedDict = self.current.mouseMovedDict
-        except Exception:
-            # initialise a new mouse moved dict
-            mouseMovedDict = {MOUSEDICTSTRIP    : self.strip,
-                              AXIS_MATCHATOMTYPE: {},
-                              AXIS_FULLATOMNAME : {},
-                              }
-        xPos = yPos = 0
-        atTypes = mouseMovedDict[AXIS_MATCHATOMTYPE] = {}
-        atCodes = mouseMovedDict[AXIS_FULLATOMNAME] = {}
+    def _updateMouseDict(self, cursorCoordinate: list[float]) -> _COORDS_TYPE:
+        if not (mouseMovedDict := self.current.mouseMovedDict):
+            mouseMovedDict = self.current.mouseMovedDict = {}
+        # initialise a new mouse moved dict
+        xPos = yPos = None
+        mouseMovedDict[MOUSEDICTSTRIP] = self.strip
+        atTypes = mouseMovedDict[AxisMatch.ISOTOPE] = {}
+        atCodes = mouseMovedDict[AxisMatch.CODE] = {}
+        _atPrt = mouseMovedDict[AxisMatch.PARTIAL] = {}
+        chrs = max(1, self._preferences.get("matchNumChars", 0))
 
         # transfer the mouse position from the coords to the mouseMovedDict for the other displays
-        for n, (atomType, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self._orderedAxes)):
-            ats = atTypes.setdefault(atomType, [])
-            atcs = atCodes.setdefault(axis.code, [])
+        for n, (isotope, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self._orderedAxes)):
+            code = axis.code[:chrs].lower()
+            ats = atTypes.setdefault(isotope, [])
+            atcs = atCodes.setdefault(code, [])
+            _atp = _atPrt.setdefault(f"{isotope}_{code}", [])
             if n == 0:
-                xPos = pos = round_to_significant_figures(cursorCoordinate[0])
+                xPos = pos = _round_to_significant_figures(cursorCoordinate[0])
             elif n == 1:
-                yPos = pos = round_to_significant_figures(cursorCoordinate[1])
+                yPos = pos = _round_to_significant_figures(cursorCoordinate[1])
             else:
                 # for other Nd dimensions
-                pos = round_to_significant_figures(axis.position)
+                pos = _round_to_significant_figures(axis.position)
             ats.append(pos)
-            atcs.append(pos)  # this SHOULD only ever be length of 1.
+            atcs.append(pos)
+            _atp.append(pos)
 
+        mouseMovedDict[MOUSEDICTCURSOR] = (xPos, yPos)
         self.current.cursorPosition = (xPos, yPos)
-        self.current.mouseMovedDict = mouseMovedDict
-
         return mouseMovedDict
 
 
@@ -1039,6 +908,9 @@ class Gui1dWidget(CcpnGLWidget):
     SPECTRUMXZOOM = 1.0e2
     SPECTRUMYZOOM = 1.0e6
     SHOWSPECTRUMONPHASING = False
+
+    # Define the cursor handling class
+    cursorKlass = CursorRenderer1d
 
     def __init__(self, parent: _CoreStrip, *, stripIDLabel=None):
         from ccpn.ui.gui.lib.Strip import Strip1d as _Strip1d, StripNd as _StripNd
@@ -1697,124 +1569,38 @@ class Gui1dWidget(CcpnGLWidget):
         self._maxY = max(self._maxY, specVals.maxSpectrumFrequency[1])
         self._minY = min(self._minY, specVals.minSpectrumFrequency[1])
 
-    def buildCursors(self):
-        """Build and draw the cursors/doubleCursors
-        """
-        if self._disableCursorUpdate or not self._crosshairVisible:
-            return
+    def _updateMouseDict(self, cursorCoordinate: list[float]) -> _COORDS_TYPE:
+        if not (mouseMovedDict := self.current.mouseMovedDict):
+            mouseMovedDict = self.current.mouseMovedDict = {}
+        # initialise a new mouse moved dict
+        xPos = yPos = None
+        mouseMovedDict[MOUSEDICTSTRIP] = self.strip
+        atTypes = mouseMovedDict[AxisMatch.ISOTOPE] = {}
+        atCodes = mouseMovedDict[AxisMatch.CODE] = {}
+        _atPrt = mouseMovedDict[AxisMatch.PARTIAL] = {}
+        chrs = max(1, self._preferences.get("matchNumChars", 0))
 
-        # get the next cursor drawList
-        self._advanceGLCursor()
-        drawList = self._glCursorQueue[self._glCursorHead]
-        vertices = []
-        indices = []
-        index = 0
-
-        # map the cursor to the ratio coordinates - double cursor is flipped about the line x=y
-        cursorCoordinate = self.getCurrentCursorCoordinate()
-        newCoords = self._scaleAxisToRatio(cursorCoordinate[:2])
-        # doubleCoords = self._scaleAxisToRatio(self.getCurrentDoubleCursorCoordinates()[0:2])
-
-        if getCurrentMouseMode() == PICK and self.underMouse():
-
-            x = self.deltaX * 8
-            y = self.deltaY * 8
-
-            vertices = [newCoords[0] - x, newCoords[1] - y,
-                        newCoords[0] + x, newCoords[1] - y,
-                        newCoords[0] + x, newCoords[1] - y,
-                        newCoords[0] + x, newCoords[1] + y,
-                        newCoords[0] + x, newCoords[1] + y,
-                        newCoords[0] - x, newCoords[1] + y,
-                        newCoords[0] - x, newCoords[1] + y,
-                        newCoords[0] - x, newCoords[1] - y
-                        ]
-            indices = [0, 1, 2, 3, 4, 5, 6, 7]
-            col = self.mousePickColour
-            index = 8
-
-        else:
-            col = self.foreground
-
-        if not self.spectrumDisplay.phasingFrame.isVisible() and (coords := self.current.mouseMovedDict):
-            # read values from isotopeCode or axisCode
-            if self._preferences.matchAxisCode == 0:  # default - match atom type
-
-                # add extra 'isotopeCode' so that 1D appears correctly
-                if self.strip.spectrumDisplay._flipped:
-                    atomTypes = ('intensity',) + self.spectrumDisplay.isotopeCodes
-                else:
-                    atomTypes = self.spectrumDisplay.isotopeCodes + ('intensity',)
-
-                xPosList = coords[AXIS_MATCHATOMTYPE].get(atomTypes[0], [])
-                yPosList = coords[AXIS_MATCHATOMTYPE].get(atomTypes[1], [])
-            else:
-                atCodes = self._orderedAxes
-                xPosList = coords[AXIS_FULLATOMNAME].get(atCodes[0].code, [])
-                yPosList = coords[AXIS_FULLATOMNAME].get(atCodes[1].code, [])
-
-            foundX = []
-            foundY = []
-            if not self._updateVTrace and newCoords[0] is not None:
-                for pos in xPosList:
-                    x, _y = self._scaleAxisToRatio([pos, 0])
-                    if all(abs(x - val) > self.deltaX for val in foundX):
-                        # store the found value so that overlaying lines are not drawn - OpenGL uses an XOR draw mode
-                        foundX.append(x)
-                        vertices.extend([x, 1.0, x, 0.0])
-                        indices.extend([index, index + 1])
-                        index += 2
-
-            if not self._updateHTrace and newCoords[1] is not None:
-                for pos in yPosList:
-                    _x, y = self._scaleAxisToRatio([0, pos])
-                    if all(abs(y - val) > self.deltaY for val in foundY):
-                        foundY.append(y)
-                        vertices.extend([0.0, y, 1.0, y])
-                        indices.extend([index, index + 1])
-                        index += 2
-
-        drawList.vertices = np.array(vertices, dtype=np.float32)
-        drawList.indices = np.array(indices, dtype=np.int32)
-        drawList.numVertices = len(vertices) // 2
-        drawList.colors = np.array(col * drawList.numVertices, dtype=np.float32)
-
-        # build and draw the VBO
-        drawList.defineIndexVBO()
-
-    def _updateMouseDict(self, cursorCoordinate):
-        try:
-            mouseMovedDict = self.current.mouseMovedDict
-        except:
-            # initialise a new mouse moved dict
-            mouseMovedDict = {MOUSEDICTSTRIP    : self.strip,
-                              AXIS_MATCHATOMTYPE: {},
-                              AXIS_FULLATOMNAME : {},
-                              }
-
-        xPos = yPos = 0
-        atTypes = mouseMovedDict[AXIS_MATCHATOMTYPE] = {}
-        atCodes = mouseMovedDict[AXIS_FULLATOMNAME] = {}
         if self.strip.spectrumDisplay._flipped:
             isoCodes = ('intensity',) + self.spectrumDisplay.isotopeCodes
         else:
             isoCodes = self.spectrumDisplay.isotopeCodes + ('intensity',)
 
         # transfer the mouse position from the coords to the mouseMovedDict for the other displays
-        for n, (atomType, axis) in enumerate(zip(isoCodes, self._orderedAxes)):
-            ats = atTypes.setdefault(atomType, [])
-            atcs = atCodes.setdefault(axis.code, [])
+        for n, (isotope, axis) in enumerate(zip(isoCodes, self._orderedAxes)):
+            code = axis.code[:chrs].lower()
+            ats = atTypes.setdefault(isotope, [])
+            atcs = atCodes.setdefault(code, [])
+            _atp = _atPrt.setdefault(f"{isotope}_{code}", [])
             if n == 0:
-                xPos = pos = round_to_significant_figures(cursorCoordinate[0])
+                xPos = pos = _round_to_significant_figures(cursorCoordinate[0])
             elif n == 1:
-                yPos = pos = round_to_significant_figures(cursorCoordinate[1])
+                yPos = pos = _round_to_significant_figures(cursorCoordinate[1])
             else:
-                break
-
+                break  # Only need the first two for 1d
             ats.append(pos)
             atcs.append(pos)
+            _atp.append(pos)
 
+        mouseMovedDict[MOUSEDICTCURSOR] = (xPos, yPos)
         self.current.cursorPosition = (xPos, yPos)
-        self.current.mouseMovedDict = mouseMovedDict
-
         return mouseMovedDict

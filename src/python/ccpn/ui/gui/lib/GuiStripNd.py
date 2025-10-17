@@ -36,8 +36,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-03 18:56:46 +0000 (Fri, January 03, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -55,19 +55,19 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
-from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
-    _getNdIntegralMenu, _getNdMultipletMenu, _getNdAxisMenu
+from ccpn.ui.gui.lib.GuiStripContextMenus import (_getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu,
+                                                  _getNdIntegralMenu, _getNdMultipletMenu, _getNdAxisMenu)
 from ccpn.ui.gui.lib.StripLib import copyStripAxisPositionsAndWidths
 from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.PlaneToolbar import ZPlaneToolbar
-from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, PlaneAxisWidget, StripLabelWidget, \
-    EMITSOURCE, EMITCLICKED, EMITIGNORESOURCE
+from ccpn.ui.gui.widgets.PlaneToolbar import (StripHeaderWidget, PlaneAxisWidget, StripLabelWidget,
+                                              EMITSOURCE, EMITCLICKED, EMITIGNORESOURCE)
 from ccpn.util.Colour import colorSchemeTable
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
-from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT, AXIS_FULLATOMNAME
+from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT, AxisMatch
 
 
 class GuiStripNd(GuiStrip):
@@ -229,7 +229,7 @@ class GuiStripNd(GuiStrip):
         if self.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.dataValue:
             self.zPlaneFrame.attachZPlaneWidgets(self)
         self.zPlaneFrame.setVisible(
-            self.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.dataValue)
+                self.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.dataValue)
 
         if self.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.dataValue:
             self.spectrumDisplay.zPlaneFrame.attachZPlaneWidgets(self)
@@ -289,7 +289,7 @@ class GuiStripNd(GuiStrip):
                 newDisplay.displaySpectrum(spectrum)
 
             try:
-                mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+                mDict = usePosition and self.current.mouseMovedDict[AxisMatch.CODE]
                 positions = [poss[0] if (poss := mDict.get(ax)) else None
                              for ax in self.axisCodes] if usePosition else None
                 copyStripAxisPositionsAndWidths(self, newDisplay.strips[0], positions=positions)
@@ -331,7 +331,7 @@ class GuiStripNd(GuiStrip):
             return
 
         try:
-            mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            mDict = usePosition and self.current.mouseMovedDict[AxisMatch.CODE]
             positions = [poss[0] if (poss := mDict.get(ax)) else None
                          for ax in self.axisCodes] if usePosition else None
             return self._flipAxes(axisOrderIndices=(1, 0), positions=positions)
@@ -349,7 +349,7 @@ class GuiStripNd(GuiStrip):
             return
 
         try:
-            mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            mDict = usePosition and self.current.mouseMovedDict[AxisMatch.CODE]
             positions = [poss[0] if (poss := mDict.get(ax)) else None
                          for ax in self.axisCodes] if usePosition else None
             return self._flipAxes(axisOrderIndices=(2, 1, 0), positions=positions)
@@ -367,7 +367,7 @@ class GuiStripNd(GuiStrip):
             return
 
         try:
-            mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            mDict = usePosition and self.current.mouseMovedDict[AxisMatch.CODE]
             positions = [poss[0] if (poss := mDict.get(ax)) else None
                          for ax in self.axisCodes] if usePosition else None
             return self._flipAxes(axisOrderIndices=(0, 2, 1), positions=positions)

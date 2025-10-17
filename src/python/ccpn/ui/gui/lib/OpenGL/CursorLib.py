@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-15 18:13:29 +0100 (Wed, October 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -30,14 +30,15 @@ __date__ = "$Date: 2025-10-10 10:23:20 +0100 (Fri, October 10, 2025) $"
 # Start of code
 #=========================================================================================
 
-from typing import Protocol, TYPE_CHECKING, TypeVar, TypeAlias
+from typing import Protocol, TYPE_CHECKING, TypeVar, TypeAlias, cast
 from typing_extensions import Self
 import numpy as np
 
 from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray, GLRENDERMODE_REBUILD
-from ccpn.util.Constants import AxisMatch
+from ccpn.util.Constants import AxisMatch, MOUSEDICTCURSOR
+from ccpn.ui.gui.lib.mouseEvents import PICK
 
 
 if TYPE_CHECKING:
@@ -49,15 +50,9 @@ if TYPE_CHECKING:
 _CoreSpectrumDisplay = TypeVar("_CoreSpectrumDisplay", bound="_SpectrumDisplay1d | _SpectrumDisplayNd")
 _CoreSpectrumView = TypeVar("_CoreSpectrumView", bound="_SpectrumView1d | _SpectrumViewNd")
 
-_COORDS_TYPE: TypeAlias = dict[str | int, dict[str, list[float]]]
+_COORDS_TYPE: TypeAlias = dict[str | AxisMatch | int, dict[str, list[float]] | tuple | None]
 
-# ----------------------------------------------------------------------
-# External “protocol” constants you already have in your project
-# Bring them from your codebase; these placeholders keep this file standalone.
-PICK = 1
-# from your_module import CoherenceOrder  # expected to be available on host usage
-
-# ----------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------
 # Tuning constants
 CURSOR_BOX_SIZE_FACTOR = 8.0  # pick box side = deltaX/deltaY * factor
 UNIT_MIN = 0.0  # normalized (ratio) space
@@ -67,7 +62,7 @@ UNIT_MAX = 1.0
 class CursorProtocol(Protocol):
     """A protocol defining any class that handles cursor objects."""
 
-    def attach(self, host: CcpnGLWidget) -> CursorRenderer: ...
+    def attach(self, host: CcpnGLWidget) -> Self: ...
 
     def buildCursors(self) -> None: ...
 
@@ -158,53 +153,41 @@ class CursorRenderer:
 
     def buildCursors(self) -> None:
         """Build and upload cursor geometry for the current frame."""
-        host = self._require_host
+        host = self._requireHost
         if self.disableCursorUpdate or not self.crosshairVisible:
             return
 
         # Advance cursor draw-list and get active buffer
         self._advanceGLCursor()
         drawList = self._glCursorQueue[self._glCursorHead]
-
         # Reset per-frame quantum info
-        host.mouseCoordDQ = None
+        host.mouseCoordDQ = None  # nasty - should be in here
         vertices: list[float] = []
         indices: list[int] = []
         color = host.foreground
-        newCoords: list[float | None] = [None, None]  # normalized space
+        coords_dict: _COORDS_TYPE = host.current.mouseMovedDict
 
-        # 1) PICK mode → small selection box
-        if self._isPickMode() and host.underMouse():
-            cursorCoordinate = host.getCurrentCursorCoordinate()
-            newCoords = host._scaleAxisToRatio(cursorCoordinate[:2])
-            self._addPickBox(host, vertices, indices, newCoords, size_factor=self.box_size_factor)
-            color = host.mousePickColour
+        if (coords_dict and (newCoords := cast(tuple[float | None, float | None],
+                                               coords_dict.get(MOUSEDICTCURSOR))) and
+                None not in newCoords):
+            # 1) PICK mode → small selection box - could have different shapes
+            if self._isPickMode() and host.underMouse():
+                self._addPickBox(host, vertices, indices,
+                                 host._scaleAxisToRatio(newCoords),
+                                 size_factor=self.box_size_factor)
+                color = host.mousePickColour
 
-        print(f'buildCursors  {host.axisCodes}     {self._isPickMode() and host.underMouse()}')
-
-        # 2) Crosshair / quantum cursors (skip if phasing)
-        if (not host.spectrumDisplay.phasingFrame.isVisible() and
-                (coords_dict := host.current.mouseMovedDict)):
-            # Update normalized coords from dict (if present)
-            newCoords = self._updateCoordsFromDict(host, coords_dict, newCoords)
-            for k, v in coords_dict.items():
-                print(f'              {str(k)}')
-                for kk, vv in v.items():
-                    print(f'                {kk:<10}: {vv}')
-
-            # Resolve which lists to draw + axis types
-            xPosList, yPosList, xQuantumOrder, yQuantumOrder = self._resolveAxisLists(host, coords_dict)
-
-            # Build simple vertical/horizontal lines
-            foundX: list[float] = []
-            foundY: list[float] = []
-            self._makeCursor(host, foundX, foundY, indices, newCoords, vertices, xPosList, yPosList)
-            print(f'              {newCoords}     {xPosList}   {yPosList}')
-            # Double-quantum lines when applicable
-            self._makeQuantumCursor(host, foundX, foundY, indices, vertices,
-                                    xPosList, xQuantumOrder, yPosList, yQuantumOrder)
-
-            print(f'              {newCoords}     {xPosList}   {yPosList}')
+            # 2) Crosshair / quantum cursors (skip if phasing)
+            if (not host.spectrumDisplay.phasingFrame.isVisible()):
+                # Resolve which lists to draw + axis types
+                xPosList, yPosList, xQuantumOrder, yQuantumOrder = self._resolveAxisLists(host, coords_dict)
+                # Build simple vertical/horizontal lines
+                foundX: list[float] = []
+                foundY: list[float] = []
+                self._makeCursor(host, foundX, foundY, indices, newCoords, vertices, xPosList, yPosList)
+                # Double-quantum lines when applicable
+                self._makeQuantumCursor(host, foundX, foundY, indices, vertices,
+                                        xPosList, xQuantumOrder, yPosList, yQuantumOrder)
 
         # 3) Upload to GL
         drawList.vertices = np.array(vertices, dtype=np.float32)
@@ -221,7 +204,7 @@ class CursorRenderer:
                     foundX: list[float],
                     foundY: list[float],
                     indices: list[int],
-                    newCoords: list[float | None],
+                    newCoords: tuple[float | None, float | None],
                     vertices: list[float],
                     xPosList: list[float],
                     yPosList: list[float]) -> None:
@@ -258,8 +241,7 @@ class CursorRenderer:
                            yQuantumOrder: int) -> None:
         """Generate double-quantum/zero-quantum auxiliary lines when conditions allow."""
         if not (host._matchingIsotopeCodes and
-                host._firstVisible and
-                self.doubleCrosshairVisible):
+                host._firstVisible):
             return
 
         # Case 1: single double quantum on Y (x < y)
@@ -292,7 +274,7 @@ class CursorRenderer:
     def initialise(self, context: CcpnGLWidget):
         """Initialise the GL lists, hard-coded to 2 swapBuffers."""
         # Sanity check to ensure that host has been set before doing anything else
-        _ = self._require_host
+        _ = self._requireHost
         fmt = context.format()
         self._numBuffers = int(fmt.swapBehavior()) or 2
         self._glCursorQueue: tuple[GLVertexArray, ...] = ()
@@ -337,31 +319,32 @@ class CursorRenderer:
         if cursor.indices.size:
             cursor.drawIndexVBO()
 
+    # @staticmethod
+    # def _updateCoordsFromDict(host: CcpnGLWidget,
+    #                           coords_dict: _COORDS_TYPE,
+    #                           current: list[float | None]) -> list[float | None]:
+    #     """Pull single x/y coordinates out of mouseMovedDict using ordered axis codes."""
+    #
+    #     newCoords = list(current) if current else [None, None]
+    #     atCodes = host._orderedAxes
+    #     if not atCodes:
+    #         return newCoords
+    #
+    #     chrs = max(1, host._preferences.get("matchNumChars", 0))
+    #     full_dict: dict[str, list[float]] = coords_dict.get(AxisMatch.CODE, {})
+    #     x_code = atCodes[0].code[:chrs].lower()
+    #     y_code = atCodes[1].code[:chrs].lower()
+    #     x_list = full_dict.get(x_code, [])
+    #     y_list = full_dict.get(y_code, [])
+    #
+    #     if x_list:
+    #         newCoords[0] = x_list[0]
+    #     if y_list:
+    #         newCoords[1] = y_list[0]
+    #     return newCoords
+
     @staticmethod
-    def _updateCoordsFromDict(host: CcpnGLWidget,
-                              coords_dict: _COORDS_TYPE,
-                              current: list[float | None]) -> list[float | None]:
-        """Pull single x/y coordinates out of mouseMovedDict using ordered axis codes."""
-
-        newCoords = list(current) if current else [None, None]
-        atCodes = host._orderedAxes
-        if not atCodes:
-            return newCoords
-
-        full_dict: dict[str, list[float]] = coords_dict.get(AxisMatch.FULL, {})
-        x_code = atCodes[0].code[:host._preferences.matchNumChars].lower()
-        y_code = atCodes[1].code[:host._preferences.matchNumChars].lower()
-        x_list = full_dict.get(x_code, [])
-        y_list = full_dict.get(y_code, [])
-
-        if x_list:
-            newCoords[0] = x_list[0]
-        if y_list:
-            newCoords[1] = y_list[0]
-        return newCoords
-
-    @staticmethod
-    def _getQuantumOrders(host: CcpnGLWidget) -> tuple[int, int]:
+    def _getQuantumOrders(host: CcpnGLWidget) -> tuple[int, int, bool]:
         """
         Return (xQuantumOrder, yQuantumOrder). Defaults to (1,1).
         Uses host._firstVisible.spectrum.coherenceOrders and a CoherenceOrder enum.
@@ -376,42 +359,45 @@ class CursorRenderer:
             if len(mTypes) > max(idx[0], idx[1]):
                 xQuantumOrder = mTypes[idx[0]]
                 yQuantumOrder = mTypes[idx[1]]
-        return xQuantumOrder, yQuantumOrder
+        return xQuantumOrder, yQuantumOrder, (0 < xQuantumOrder < yQuantumOrder < 3) or (
+                0 < yQuantumOrder < xQuantumOrder < 3)
 
     def _resolveAxisLists(self, host: CcpnGLWidget, coords_dict: _COORDS_TYPE
                           ) -> tuple[list[float], list[float], int, int]:
         """
         Decide which x/y lists to use (full-atom-names vs isotope-types) and return axis-types.
         """
-        xQuantumOrder, yQuantumOrder = self._getQuantumOrders(host)
-
-        atCodes = host._orderedAxes
-        assert atCodes and len(atCodes) >= 2, "CursorRenderer: _orderedAxes must provide two axes"
-        chrs = host._preferences.matchNumChars
-
-        x_code = atCodes[0].code[:chrs].lower()
-        y_code = atCodes[1].code[:chrs].lower()
-
-        xPosListAn = list(coords_dict[AxisMatch.FULL].get(x_code, []))
-        yPosListAn = list(coords_dict[AxisMatch.FULL].get(y_code, []))
         matchPref = host._preferences.matchAxisCode
-
-        if matchPref == AxisMatch.FULL.value:
-            xPosList, yPosList = xPosListAn, yPosListAn
+        if matchPref == AxisMatch.ISOTOPE.value:
+            isoDict = cast(dict[str, list[float]], coords_dict[AxisMatch.ISOTOPE])
+            isotopes = host.spectrumDisplay.isotopeCodes
+            xPosList = isoDict.get(isotopes[0], [])
+            yPosList = isoDict.get(isotopes[1], [])
         else:
-            if host._matchingIsotopeCodes and (
-                    (0 < xQuantumOrder < yQuantumOrder < 3) or (0 < yQuantumOrder < xQuantumOrder < 3)
-            ):
-                # append double-quantum cursors -> use atom-name lists as base
-                xPosList, yPosList = xPosListAn, yPosListAn
-            elif host._matchingIsotopeCodes and not self.doubleCrosshairVisible:
-                xPosList, yPosList = xPosListAn, yPosListAn
-            else:
-                isotopes = host.spectrumDisplay.isotopeCodes
-                xPosList = list(coords_dict[AxisMatch.ISOTOPE].get(isotopes[0], []))
-                yPosList = list(coords_dict[AxisMatch.ISOTOPE].get(isotopes[1], []))
+            xPosList, yPosList = self._resolveAxisCodes(coords_dict, host)
+
+        xQuantumOrder, yQuantumOrder, dq = self._getQuantumOrders(host)
+        sameSd = host.spectrumDisplay == ((st := coords_dict.get("strip")) and st.spectrumDisplay)
+        if dq or (not self.doubleCrosshairVisible and host._matchingIsotopeCodes and sameSd):
+            coords = cast(tuple, coords_dict[MOUSEDICTCURSOR])
+            xPosList = [coords[0]]
+            yPosList = [coords[1]]
 
         return xPosList, yPosList, xQuantumOrder, yQuantumOrder
+
+    @staticmethod
+    def _resolveAxisCodes(coords_dict: dict[str | AxisMatch | int, dict[str, list[float]] | tuple | None],
+                          host: CcpnGLWidget) -> tuple:
+        atCodes = host._orderedAxes
+        assert atCodes and len(atCodes) >= 2, "CursorRenderer: _orderedAxes must provide two axes"
+
+        chrs = host._preferences.matchNumChars
+        x_code = atCodes[0].code[:chrs].lower()
+        y_code = atCodes[1].code[:chrs].lower()
+        codeDict = cast(dict[str, list[float]], coords_dict[AxisMatch.CODE])
+        xPosList = codeDict.get(x_code, [])
+        yPosList = codeDict.get(y_code, [])
+        return xPosList, yPosList
 
     #-----------------------------------------------------------------------------------------
     # Small geometry utilities
@@ -493,11 +479,39 @@ class CursorRenderer:
     # Internal utilities
 
     @property
-    def _require_host(self) -> CcpnGLWidget:
+    def _requireHost(self) -> CcpnGLWidget:
         if self.host is None:
             raise RuntimeError("CursorRenderer is not attached to a host. "
                                "Call `cursorHandler.attach(host)` or pass host=... in the constructor.")
         return self.host
+
+    @staticmethod
+    def _valueToRatio(val: float, x0: float, x1: float) -> float:
+        if abs(x1 - x0) > 1e-9:
+            return (val - x0) / (x1 - x0)
+        else:
+            return 0.0
+
+    @staticmethod
+    def _widthsChangedEnough(r1, r2, tol=1e-5):
+        if len(r1) != len(r2):
+            raise ValueError('WidthsChanged must be the same length')
+        return any(abs(a - b) > tol for a, b in zip(r1, r2))
+
+    #-----------------------------------------------------------------------------------------
+    # Cursor strings - for later
+
+    _mouseCoords = None
+    _mouseCoordsDQ = None
+    _mouseString: GLVertexArray | None = None
+    _mouseStringDQ: GLVertexArray | None = None
+
+    def _drawMouseCoords(self):
+        if self._mouseString is not None:
+            # draw the mouse coordinates to the screen
+            self._mouseString.drawTextArrayVBO()
+        if self._mouseStringDQ is not None:
+            self._mouseStringDQ.drawTextArrayVBO()
 
 
 #=========================================================================================
@@ -531,21 +545,17 @@ class CursorRenderer1d(CursorRenderer):
         Decide which x/y lists to use (full-atom-names vs isotope-types) and return axis-types.
         """
         matchPref = host._preferences.matchAxisCode
-        if matchPref == AxisMatch.FULL.value:
-            atCodes = host._orderedAxes
-            assert atCodes and len(atCodes) >= 2, "CursorRenderer: _orderedAxes must provide two axes"
-
-            x_code = atCodes[0].code
-            y_code = atCodes[1].code
-            xPosList = list(coords_dict[AxisMatch.FULL].get(x_code, []))
-            yPosList = list(coords_dict[AxisMatch.FULL].get(y_code, []))
-        else:
+        if matchPref == AxisMatch.ISOTOPE.value:
             # add extra 'isotopeCode' so that 1D appears correctly
             if host.strip.spectrumDisplay._flipped:
                 atomTypes = ('intensity',) + host.spectrumDisplay.isotopeCodes
             else:
                 atomTypes = host.spectrumDisplay.isotopeCodes + ('intensity',)
-            xPosList = list(coords_dict[AxisMatch.ISOTOPE].get(atomTypes[0], []))
-            yPosList = list(coords_dict[AxisMatch.ISOTOPE].get(atomTypes[1], []))
+            isoDict = cast(dict[str, list[float]], coords_dict[AxisMatch.ISOTOPE])
+            xPosList = isoDict.get(atomTypes[0], [])
+            yPosList = isoDict.get(atomTypes[1], [])
+        else:
+            xPosList, yPosList = self._resolveAxisCodes(coords_dict, host)
 
+        # No quantum checking required
         return xPosList, yPosList, -1, -1

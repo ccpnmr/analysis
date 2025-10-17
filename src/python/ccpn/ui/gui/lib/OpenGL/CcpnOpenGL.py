@@ -60,7 +60,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-15 18:13:29 +0100 (Wed, October 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -335,6 +335,18 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
             raise RuntimeError(f'{self.__class__}._disableCursorUpdate: cursorHandler not defined')
         self._cursorHandler.disableCursorUpdate = value
 
+    # @property
+    # def _gridVisible(self):
+    #     if self._gridHandler:
+    #         return self._gridHandler.gridVisible
+    #     raise RuntimeError(f'{self.__class__}._gridVisible: gridHandler not defined')
+    #
+    # @_gridVisible.setter
+    # def _gridVisible(self, value):
+    #     if not self._gridHandler:
+    #         raise RuntimeError(f'{self.__class__}._gridVisible: gridHandler not defined')
+    #     self._gridHandler.gridVisible = value
+
     #-----------------------------------------------------------------------------------------
 
     def _setStyle(self):
@@ -403,9 +415,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
             self._cursorHandler.attach(self)  # bind to this widget
 
         self.cursorSource = CURSOR_SOURCE_NONE  # can be CURSOR_SOURCE_NONE / CURSOR_SOURCE_SELF / CURSOR_SOURCE_OTHER
-        self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
-        self.doubleCursorCoordinate = np.zeros((4,), dtype=np.float32)
-
+        self.cursorCoordinate = [0.0] * 4
         self._shift = False
         self._command = False
 
@@ -432,8 +442,6 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
 
         self.gridList = []
         self._gridVisible = True  #self._preferences.showGrid
-        # self._crosshairVisible = True  #self._preferences.showCrosshair
-        # self._doubleCrosshairVisible = True  #self._preferences.showDoubleCrosshair
         self._sideBandsVisible = True
 
         self.diagonalGLList = None
@@ -3950,7 +3958,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
                         self.strip.marks:
 
                 # find the matching axisCodes to the display
-                exactMatch = (self._preferences.matchAxisCode == AxisMatch.FULL.value)
+                exactMatch = (self._preferences.matchAxisCode == AxisMatch.CODE.value)
                 indices = getAxisCodeMatchIndices(mark.axisCodes, self._axisCodes[:2], exactMatch=exactMatch,
                                                   allMatches=not exactMatch)
 
@@ -4057,10 +4065,8 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
 
     def getCurrentCursorCoordinate(self):
 
-        # AAARRGH - mouse may be in another strip :|
         if self.cursorSource is None or self.cursorSource == 'self':
             currentPos = self.mapFromGlobal(QtGui.QCursor.pos())
-
             # calculate mouse coordinate within the mainView
             mx = currentPos.x()
             if self._drawBottomAxis:
@@ -4069,10 +4075,8 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
             else:
                 my = self.height() - currentPos.y()
                 _top = self.height()
-
             mt = self.mouseTransform * QtGui.QVector4D(mx, my, 0.0, 1.0)
             result = [mt.x(), mt.y(), mt.z(), mt.w()]
-
         else:
             result = self.cursorCoordinate
 
@@ -4395,7 +4399,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
 
     def buildMouseCoordsDQ(self):
         """Builds Mouse Coord text for DQ crosshair."""
-        if not self._doubleCrosshairVisible or not self._crosshairVisible:
+        if not self._crosshairVisible:
             self.mouseStringDQ = None
             return
         try:
@@ -4555,9 +4559,6 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
             self.buildMouseCoordsDQ()
 
     def drawMouseCoords(self):
-        # if self.underMouse() or self._disableCursorUpdate:  # and self.mouseString:  # crosshairVisible
-        #     self.buildMouseCoords()
-
         if self.underMouse():
             if self.mouseString is not None:
                 # draw the mouse coordinates to the screen
@@ -5788,14 +5789,8 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
     def _glMouseMoved(self, aDict):
         if self.strip.isDeleted:
             return
-
-        if aDict[GLNotifier.GLSOURCE] != self:
-
-            # mouseMovedDict = aDict[GLNotifier.GLMOUSEMOVEDDICT]
-
-            if self._crosshairVisible:
-                # exactMatch = (self._preferences.matchAxisCode == AxisMatch.FULL.value)
-                self.update(mode=PaintModes.PAINT_MOUSEONLY)
+        if aDict[GLNotifier.GLSOURCE] != self and self._crosshairVisible:
+            self.update(mode=PaintModes.PAINT_MOUSEONLY)
 
     @Slot(dict)
     def _glKeyEvent(self, aDict):

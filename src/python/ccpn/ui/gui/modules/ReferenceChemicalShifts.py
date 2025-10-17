@@ -4,7 +4,7 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-12-11 19:13:09 +0000 (Wed, December 11, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:10 +0100 (Fri, October 17, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -54,6 +54,7 @@ from collections import defaultdict
 from ccpn.util.Colour import rgbaRatioToHex
 from ccpn.AnalysisAssign.modules.NmrAtomAssigner import BACKBONEATOMS
 from ccpn.util.isotopes import name2IsotopeCode
+from ccpn.util.Constants import AxisMatch
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
 
 
@@ -439,8 +440,8 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
                     isotope = name2IsotopeCode(item.atomName)
                     isotopeCodePosDict[isotope].append(x)
 
-        mouseMovedDict = {0: isotopeCodePosDict,
-                          1: atomPosDict}
+        mouseMovedDict = {AxisMatch.ISOTOPE: isotopeCodePosDict,
+                          AxisMatch.CODE   : atomPosDict}
 
         self.current.mouseMovedDict = mouseMovedDict
         self.GLSignals._emitMouseMoved(source=None, coords=None, mouseMovedDict=mouseMovedDict,

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-16 16:52:31 +0100 (Thu, October 16, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -398,7 +398,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                         QMenuBar { color: palette(text); }
                         QMenuBar::item:disabled { color: palette(dark); }
                         """
-                        # QProgressBar { text-align: center; }  # this messes with the colours :|
+        # QProgressBar { text-align: center; }  # this messes with the colours :|
 
         # there is also some weird stuff with the qprogressbar text-colour:
         #   the left-edge of the text-label is its local 0%, the right-edge its local 100%,
@@ -1415,6 +1415,16 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """Close modules in main window;
         CCPNINTERNAL: also called from Framework
         """
+        from ccpn.ui.gui.modules.SpectrumDisplay import SpectrumDisplay
+
+        # Block any rogue signals from the modules
+        _block = [QtCore.QSignalBlocker(module) for module in self.moduleArea.ccpnModules]
+        # Pass 1: stop the spectrum-displays from firing any paint-events
+        for module in self.moduleArea.ccpnModules:
+            if isinstance(module, SpectrumDisplay):
+                for strip in module.strips:
+                    strip._disableForClosure()
+        # Pass 2: close the modules
         for module in self.moduleArea.ccpnModules:
             getLogger().debug('Closing module: %s' % module)
             try:
@@ -1428,6 +1438,16 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """Close modules in any extra window;
         CCPNINTERNAL: also called from Framework
         """
+        from ccpn.ui.gui.modules.SpectrumDisplay import SpectrumDisplay
+
+        # Block any rogue signals from the modules
+        _block = [QtCore.QSignalBlocker(module) for module in self.moduleArea.tempAreas]
+        # Pass 1: stop the spectrum-displays from firing any paint-events
+        for module in self.moduleArea.tempAreas:
+            if isinstance(module, SpectrumDisplay):
+                for strip in module.strips:
+                    strip._disableForClosure()
+        # Pass 2: close the modules
         for module in self.moduleArea.tempAreas:
             getLogger().debug('Closing module: %s' % module)
             try:

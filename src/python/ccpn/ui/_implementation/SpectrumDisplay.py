@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-02 11:23:05 +0100 (Fri, May 02, 2025) $"
-__version__ = "$Revision: 3.3.2 $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -741,7 +741,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(SpectrumDisplay)
-def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
+def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: tuple[str, ...],
                         stripDirection: str = 'Y', name: str = None,
                         zPlaneNavigationMode: str = None,
                         isGrouped: bool = False, flip1D=False):
@@ -778,7 +778,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     is1D = (spectrum.dimensionCount == 1)
 
     if not is1D and flip1D:
-        raise ValueError('_newSpectrumDisplay: flid1D does not alpply to nD spectra')
+        raise ValueError('_newSpectrumDisplay: flid1D does not apply to nD spectra')
 
     # set api-parameters for display generation
     displayPars = dict(

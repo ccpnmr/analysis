@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-15 18:13:29 +0100 (Wed, October 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:10 +0100 (Fri, October 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,8 @@ import re
 from collections import OrderedDict
 
 from ccpn.util.DataEnum import DataIntEnum
-from ccpn.util.isotopes import isotopeRecords  # NB also used from here in ccpnmodel/ccpncore/api/ccp/nmr/ExpPrototype.py.
+from ccpn.util.isotopes import \
+    isotopeRecords  # NB also used from here in ccpnmodel/ccpncore/api/ccp/nmr/ExpPrototype.py.
 
 
 # TODO remove these dependencies
@@ -39,11 +40,13 @@ from ccpn.util.isotopes import isotopeRecords  # NB also used from here in ccpnm
 
 ERRORSTRING = 'BADVALUE'
 MOUSEDICTSTRIP = 'strip'
+MOUSEDICTCURSOR = 'cursor'
+
 
 class AxisMatch(DataIntEnum):
     ISOTOPE = 0, 'Isotope', 'match by isotope code'
-    FULL = 1, 'Atom Name', 'match by exact atom name'
-    PARTIAL = 2, 'Partial', 'match by isotope code and first letter of atom name'
+    CODE = 1, 'Axis code', 'match by axis code'
+    PARTIAL = 2, 'Partial', 'match by isotope code and first letter of axis code'
 
 
 POSINFINITY = float('Infinity')
@@ -68,7 +71,7 @@ INTERNALQTDATA = 'application/x-qabstractitemmodeldatalist'
 # The expression below has one error:
 # a string of the form '+12' is parsed as (None, '', '+12'}
 # whereas it should be interpreted as (None, '+12', None), but that cannot be helped
-sequenceCodePattern = re.compile('(\-?\d+)?(.*?)(\+\d+|\-\d+)?$')
+sequenceCodePattern = re.compile(r'(\-?\d+)?(.*?)(\+\d+|\-\d+)?$')
 
 # Units allowed for amounts (e.g. Sample)
 amountUnits = ('L', 'g', 'mole')

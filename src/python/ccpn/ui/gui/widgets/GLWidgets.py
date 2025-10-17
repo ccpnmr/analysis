@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-15 18:13:29 +0100 (Wed, October 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:10 +0100 (Fri, October 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -41,9 +41,9 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import (CcpnGLWidget, GLVertexArray, GLRE
                                                GLRENDERMODE_RESCALE)
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import YAXISUNITS1D
 import ccpn.util.Phasing as Phasing
-from ccpn.util.Constants import MOUSEDICTSTRIP, AxisMatch
+from ccpn.util.Constants import MOUSEDICTSTRIP, AxisMatch, MOUSEDICTCURSOR
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.lib.OpenGL.CursorLib import CursorRenderer, CursorRenderer1d
+from ccpn.ui.gui.lib.OpenGL.CursorLib import CursorRenderer, CursorRenderer1d, _COORDS_TYPE
 
 
 if TYPE_CHECKING:
@@ -858,19 +858,14 @@ class GuiNdWidget(CcpnGLWidget):
         self._maxY = max(self._maxY, specVals.maxSpectrumFrequency[1])
         self._minY = min(self._minY, specVals.minSpectrumFrequency[1])
 
-    def _updateMouseDict(self, cursorCoordinate):
-        try:
-            mouseMovedDict = self.current.mouseMovedDict
-        except Exception:
-            # initialise a new mouse moved dict
-            mouseMovedDict = {MOUSEDICTSTRIP    : self.strip,
-                              AxisMatch.ISOTOPE: {},
-                              AxisMatch.FULL: {},
-                              AxisMatch.PARTIAL: {},
-                              }
-        xPos = yPos = 0
+    def _updateMouseDict(self, cursorCoordinate: list[float]) -> _COORDS_TYPE:
+        if not (mouseMovedDict := self.current.mouseMovedDict):
+            mouseMovedDict = self.current.mouseMovedDict = {}
+        # initialise a new mouse moved dict
+        xPos = yPos = None
+        mouseMovedDict[MOUSEDICTSTRIP] = self.strip
         atTypes = mouseMovedDict[AxisMatch.ISOTOPE] = {}
-        atCodes = mouseMovedDict[AxisMatch.FULL] = {}
+        atCodes = mouseMovedDict[AxisMatch.CODE] = {}
         _atPrt = mouseMovedDict[AxisMatch.PARTIAL] = {}
         chrs = max(1, self._preferences.get("matchNumChars", 0))
 
@@ -891,9 +886,8 @@ class GuiNdWidget(CcpnGLWidget):
             atcs.append(pos)
             _atp.append(pos)
 
+        mouseMovedDict[MOUSEDICTCURSOR] = (xPos, yPos)
         self.current.cursorPosition = (xPos, yPos)
-        self.current.mouseMovedDict = mouseMovedDict
-
         return mouseMovedDict
 
 
@@ -1575,19 +1569,14 @@ class Gui1dWidget(CcpnGLWidget):
         self._maxY = max(self._maxY, specVals.maxSpectrumFrequency[1])
         self._minY = min(self._minY, specVals.minSpectrumFrequency[1])
 
-    def _updateMouseDict(self, cursorCoordinate):
-        try:
-            mouseMovedDict = self.current.mouseMovedDict
-        except:
-            # initialise a new mouse moved dict
-            mouseMovedDict = {MOUSEDICTSTRIP    : self.strip,
-                              AxisMatch.ISOTOPE: {},
-                              AxisMatch.FULL: {},
-                              AxisMatch.PARTIAL: {},
-                              }
-        xPos = yPos = 0
+    def _updateMouseDict(self, cursorCoordinate: list[float]) -> _COORDS_TYPE:
+        if not (mouseMovedDict := self.current.mouseMovedDict):
+            mouseMovedDict = self.current.mouseMovedDict = {}
+        # initialise a new mouse moved dict
+        xPos = yPos = None
+        mouseMovedDict[MOUSEDICTSTRIP] = self.strip
         atTypes = mouseMovedDict[AxisMatch.ISOTOPE] = {}
-        atCodes = mouseMovedDict[AxisMatch.FULL] = {}
+        atCodes = mouseMovedDict[AxisMatch.CODE] = {}
         _atPrt = mouseMovedDict[AxisMatch.PARTIAL] = {}
         chrs = max(1, self._preferences.get("matchNumChars", 0))
 
@@ -1612,7 +1601,6 @@ class Gui1dWidget(CcpnGLWidget):
             atcs.append(pos)
             _atp.append(pos)
 
+        mouseMovedDict[MOUSEDICTCURSOR] = (xPos, yPos)
         self.current.cursorPosition = (xPos, yPos)
-        self.current.mouseMovedDict = mouseMovedDict
-
         return mouseMovedDict

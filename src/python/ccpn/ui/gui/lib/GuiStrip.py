@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-16 16:52:32 +0100 (Thu, October 16, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -284,8 +284,8 @@ class GuiStrip(Frame):
             self.arrowMinimum = _firstStrip.arrowMinimum
 
             self.gridVisible = _firstStrip.gridVisible
-            self._crosshairVisible = _firstStrip._crosshairVisible
             self._doubleCrosshairVisible = _firstStrip._doubleCrosshairVisible
+            self._crosshairVisible = _firstStrip._crosshairVisible
             self.sideBandsVisible = _firstStrip.sideBandsVisible
 
             self.showSpectraOnPhasing = _firstStrip.showSpectraOnPhasing
@@ -304,10 +304,20 @@ class GuiStrip(Frame):
 
         else:
             # get the values from the preferences
-            self.gridVisible = self._preferences.showGrid
-            self._crosshairVisible = self._preferences.showCrosshair
-            self._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
-            self.sideBandsVisible = self._preferences.showSideBands
+            if len(self.project.strips) < 2:
+                # These four are currently global, so should grab from the first open strip
+                self.gridVisible = self._preferences.showGrid
+                self._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
+                self._crosshairVisible = self._preferences.showCrosshair
+                self.sideBandsVisible = self._preferences.showSideBands
+            else:
+                # There are already existing strips so need to update the global attributes from a previous strip
+                _firstStrip = next((strip for strip in self.project.strips if strip != self), None)
+                self.gridVisible = _firstStrip.gridVisible
+                # These are coupled, so double-crosshair has be set first
+                self._doubleCrosshairVisible = _firstStrip._doubleCrosshairVisible
+                self._crosshairVisible = _firstStrip._crosshairVisible
+                self.sideBandsVisible = _firstStrip.sideBandsVisible
 
             self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
             self._spectrumBordersVisible = self._preferences.showSpectrumBorder
@@ -384,6 +394,12 @@ class GuiStrip(Frame):
         self._queuePending = UpdateQueue()
         self._queueActive = None
         self._lock = QtCore.QMutex()
+
+    def _disableForClosure(self):
+        """Disable painting in the GL window for closure."""
+        if self._CcpnGLWidget:
+            # SHOULD use a method for this :|
+            self._CcpnGLWidget._blankDisplay = True
 
     @property
     def painted(self):
@@ -941,7 +957,7 @@ class GuiStrip(Frame):
 
         allowMenuDuplicates = ((prefs := getPreferences()) and prefs.general.get('allowMenuDuplicates'))
         showBlankDimensions = ((prefs := getPreferences()) and prefs.general.get('showBlankDimensions'))
-        mouseDict = self.current.mouseMovedDict[AxisMatch.FULL]
+        mouseDict = self.current.mouseMovedDict[AxisMatch.CODE]
         position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
                     for ax in self.axisCodes]
         if None in position:
@@ -955,7 +971,7 @@ class GuiStrip(Frame):
     def markAxisIndices(self, indices=None):
         """Mark the X/Y/XY axisCodes by index
         """
-        mouseDict = self.current.mouseMovedDict[AxisMatch.FULL]
+        mouseDict = self.current.mouseMovedDict[AxisMatch.CODE]
         position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
                     for ax in self.axisCodes]
         if indices is None:
@@ -1083,7 +1099,7 @@ class GuiStrip(Frame):
         """Set up the menu for the main view for marking axis codes
         """
         axisName = axisMenu or self.markAxesMenu
-        mouseDict = self.current.mouseMovedDict[AxisMatch.FULL]
+        mouseDict = self.current.mouseMovedDict[AxisMatch.CODE]
         # position = [mouseDict[ax][0] if mouseDict[ax] else None
         #             for ax in self.axisCodes if mouseDict.get(ax)]
         position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
@@ -1230,14 +1246,14 @@ class GuiStrip(Frame):
         position = None
         mouseMovedDict = self.current.mouseMovedDict
         if direction == 0:
-            for mm in mouseMovedDict[AxisMatch.FULL].keys():
+            for mm in mouseMovedDict[AxisMatch.CODE].keys():
                 if mm[0] == self.axisCodes[0][0]:  # check the first letter?
-                    positions = mouseMovedDict[AxisMatch.FULL][mm]
+                    positions = mouseMovedDict[AxisMatch.CODE][mm]
                     position = positions[0] if positions else None
         else:
-            for mm in mouseMovedDict[AxisMatch.FULL].keys():
+            for mm in mouseMovedDict[AxisMatch.CODE].keys():
                 if mm[0] == self.axisCodes[1][0]:
-                    positions = mouseMovedDict[AxisMatch.FULL][mm]
+                    positions = mouseMovedDict[AxisMatch.CODE][mm]
                     position = positions[0] if positions else None
 
         if position is not None:
@@ -2242,7 +2258,7 @@ class GuiStrip(Frame):
                 defaultColour = '#FF0000'
 
             # find all the positions valid for this strip
-            mouseDict = self.current.mouseMovedDict[AxisMatch.FULL]
+            mouseDict = self.current.mouseMovedDict[AxisMatch.CODE]
             positions = [(pos, ax) for ax in self.axisCodes for pos in mouseDict.get(ax, []) if pos is not None]
 
             if axisIndex is not None:
@@ -3107,9 +3123,9 @@ class GuiStrip(Frame):
         # Only implemented for nD
         pass
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Notifier queue handling
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def queueFull(self):
         """Method that is called when the queue is deemed to be too big.

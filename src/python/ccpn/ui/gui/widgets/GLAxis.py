@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-15 18:13:29 +0100 (Wed, October 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:10 +0100 (Fri, October 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -30,14 +30,13 @@ __date__ = "$Date: 2021-03-26 15:58:06 +0000 (Fri, March 26, 2021) $"
 import math
 import time
 from contextlib import contextmanager
-from typing import Tuple
 from itertools import takewhile
 import numpy as np
 from OpenGL import GL
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import pyqtSlot as Slot, Qt
 
-from ccpn.util.Constants import MOUSEDICTSTRIP, AxisMatch
+from ccpn.util.Constants import MOUSEDICTSTRIP, AxisMatch, MOUSEDICTCURSOR
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.guiSettings import (getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_BACKGROUND,
                                      CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, CCPNGLWIDGET_GRID,
@@ -55,6 +54,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
+from ccpn.ui.gui.lib.OpenGL.CursorLib import _COORDS_TYPE
 from ccpn.ui.gui.lib.mouseEvents import rightMouse
 
 
@@ -260,7 +260,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.update()
 
     @property
-    def tilePosition(self) -> Tuple[int, int]:
+    def tilePosition(self) -> tuple[int, int]:
         """Returns a tuple of the tile coordinates (from top-left)
         tilePosition = (x, y)
         """
@@ -913,9 +913,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._startCoordinate = None
         self._endCoordinate = None
         self.cursorSource = CURSOR_SOURCE_NONE  # can be CURSOR_SOURCE_NONE / CURSOR_SOURCE_SELF / CURSOR_SOURCE_OTHER
-        self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
-        self.doubleCursorCoordinate = np.zeros((4,), dtype=np.float32)
-
+        self.cursorCoordinate = [0.0] * 4
         self._shift = False
         self._command = False
         self._key = ''
@@ -945,7 +943,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         self.gridList = []
         self._gridVisible = True
-        # self._crosshairVisible = True
         self._sideBandsVisible = True
 
         self.diagonalGLList = None
@@ -1396,13 +1393,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     def _glMouseMoved(self, aDict):
         if self.spectrumDisplay.isDeleted:
             return
-
         if aDict[GLNotifier.GLSOURCE] != self:
-            # # self.cursorCoordinate = aDict[GLMOUSECOORDS]
-            # # self.update()
-            # mouseMovedDict = aDict[GLNotifier.GLMOUSEMOVEDDICT]
-            # if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
-            #     exactMatch = (self._preferences.matchAxisCode == AxisMatch.FULL.value)
             self.update(mode=PaintModes.PAINT_MOUSEONLY)
 
     def update(self, mode=PaintModes.PAINT_ALL):
@@ -2044,7 +2035,6 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         if self.cursorSource is None or self.cursorSource == 'self':
             currentPos = self.mapFromGlobal(QtGui.QCursor.pos())
-
             # calculate mouse coordinate within the mainView
             mx = currentPos.x()
             if not self._fullHeightRightAxis:
@@ -2053,10 +2043,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             else:
                 my = self.height() - currentPos.y()
                 _top = self.height()
-
-            result = self.mouseTransform * QtGui.QVector4D(mx, my, 0.0, 1.0)
-            result = (result.x(), result.y(), result.z(), result.w())
-
+            mt = self.mouseTransform * QtGui.QVector4D(mx, my, 0.0, 1.0)
+            result = [mt.x(), mt.y(), mt.z(), mt.w()]
         else:
             result = self.cursorCoordinate
 
@@ -2208,40 +2196,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             event.ignore()
             return
 
-        try:
-            mouseMovedDict = self.current.mouseMovedDict
-        except:
-            # initialise a new mouse moved dict
-            mouseMovedDict = {MOUSEDICTSTRIP    : None,
-                              AxisMatch.ISOTOPE: {},
-                              AxisMatch.FULL: {},
-                              AxisMatch.PARTIAL.value: {},
-                              }
-
-        xPos = yPos = 0
-        atTypes = mouseMovedDict[AxisMatch.ISOTOPE] = {}
-        atCodes = mouseMovedDict[AxisMatch.FULL] = {}
-        _atPrt = mouseMovedDict[AxisMatch.PARTIAL] = {}
-        chrs = max(1, self._preferences.get("matchNumChars", 0))
-
-        for n, (isotope, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self.spectrumDisplay.axes)):
-            code = axis.code[:chrs].lower()
-            ats = atTypes.setdefault(isotope, [])
-            atcs = atCodes.setdefault(code, [])
-            _atp = _atPrt.setdefault(f"{isotope}_{code}", [])
-            if n == 0:
-                xPos = pos = cursorCoordinate[0]
-            elif n == 1:
-                yPos = pos = cursorCoordinate[1]
-            else:
-                # for other Nd dimensions
-                pos = axis.position
-            ats.append(pos)
-            atcs.append(pos)
-            _atp.append(pos)
-
-        self.current.cursorPosition = (xPos, yPos)
-        self.current.mouseMovedDict = mouseMovedDict
+        mouseMovedDict = self._updateMouseDict(cursorCoordinate)
 
         if int(event.buttons() & (Qt.LeftButton | Qt.RightButton)):
             # Main mouse drag event - handle moving the axes with the mouse
@@ -2268,6 +2223,37 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                                            mainWindow=self.mainWindow)
 
         self.update()
+
+    def _updateMouseDict(self, cursorCoordinate: list[float]) -> _COORDS_TYPE:
+        if not (mouseMovedDict := self.current.mouseMovedDict):
+            mouseMovedDict = self.current.mouseMovedDict = {}
+        # initialise a new mouse moved dict
+        xPos = yPos = None
+        mouseMovedDict[MOUSEDICTSTRIP] = None
+        atTypes = mouseMovedDict[AxisMatch.ISOTOPE] = {}
+        atCodes = mouseMovedDict[AxisMatch.CODE] = {}
+        _atPrt = mouseMovedDict[AxisMatch.PARTIAL] = {}
+        chrs = max(1, self._preferences.get("matchNumChars", 0))
+
+        for n, (isotope, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self.spectrumDisplay.axes)):
+            code = axis.code[:chrs].lower()
+            ats = atTypes.setdefault(isotope, [])
+            atcs = atCodes.setdefault(code, [])
+            _atp = _atPrt.setdefault(f"{isotope}_{code}", [])
+            if n == 0:
+                xPos = pos = cursorCoordinate[0]
+            elif n == 1:
+                yPos = pos = cursorCoordinate[1]
+            else:
+                # for other Nd dimensions
+                pos = axis.position
+            ats.append(pos)
+            atcs.append(pos)
+            _atp.append(pos)
+
+        mouseMovedDict[MOUSEDICTCURSOR] = (xPos, yPos)
+        self.current.cursorPosition = (xPos, yPos)
+        return mouseMovedDict
 
     def _resizeGL(self, w, h):
         self.w = w

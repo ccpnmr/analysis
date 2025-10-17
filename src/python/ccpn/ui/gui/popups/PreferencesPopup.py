@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-15 18:13:29 +0100 (Wed, October 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:10 +0100 (Fri, October 17, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -517,7 +517,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                    (self._setExternalProgramsTabWidgets, 'External Programs'),
                                    (self._setAppearanceTabWidgets, 'Appearance'),
                                    (self._setMacroEditorTabWidgets, 'Macro Editor'),
-                                    (self._setPluginsTabWidgents, 'Plugins')
+                                   (self._setPluginsTabWidgents, 'Plugins')
                                    ):
             fr = ScrollableFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
                                  scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
@@ -882,13 +882,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 2), gridSpan=(1, 1))
 
-
     def _setPluginsTabWidgents(self, parent):
         from ccpn.framework.plugins._PluginPreferencesWidgets import PluginPreferencesFrame
+
         row = 0
-        frame = PluginPreferencesFrame(parent, grid=(0,0))
-
-
+        frame = PluginPreferencesFrame(parent, grid=(0, 0))
 
     def _setMacroEditorTabWidgets(self, parent):
         row = 0
@@ -1354,7 +1352,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.matchAxisCodeLabel = _makeLabel(parent, text="Match axes by", grid=(row, 0))
-        self.matchAxisCode = RadioButtons(parent, texts=['Isotope', 'Full axis code'],
+        self.matchAxisCode = RadioButtons(parent, texts=['Isotope', 'Axis code'],
                                           callback=self._queueSetMatchAxisCode,
                                           direction='h',
                                           grid=(row, 1), hAlign='l', gridSpan=(1, 2),

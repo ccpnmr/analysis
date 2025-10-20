@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-17 18:11:10 +0100 (Fri, October 17, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-20 16:39:53 +0100 (Mon, October 20, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from OpenGL import GL
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import pyqtSlot as Slot, Qt
 
-from ccpn.util.Constants import MOUSEDICTSTRIP, AxisMatch, MOUSEDICTCURSOR
+from ccpn.util.Constants import MOUSEDICTSTRIP, AxisMatch, MOUSEDICTCURSOR, MOUSEGLPARENT
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.guiSettings import (getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_BACKGROUND,
                                      CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, CCPNGLWIDGET_GRID,
@@ -2253,6 +2253,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
         mouseMovedDict[MOUSEDICTCURSOR] = (xPos, yPos)
         self.current.cursorPosition = (xPos, yPos)
+        mouseMovedDict[MOUSEGLPARENT] = self
         return mouseMovedDict
 
     def _resizeGL(self, w, h):

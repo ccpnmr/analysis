@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-17 18:11:10 +0100 (Fri, October 17, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-20 16:39:53 +0100 (Mon, October 20, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,7 @@ from ccpn.util.isotopes import \
 ERRORSTRING = 'BADVALUE'
 MOUSEDICTSTRIP = 'strip'
 MOUSEDICTCURSOR = 'cursor'
+MOUSEGLPARENT = 'glparent'
 
 
 class AxisMatch(DataIntEnum):

@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-20 16:39:53 +0100 (Mon, October 20, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -30,27 +30,28 @@ __date__ = "$Date: 2025-10-10 10:23:20 +0100 (Fri, October 10, 2025) $"
 # Start of code
 #=========================================================================================
 
-from typing import Protocol, TYPE_CHECKING, TypeVar, TypeAlias, cast
+from typing import Protocol, TYPE_CHECKING, TypeVar, TypeAlias, cast, Union
 from typing_extensions import Self
 import numpy as np
 
+from ccpn.core.lib.SpectrumLib import QuantumType
 from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray, GLRENDERMODE_REBUILD
-from ccpn.util.Constants import AxisMatch, MOUSEDICTCURSOR
+from ccpn.util.Constants import AxisMatch, MOUSEDICTCURSOR, MOUSEGLPARENT
 from ccpn.ui.gui.lib.mouseEvents import PICK
 
 
 if TYPE_CHECKING:
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget
-    from ccpn.ui.gui.modules.SpectrumDisplay import (SpectrumDisplay1d as _SpectrumDisplay1d,
-                                                     SpectrumDisplayNd as _SpectrumDisplayNd)
-    from ccpn.ui.gui.lib.SpectrumView import (SpectrumView as _SpectrumView1d, SpectrumView as _SpectrumViewNd)
+    from ccpn.ui.gui.modules.SpectrumDisplay import (SpectrumDisplay1d, SpectrumDisplayNd)
+    from ccpn.ui.gui.lib.SpectrumView import (SpectrumView1d, SpectrumViewNd)
 
-_CoreSpectrumDisplay = TypeVar("_CoreSpectrumDisplay", bound="_SpectrumDisplay1d | _SpectrumDisplayNd")
-_CoreSpectrumView = TypeVar("_CoreSpectrumView", bound="_SpectrumView1d | _SpectrumViewNd")
+_CoreSpectrumDisplay = TypeVar("_CoreSpectrumDisplay", bound="SpectrumDisplay1d | SpectrumDisplayNd")
+_CoreSpectrumView = TypeVar("_CoreSpectrumView", bound="SpectrumView1d | SpectrumViewNd")
 
-_COORDS_TYPE: TypeAlias = dict[str | AxisMatch | int, dict[str, list[float]] | tuple | None]
+# The `|` operator doesn't like quoted types here, so MUST use typing.Union (it may be python 3.10 issue)
+_COORDS_TYPE: TypeAlias = dict[str | AxisMatch | int, Union[dict[str, list[float]], tuple, "CcpnGLWidget", None]]
 
 #-----------------------------------------------------------------------------------------
 # Tuning constants
@@ -79,6 +80,34 @@ class CursorProtocol(Protocol):
     def drawCursors(self): ...
 
     def drawLastCursors(self): ...
+
+
+def _getQuantumOrders(host: CcpnGLWidget) -> tuple[int, int, QuantumType]:
+    """
+    Return (x_order, y_order, match_type). Defaults to (1, 1, QuantumType.NONE).
+    Uses host._firstVisible.spectrum.coherenceOrders and a CoherenceOrder enum.
+    """
+    from ccpn.core.lib.SpectrumLib import CoherenceOrder
+
+    x_order: int = 1
+    y_order: int = 1
+    if (fv := host._firstVisible) and not fv.isDeleted:
+        x_idx, y_idx = fv.dimensionIndices[:2]
+        spec = fv.spectrum
+        mTypes = [CoherenceOrder[co].value for co in spec.coherenceOrders]  # type: ignore
+        if len(mTypes) > max(x_idx, y_idx):
+            x_order = mTypes[x_idx]
+            y_order = mTypes[y_idx]
+
+    if x_order == 1 and y_order == 2:
+        match_type = QuantumType.Y
+    elif x_order == 2 and y_order == 1:
+        match_type = QuantumType.X
+    else:
+        # This includes (1,1), (2,2), (3,1), etc.
+        match_type = QuantumType.NONE
+
+    return x_order, y_order, match_type
 
 
 #=========================================================================================
@@ -117,6 +146,9 @@ class CursorRenderer:
       - _scaleAxisToRatio(values: list[float | None]) -> list[float]
       - getCurrentCursorCoordinate(localPos: Optional[QPointF] = None) -> list[float]
       - underMouse() -> bool
+      - etc.
+
+    There are also host attributes that MUST be moved here for correct ownership.
 
     Optional methods (if present, used; otherwise safe defaults are applied):
       - isPickMode() -> bool
@@ -343,25 +375,6 @@ class CursorRenderer:
     #         newCoords[1] = y_list[0]
     #     return newCoords
 
-    @staticmethod
-    def _getQuantumOrders(host: CcpnGLWidget) -> tuple[int, int, bool]:
-        """
-        Return (xQuantumOrder, yQuantumOrder). Defaults to (1,1).
-        Uses host._firstVisible.spectrum.coherenceOrders and a CoherenceOrder enum.
-        """
-        from ccpn.core.lib.SpectrumLib import CoherenceOrder
-
-        xQuantumOrder = yQuantumOrder = 1
-        if (fv := host._firstVisible) and not fv.isDeleted:
-            idx = fv.dimensionIndices
-            spec = fv.spectrum
-            mTypes = [CoherenceOrder[co].value for co in spec.coherenceOrders]  # type: ignore
-            if len(mTypes) > max(idx[0], idx[1]):
-                xQuantumOrder = mTypes[idx[0]]
-                yQuantumOrder = mTypes[idx[1]]
-        return xQuantumOrder, yQuantumOrder, (0 < xQuantumOrder < yQuantumOrder < 3) or (
-                0 < yQuantumOrder < xQuantumOrder < 3)
-
     def _resolveAxisLists(self, host: CcpnGLWidget, coords_dict: _COORDS_TYPE
                           ) -> tuple[list[float], list[float], int, int]:
         """
@@ -374,20 +387,37 @@ class CursorRenderer:
             xPosList = isoDict.get(isotopes[0], [])
             yPosList = isoDict.get(isotopes[1], [])
         else:
-            xPosList, yPosList = self._resolveAxisCodes(coords_dict, host)
+            xPosList, yPosList = self._resolveAxisCodes(host, coords_dict)
 
-        xQuantumOrder, yQuantumOrder, dq = self._getQuantumOrders(host)
-        sameSd = host.spectrumDisplay == ((st := coords_dict.get("strip")) and st.spectrumDisplay)
-        if dq or (not self.doubleCrosshairVisible and host._matchingIsotopeCodes and sameSd):
-            coords = cast(tuple, coords_dict[MOUSEDICTCURSOR])
-            xPosList = [coords[0]]
-            yPosList = [coords[1]]
+        x_order, y_order, dq = _getQuantumOrders(host)
+        if host._matchingIsotopeCodes:
+            # Only disable double-cursors in these displays
+            sameSd = host.spectrumDisplay == ((st := coords_dict.get("strip")) and st.spectrumDisplay)
 
-        return xPosList, yPosList, xQuantumOrder, yQuantumOrder
+            if sameSd and not self.doubleCrosshairVisible and dq is QuantumType.NONE:
+                # Non-double quantum display
+                x_coord, y_coord = cast(tuple, coords_dict[MOUSEDICTCURSOR])
+                xPosList = [x_coord]
+                yPosList = [y_coord]
+
+            elif dq is not QuantumType.NONE:
+                _, _, dq_source = _getQuantumOrders(cast("CcpnGLWidget", coords_dict[MOUSEGLPARENT]))
+
+                # SHOULD really test the first isotope-code of the other display :|
+                if dq_source is QuantumType.NONE or dq == dq_source:
+                    x_slice, y_slice = slice(0, 1), slice(1, 2)
+                else:
+                    # Flip the co-ordinates
+                    x_slice, y_slice = slice(1, 2), slice(0, 1)
+                # Always put a value in to, at least, give a cross-hair.
+                # When mapping from a non-matching display, one of these may be empty.
+                xPosList = xPosList[x_slice] or yPosList[y_slice]
+                yPosList = yPosList[y_slice] or xPosList[x_slice]
+
+        return xPosList, yPosList, x_order, y_order
 
     @staticmethod
-    def _resolveAxisCodes(coords_dict: dict[str | AxisMatch | int, dict[str, list[float]] | tuple | None],
-                          host: CcpnGLWidget) -> tuple:
+    def _resolveAxisCodes(host: CcpnGLWidget, coords_dict: _COORDS_TYPE) -> tuple[list[float], list[float]]:
         atCodes = host._orderedAxes
         assert atCodes and len(atCodes) >= 2, "CursorRenderer: _orderedAxes must provide two axes"
 
@@ -429,7 +459,7 @@ class CursorRenderer:
         self._appendLine(vertices, indices, x - dx, y + dy, x - dx, y - dy)  # left
 
     #-----------------------------------------------------------------------------------------
-    # Adapters / defaults
+    # Adapters/defaults
 
     # def _getActiveCursorDrawList(self, host: CcpnGLWidget) -> GLVertexArray:
     #     """Default adapter to your queue; override if you use a different mechanism."""
@@ -555,7 +585,7 @@ class CursorRenderer1d(CursorRenderer):
             xPosList = isoDict.get(atomTypes[0], [])
             yPosList = isoDict.get(atomTypes[1], [])
         else:
-            xPosList, yPosList = self._resolveAxisCodes(coords_dict, host)
+            xPosList, yPosList = self._resolveAxisCodes(host, coords_dict)
 
         # No quantum checking required
-        return xPosList, yPosList, -1, -1
+        return xPosList, yPosList, 1, 1

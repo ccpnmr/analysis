@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-17 18:11:10 +0100 (Fri, October 17, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-20 16:39:53 +0100 (Mon, October 20, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import (CcpnGLWidget, GLVertexArray, GLRE
                                                GLRENDERMODE_RESCALE)
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import YAXISUNITS1D
 import ccpn.util.Phasing as Phasing
-from ccpn.util.Constants import MOUSEDICTSTRIP, AxisMatch, MOUSEDICTCURSOR
+from ccpn.util.Constants import MOUSEDICTSTRIP, AxisMatch, MOUSEDICTCURSOR, MOUSEGLPARENT
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.OpenGL.CursorLib import CursorRenderer, CursorRenderer1d, _COORDS_TYPE
 
@@ -888,6 +888,7 @@ class GuiNdWidget(CcpnGLWidget):
 
         mouseMovedDict[MOUSEDICTCURSOR] = (xPos, yPos)
         self.current.cursorPosition = (xPos, yPos)
+        mouseMovedDict[MOUSEGLPARENT] = self
         return mouseMovedDict
 
 
@@ -1603,4 +1604,5 @@ class Gui1dWidget(CcpnGLWidget):
 
         mouseMovedDict[MOUSEDICTCURSOR] = (xPos, yPos)
         self.current.cursorPosition = (xPos, yPos)
+        mouseMovedDict[MOUSEGLPARENT] = self
         return mouseMovedDict

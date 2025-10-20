@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-06-27 13:30:47 +0100 (Fri, June 27, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-20 16:39:52 +0100 (Mon, October 20, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -27,11 +27,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import collections
-import math
 import random
 import numpy as np
 import decorator
-from typing import Tuple, Optional, Sequence, Any
+from typing import Tuple, Optional, Sequence
 from itertools import permutations
 from tqdm import tqdm
 from ccpn.framework.Application import getApplication
@@ -41,7 +40,7 @@ from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeT
 # from ccpn.util.Common import percentage, isIterable # this causes circular imports. DO NOT USE HERE
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import singleton
-from ccpn.util.DataEnum import DataEnum
+from ccpn.util.DataEnum import DataIntEnum
 
 
 #=========================================================================================
@@ -102,14 +101,14 @@ UNDEFINED_DIM_INDEX = 8
 # DATA_TYPE_PN      = 2  # size/2 P and size/2 N points
 # dataTypeMap = {DATA_TYPE_REAL:"real", DATA_TYPE_COMPLEX:"complex", DATA_TYPE_PN:"PN"}
 
-DATA_TYPE_REAL         = 'nR' # n real data points; pointCount = n
-DATA_TYPE_COMPLEX_nRnI = '(nR)(nI)' # n real followed by n imag points; pointCount = 2*n
-DATA_TYPE_COMPLEX_nRI  = 'n(RI)'  # n (real, imag) pairs; pointCount = 2*n
-DATA_TYPE_COMPLEX_PN   = 'n(PN)'   # n (P, N) pairs; pointCount = 2*n
+DATA_TYPE_REAL = 'nR'  # n real data points; pointCount = n
+DATA_TYPE_COMPLEX_nRnI = '(nR)(nI)'  # n real followed by n imag points; pointCount = 2*n
+DATA_TYPE_COMPLEX_nRI = 'n(RI)'  # n (real, imag) pairs; pointCount = 2*n
+DATA_TYPE_COMPLEX_PN = 'n(PN)'  # n (P, N) pairs; pointCount = 2*n
 DATA_TYPES = (DATA_TYPE_REAL, DATA_TYPE_COMPLEX_nRnI, DATA_TYPE_COMPLEX_nRI, DATA_TYPE_COMPLEX_PN)
 
 MagnetisationTransferTypes = ('onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'through-space', 'relayed-alternate')
-MagnetisationTransferParameters = ('dimension1 dimension2 transferType isIndirect'.split())
+MagnetisationTransferParameters = ('dimension1', 'dimension2', 'transferType', 'isIndirect')
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', MagnetisationTransferParameters)
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
 
@@ -118,12 +117,20 @@ FOLDING_MODE_MIRROR = 'mirror'
 FOLDING_MODES = (FOLDING_MODE_CIRCULAR, FOLDING_MODE_MIRROR)
 
 
-class CoherenceOrder(DataEnum):
+class CoherenceOrder(DataIntEnum):
     # name, value, description, dataValue = number of isotope-codes per order
     ZQ = 0, 'Zero Quantum', 2
     SQ = 1, 'Single Quantum', 1
     DQ = 2, 'Double Quantum', 2
     TQ = 3, 'Triple Quantum', 3
+
+
+class QuantumType(DataIntEnum):
+    # name, value, description, dataValue = number of isotope-codes per order
+    NONE = 0, 'no match'
+    X = 1, 'double-quantum on x-axis'
+    Y = 2, 'double-quantum on y-axis'
+    XY = 3, 'double-quantum on both axes'  # Not sure that this should ever exist
 
 
 WINDOW_FUNCTION_EM = 'EM'
@@ -135,7 +142,8 @@ WINDOW_FUNCTIONS = (WINDOW_FUNCTION_EM, WINDOW_FUNCTION_GM, WINDOW_FUNCTION_SINE
 # These MUST match the model - ('Shift','ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling','MQShift','T1','T2','T1rho','T1zz','Time','None')
 MEASUREMENT_TYPE_TIME = 'Time'
 MEASUREMENT_TYPE_SHIFT = 'Shift'
-MEASUREMENT_TYPES = (MEASUREMENT_TYPE_TIME, MEASUREMENT_TYPE_SHIFT, 'ShiftAnisotropy', 'JCoupling', 'Rdc', 'TROESY', 'DipolarCoupling',
+MEASUREMENT_TYPES = (MEASUREMENT_TYPE_TIME, MEASUREMENT_TYPE_SHIFT, 'ShiftAnisotropy', 'JCoupling', 'Rdc', 'TROESY',
+                     'DipolarCoupling',
                      'MQShift', 'T1', 'T2', 'T1rho', 'T1zz')
 
 # Isotope-dependent assignment tolerances (in ppm)
@@ -324,6 +332,7 @@ def checkSpectrumPropertyValue(iterable: bool, unique: bool = False, allowNone: 
 
     return theDecorator
 
+
 #------------------------------------------------------------------------------------------------------
 # Routines dealing with getting data sources
 #------------------------------------------------------------------------------------------------------
@@ -340,8 +349,8 @@ def getSpectrumDataSource(path, dataFormat):
     raises ValueError if path is None or dataFormat is inValid
     """
     # avoiding cyclic import
-    from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import \
-        getDataSourceClass, getDataFormats, SpectrumDataSourceSuffixDict
+    from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import (getDataSourceClass, getDataFormats,
+                                                                         SpectrumDataSourceSuffixDict)
     from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
     from ccpn.core.lib.DataStore import DataStore
 
@@ -378,6 +387,7 @@ def getSpectrumDataSource(path, dataFormat):
         # last one we tried is False
         return (dataStore, dataSource)
 
+
 #------------------------------------------------------------------------------------------------------
 
 def _calibrateX1D(spectrum, currentPosition, newPosition):
@@ -392,6 +402,7 @@ def _calibrateY1D(spectrum, currentPosition, newPosition):
     # NOTE:ED - update all peak-positions, but needs revisiting
     for pp in spectrum.peaks:
         pp.height += shift
+
 
 def _calibrateXND(spectrum, strip, currentPosition, newPosition):
     # map the X change to the correct spectrum axis
@@ -472,8 +483,6 @@ def align2HSQCs(refSpectrum, querySpectrum, refPeakListIdx=-1, queryPeakListIdx=
     correctedValues = np.array(queryRefValues) - shifts
 
     return shifts, correctedValues
-
-
 
 
 # refSpectrum = project.spectra[]
@@ -558,7 +567,7 @@ from scipy import sparse
 from scipy.sparse.linalg import spsolve
 
 
-def als(y, lam=10 ** 2, p=0.001, nIter=10):
+def als(y, lam=10**2, p=0.001, nIter=10):
     """Implements an Asymmetric Least Squares (Asl) Smoothing
     baseline correction algorithm
     H C Eilers, Paul & F M Boelens, Hans. (2005). Baseline Correction with Asymmetric Least Squares Smoothing. Unpubl. Manuscr. .
@@ -947,7 +956,8 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                               setPositiveContours=True, setNegativeContours=True,
                               useDefaultMultiplier=True, useDefaultLevels=True, useDefaultContourBase=False,
                               useSameMultiplier=True,
-                              defaultMultiplier=DEFAULTMULTIPLIER, defaultLevels=DEFAULTLEVELS, defaultContourBase=DEFAULTCONTOURBASE):
+                              defaultMultiplier=DEFAULTMULTIPLIER, defaultLevels=DEFAULTLEVELS,
+                              defaultContourBase=DEFAULTCONTOURBASE):
     """Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum
     """
 
@@ -982,7 +992,9 @@ def setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
         return
 
     if any(x != 'Frequency' for x in spectrum.dimensionTypes):
-        raise NotImplementedError("setContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
+        raise NotImplementedError(
+                "setContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(
+                        spectrum.dimensionTypes, ))
 
     getLogger().info("estimating noise level for spectrum %s" % str(spectrum.pid))
     if setNoiseLevel:
@@ -1051,7 +1063,8 @@ def getContourLevelsFromNoise(spectrum,
                               setPositiveContours=False, setNegativeContours=False,
                               useDefaultMultiplier=True, useDefaultLevels=True, useDefaultContourBase=False,
                               useSameMultiplier=True,
-                              defaultMultiplier=DEFAULTMULTIPLIER, defaultLevels=DEFAULTLEVELS, defaultContourBase=DEFAULTCONTOURBASE):
+                              defaultMultiplier=DEFAULTMULTIPLIER, defaultLevels=DEFAULTLEVELS,
+                              defaultContourBase=DEFAULTCONTOURBASE):
     """Calculate the noise level, base contour level and positive/negative multipliers for the given spectrum
     """
 
@@ -1080,7 +1093,9 @@ def getContourLevelsFromNoise(spectrum,
         return [None] * 6
 
     if any(x != 'Frequency' for x in spectrum.dimensionTypes):
-        raise NotImplementedError("getContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
+        raise NotImplementedError(
+                "getContourLevelsFromNoise not implemented for processed frequency spectra, dimension types were: {}".format(
+                        spectrum.dimensionTypes, ))
 
     # need to generate a min/max
     noise = getContourEstimate(spectrum)
@@ -1146,13 +1161,16 @@ def getClippedRegion(spectrum, strip, sort=False):
     if spectrum.dimensionCount == 1:
         ppmArrays = [spectrum.getPpmArray(dimension=1)]
     else:
-        ppmArrays = [spectrum.getPpmArray(dimension=dim) for dim in spectrum.getByAxisCodes('dimensions', strip.axisCodes)]
+        ppmArrays = [spectrum.getPpmArray(dimension=dim) for dim in
+                     spectrum.getByAxisCodes('dimensions', strip.axisCodes)]
 
     # clip to the ppmArrays, not taking aliased regions into account
     if sort:
-        return tuple(tuple(sorted(np.clip(region, np.min(limits), np.max(limits)))) for region, limits in zip(selectedRegion, ppmArrays))
+        return tuple(tuple(sorted(np.clip(region, np.min(limits), np.max(limits))))
+                     for region, limits in zip(selectedRegion, ppmArrays))
     else:
-        return tuple(tuple(np.clip(region, np.min(limits), np.max(limits))) for region, limits in zip(selectedRegion, ppmArrays))
+        return tuple(tuple(np.clip(region, np.min(limits), np.max(limits)))
+                     for region, limits in zip(selectedRegion, ppmArrays))
 
 
 def getNoiseEstimateFromRegion(spectrum, strip):
@@ -1233,7 +1251,7 @@ def getNoiseEstimate(spectrum):
     npts = spectrum.pointCounts
 
     # take % of points in each axis
-    _fract = (fractPerAxis ** len(npts))
+    _fract = (fractPerAxis**len(npts))
     nsamples = min(int(np.prod(npts) * _fract), maxSamples)
     nsubsets = max(1, int(nsamples * subsetFract))
 
@@ -1254,7 +1272,7 @@ def getContourEstimate(spectrum):
     npts = spectrum.pointCounts
 
     # take % of points in each axis
-    _fract = (fractPerAxis ** len(npts))
+    _fract = (fractPerAxis**len(npts))
     nsamples = min(int(np.prod(npts) * _fract), maxSamples)
     nsubsets = max(1, int(nsamples * subsetFract))
 
@@ -1269,6 +1287,7 @@ def _noiseFunc(value):
                               min=value.min, max=value.max,
                               noiseLevel=abs(value.mean) + 3.5 * value.std)
 
+
 def _getNoiseRegionFromLimits(regionData, yLower, yUpper):
     """Get the sd from the region between two limits value"""
     yValues = regionData
@@ -1276,19 +1295,20 @@ def _getNoiseRegionFromLimits(regionData, yLower, yUpper):
     noiseRegion = yValues[indices]
     return noiseRegion
 
-def _estimateNoiseSDforSpectrumNoiseLevel(spectrum, stdFactor=1.1, noiseLevelFactor=3.5):
 
+def _estimateNoiseSDforSpectrumNoiseLevel(spectrum, stdFactor=1.1, noiseLevelFactor=3.5):
     regionData = spectrum.getAllRegionData()
     regionData = regionData.flatten()
     noiseLevel = spectrum.noiseLevel
     if spectrum.noiseLevel is None:
         raise ValueError('This routine requires the noiseLevel to be set')
-    yUpper =  noiseLevel/noiseLevelFactor
-    yLower =  - yUpper
+    yUpper = noiseLevel / noiseLevelFactor
+    yLower = - yUpper
     noiseRegion = _getNoiseRegionFromLimits(regionData, yLower, yUpper)
     sd = np.std(noiseRegion)
     sd *= stdFactor
     return float(sd)
+
 
 def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     """
@@ -1500,6 +1520,7 @@ def _old_estimateSNR(noiseLevels, signalPoints, factor=2.5):
         return abs(snRatios)
     return [None] * len(signalPoints)
 
+
 class _1DRawDataDict(dict):
     """
     Class to contain Spectra Raw ppmPosition and Intensities
@@ -1507,19 +1528,21 @@ class _1DRawDataDict(dict):
     It is a sort of  on-the-fly caching of the raw ppmPositions and intensities array for the requested spectra, without the overhead of looking to the core classes (more than necessary).
 
     """
+
     def __init__(self, spectra=None):
         super(_1DRawDataDict, self).__init__()
         from ccpn.framework.Application import getProject
 
         getLogger().info('Building 1D raw data dictionary...')
         project = getProject()
-        dd =  {}
+        dd = {}
         spectra = spectra or project.spectra
         for sp in tqdm(spectra):
             if sp.dimensionCount == 1:
-                dd[sp] = (sp.positions,sp.intensities)
+                dd[sp] = (sp.positions, sp.intensities)
         self.update(dd)
         getLogger().info('Building 1D raw data dictionary. Completed')
+
 
 def _filterROI1Darray(x, y, roi):
     """ Return region included in the ROI ppm position"""
@@ -1817,7 +1840,9 @@ def _getApiExpTransfers(spectrum, referenceExperimentName, referenceDimensions):
                 try:
                     if not useRefs:
                         # dims = sorted(ii + 1 for exp in expDimRefs for ii, val in enumerate(spectrum.spectrumReferences) if exp == val._expDimRef)
-                        dims = sorted([ii + 1, exp.refExpDimRef.axisCode] for exp in expDimRefs for ii, val in enumerate(spectrum.spectrumReferences)
+                        dims = sorted([ii + 1, exp.refExpDimRef.axisCode]
+                                      for exp in expDimRefs
+                                      for ii, val in enumerate(spectrum.spectrumReferences)
                                       if exp == val._expDimRef and exp.refExpDimRef.axisCode in referenceDimensions)
 
                     else:
@@ -2146,8 +2171,9 @@ def _createPeak(spectrum, peakList=None, height=None, **ppmPositions) -> Optiona
             # check that the picked peak lies in the bounded region of the spectrum
             minSpectrumFrequency, maxSpectrumFrequency = sorted(specLimits[dim])
             visibleAlias = aliasInds[dim]
-            regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
-                            round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
+            regionBounds = (
+                round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
+                round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
 
             if not (regionBounds[0] <= pos <= regionBounds[1]):
                 break
@@ -2159,7 +2185,8 @@ def _createPeak(spectrum, peakList=None, height=None, **ppmPositions) -> Optiona
                             for indx, (pos, np) in enumerate(zip(_ppmPositions, pointCounts))]
 
             # get the existing peak point-positions for this list
-            existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks if None not in pk.pointPositions]
+            existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks
+                                 if None not in pk.pointPositions]
 
             if intPositions not in existingPositions:
                 # add the new peak only if one doesn't exist at these pointPositions
@@ -2436,7 +2463,7 @@ def _setParameterValues(obj, parameterName: str, values: Sequence, dimensions: S
     CCPNINTERNAL: used in setByAxisCode and setByDimension methods of
                   Spectrum and Peak classes
     """
-    from ccpn.util.Common import isIterable # this causes circular imports. KEEP LOCAL
+    from ccpn.util.Common import isIterable  # this causes circular imports. KEEP LOCAL
 
     if not hasattr(obj, parameterName):
         raise ValueError('object "%s" does not have parameter "%s"' %
@@ -2479,7 +2506,7 @@ def _getParameterValues(obj, parameterName: str, dimensions: Sequence, dimension
     CCPNINTERNAL: used in getByAxisCode and getByDimension methods of
                   Spectrum and Peak classes
     """
-    from ccpn.util.Common import isIterable # this causes circular imports. KEEP LOCAL
+    from ccpn.util.Common import isIterable  # this causes circular imports. KEEP LOCAL
 
     if not hasattr(obj, parameterName):
         raise ValueError('object "%s" does not have parameter "%s"' %
@@ -2521,7 +2548,7 @@ def _orderByDimensions(iterable, dimensions, dimensionCount) -> list:
     :param dimensions: a tuple or list of dimensions (1..dimensionCount)
     :return: a list with values defined by iterable in dimensions order
     """
-    from ccpn.util.Common import isIterable # this causes circular imports. KEEP LOCAL
+    from ccpn.util.Common import isIterable  # this causes circular imports. KEEP LOCAL
 
     if not isIterable(iterable):
         raise ValueError('not an iterable; got %r' % (iterable))

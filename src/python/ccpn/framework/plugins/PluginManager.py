@@ -29,8 +29,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-08-20 12:43:21 +0100 (Wed, August 20, 2025) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-10-21 19:03:07 +0100 (Tue, October 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -238,6 +238,9 @@ class PluginManager:
         internalPluginsSubMenu = mainWindow.searchMenuAction(CCPNPLUGINSMENU)
         userPluginsSubMenu.clear() #clear all to don't mess with ordering or complex checking
         internalPluginsSubMenu.clear()
+
+        # NOTE:ED - need to put this back in after workshop
+        return
 
         for pluginName, pluginDescriptor in self._descriptors.items():
             _isInternalPlugin = pluginDescriptor._isInternalPlugin

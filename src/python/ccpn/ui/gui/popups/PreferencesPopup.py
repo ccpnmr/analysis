@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-21 17:32:32 +0100 (Tue, October 21, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-21 19:03:08 +0100 (Tue, October 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -517,7 +517,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                    (self._setExternalProgramsTabWidgets, 'External Programs'),
                                    (self._setAppearanceTabWidgets, 'Appearance'),
                                    (self._setMacroEditorTabWidgets, 'Macro Editor'),
-                                   (self._setPluginsTabWidgents, 'Plugins')
+                                   # (self._setPluginsTabWidgets, 'Plugins')
                                    ):
             fr = ScrollableFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
                                  scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
@@ -882,7 +882,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 2), gridSpan=(1, 1))
 
-    def _setPluginsTabWidgents(self, parent):
+    def _setPluginsTabWidgets(self, parent):
         from ccpn.framework.plugins._PluginPreferencesWidgets import PluginPreferencesFrame
 
         row = 0
@@ -1093,7 +1093,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self._populatePeaksTab()
             self._populateExternalProgramsTab()
             self._populateAppearanceTab()
-            self._populateMacroEditorTab()
+            # self._populateMacroEditorTab()
 
     def setFontText(self, widget, fontString):
         """Set the contents of the widget the details of the font

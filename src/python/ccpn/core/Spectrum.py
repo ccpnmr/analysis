@@ -65,7 +65,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-07-02 10:23:00 +0100 (Wed, July 02, 2025) $"
+__dateModified__ = "$dateModified: 2025-09-29 10:59:32 +0100 (Mon, September 29, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -1135,6 +1135,13 @@ class Spectrum(AbstractWrapperObject):
             return
 
         self._openFile(path=value, dataFormat=self.dataFormat, checkParameters=True)
+
+    def _autoSetExperimentDims(self):
+        if not list(set(self.isotopeCodes)) == self.isotopeCodes:
+            getLogger().info('Failed auto-setting experiment types: not all isotopeCodes are unique.')
+            return
+
+        self.referenceExperimentDimensions = self.axisCodes
 
     def _makeAbsolutePath(self) -> Path:
         """Resolve any redirections in the path, as maintained in the dataStore object
@@ -4622,6 +4629,8 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
         spectrum._updateParameterValues()
         # spectrum._saveSpectrumMetaData()
         spectrum._setDefaultAxisOrdering()
+
+    spectrum._autoSetExperimentDims()
 
     return spectrum
 

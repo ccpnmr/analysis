@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-02 14:32:05 +0100 (Thu, October 02, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__dateModified__ = "$dateModified: 2025-10-15 14:15:25 +0100 (Wed, October 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -54,14 +54,14 @@ _CoreStrip = TypeVar('_CoreStrip', bound='_Strip1d | _StripNd')
 _CoreSpectrumDisplay = TypeVar('_CoreSpectrumDisplay', bound='_SpectrumDisplay1d | _SpectrumDisplayNd')
 
 
-def addItemsToNavigateMenu(self: _CoreStrip, position: list[float], axisCodes: list[str], label: str, menuFunc: Menu,
+def addItemsToNavigateMenu(strip: _CoreStrip, position: list[float], axisCodes: list[str], label: str, menuFunc: Menu,
                            includeAxisCodes: bool = True, allowMenuDuplicates: bool = False,
                            showBlankDimensions: bool = False,
                            ):
     """Adds item to navigate to a section of the context-menu.
 
-    :param self: The instance of the class calling this function, a strip UI element.
-    :type self: _CoreStrip
+    :param strip: The instance of the class calling this function, a strip UI element.
+    :type strip: _CoreStrip
     :param position: A list of float values representing the coordinates for navigation.
     :type position: list[float]
     :param axisCodes: A list of strings representing the axis codes.
@@ -79,12 +79,15 @@ def addItemsToNavigateMenu(self: _CoreStrip, position: list[float], axisCodes: l
     """
     if not menuFunc:
         return
-    if not self.current.project.spectrumDisplays:
+    try:
+        specDisplays = strip.current.project.spectrumDisplays
+    except AttributeError:
+        # Skip if `None` is found at any level
         return
 
     menuFunc.clear()
     menuFunc.setColourEnabled(True)  # enable foreground-colours for this menu
-    currentStrip = self
+    currentStrip = strip
     if not getattr(menuFunc, '_filter', None):
         # add a menu-filter to show/hide strip overlays as the mouse is moved over menu-actions
         menuFunc._filter = MenuEventFilter(menuFunc)
@@ -92,8 +95,8 @@ def addItemsToNavigateMenu(self: _CoreStrip, position: list[float], axisCodes: l
 
     # the first section for the current spectrumDisplay/strip
     # add the opposite diagonals for matching axisCodes - always at the top of the list
-    _addGroupMenuItems(menuFunc, [self], currentStrip,
-                       self.mainWindow._previousStrip, self.spectrumDisplay,
+    _addGroupMenuItems(menuFunc, [strip], currentStrip,
+                       strip.mainWindow._previousStrip, strip.spectrumDisplay,
                        position, axisCodes, label,
                        includeAxisCodes, allowMenuDuplicates, showBlankDimensions,
                        )
@@ -107,7 +110,7 @@ def addItemsToNavigateMenu(self: _CoreStrip, position: list[float], axisCodes: l
         # 2-pass: show all pinned, and then unpinned
 
         # add the permutations for the other strips
-        for spectrumDisplay in self.current.project.spectrumDisplays:
+        for spectrumDisplay in specDisplays:
             # skip the spectrumDisplay containing the current strip (for the minute)
             if spectrumDisplay == currentStrip.spectrumDisplay:
                 # skip if the current spectrumDisplay
@@ -118,7 +121,7 @@ def addItemsToNavigateMenu(self: _CoreStrip, position: list[float], axisCodes: l
                 # skip if no strips
                 continue
             _previousMenuItem, _currentMenuItem = _addGroupMenuItems(menuFunc, pStrips, currentStrip,
-                                                                     self.mainWindow._previousStrip, spectrumDisplay,
+                                                                     strip.mainWindow._previousStrip, spectrumDisplay,
                                                                      position, axisCodes, label,
                                                                      includeAxisCodes, allowMenuDuplicates,
                                                                      showBlankDimensions,

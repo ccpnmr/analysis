@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-22 16:55:44 +0100 (Thu, May 22, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-15 14:04:47 +0100 (Wed, October 15, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -111,6 +111,7 @@ class MessageDialog(QtWidgets.QMessageBox):
     _dontShowEnabled = False
     _defaultResponse = None
     _popupId = None
+    _dontShowCheckBox = None
 
     def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None,
                  detailedText=None, dontShowEnabled=False, defaultResponse=None, popupId=None):
@@ -135,7 +136,11 @@ class MessageDialog(QtWidgets.QMessageBox):
             self._dontShowEnabled = dontShowEnabled
             self._defaultResponse = defaultResponse
             self._popupId = popupId
-        self._setDontShow()
+
+    def exec_(self):
+        if self._dontShowEnabled:
+            self._setDontShow()
+        return super().exec_()
 
     def _setFonts(self):
         """Set the fonts for the message widgets.
@@ -212,34 +217,23 @@ class MessageDialog(QtWidgets.QMessageBox):
             # any error should hide the checkbox
             self._dontShowCheckBox = None
             return
-        layout = cast(QtWidgets.QGridLayout, self.layout())
-        # add a checkbox below the buttons - looks a little cleaner
-        # - just use simple widgets for the minute to stop cyclic imports
-        self._frame = _frame = Frame(self)
-        innerLayout = QtWidgets.QHBoxLayout()
-        _frame.setLayout(innerLayout)
-        # set the background/fontSize for the tooltips, fraction slower but don't need to import the colour-names
-        # _frame.setStyleSheet('QToolTip {{ background-color: {TOOLTIP_BACKGROUND}; '
-        #                      'color: {TOOLTIP_FOREGROUND}; '
-        #                      'font-size: {_size}pt ; }}'.format(_size=_frame.font().pointSize(), **getColours()))
 
+        # add a checkbox below the buttons - looks a little cleaner
         _msg = 'This popup can be enabled again from preferences->appearance'
-        dsc = self._dontShowCheckBox = CheckBox(_frame, text=_DONTSHOWMESSAGE)
+        dsc = self._dontShowCheckBox = CheckBox(text=_DONTSHOWMESSAGE)
+        dsc.setParent(self)  # Add to the message-box,
+        dsc.setFixedSize(dsc.sizeHint())  # Size MUST be defined
         dsc.setToolTip(_msg)
         dsc.setContentsMargins(0, 0, 0, 0)
         dsc.setChecked(state)
-        innerLayout.addWidget(dsc, 0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
         self.accepted.connect(self._accept)
         self.rejected.connect(self._reject)
 
-        _frame.setFixedSize(_frame.minimumSizeHint())
-        hs = _frame.height() - layout.verticalSpacing() - self.contentsMargins().bottom() // 2
-
-        _spacer = QtWidgets.QSpacerItem(0, max(1, hs), QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        layout.addItem(_spacer, layout.rowCount(), 0, 1, layout.columnCount())
-
         self._setStyle()
+        marg = self.contentsMargins()
+        marg.setBottom(max(dsc.sizeHint().height(), int(marg.bottom() * 1.5)))
+        self.setContentsMargins(marg)  # Must be done AFTER setting styleSheet :|
 
     def _getStandardIcon(self):
         # NOTE:ED - how to grab the standardIcons as pixmaps for our own message-widget
@@ -337,11 +331,12 @@ class MessageDialog(QtWidgets.QMessageBox):
             self.move(global_point
                       - self.frameGeometry().center()
                       + self.frameGeometry().topLeft())
-        if self._dontShowEnabled:
+        if self._dontShowEnabled and self._dontShowCheckBox:
             with suppress(AttributeError):
-                # strange error on the first paint of the widget
-                self._frame.move(self.contentsMargins().left() // 2,
-                                 self.geometry().height() - self._frame.height() - self.contentsMargins().bottom() // 2)
+                lt, bm = self.contentsMargins().left(), self.contentsMargins().bottom()
+                # Strange error on the first paint of the widget?
+                # Align the new checkbox with the bottom-margin
+                self._dontShowCheckBox.move(lt // 2, self.geometry().height() - bm)
 
     def runFunc(self, func):
         QtCore.QTimer().singleShot(0, partial(self._runFunc, func))

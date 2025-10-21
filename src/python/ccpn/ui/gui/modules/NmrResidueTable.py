@@ -22,8 +22,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-02-25 15:04:59 +0000 (Tue, February 25, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__dateModified__ = "$dateModified: 2025-10-15 14:15:26 +0100 (Wed, October 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -113,7 +113,9 @@ class NmrResidueTableModule(CcpnTableModule):
                                                  includeSpectrumTable=self.includeSpectrumTable,
                                                  activePulldownClass=self.activePulldownClass,
                                                  activePulldownInitialState=self.activePulldownInitialState,
-                                                 grid=(0, 0))
+                                                 includeSequentialStrips=False,
+                                                 grid=(0, 0)
+                                                 )
 
         # add the frame containing the pulldown and table
         self._mainFrame = NmrResidueTableFrame(parent=mainWidget,

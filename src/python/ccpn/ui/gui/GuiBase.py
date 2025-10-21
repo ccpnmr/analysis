@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-15 10:09:12 +0100 (Thu, May 15, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-16 16:52:31 +0100 (Thu, October 16, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -249,7 +249,9 @@ __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
 #                                             ("Auto-arrange Labels", self.arrangeLabels, [('shortcut', 'av')]),
 #                                             ("Reset Labels", self.resetLabels, [('shortcut', 'rv')]),
 #                                             )),
-#             ("Show/Hide Crosshairs", self.toggleCrosshairAll, [('shortcut', 'ch')]),
+#             ("Show/Hide Grid", self.toggleGridAll, [('shortcut', 'gs')]),
+            # TODO:ED - Move somewhere :|
+            # ("Show/Hide Crosshairs", self.toggleCrosshairAll, [('shortcut', 'ch')]),
 #             ("Show/Hide Double Crosshairs", self.toggleDoubleCrosshairAll, [('shortcut', 'dc')]),
 #             (),
 #             (SHOWMODULESMENU, ([

@@ -60,8 +60,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-08-11 11:59:37 +0100 (Mon, August 11, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -122,15 +122,16 @@ import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from ccpn.ui.gui.lib.ModuleLib import getBlockingDialogs
-from ccpn.ui.gui.menus.StripContextMenus import (_hidePeaksSingleActionItems, _hideMultipletsSingleActionItems,
-                                                 _setEnabledAllItems, _ARRANGELABELS,
-                                                 _RESETLABELS)
+from ccpn.ui.gui.menus.GuiStripContextMenus import (_hidePeaksSingleActionItems, _hideMultipletsSingleActionItems,
+                                                    _setEnabledAllItems, _ARRANGELABELS,
+                                                    _RESETLABELS)
+from ccpn.ui.gui.lib.OpenGL.CursorLib import CursorProtocol
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBlocking
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib import Pid
 from ccpn.util.decorators import profile
-from ccpn.util.Constants import AXIS_FULLATOMNAME
+from ccpn.util.Constants import AxisMatch
 from ccpn.util.Logging import getLogger
 
 
@@ -219,15 +220,18 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
     _pids = None
     _dragStartPosition = None
     tilePosition = None
-    mouseCoordDQ = None
+    mouseCoordDQ: tuple[float | None, float | None, int] | None = None
 
-    strip: _CoreStrip = WeakRefDescriptor()
-    spectrumDisplay: _CoreSpectrumDisplay = WeakRefDescriptor()
+    strip: WeakRefDescriptor[_CoreStrip] = WeakRefDescriptor()
+    spectrumDisplay: WeakRefDescriptor[_CoreSpectrumDisplay] = WeakRefDescriptor()
     application = WeakRefDescriptor()
     mainWindow = WeakRefDescriptor()
     project = WeakRefDescriptor()
     current = WeakRefDescriptor()
     _preferences = WeakRefDescriptor()
+
+    cursorKlass: type[CursorProtocol] = None
+    _curserHandler: CursorProtocol | None = None
 
     def __init__(self, parent: _CoreStrip,
                  *, mainWindow=None, stripIDLabel=None, antiAlias=4):
@@ -292,6 +296,59 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
             self.resized.connect(self._resized)
             self.frameSwapped.connect(self._frameSwapped)
 
+    #-----------------------------------------------------------------------------------------
+    # Properties
+
+    @property
+    def _crosshairVisible(self):
+        if self._cursorHandler:
+            return self._cursorHandler.crosshairVisible
+        raise RuntimeError(f'{self.__class__}._crosshairVisible: cursorHandler not defined')
+
+    @_crosshairVisible.setter
+    def _crosshairVisible(self, value):
+        if not self._cursorHandler:
+            raise RuntimeError(f'{self.__class__}._crosshairVisible: cursorHandler not defined')
+        self._cursorHandler.crosshairVisible = value
+
+    @property
+    def _doubleCrosshairVisible(self):
+        if self._cursorHandler:
+            return self._cursorHandler.doubleCrosshairVisible
+        raise RuntimeError(f'{self.__class__}._doubleCrosshairVisible: cursorHandler not defined')
+
+    @_doubleCrosshairVisible.setter
+    def _doubleCrosshairVisible(self, value):
+        if not self._cursorHandler:
+            raise RuntimeError(f'{self.__class__}._doubleCrosshairVisible: cursorHandler not defined')
+        self._cursorHandler.doubleCrosshairVisible = value
+
+    @property
+    def _disableCursorUpdate(self):
+        if self._cursorHandler:
+            return self._cursorHandler.disableCursorUpdate
+        raise RuntimeError(f'{self.__class__}._disableCursorUpdate: cursorHandler not defined')
+
+    @_disableCursorUpdate.setter
+    def _disableCursorUpdate(self, value):
+        if not self._cursorHandler:
+            raise RuntimeError(f'{self.__class__}._disableCursorUpdate: cursorHandler not defined')
+        self._cursorHandler.disableCursorUpdate = value
+
+    # @property
+    # def _gridVisible(self):
+    #     if self._gridHandler:
+    #         return self._gridHandler.gridVisible
+    #     raise RuntimeError(f'{self.__class__}._gridVisible: gridHandler not defined')
+    #
+    # @_gridVisible.setter
+    # def _gridVisible(self, value):
+    #     if not self._gridHandler:
+    #         raise RuntimeError(f'{self.__class__}._gridVisible: gridHandler not defined')
+    #     self._gridHandler.gridVisible = value
+
+    #-----------------------------------------------------------------------------------------
+
     def _setStyle(self):
         self._checkPalette(self.palette())
 
@@ -352,10 +409,13 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
         self._startCoordinate = None
         self._endCoordinate = None
         self._refreshCursors = False
-        self.cursorSource = CURSOR_SOURCE_NONE  # can be CURSOR_SOURCE_NONE / CURSOR_SOURCE_SELF / CURSOR_SOURCE_OTHER
-        self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
-        self.doubleCursorCoordinate = np.zeros((4,), dtype=np.float32)
 
+        if self.cursorKlass:
+            self._cursorHandler = self.cursorKlass()  # create the handler
+            self._cursorHandler.attach(self)  # bind to this widget
+
+        self.cursorSource = CURSOR_SOURCE_NONE  # can be CURSOR_SOURCE_NONE / CURSOR_SOURCE_SELF / CURSOR_SOURCE_OTHER
+        self.cursorCoordinate = [0.0] * 4
         self._shift = False
         self._command = False
 
@@ -382,8 +442,6 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
 
         self.gridList = []
         self._gridVisible = True  #self._preferences.showGrid
-        self._crosshairVisible = True  #self._preferences.showCrosshair
-        self._doubleCrosshairVisible = True  #self._preferences.showDoubleCrosshair
         self._sideBandsVisible = True
 
         self.diagonalGLList = None
@@ -550,7 +608,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
 
         self._cursorFrameCounter = GLDefs.CursorFrameCounterModes.CURSOR_DEFAULT
         self._menuActive = False
-        self._disableCursorUpdate = False
+        # self._disableCursorUpdate = False
 
         self.globalGL = GLGlobalData(parent=self)
         self.viewports = GLViewports()
@@ -1775,25 +1833,27 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
                                            dimension=2,
                                            GLContext=self)
 
+        if self._cursorHandler:
+            self._cursorHandler.initialise(self)
         # get the current buffering mode and set the required length to the number of buffers
-        fmt = self.format()
-        self._numBuffers = int(fmt.swapBehavior()) or 2
-        self._glCursorQueue = ()
-        for buf in range(self._numBuffers):
-            self._glCursorQueue += (GLVertexArray(numLists=1,
-                                                  renderMode=GLRENDERMODE_REBUILD,
-                                                  blendMode=False,
-                                                  drawMode=GL.GL_LINES,
-                                                  dimension=2,
-                                                  GLContext=self),)
-        self._clearGLCursorQueue()
-
-        self._glCursor = GLVertexArray(numLists=1,
-                                       renderMode=GLRENDERMODE_REBUILD,
-                                       blendMode=False,
-                                       drawMode=GL.GL_LINES,
-                                       dimension=2,
-                                       GLContext=self)
+        # fmt = self.format()
+        # self._numBuffers = int(fmt.swapBehavior()) or 2
+        # self._glCursorQueue = ()
+        # for buf in range(self._numBuffers):
+        #     self._glCursorQueue += (GLVertexArray(numLists=1,
+        #                                           renderMode=GLRENDERMODE_REBUILD,
+        #                                           blendMode=False,
+        #                                           drawMode=GL.GL_LINES,
+        #                                           dimension=2,
+        #                                           GLContext=self),)
+        # self._clearGLCursorQueue()
+        #
+        # self._glCursor = GLVertexArray(numLists=1,
+        #                                renderMode=GLRENDERMODE_REBUILD,
+        #                                blendMode=False,
+        #                                drawMode=GL.GL_LINES,
+        #                                dimension=2,
+        #                                GLContext=self)
 
         self._externalRegions = GLExternalRegion(project=self.project, GLContext=self, spectrumView=None,
                                                  integralListView=None)
@@ -1880,21 +1940,29 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
         self.GLSignals.glKeyEvent.connect(self._glKeyEvent)
         self.glReady = True
 
-    def _clearGLCursorQueue(self):
-        """Clear the cursor glLists
-        """
-        if not self._disableCursorUpdate:
-            for glBuf in self._glCursorQueue:
-                glBuf.clearArrays()
-            self._glCursorHead = 0
-            self._glCursorTail = (self._glCursorHead - 1) % self._numBuffers
+    # @property
+    # def _disableCursorUpdate(self) -> bool:
+    #     return self._cursorHandler._disableCursorUpdate
+    #
+    # @_disableCursorUpdate.setter
+    # def _disableCursorUpdate(self, value: bool):
+    #     self._cursorHandler._disableCursorUpdate = value
 
-    def _advanceGLCursor(self):
-        """Advance the pointers for the cursor glLists
-        """
-        if not self._disableCursorUpdate:
-            self._glCursorHead = (self._glCursorHead + 1) % self._numBuffers
-            self._glCursorTail = (self._glCursorHead - 1) % self._numBuffers
+    # def _clearGLCursorQueue(self):
+    #     """Clear the cursor glLists
+    #     """
+    #     if not self._disableCursorUpdate:
+    #         for glBuf in self._glCursorQueue:
+    #             glBuf.clearArrays()
+    #         self._glCursorHead = 0
+    #         self._glCursorTail = (self._glCursorHead - 1) % self._numBuffers
+    #
+    # def _advanceGLCursor(self):
+    #     """Advance the pointers for the cursor glLists
+    #     """
+    #     if not self._disableCursorUpdate:
+    #         self._glCursorHead = (self._glCursorHead + 1) % self._numBuffers
+    #         self._glCursorTail = (self._glCursorHead - 1) % self._numBuffers
 
     def _initialiseViewPorts(self):
         """Initialise all the viewports for the widget
@@ -2533,7 +2601,6 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
         # if no self.current then strip is not defined correctly
         if not getattr(self.current, 'mouseMovedDict', None):
             return
-
         if not self._mousePressed:
             return
 
@@ -3048,7 +3115,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
         if self._notifyContoursChange or self._notifySpectrumViewsChange:
             # build spectrumSettings
             self.buildSpectra()
-        self.buildCursors()
+        self._cursorHandler.buildCursors()
         if self.underMouse():
             self.buildMouseCoords(self._refreshCursors)
             self._refreshCursors = False
@@ -3125,7 +3192,8 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
 
         elif self._paintMode == PaintModes.PAINT_ALL or self._leavingWidget:
             # NOTE:ED - paint all content to the GL widget - need to work on this
-            self._clearGLCursorQueue()
+            if self._cursorHandler:
+                self._cursorHandler._clearGLCursorQueue()
 
             if getattr(self.project, '_buildWithProfile', False) is True:
                 self.project._buildWithProfile = False
@@ -3212,12 +3280,12 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
 
         for _ in self._disableGLAliasing():
             shader.setProjection(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-            self.buildCursors()
+            self._cursorHandler.buildCursors()
 
             for _ in self._enableLogicOp(GL.GL_INVERT):
                 # enable invert mode so that only the cursor needs to be refreshed in the other viewports
-                self.drawLastCursors()
-                self.drawCursors()
+                self._cursorHandler.drawLastCursors()
+                self._cursorHandler.drawCursors()
 
     def _paintGL(self):
 
@@ -3319,7 +3387,8 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
 
             for _ in self._enableLogicOp(GL.GL_INVERT):
                 # enable invert mode so that only the cursor needs to be refreshed in the other viewports
-                self.drawCursors()
+                if self._cursorHandler:
+                    self._cursorHandler.drawCursors()
 
         shader = self._shaderText.bind()
         self.enableTextClientState()
@@ -3889,7 +3958,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
                         self.strip.marks:
 
                 # find the matching axisCodes to the display
-                exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
+                exactMatch = (self._preferences.matchAxisCode == AxisMatch.CODE.value)
                 indices = getAxisCodeMatchIndices(mark.axisCodes, self._axisCodes[:2], exactMatch=exactMatch,
                                                   allMatches=not exactMatch)
 
@@ -3980,26 +4049,24 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
                 ((values[1] - self.axisB) / (self.axisT - self.axisB))
                 if values[1] is not None and abs(self.axisT - self.axisB) > 1e-9 else 0.0]
 
-    def drawLastCursors(self):
-        """Draw the cursors/doubleCursors
-        """
-        cursor = self._glCursorQueue[self._glCursorTail]
-        if cursor.indices.size:
-            cursor.drawIndexVBO()
-
-    def drawCursors(self):
-        """Draw the cursors/doubleCursors
-        """
-        cursor = self._glCursorQueue[self._glCursorHead]
-        if cursor.indices.size:
-            cursor.drawIndexVBO()
+    # def drawLastCursors(self):
+    #     """Draw the cursors/doubleCursors
+    #     """
+    #     cursor = self._glCursorQueue[self._glCursorTail]
+    #     if cursor.indices.size:
+    #         cursor.drawIndexVBO()
+    #
+    # def drawCursors(self):
+    #     """Draw the cursors/doubleCursors
+    #     """
+    #     cursor = self._glCursorQueue[self._glCursorHead]
+    #     if cursor.indices.size:
+    #         cursor.drawIndexVBO()
 
     def getCurrentCursorCoordinate(self):
 
-        # AAARRGH - mouse may be in another strip :|
         if self.cursorSource is None or self.cursorSource == 'self':
             currentPos = self.mapFromGlobal(QtGui.QCursor.pos())
-
             # calculate mouse coordinate within the mainView
             mx = currentPos.x()
             if self._drawBottomAxis:
@@ -4008,10 +4075,8 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
             else:
                 my = self.height() - currentPos.y()
                 _top = self.height()
-
             mt = self.mouseTransform * QtGui.QVector4D(mx, my, 0.0, 1.0)
             result = [mt.x(), mt.y(), mt.z(), mt.w()]
-
         else:
             result = self.cursorCoordinate
 
@@ -4334,7 +4399,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
 
     def buildMouseCoordsDQ(self):
         """Builds Mouse Coord text for DQ crosshair."""
-        if not self._doubleCrosshairVisible or not self._crosshairVisible:
+        if not self._crosshairVisible:
             self.mouseStringDQ = None
             return
         try:
@@ -4494,9 +4559,6 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
             self.buildMouseCoordsDQ()
 
     def drawMouseCoords(self):
-        # if self.underMouse() or self._disableCursorUpdate:  # and self.mouseString:  # crosshairVisible
-        #     self.buildMouseCoords()
-
         if self.underMouse():
             if self.mouseString is not None:
                 # draw the mouse coordinates to the screen
@@ -4666,7 +4728,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
             # if ph0 is not None and ph1 is not None and pivot is not None:
             #     data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
-            y = positionPixel[1] + spectrumView._traceScale * (self.axisT - self.axisB) * data
+            y = positionPixel[1] + spectrumView.traceScale * (self.axisT - self.axisB) * data
             _posColour = spectrumView.posColours[0]
             colR, colG, colB = _posColour[0:3]
 
@@ -4716,7 +4778,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
                 data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
             y = spectrumView.spectrum.getPpmArray(dimension=dim)
-            x = positionPixel[0] + spectrumView._traceScale * (self.axisL - self.axisR) * data
+            x = positionPixel[0] + spectrumView.traceScale * (self.axisL - self.axisR) * data
             _posColour = spectrumView.posColours[0]
             colR, colG, colB = _posColour[0:3]
 
@@ -4936,7 +4998,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
                     if self.is1D:
                         trace.vertices[1::2] = preData
                     else:
-                        y = positionPixel[1] + specView._traceScale * (self.axisT - self.axisB) * preData
+                        y = positionPixel[1] + specView.traceScale * (self.axisT - self.axisB) * preData
                         y = np.append(y, (positionPixel[1], positionPixel[1]))
                         trace.vertices[1::2] = y
 
@@ -4966,7 +5028,7 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
                     if self.is1D:
                         trace.vertices[::2] = preData
                     else:
-                        x = positionPixel[0] + specView._traceScale * (self.axisL - self.axisR) * preData
+                        x = positionPixel[0] + specView.traceScale * (self.axisL - self.axisR) * preData
                         x = np.append(x, (positionPixel[0], positionPixel[0]))
                         trace.vertices[::2] = x
 
@@ -5727,14 +5789,8 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
     def _glMouseMoved(self, aDict):
         if self.strip.isDeleted:
             return
-
-        if aDict[GLNotifier.GLSOURCE] != self:
-
-            mouseMovedDict = aDict[GLNotifier.GLMOUSEMOVEDDICT]
-
-            if self._crosshairVisible:
-                exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
-                self.update(mode=PaintModes.PAINT_MOUSEONLY)
+        if aDict[GLNotifier.GLSOURCE] != self and self._crosshairVisible:
+            self.update(mode=PaintModes.PAINT_MOUSEONLY)
 
     @Slot(dict)
     def _glKeyEvent(self, aDict):
@@ -6016,16 +6072,16 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
         finally:
             self._menuActive = False
 
-    # @contextmanager
-    def _disableCursorUpdating(self):
-        """Context manager to set the menu status to active
-        so that when the menu appears the live traces stay visible
-        """
-        self._disableCursorUpdate = True
-        try:
-            yield
-        finally:
-            self._disableCursorUpdate = False
+    # # @contextmanager
+    # def _disableCursorUpdating(self):
+    #     """Context manager to set the menu status to active
+    #     so that when the menu appears the live traces stay visible
+    #     """
+    #     self._disableCursorUpdate = True
+    #     try:
+    #         yield
+    #     finally:
+    #         self._disableCursorUpdate = False
 
     def getObjectsUnderMouse(self):
         """Return a list of objects under the mouse position as a dict

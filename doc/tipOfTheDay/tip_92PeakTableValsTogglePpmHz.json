@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can change the units used in PeakList tables by <span style=%(purple)s>clicking on the gear icon</span> of your PeakList module to open up the settings. Then choose to display the peak position in ppm, Hz or points and the LineWidth in Hz or ppm.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/PeakTableValsTogglePpmHz.png"
+  ]
+}

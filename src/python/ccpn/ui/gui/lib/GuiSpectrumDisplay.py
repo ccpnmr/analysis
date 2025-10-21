@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-26 19:16:21 +0100 (Fri, September 26, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-16 16:52:31 +0100 (Thu, October 16, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -203,6 +203,8 @@ class GuiSpectrumDisplay(CcpnModule):
     MAXMULTIPLETSYMBOLTYPES = 0
     MAXARROWSYMBOLTYPES = 0
 
+    phasingFrame: PhasingFrame
+
     # Sub-classed in the 1d/nD implementations
     # NB: 'self' is added to the callback in _fillToolbar using partial
     _toolbarItems = []
@@ -281,6 +283,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self._phasingTraceScale = 1.0e-7
         self.stripScaleFactor = 1.0
+
+        self.displayTraceScale = 1.0
 
         self._setNotifiers()
 
@@ -2365,7 +2369,9 @@ class GuiSpectrumDisplay(CcpnModule):
             for strip in self.strips:
                 for spectrumView in strip.spectrumViews:
                     if spectrumView.traceScale is not None:
-                        spectrumView.traceScale *= 1.4
+                        # Needs to be _traceScale to ensure not
+                        # multiplying the global scaling
+                        spectrumView._traceScale *= 1.4
 
                 # spawn a redraw of the strip
                 strip._updatePivot()
@@ -2377,7 +2383,9 @@ class GuiSpectrumDisplay(CcpnModule):
             for strip in self.strips:
                 for spectrumView in strip.spectrumViews:
                     if spectrumView.traceScale is not None:
-                        spectrumView.traceScale /= 1.4
+                        # Needs to be _traceScale to ensure not
+                        # multiplying the global scaling
+                        spectrumView._traceScale /= 1.4
 
                 # spawn a redraw of the strip
                 strip._updatePivot()
@@ -2828,30 +2836,34 @@ class GuiSpectrumDisplay(CcpnModule):
         for strip in self.strips:
             strip._zoomOut()
 
-    def toggleGrid(self):
+    def toggleGrid(self, state: bool | None = None):
         """Toggles whether grid is displayed in all strips of spectrum display.
         """
         for strip in self.strips:
-            strip.toggleGrid()
+            state = strip.toggleGrid(state)
+        return state
 
-    def toggleSideBands(self):
+    def toggleSideBands(self, state: bool | None = None):
         """Toggles whether sideBands are displayed in all strips of spectrum display.
         """
         for strip in self.strips:
-            strip.toggleSideBands()
+            state = strip.toggleSideBands(state)
+        return state
 
-    def toggleCrosshair(self):
+    def toggleCrosshair(self, state: bool | None = None):
         """Toggles whether cross-hair is displayed in all strips of spectrum display.
         """
         for strip in self.strips:
-            strip._toggleCrosshair()
+            state = strip._toggleCrosshair(state)
+        return state
 
-    def toggleDoubleCrosshair(self):
+    def toggleDoubleCrosshair(self, state: bool | None = None):
         """Toggles whether double-crosshair is displayed in all strips of spectrum display.
         """
         # should hide these to be accessible through mainWindow only
         for strip in self.strips:
-            strip._toggleDoubleCrosshair()
+            state = strip._toggleDoubleCrosshair(state)
+        return state
 
     def _cycleSymbolLabelling(self):
         """Cycles peak symbols of current-strip.
@@ -3427,6 +3439,14 @@ class GuiSpectrumDisplay(CcpnModule):
     def updateTraces(self):
         for strip in self.strips:
             strip._updateTraces()
+
+    def showTraceScaleBalloon(self):
+        """Shows the trace scale editor popup."""
+        from ccpn.ui.gui.popups.TraceScaleBalloon import TraceScaleBalloon
+        balloon = TraceScaleBalloon(parent=self, mainWindow=self.mainWindow)
+
+        popupPos = QtGui.QCursor().pos()
+        balloon.showAt(popupPos)
 
     @logCommand(get='self')
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],

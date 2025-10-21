@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
-__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
-               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
+__credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Daniel Thompson",
+               "Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -15,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-12-21 12:16:47 +0000 (Wed, December 21, 2022) $"
-__version__ = "$Revision: 3.1.0 $"
+__dateModified__ = "$dateModified: 2025-10-14 17:22:06 +0100 (Tue, October 14, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,7 +27,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtWidgets
+from functools import partial
+from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5.QtCore import QObject
+
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Font import getFontHeight
@@ -63,11 +67,15 @@ class Splitter(QtWidgets.QSplitter, Base):
                             QSplitter::handle:horizontal {background-color: transparent; width: %dpx; image: url(%s); }
                             """ % (_height, path1, _height, path2))
 
+    def sizeHint(self):
+        # Override the built-in Qt QSize(256, 192) that can stop widgets collapsing as required
+        return QtCore.QSize(16, 16)
+
     def createHandle(self):
 
         return SplitterHandle(self, self.orientation())
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QtGui.QResizeEvent):
         """Catch resize event
         """
         self.doResize = True
@@ -84,7 +92,6 @@ class Splitter(QtWidgets.QSplitter, Base):
         event.accept()
 
 
-
 class SplitterHandle(QtWidgets.QSplitterHandle):
 
     def __init__(self, parent, orientation):
@@ -97,3 +104,31 @@ class SplitterHandle(QtWidgets.QSplitterHandle):
     def mouseReleaseEvent(self, event):
         self.parent().doResize = False
         return super().mouseReleaseEvent(event)
+
+
+class SplitterGroup(QObject):
+    """A primitive splitter synchroniser."""
+
+    def __init__(self, splitters: list[Splitter], *kwds):
+        """Given a list of splitters it will try its best to
+        ensure all handles are in the same position.
+        """
+        super().__init__(*kwds)
+        self.splitters = splitters
+
+        if splitters:
+            for splitter in splitters:
+                splitter.splitterMoved.connect(partial(self.moveAllSplitters, splitter))
+
+    def addSplitter(self, splitter):
+        """Add a splitter to the group"""
+        self.splitters.append(splitter)
+        splitter.splitterMoved.connect(partial(self.moveAllSplitters, splitter))
+
+    def moveAllSplitters(self, leadSplitter):
+        """Set all splitter sizes to that of the leadSplitter"""
+        for splitter in self.splitters:
+            if splitter is not leadSplitter:
+                splitter.blockSignals(True)
+                splitter.setSizes(leadSplitter.sizes())
+                splitter.blockSignals(False)

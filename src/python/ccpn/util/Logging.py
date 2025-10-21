@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-07-02 10:23:01 +0100 (Wed, July 02, 2025) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-10-16 14:04:27 +0100 (Thu, October 16, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ import time
 import inspect
 import sys
 import re
+from contextlib import suppress
 from typing import cast
 from ccpn.util.Path import aPath
 
@@ -74,20 +75,20 @@ class CustomLogger(logging.Logger):
     _fileHandler: DeferredFileHandler | None
     _streamHandler: logging.StreamHandler | None
 
-    debugGL: _message
-    echoInfo: _message
-    info: _message
-    debug1: _message
-    debug: _message
-    debug2: _message
-    debug3: _message
-    debug3_backup_thread: _message
-    warning: _message
-    dynamic: _dynamicLevel
+    debugGL: functools.partial
+    echoInfo: functools.partial
+    info: functools.partial
+    debug1: functools.partial
+    debug: functools.partial
+    debug2: functools.partial
+    debug3: functools.partial
+    debug3_backup_thread: functools.partial
+    warning: functools.partial
+    dynamic: functools.partial
 
 
 logger: CustomLogger | None = None
-defaultLogger: logging.Logger | None = logging.getLogger('defaultLogger')
+defaultLogger: CustomLogger = cast(CustomLogger, logging.getLogger('defaultLogger'))
 defaultLogger.propagate = False
 ANSIESCAPEPATTERN = re.compile(r'\033\[[0-9;]*m')  # Matches ANSI escape sequences
 
@@ -476,13 +477,11 @@ class DeferredFileHandler(logging.FileHandler):
 
     def close(self) -> None:
         if not self._readOnly:
-            try:
+            with suppress(PermissionError, FileNotFoundError):
                 # emit all queued items to the stream
                 for rcd in self._queued:
                     super().emit(rcd)
                 self._queued = []
-            except (PermissionError, FileNotFoundError):
-                ...
         super().close()
 
     def _updateFilename(self, filename):

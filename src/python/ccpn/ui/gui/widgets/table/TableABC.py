@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-21 12:43:52 +0100 (Wed, May 21, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-08 17:21:57 +0100 (Wed, October 08, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,8 @@ __date__ = "$Date: 2022-09-08 17:12:49 +0100 (Thu, September 08, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+__all__ = ["TableABC"]
 
 import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -146,6 +148,11 @@ class TableABC(QtWidgets.QTableView, metaclass=_TableABCMeta):
                     QTableView:focus {
                         border-color: palette(highlight);
                     }
+                    QTableView::corner {
+                        border-top: 1px solid palette(mid);
+                        border-left: 1px solid palette(mid);
+                        background-color: transparent;
+                    }                    
                     """
 
     # this overrides QtCore.Qt.ForegroundRole - keep for the minute
@@ -192,6 +199,7 @@ class TableABC(QtWidgets.QTableView, metaclass=_TableABCMeta):
     defaultSortOrder = QtCore.Qt.AscendingOrder
     _newFocus = False
     _disableNewFocus = True  # allow instant click on table
+    _lastMinimumSize = QtCore.QSize(0, 0)
 
     def __init__(self, parent, *, df=None,
                  multiSelect=True, selectRows=True,
@@ -269,6 +277,7 @@ class TableABC(QtWidgets.QTableView, metaclass=_TableABCMeta):
 
         # initialise the table
         self.updateDf(df, _resize, setHeightToRows, setWidthToColumns, setOnHeaderOnly=setOnHeaderOnly)
+        self._scrollBarResize()
         self._setStyle()
 
     @property
@@ -280,7 +289,7 @@ class TableABC(QtWidgets.QTableView, metaclass=_TableABCMeta):
         super().setFixedHeight(int(p_int))
 
     def _setSelectionBehaviour(self, multiSelect):
-        """Set the selection-behaiour
+        """Set the selection-behaviour
         """
         # define the multi-selection behaviour
         self.multiSelect = multiSelect
@@ -450,15 +459,25 @@ class TableABC(QtWidgets.QTableView, metaclass=_TableABCMeta):
                     margin-right : 2px;''')
 
     def _postInit(self):
-        from ccpn.ui.gui.widgets.ScrollBarVisibilityWatcher import ScrollBarVisibilityWatcher
+        # Connect to the scrollbars changing and update the minimum-size so that they don't 'squish'
+        self.horizontalScrollBar().rangeChanged.connect(self._scrollBarResize)
+        self.verticalScrollBar().rangeChanged.connect(self._scrollBarResize)
 
-        # add a widget handler to give a clean corner widget for the scroll area
-        self._cornerDisplay = ScrollBarVisibilityWatcher(self)
-        try:
-            # may refactor the remaining modules so this isn't needed
-            self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
-        except Exception:
-            getLogger().debug2(f'{self.__class__.__name__} has no _widgetScrollArea')
+    def _scrollBarResize(self):
+        frame_width = self.frameWidth() * 2
+        hbar = self.horizontalScrollBar()
+        vbar = self.verticalScrollBar()
+        sb_extent = self.style().pixelMetric(QtWidgets.QStyle.PM_ScrollBarExtent, None, self)
+
+        sb_size = QtCore.QSize(sb_extent, sb_extent)
+        h_sb = sb_size.expandedTo(hbar.sizeHint() if hbar.isVisible() else sb_size)
+        v_sb = sb_size.expandedTo(vbar.sizeHint() if vbar.isVisible() else sb_size)
+        min_h = frame_width + h_sb.height() + v_sb.height()
+        min_w = frame_width + h_sb.width() + v_sb.width()
+
+        self._lastMinimumSize = self._lastMinimumSize.expandedTo(QtCore.QSize(min_w, min_h))
+        self.setMinimumSize(self._lastMinimumSize)
+        self.update()
 
     def _setHeaderWidgets(self, _height, showHorizontalHeader, showVerticalHeader, df):
         """Initialise the headers

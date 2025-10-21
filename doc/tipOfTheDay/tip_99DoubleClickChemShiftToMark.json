@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>In a <span style=%(purple)s>Chemical Shift Table</span> you can <span style=%(purple)s>double-click</span> on a chemical shift to draw a mark at its ppm position in your SpectrumDisplays.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/DoubleClickChemShiftToMark.png"
+  ]
+}

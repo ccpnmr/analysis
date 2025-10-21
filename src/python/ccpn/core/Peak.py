@@ -14,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-13 18:14:44 +0000 (Thu, March 13, 2025) $"
-__version__ = "$Revision: 3.2.12 $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-09-15 16:27:31 +0100 (Mon, September 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -47,7 +47,7 @@ from ccpn.core.NmrAtom import NmrAtom, UnknownIsotopeCode
 from ccpn.core.lib.peakUtils import _getPeakSNRatio, snapToExtremum as peakUtilsSnapToExtremum
 
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, \
-    undoBlock, undoBlockWithoutSideBar, undoStackBlocking, ccpNmrV3CoreUndoBlock
+    undoBlock, undoBlockWithoutSideBar, undoStackBlocking, ccpNmrV3CoreUndoBlock, undoBlockWithSideBar
 
 from ccpn.core.lib.Notifiers import NotifierSignal
 from ccpn.core.lib.CcpNmrProperties import CcpNmrTypedListProperty
@@ -1422,6 +1422,29 @@ class Peak(AbstractWrapperObject):
             if isinstance(values, (int, float, str)):
                 df.loc[ix, f'{header}'] = values
         return df
+
+    def _extractSliceAtPeakPosition(self):
+        """Implementation of the macro extractSliceAtPeakPosition"""
+        from ccpn.util.Path import joinPath, aPath
+
+        decimalSeparator = '-'
+        ppmRounding = 2
+        namesSeparator = '_'
+
+        spectrum = self.spectrum
+
+        for dim in spectrum.dimensions:
+            pointPositions = np.array(self.pointPositions, dtype=int)
+            ppmPositionsStr = f'{namesSeparator}'.join(
+                    [f'{i:.{ppmRounding}f}'.replace('.', decimalSeparator) for i in self.ppmPositions])
+            axisCodes = spectrum.getByDimensions('axisCodes', dimensions=[dim])
+            with undoBlockWithSideBar():
+                # set everything as a single undo-operation
+                spectrumName = f'{spectrum.name}{namesSeparator}{axisCodes[0]}{namesSeparator}[{ppmPositionsStr}_ppm]'
+                savingPath = aPath(joinPath(self.project.spectraPath, spectrumName, ))
+                savingPath = savingPath.assureSuffix('ndf5')
+                sp = spectrum.extractSliceToFile(axisCodes[0], pointPositions, path=savingPath)
+                sp.noiseLevel = spectrum.noiseLevel
 
     # def _checkAliasing(self):
     #     """Recalculate the aliasing range for all peaks in the parent spectrum

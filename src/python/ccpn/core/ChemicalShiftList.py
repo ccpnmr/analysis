@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-10 18:22:04 +0100 (Wed, September 10, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-20 17:42:33 +0100 (Mon, October 20, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -700,34 +700,36 @@ class ChemicalShiftList(AbstractWrapperObject):
             #     getLogger().debug(f'updating classType {chemicalShiftList} -> _ChemicalShiftListFrame')
             #     _data = _ChemicalShiftListFrame(_data)
 
-            # remove the deleted shifts, not needed after restore
-            _data = _data[_data[CS_ISDELETED] == False]
+            # remove the deleted shifts, not needed after restore, and any bad ones
+            _data = (_data
+                     .loc[~_data[CS_ISDELETED].fillna(True)]
+                     .reset_index(drop=True)
+                     )
             oldLen = len(_data)
 
             # drop any duplicates and merge back in the Nones which must be kept
-            _data.reset_index(drop=True, inplace=True)
-            _noDupes = (_data
-                        .drop_duplicates(CS_NMRATOM)
-                        .merge(_data[_data[CS_NMRATOM].isnull()],
-                               how='outer')
-                        )
-            # _noDupes_assert = (_data
-            #                    .drop_duplicates(CS_NMRATOM)
-            #                    .merge(_data[_data[CS_NMRATOM].isnull()].astype({CS_NMRATOM: 'object'}),
-            #                           how='outer')
-            #                    )
-            # assert _noDupes.equals(_noDupes_assert)
-            _noDupes.sort_values(CS_UNIQUEID, inplace=True, )
-            if len(_noDupes) != oldLen:
-                # log a warning and update the dataFrame
+            non_nas = (_data
+                       .dropna(subset=[CS_NMRATOM])
+                       .drop_duplicates(subset=[CS_NMRATOM], keep='first')
+                       )
+            nas = _data.loc[_data[CS_NMRATOM].isna()]
+            # Vertically stack the defined/undefined nmrAtom labelled shifts
+            new_df = pd.concat([non_nas, nas], axis=0, copy=False)
+            new_df.sort_values(CS_UNIQUEID, inplace=True)
+
+            if len(new_df) != oldLen:
+                # Log a warning and update the dataFrame
+                # Which original rows did we drop? Compare on original index
+                dropped_idx = _data.index.difference(new_df.index)
+                dropped_uids = list(_data.loc[dropped_idx, CS_UNIQUEID])  # annoying pycharm error with `.tolist()`
                 getLogger().warning(f'Duplicate nmrAtoms have been removed from {chemicalShiftList}')
-                getLogger().debug(f'>>> Dropped rows\n{list(_data.drop(_noDupes.index)[CS_UNIQUEID])}')
-                _data = _noDupes
+                getLogger().debug(f'>>> Dropped rows\n{dropped_uids}')
+                _data = new_df
 
             if CS_STATIC not in _data.columns:
                 # add new static column if not defined
                 _data.insert(CS_COLUMNS.index(CS_STATIC), CS_STATIC, False)
-            _data.set_index(_data[CS_UNIQUEID], inplace=True, )  # drop=False)
+            _data.set_index(CS_UNIQUEID, drop=False, inplace=True)
 
             chemicalShiftList._wrappedData.data = _data
 

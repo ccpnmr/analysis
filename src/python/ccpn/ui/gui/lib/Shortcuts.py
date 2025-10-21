@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-01-28 16:31:43 +0000 (Tue, January 28, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-10-16 16:52:32 +0100 (Thu, October 16, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -59,7 +59,7 @@ class Shortcuts:
         context = QtCore.Qt.WidgetWithChildrenShortcut
         # addShortCut("c, h", self, self.toggleCrosshairAll, context=context)
         addShortCut("e, n", self, mainWindow.showEstimateNoisePopup, context=context)
-        addShortCut("g, s", self, mainWindow.toggleGridAll, context=context)
+        # addShortCut("g, s", self, mainWindow.toggleGridAll, context=context)
         addShortCut("Del", self, partial(mainWindow._deleteSelectedItems), context=context)
         addShortCut("Backspace", self, partial(mainWindow._deleteSelectedItems), context=context)
         addShortCut("m, k", self, mainWindow.createMark, context=context)
@@ -93,6 +93,7 @@ class Shortcuts:
         addShortCut("t, d", self, partial(mainWindow.traceScaleDown, self), context=context)
         addShortCut("t, h", self, partial(mainWindow.toggleHTrace, self), context=context)
         addShortCut("t, v", self, partial(mainWindow.toggleVTrace, self), context=context)
+        addShortCut("T, S", self, partial(mainWindow.showTraceScaleBalloon, self), context=context)
         addShortCut("t, a", self, mainWindow.newPhasingTrace, context=context)
         addShortCut("t, r", self, mainWindow.removePhasingTraces, context=context)
         addShortCut("p, v", self, mainWindow.setPhasingPivot, context=context)

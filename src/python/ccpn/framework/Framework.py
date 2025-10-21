@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2025-10-03 15:23:26 +0100 (Fri, October 03, 2025) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2025-10-16 16:52:31 +0100 (Thu, October 16, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -2639,11 +2639,34 @@ class Framework(HasCcpNmrProperties, NotifierBase):
     #     for window in self.project.windows:
     #         window.toggleCrosshair()
 
-    def toggleDoubleCrosshairAll(self):
+    # NOTE:ED - need to move to GuiBase
+    def toggleGridAll(self, state: bool | None = None):
+        """Toggles whether grids are displayed in all windows.
+        """
+        for window in self.project.windows:
+            state = window.toggleGrid(state)
+        return state
+
+    def toggleSideBandsAll(self, state: bool | None = None):
+        """Toggles whether sidebands are displayed in all windows.
+        """
+        for window in self.project.windows:
+            state = window.toggleSideBands(state)
+        return state
+
+    def toggleCrosshairAll(self, state: bool | None = None):
+        """Toggles whether crosshairs are displayed in all windows.
+        """
+        for window in self.project.windows:
+            state = window.toggleCrosshair(state)
+        return state
+
+    def toggleDoubleCrosshairAll(self, state: bool | None = None):
         """Toggles whether double-crosshairs are displayed in all windows.
         """
         for window in self.project.windows:
-            window.toggleDoubleCrosshair()
+            state = window.toggleDoubleCrosshair(state)
+        return state
 
     #################################################################################################
     ## MENU callbacks:  Macro

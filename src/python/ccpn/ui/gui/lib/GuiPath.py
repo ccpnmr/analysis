@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-09-13 15:20:23 +0100 (Fri, September 13, 2024) $"
-__version__ = "$Revision: 3.2.7 $"
+__dateModified__ = "$dateModified: 2025-10-08 19:44:50 +0100 (Wed, October 08, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,6 +27,8 @@ __date__ = "$Date: 2020-04-16 12:14:50 +0000 (Thu, April 16, 2020) $"
 # Start of code
 #=========================================================================================
 
+__all__ = ["PathEdit", "PathValidator"]
+
 import os
 from typing import Callable
 from PyQt5 import QtGui, QtWidgets
@@ -34,8 +36,8 @@ from PyQt5 import QtGui, QtWidgets
 from ccpn.util.Path import aPath
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 
-from ccpn.ui.gui.guiSettings import COLOUR_BLIND_LIGHTGREEN, COLOUR_BLIND_MEDIUM, COLOUR_BLIND_DARKGREEN, \
-    COLOUR_BLIND_RED, COLOUR_BLIND_ORANGE
+from ccpn.ui.gui.guiSettings import (COLOUR_BLIND_LIGHTGREEN, COLOUR_BLIND_MEDIUM, COLOUR_BLIND_DARKGREEN,
+                                     COLOUR_BLIND_RED, COLOUR_BLIND_ORANGE)
 
 
 VALIDROWCOLOUR = COLOUR_BLIND_LIGHTGREEN
@@ -77,6 +79,7 @@ VALIDFUNCS = (_validFile, _validPath)
 
 PATH = 'path'
 IS_VALID = 'isValid'
+
 
 class PathValidator(QtGui.QValidator):
 

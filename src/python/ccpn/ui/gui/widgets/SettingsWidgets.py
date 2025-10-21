@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-08 18:38:38 +0100 (Mon, September 08, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-15 14:15:26 +0100 (Wed, October 15, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -174,6 +174,14 @@ class AssignmentInspectorSettings(Widget):
                                                         texts=None,
                                                         fixedWidths=[100, 200, 200],
                                                         axisCodeFilter=axisCodeFilter)
+
+        self.showBackboneHNCheckbox = CheckBoxCompoundWidget(
+                self.chTab,
+                grid=(1, 0), hAlign='left',
+                orientation='left',
+                labelText='Show Backbone HN',
+                checked=False
+                )
 
     def _initGenTab(self, parent):
         """Initialise the general setttings tab"""
@@ -1560,6 +1568,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                  activePulldownClass=None,
                  activePulldownInitialState=True,
                  labelText='Display(s) ',
+                 nmrChainList: bool = None,
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
@@ -1585,7 +1594,11 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         self.includeNmrChainPullSelection = includeNmrChainPullSelection
         self.includeSpectrumTable = includeSpectrumTable
         self.activePulldownClass = activePulldownClass
+        self.nmrChainList = nmrChainList
+
         self.nmrChain = None
+        self.nmrChains = None
+
 
         # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
         # underpinning the addNotifier call do not allow for it either
@@ -1662,15 +1675,15 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                                            checked=activePulldownInitialState
                                            ))
 
-        row += 1
-        self.onlyRestrictedBox = CheckBoxCompoundWidget(
-                self,
-                grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                fixedWidths=(colwidth, None),
-                orientation='left',
-                labelText='Assign restricted axes only',
-                checked=True
-                )
+        # row += 1
+        # self.onlyRestrictedBox = CheckBoxCompoundWidget(
+        #         self,
+        #         grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+        #         fixedWidths=(colwidth, None),
+        #         orientation='left',
+        #         labelText='Assign restricted axes only',
+        #         checked=True
+        #         )
 
         row += 1
         texts = []
@@ -1722,15 +1735,23 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         if self.includeNmrChainPullSelection:
             # add a pulldown to select an nmrChain
             row += 1
+            if self.nmrChainList:
+                self.ncWidget = NmrChainSelectionWidget(parent=self, mainWindow=self.mainWindow,
+                                                        #first NmrChain in project (if present)
+                                                        grid=(row, 0), gridSpan=(1, 1),
+                                                        objectWidgetChangedCallback=self._nmrChainsSelectionCallback,
+                                                        labelText='NmrChain'
+                                                        )
 
-            self.ncWidget = NmrChainPulldown(parent=self,
-                                             mainWindow=self.mainWindow, default=None,
-                                             #first NmrChain in project (if present)
-                                             grid=(row, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
-                                             showSelectName=True,
-                                             sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                             callback=self._selectionPulldownCallback
-                                             )
+            else:
+                self.ncWidget = NmrChainPulldown(parent=self,
+                                                 mainWindow=self.mainWindow, default=None,
+                                                 #first NmrChain in project (if present)
+                                                 grid=(row, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                                 showSelectName=True,
+                                                 sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                                 callback=self._selectionPulldownCallback
+                                                 )
 
         self._spectraWidget = None
         self.axisCodeOptions = None
@@ -1876,7 +1897,10 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
             StripPlot._storedState[STOREACTIVE] = checked
         StripPlot._storedState[STORELIST] = self.listButtons.getIndex()
         if self.includeNmrChainPullSelection:
-            StripPlot._storedState[STORENMRCHAIN] = self.ncWidget.getIndex()
+            if self.nmrChainList:
+                StripPlot._storedState[STORENMRCHAIN] = self.ncWidget.getTexts()
+            else:
+                StripPlot._storedState[STORENMRCHAIN] = self.ncWidget.getIndex()
 
     def restoreWidgetState(self):
         """Restore the state of the checkBoxes
@@ -1903,7 +1927,13 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
 
             if self.includeNmrChainPullSelection:
                 value = StripPlot._storedState.get(STORENMRCHAIN, self.includeNmrChainPullSelection)
-                self.ncWidget.setIndex(value)
+
+                if self.nmrChainList:
+                    if not isinstance(value, list):
+                        value = [value]
+                    self.ncWidget.setTexts(value)
+                else:
+                    self.ncWidget.setIndex(value)
 
     def setLabelText(self, label):
         """Set the text for the label attached to the list widget
@@ -1999,6 +2029,22 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         self.nmrChain = self.project.getByPid(item)
         if self.nmrChain is not None and self.NMRCHAINBUTTON is not None:
             # select the nmrChain here
+            self.listButtons.setIndex(self.NMRCHAINBUTTON)
+
+    def _nmrChainsSelectionCallback(self):
+        """Sets nmrChains/nmrChain based on type of widget ncWidget is.
+        """
+        if not isinstance(self.ncWidget, NmrChainSelectionWidget):
+            return
+
+        texts = self.ncWidget.getTexts()
+
+        if ALL in texts:
+            self.nmrChains = self.project.nmrChains
+        else:
+            self.nmrChains = [self.project.getByPid(chain) for chain in texts]
+
+        if self.nmrChains is not None and self.NMRCHAINBUTTON is not None:
             self.listButtons.setIndex(self.NMRCHAINBUTTON)
 
 
@@ -2492,6 +2538,12 @@ class SpectrumGroupSelectionWidget(ObjectSelectionWidget):
 
 class NmrChainSelectionWidget(ObjectSelectionWidget):
     KLASS = NmrChain
+
+    def unRegister(self):
+        """Unregister the notifiers; needs to be called when disgarding an instance
+        """
+        getLogger().debug2(f'==> unRegister  {self.__class__.__name__}')
+        self.deleteNotifiers()
 
 
 class PeakListSelectionWidget(ObjectSelectionWidget):

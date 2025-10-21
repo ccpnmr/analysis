@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-02 14:32:05 +0100 (Thu, October 02, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,7 +45,7 @@ from ccpn.ui.gui.guiSettings import (getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPN
                                      ZPlaneNavigationModes)
 from ccpn.ui.gui.lib.MenuLib import addItemsToNavigateMenu
 from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import AXIS_FULLATOMNAME, AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
+from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT, AxisMatch
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
 from ccpn.util.UpdateScheduler import UpdateScheduler
@@ -293,6 +293,7 @@ class GuiStrip(Frame):
             self.arrowMinimum = _firstStrip.arrowMinimum
 
             self.gridVisible = _firstStrip.gridVisible
+            self._doubleCrosshairVisible = _firstStrip._doubleCrosshairVisible
             self._crosshairVisible = _firstStrip._crosshairVisible
             self.sideBandsVisible = _firstStrip.sideBandsVisible
 
@@ -312,9 +313,20 @@ class GuiStrip(Frame):
 
         else:
             # get the values from the preferences
-            self.gridVisible = self._preferences.showGrid
-            self._crosshairVisible = self._preferences.showCrosshair
-            self.sideBandsVisible = self._preferences.showSideBands
+            if len(self.project.strips) < 2:
+                # These four are currently global, so should grab from the first open strip
+                self.gridVisible = self._preferences.showGrid
+                self._doubleCrosshairVisible = self._preferences.showDoubleCrosshair
+                self._crosshairVisible = self._preferences.showCrosshair
+                self.sideBandsVisible = self._preferences.showSideBands
+            else:
+                # There are already existing strips so need to update the global attributes from a previous strip
+                _firstStrip = next((strip for strip in self.project.strips if strip != self), None)
+                self.gridVisible = _firstStrip.gridVisible
+                # These are coupled, so double-crosshair has be set first
+                self._doubleCrosshairVisible = _firstStrip._doubleCrosshairVisible
+                self._crosshairVisible = _firstStrip._crosshairVisible
+                self.sideBandsVisible = _firstStrip.sideBandsVisible
 
             self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
             self._spectrumBordersVisible = self._preferences.showSpectrumBorder
@@ -404,6 +416,12 @@ class GuiStrip(Frame):
         return self
 
     #---------------------------------------------------------------------------------------------
+
+    def _disableForClosure(self):
+        """Disable painting in the GL window for closure."""
+        if self._CcpnGLWidget:
+            # SHOULD use a method for this :|
+            self._CcpnGLWidget._blankDisplay = True
 
     @property
     def painted(self):
@@ -573,6 +591,7 @@ class GuiStrip(Frame):
     def viewRange(self):
         return self._CcpnGLWidget.viewRange()
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @property
     def gridVisible(self):
         """True if the grid is visible.
@@ -581,15 +600,37 @@ class GuiStrip(Frame):
 
     @gridVisible.setter
     def gridVisible(self, visible):
-        """set the grid visibility
+        """Set the grid visibility
         """
+        if not isinstance(visible, bool):
+            raise TypeError("gridVisible: visible is not a bool")
         if hasattr(self, 'gridAction'):
             self.gridAction.setChecked(visible)
         self._CcpnGLWidget._gridVisible = visible
 
         # spawn a redraw event of the GL windows
+        # self._CcpnGLWidget._notifyAxesChange = True  # CHECK:ED - is this _notifyAxesChange?
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
+    def toggleGrid(self, state: bool | None = None):
+        """Toggles whether grid is visible in the strip.
+        """
+        if not isinstance(state, bool | None):
+            raise TypeError("toggleGrid: state is not a bool")
+        state = self.gridVisible = (not self.gridVisible) if state is None else state
+        return state
+
+    def _showGrid(self):
+        """Displays grid in the strip.
+        """
+        self.gridVisible = True
+
+    def _hideGrid(self):
+        """Hides grid in strip.
+        """
+        self.gridVisible = False
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @property
     def sideBandsVisible(self):
         """True if sideBands are visible.
@@ -600,13 +641,35 @@ class GuiStrip(Frame):
     def sideBandsVisible(self, visible):
         """set the sideBands visibility
         """
+        if not isinstance(visible, bool):
+            raise TypeError("sideBandsVisible: visible is not a bool")
         if hasattr(self, 'sideBandsAction'):
             self.sideBandsAction.setChecked(visible)
         self._CcpnGLWidget._sideBandsVisible = visible
 
         # spawn a redraw event event of the GL windows
+        # self._CcpnGLWidget._notifyAxesChange = True  # CHECK:ED - is this _notifyAxesChange?
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
+    def toggleSideBands(self, state: bool | None = None):
+        """Toggles whether sideBands are visible in the strip.
+        """
+        if not isinstance(state, bool | None):
+            raise TypeError("toggleSideBands: state is not a bool")
+        state = self.sideBandsVisible = (not self.sideBandsVisible) if state is None else state
+        return state
+
+    def _showSideBands(self):
+        """Displays sideBands in the strip.
+        """
+        self.sideBandsVisible = True
+
+    def _hideSideBands(self):
+        """Hides sideBands in strip.
+        """
+        self.sideBandsVisible = False
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @property
     def spectrumBordersVisible(self):
         """True if spectrumBorders are visible.
@@ -624,16 +687,7 @@ class GuiStrip(Frame):
         # spawn a redraw event event of the GL windows
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
-    def toggleGrid(self):
-        """Toggles whether grid is visible in the strip.
-        """
-        self.gridVisible = not self._CcpnGLWidget._gridVisible
-
-    def toggleSideBands(self):
-        """Toggles whether sideBands are visible in the strip.
-        """
-        self.sideBandsVisible = not self._CcpnGLWidget._sideBandsVisible
-
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @property
     def _crosshairVisible(self):
         """True if crosshair is visible.
@@ -642,8 +696,10 @@ class GuiStrip(Frame):
 
     @_crosshairVisible.setter
     def _crosshairVisible(self, visible):
-        """set the crosshair visibility
+        """Set the crosshair visibility
         """
+        if not isinstance(visible, bool):
+            raise TypeError("_crosshairVisible: visible is not a bool")
         if hasattr(self, 'crosshairAction'):
             # this is nasty, connecting to the checkbox of a menu-action
             # feedback loop? actually not sure that they are doing anything
@@ -654,11 +710,13 @@ class GuiStrip(Frame):
         self._CcpnGLWidget._refreshCursors = True
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
-    def _toggleCrosshair(self):
+    def _toggleCrosshair(self, state: bool | None = None):
         """Toggles whether crosshair is visible.
         """
-        # uses setter above
-        self._crosshairVisible = not self._crosshairVisible
+        if not isinstance(state, bool | None):
+            raise TypeError("_toggleCrosshair: state is not a bool")
+        state = self._crosshairVisible = (not self._crosshairVisible) if state is None else state
+        return state
 
     def _showCrosshair(self):
         """Displays crosshair in the strip.
@@ -670,6 +728,7 @@ class GuiStrip(Frame):
         """
         self._crosshairVisible = False
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @property
     def _doubleCrosshairVisible(self):
         """True if double-crosshair is visible.
@@ -678,8 +737,10 @@ class GuiStrip(Frame):
 
     @_doubleCrosshairVisible.setter
     def _doubleCrosshairVisible(self, visible):
-        """set the double-crosshair visibility
+        """Set the double-crosshair visibility
         """
+        if not isinstance(visible, bool):
+            raise TypeError("_doubleCrosshairVisible: visible is not a bool")
         if not visible and not self._crosshairVisible:
             self._crosshairVisible = True
             return
@@ -696,11 +757,13 @@ class GuiStrip(Frame):
         self._CcpnGLWidget._refreshCursors = True
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
-    def _toggleDoubleCrosshair(self):
+    def _toggleDoubleCrosshair(self, state: bool | None = None):
         """Toggles whether double-crosshair is visible.
         """
-        # uses setter above
-        self._doubleCrosshairVisible = not self._doubleCrosshairVisible
+        if not isinstance(state, bool | None):
+            raise TypeError("_toggleDoubleCrosshair: state is not a bool")
+        state = self._doubleCrosshairVisible = (not self._doubleCrosshairVisible) if state is None else state
+        return state
 
     def _showDoubleCrosshair(self):
         """Displays double-crosshair in the strip.
@@ -712,12 +775,7 @@ class GuiStrip(Frame):
         """
         self._doubleCrosshairVisible = False
 
-    def _crosshairCode(self, axisCode):
-        """Determines what axisCodes are compatible as far as drawing crosshair is concerned
-        TBD: the naive approach below should be improved
-        """
-        return axisCode  #if axisCode[0].isupper() else axisCode
-
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def _toggleLastAxisOnly(self):
         self.spectrumDisplay.setLastAxisOnly(lastAxisOnly=self.lastAxisOnlyCheckBox.isChecked())
         self.spectrumDisplay.showAxes()
@@ -922,7 +980,7 @@ class GuiStrip(Frame):
 
         allowMenuDuplicates = ((prefs := getPreferences()) and prefs.general.get('allowMenuDuplicates'))
         showBlankDimensions = ((prefs := getPreferences()) and prefs.general.get('showBlankDimensions'))
-        mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+        mouseDict = self.current.mouseMovedDict[AxisMatch.CODE]
         position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
                     for ax in self.axisCodes]
         if None in position:
@@ -936,7 +994,7 @@ class GuiStrip(Frame):
     def markAxisIndices(self, indices=None):
         """Mark the X/Y/XY axisCodes by index
         """
-        mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+        mouseDict = self.current.mouseMovedDict[AxisMatch.CODE]
         position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
                     for ax in self.axisCodes]
         if indices is None:
@@ -1064,7 +1122,7 @@ class GuiStrip(Frame):
         """Set up the menu for the main view for marking axis codes
         """
         axisName = axisMenu or self.markAxesMenu
-        mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+        mouseDict = self.current.mouseMovedDict[AxisMatch.CODE]
         # position = [mouseDict[ax][0] if mouseDict[ax] else None
         #             for ax in self.axisCodes if mouseDict.get(ax)]
         position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
@@ -1216,14 +1274,14 @@ class GuiStrip(Frame):
         position = None
         mouseMovedDict = self.current.mouseMovedDict
         if direction == 0:
-            for mm in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+            for mm in mouseMovedDict[AxisMatch.CODE].keys():
                 if mm[0] == self.axisCodes[0][0]:  # check the first letter?
-                    positions = mouseMovedDict[AXIS_FULLATOMNAME][mm]
+                    positions = mouseMovedDict[AxisMatch.CODE][mm]
                     position = positions[0] if positions else None
         else:
-            for mm in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+            for mm in mouseMovedDict[AxisMatch.CODE].keys():
                 if mm[0] == self.axisCodes[1][0]:
-                    positions = mouseMovedDict[AXIS_FULLATOMNAME][mm]
+                    positions = mouseMovedDict[AxisMatch.CODE][mm]
                     position = positions[0] if positions else None
 
         if position is not None:
@@ -2228,7 +2286,7 @@ class GuiStrip(Frame):
                 defaultColour = '#FF0000'
 
             # find all the positions valid for this strip
-            mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            mouseDict = self.current.mouseMovedDict[AxisMatch.CODE]
             positions = [(pos, ax) for ax in self.axisCodes for pos in mouseDict.get(ax, []) if pos is not None]
 
             if axisIndex is not None:
@@ -3093,9 +3151,9 @@ class GuiStrip(Frame):
         # Only implemented for nD
         pass
 
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
     # Notifier queue handling
-    #=========================================================================================
+    #-----------------------------------------------------------------------------------------
 
     def queueFull(self):
         """Method that is called when the queue is deemed to be too big.

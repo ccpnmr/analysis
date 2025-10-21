@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-05-02 17:07:59 +0100 (Fri, May 02, 2025) $"
-__version__ = "$Revision: 3.3.2 $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -47,7 +47,7 @@ from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
 from ccpn.ui.gui.widgets.Spacer import Spacer
 
 from ccpn.util.Colour import colorSchemeTable, hexToRgbRatio
-from ccpn.util.Constants import AXIS_FULLATOMNAME
+from ccpn.util.Constants import AxisMatch
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 
@@ -304,7 +304,7 @@ class GuiStrip1d(GuiStrip):
                 newDisplay.displaySpectrum(spectrum)
 
             try:
-                mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+                mDict = usePosition and self.current.mouseMovedDict[AxisMatch.CODE]
                 positions = [poss[0] if (poss := mDict.get(ax)) else None
                              for ax in self.axisCodes] if usePosition else None
                 copyStripAxisPositionsAndWidths(self, newDisplay.strips[0], positions=positions)
@@ -345,7 +345,7 @@ class GuiStrip1d(GuiStrip):
             return
 
         try:
-            mDict = usePosition and self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            mDict = usePosition and self.current.mouseMovedDict[AxisMatch.CODE]
             positions = [poss[0] if (poss := mDict.get(ax)) else None
                          for ax in self.axisCodes] if usePosition else None
             return self._flipAxes(axisOrderIndices=(int(self.spectrumDisplay._flipped),), positions=positions)
@@ -707,14 +707,14 @@ class GuiStrip1d(GuiStrip):
         position = None
         mouseMovedDict = self.current.mouseMovedDict
         if direction == 0:
-            for mm in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+            for mm in mouseMovedDict[AxisMatch.CODE].keys():
                 if mm[0] == self.axisCodes[flipAxis][0]:  # check the first letter?
-                    positions = mouseMovedDict[AXIS_FULLATOMNAME][mm]
+                    positions = mouseMovedDict[AxisMatch.CODE][mm]
                     position = positions[0] if positions else None
         else:  # don't think 1D gets here
-            for mm in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+            for mm in mouseMovedDict[AxisMatch.CODE].keys():
                 if mm[0] == self.axisCodes[1 - flipAxis][0]:
-                    positions = mouseMovedDict[AXIS_FULLATOMNAME][mm]
+                    positions = mouseMovedDict[AxisMatch.CODE][mm]
                     position = positions[0] if positions else None
 
         if position is not None:

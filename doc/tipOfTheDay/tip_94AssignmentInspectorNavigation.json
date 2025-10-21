@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>The <span style=%(purple)s>Settings panel</span> of the <span style=%(purple)s>Assignment Inspector</span> module allows you to set up NH and CH-based strips for easy navigation. Once you have chosen the SpectrumDisplays you want to navigate to and set any other options, simply <span style=%(purple)s>double-click</span> on an NmrResidue of your choice in the ChemicalShiftList (upper) table of the Assignment Inspector.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/AssignmentInspectorNavigation.png"
+  ]
+}

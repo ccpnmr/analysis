@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>If you have enabled horizontal and/or vertical traces in a SpectrumDisplay, you can scale them using the <span style=%(purple)s>TU</span> and <span style=%(purple)s>TD</span> shortcuts. For bespoke scaling, you can right-click and select <span style=%(purple)s>Show Trace Scale Balloon</span> (or use shortcut <span style=%(purple)s>TS</span>) and enter a global trace multiplier or multipliers for specific spectra only.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/InteractiveTraceScaling.png"
+  ]
+}

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-10 16:46:25 +0100 (Wed, September 10, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -447,7 +447,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                         QMenuBar { color: palette(text); }
                         QMenuBar::item:disabled { color: palette(dark); }
                         """
-                        # QProgressBar { text-align: center; }  # this messes with the colours :|
+        # QProgressBar { text-align: center; }  # this messes with the colours :|
 
         # there is also some weird stuff with the qprogressbar text-colour:
         #   the left-edge of the text-label is its local 0%, the right-edge its local 100%,
@@ -1622,16 +1622,45 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         """Close all modules in main window;
         CCPNINTERNAL: also called from Framework
         """
-        try:
-            self.moduleArea._closeAll()
-        except Exception as es:
-            # wrapped C/C++ object of type StripDisplay1d has been deleted
-            getLogger().debug(f'_closeMainWindowModules: {es}')
+        from ccpn.ui.gui.modules.SpectrumDisplay import SpectrumDisplay
+
+        # Block any rogue signals from the modules
+        _block = [QtCore.QSignalBlocker(module) for module in self.moduleArea.ccpnModules]
+        # Pass 1: stop the spectrum-displays from firing any paint-events
+        for module in self.moduleArea.ccpnModules:
+            if isinstance(module, SpectrumDisplay):
+                for strip in module.strips:
+                    strip._disableForClosure()
+        # Pass 2: close the modules
+        for module in self.moduleArea.ccpnModules:
+            getLogger().debug('Closing module: %s' % module)
+            try:
+                module.setVisible(False)  # GWV not sure why, but this was the effect of prior code
+                module.close()
+            except Exception as es:
+                # wrapped C/C++ object of type StripDisplay1d has been deleted
+                getLogger().debug(f'_closeMainWindowModules: {es}')
+
+        # try:
+        #     self.moduleArea._closeAll()
+        # except Exception as es:
+        #     # wrapped C/C++ object of type StripDisplay1d has been deleted
+        #     getLogger().debug(f'_closeMainWindowModules: {es}')
 
     def _closeExtraWindowModules(self):
         """Close modules in any extra window;
         CCPNINTERNAL: also called from Framework
         """
+        from ccpn.ui.gui.modules.SpectrumDisplay import SpectrumDisplay
+
+        # Block any rogue signals from the modules
+        _block = [QtCore.QSignalBlocker(module) for module in self.moduleArea.tempAreas]
+        # Pass 1: stop the spectrum-displays from firing any paint-events
+        for module in self.moduleArea.tempAreas:
+            if isinstance(module, SpectrumDisplay):
+                for strip in module.strips:
+                    strip._disableForClosure()
+        # Pass 2: close the modules
         for module in self.moduleArea.tempAreas:
             getLogger().debug('Closing module: %s' % module)
             try:
@@ -2121,6 +2150,13 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
             navigateToCurrentPeakPosition(self.application, selectClickedPeak=True, allStrips=False)
 
+    def centreZOnPeak(self):
+        """Centre the displays strips on the current peaks Z position"""
+        if (peak := self.current.peaks) and (strip := self.current.strip):
+            from ccpn.ui.gui.lib.SpectrumDisplayLib import navigateToCurrentPeakZ
+
+            navigateToCurrentPeakZ(strip, peak[0])
+
     def calibrateFromPeaks(self):
         """Calibrate the current strip from the selected peaks
         """
@@ -2205,6 +2241,15 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
 
                 else:
                     getLogger().warning('Current strip is not 1D')
+
+    def extractSliceAtPeakPosition(self):
+        peak = self.application.current.peak
+
+        if not peak:
+            getLogger().warning('No peak selected')
+            return
+
+        peak._extractSliceAtPeakPosition()
 
     @logCommand('mainWindow.')
     def refitCurrentPeaks(self, singularMode=False):
@@ -2457,6 +2502,11 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         if self.application.current.strip:
             self.application.current.strip.spectrumDisplay.toggleVTrace()
 
+    def showTraceScaleBalloon(self, window: GuiWindowInstance):
+        """Opens the trace scale balloon"""
+        if strip := self.application.current.strip:
+            strip.spectrumDisplay.showTraceScaleBalloon()
+
     def toggleLastAxisOnly(self, window: GuiWindowInstance):
         """
         Toggles whether the axis is displayed in the last strip of the display
@@ -2518,29 +2568,42 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
         if strip:
             strip.spectrumDisplay.adjustContours()
 
-    # def toggleCrosshairAll(self):
-    #     """
-    #     Toggles whether crosshairs are displayed in all windows.
-    #     """
-    #     for window in self.project.windows:
-    #         window.toggleCrosshair()
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    def toggleGrid(self, state: bool | None = None):
+        """
+        toggle grid for the spectrum displays in this window.
+        """
+        for spectrumDisplay in self.spectrumDisplays:
+            state = spectrumDisplay.toggleGrid(state)
+        return state
 
-    def toggleCrosshair(self):
+    def toggleSideBands(self, state: bool | None = None):
+        """
+        toggle sideBands for the spectrum displays in this window.
+        """
+        for spectrumDisplay in self.spectrumDisplays:
+            state = spectrumDisplay.toggleSideBands(state)
+        return state
+
+    def toggleCrosshair(self, state: bool | None = None):
         """
         Toggles whether crosshairs are displayed in all spectrum displays
         """
         # toggle crosshairs for the spectrum displays in this window
         for spectrumDisplay in self.spectrumDisplays:
-            spectrumDisplay.toggleCrosshair()
+            state = spectrumDisplay.toggleCrosshair(state)
+        return state
 
-    def toggleDoubleCrosshair(self):
+    def toggleDoubleCrosshair(self, state: bool | None = None):
         """
         Toggles whether double-crosshairs are displayed in all spectrum displays
         """
         # toggle crosshairs for the spectrum displays in this window
         for spectrumDisplay in self.spectrumDisplays:
-            spectrumDisplay.toggleDoubleCrosshair()
+            state = spectrumDisplay.toggleDoubleCrosshair(state)
+        return state
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def showEstimateNoisePopup(self):
         """estimate the noise in the visible region of the current strip
         """
@@ -2665,34 +2728,6 @@ class GuiMainWindow(QtWidgets.QMainWindow, Shortcuts):
                     self.newMark(defaultColour, [position], [axisCode], strips=strips)
                 except Exception:
                     getLogger().warning(f'Error setting mark at position {position}')
-
-    def toggleGridAll(self):
-        """
-        Toggles grid display in all windows
-        """
-        for window in self.project.windows:
-            window.toggleGrid()
-
-    def toggleGrid(self):
-        """
-        toggle grid for the spectrum displays in this window.
-        """
-        for spectrumDisplay in self.spectrumDisplays:
-            spectrumDisplay.toggleGrid()
-
-    def toggleSideBandsAll(self):
-        """
-        Toggles sideBand display in all windows
-        """
-        for window in self.project.windows:
-            window.toggleSideBands()
-
-    def toggleSideBands(self):
-        """
-        toggle sideBands for the spectrum displays in this window.
-        """
-        for spectrumDisplay in self.spectrumDisplays:
-            spectrumDisplay.toggleSideBands()
 
     def moveToNextSpectrum(self):
         """

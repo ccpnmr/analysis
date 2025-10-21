@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -12,9 +12,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2024-11-13 12:18:54 +0000 (Wed, November 13, 2024) $"
-__version__ = "$Revision: 3.2.10.GWV $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-10-01 15:39:12 +0100 (Wed, October 01, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,12 +26,16 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtCore
 from functools import partial
+from collections import OrderedDict as od
+
 from ccpn.util.Logging import getLogger
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers, _makeNotifiers
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking, progressHandler
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtonsWithSubCheckBoxes
+from ccpn.ui.gui.widgets.RadioButton import CheckBoxCheckedText, CheckBoxCallbacks, CheckBoxTexts, CheckBoxTipTexts
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -46,6 +50,19 @@ FROMSPECTRUM = 'From An Individual Spectrum'
 SELECTED = 'From Selected Peaks'
 VISIBLESPECTRA = 'From Visible Spectra'
 SELECTANOPTION = '< Select an option to start >'
+
+_OnlyPositionAndAssignments = 'Copy position and assignments'
+_IncludeAllPeakProperties = 'Copy all existing properties'
+_SnapToExtremum = 'Snap to extremum'
+_RefitPeaks = 'Refit peaks'
+_RefitPeaksAtPosition = 'Refit peaks at position'
+_RecalculateVolume = 'Recalculate volume'
+_tipTextOnlyPos = f'''Copy Peaks and include only the original position and assignments (if available).\nAdditionally, execute the selected operations'''
+_tipTextIncludeAll = f'''Copy Peaks and include all the original properties: \nPosition, Assignments, Heights, Linewidths, Volumes etc...'''
+_tipTextSnapToExtremum = 'Snap all new peaks to extremum. Default properties set in the General Preferences'
+_tipTextRefitPeaks = 'Refit all new peaks. Default properties set in the General Preferences'
+_tipTextRefitPeaksAtPosition = 'Refit peaks and force to maintain the original position. Default properties set in the General Preferences'
+_tipTextRecalculateVolume = 'Recalculate volume for all peaks. Requires a Refit.'
 
 
 class CopyPeaks(CcpnDialog):
@@ -70,6 +87,13 @@ class CopyPeaks(CcpnDialog):
         self._queuePending = UpdateQueue()
         self._queueActive = None
         self._lock = QtCore.QMutex()
+
+        self._extraActionDefs = {
+            _SnapToExtremum      : self._snapPeaksToExtremum,
+            _RefitPeaks          : self._refitPeaks,
+            _RecalculateVolume   : self._recalculateVolume,
+            _RefitPeaksAtPosition: self._refitPeaksAtPositions,
+            }
 
     def _createWidgets(self):
         """Create the widgets row by row
@@ -111,8 +135,35 @@ class CopyPeaks(CcpnDialog):
                                            grid=(row, 0), gridSpan=(1,2)
                                            )
         self.inputPeaksListWidget = ListWidget(self, multiSelect=True, callback=self._activateCopy, tipText=tipText,
-                                               grid=(row, 2), gridSpan=(1,2)
+                                               grid=(row, 1), gridSpan=(1,2)
                                                )
+
+        self.inputPeaksWidget.itemSelectionChanged.connect(self._activateCopy)
+        self.inputPeaksListWidget.itemSelectionChanged.connect(self._activateCopy)
+        row += 1
+        checkBoxTexts = [_SnapToExtremum, _RefitPeaks, _RefitPeaksAtPosition, _RecalculateVolume]
+        checkBoxTipTexts = [_tipTextSnapToExtremum, _tipTextRefitPeaks, _tipTextRefitPeaksAtPosition,
+                            _tipTextRecalculateVolume]
+
+        checkBoxesDict = od([
+            (_OnlyPositionAndAssignments,
+             {
+                 CheckBoxTexts      : checkBoxTexts,
+                 CheckBoxCheckedText: [_SnapToExtremum, _RefitPeaks, _RecalculateVolume],
+                 CheckBoxTipTexts   : checkBoxTipTexts,
+                 CheckBoxCallbacks  : [self._subSelectionCallback] * len(checkBoxTexts)
+                 }
+             ),
+            ])
+
+        self.copyOptionsRadioButtons = RadioButtonsWithSubCheckBoxes(self,
+                                                                     texts=[_OnlyPositionAndAssignments,
+                                                                            _IncludeAllPeakProperties],
+                                                                     selectedInd=0,
+                                                                     tipTexts=[_tipTextOnlyPos, _tipTextIncludeAll],
+                                                                     checkBoxesDictionary=checkBoxesDict,
+                                                                     grid=(row, 0),
+                                                                     )
 
         row += 1
         self.selectButtons = ButtonList(self,
@@ -132,6 +183,84 @@ class CopyPeaks(CcpnDialog):
 
         self.copyButtons.buttons[1].setDisabled(True)
         self._initiateSelectionPullDowns()
+
+    def _subSelectionCallback(self, checked):
+        """
+        This routine is to ensure there are not mutually exclusive selections.
+        Behaviour:
+            allowed combinations:
+                - _SnapToExtremum, _RefitPeaks, _RecalculateVolume
+                - _SnapToExtremum, _RecalculateVolume
+                - _RefitPeaks, _RecalculateVolume
+                - _RefitPeaksAtPosition, _RecalculateVolume
+
+            not allowed:
+                - _RecalculateVolume alone
+                - _RefitPeaksAtPosition excludes any of _RefitPeaks, _SnapToExtremum
+
+        It is convoluted and a refactor might be needed for readability.
+        But double-check the intended behaviour is maintained!
+
+        :param checked: bool
+        :return: None
+        """
+        clicked = self.sender().getText()
+        radioButton = self.copyOptionsRadioButtons.getRadioButtonByText(_OnlyPositionAndAssignments)
+        _include = radioButton.getSelectedCheckBoxes()
+        _exclude = []
+
+        if clicked == _RefitPeaksAtPosition:
+            if checked:
+                _exclude += [_SnapToExtremum, _RefitPeaks]
+
+        if clicked == _SnapToExtremum:
+            _exclude += [_RefitPeaksAtPosition]
+
+        if clicked == _RefitPeaks:
+            _exclude += [_RefitPeaksAtPosition]
+
+        if _RecalculateVolume in _include:
+            if _RefitPeaks not in _include:
+                if _RefitPeaksAtPosition not in _include:
+                    _include += [_RefitPeaks]
+
+        newSelection = list(set([i for i in _include if i not in _exclude]))
+        radioButton.setSelectedCheckBoxes(newSelection)
+
+    def _refitPeaks(self, peakList, keepPosition=False):
+        peaks = peakList.peaks
+        fitMethod = self.application.preferences.general.peakFittingMethod
+        getLogger().info('Refitting peaks')
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                for peak in peaks:
+                    peak.fit(fitMethod=fitMethod, keepPosition=keepPosition)
+
+    def _refitPeaksAtPositions(self, peakList, keepPosition=True):
+        self._refitPeaks(peakList, keepPosition=keepPosition)
+
+    @staticmethod
+    def _recalculateVolume(peakList):
+        getLogger().info('Recalculating  peak volumes.')
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                peakList.estimateVolumes()
+
+    def _snapPeaksToExtremum(self, peakList):
+        # get the default from the preferences
+        minDropFactor = self.application.preferences.general.peakDropFactor
+        searchBoxMode = self.application.preferences.general.searchBoxMode
+        searchBoxDoFit = self.application.preferences.general.searchBoxDoFit
+        fitMethod = self.application.preferences.general.peakFittingMethod
+        peaks = peakList.peaks
+        getLogger().info('Snapping Peaks To Extremum.')
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
+                for peak in peaks:
+                    peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
+                                        minDropFactor=minDropFactor, searchBoxMode=searchBoxMode,
+                                        searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
 
     def _initiateSelectionPullDowns(self):
         isOkToEnableCopy = []
@@ -212,11 +341,13 @@ class CopyPeaks(CcpnDialog):
         self.selectFromPullDown.select(spectrum)
 
     def _activateCopy(self):
-        if len(self.inputPeaksListWidget.getSelectedObjects()) > 0 and len(
-                self.inputPeaksWidget.getSelectedObjects()) > 0:
+        if self.inputPeaksListWidget.getSelectedObjects() and self.inputPeaksWidget.getSelectedObjects():
             self.copyButtons.buttons[1].setDisabled(False)
+        else:
+            self.copyButtons.buttons[1].setDisabled(True)
 
     def _copyButton(self):
+        includeAllProperties = self.copyOptionsRadioButtons.getSelectedText() == _IncludeAllPeakProperties
 
         peakLists = self.inputPeaksListWidget.getSelectedObjects()
         peaks = self.inputPeaksWidget.getSelectedObjects()
@@ -239,7 +370,11 @@ class CopyPeaks(CcpnDialog):
                         for listNumber, peakList in enumerate(peakLists):
                             progress.checkCancel()
                             progress.setValue((numPeaks * listNumber + peakNumber) // pDiv)
-                            peak.copyTo(peakList)
+                            peak.copyTo(peakList, includeAllProperties=includeAllProperties)
+
+                    for peakList in peakLists:
+                        self._executeAfterCopyPeaks(peakList)
+
             getLogger().info('Peaks copied. Finished')
 
         if es := progress.error:
@@ -253,6 +388,15 @@ class CopyPeaks(CcpnDialog):
             #     # undo any copied peaks
             #     undoStack.undo()
         self._closePopup()
+
+    def _executeAfterCopyPeaks(self, peakList):
+        # execute further operations to the new peakList if required.
+        ddValues = self.copyOptionsRadioButtons.get()
+        extraActionsTexts = ddValues.get(_OnlyPositionAndAssignments, [])
+        for action in extraActionsTexts:
+            func = self._extraActionDefs.get(action)
+            if func:
+                func(peakList)
 
     def _selectPeaks(self, peaks):
         self.inputPeaksWidget.selectObjects(peaks)

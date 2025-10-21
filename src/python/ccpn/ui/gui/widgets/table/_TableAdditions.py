@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-01-13 12:40:32 +0000 (Mon, January 13, 2025) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-10-09 13:28:21 +0100 (Thu, October 09, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,6 +26,17 @@ __date__ = "$Date: 2022-09-09 18:02:40 +0100 (Fri, September 09, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
+__all__ = [
+    "TableHeaderMenuABC",
+    "TableHeaderMenuColumns",
+    "TableHeaderMenuCoreColumns",
+    "TableMenuABC",
+    "TableMenuCopyCell",
+    "TableMenuDelete",
+    "TableMenuExport",
+    "TableMenuSearch"
+    ]
 
 from PyQt5 import QtWidgets, QtCore
 from collections import OrderedDict, namedtuple
@@ -42,29 +53,36 @@ from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import copyToClipboard, NOTHING
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
+from ccpn.core.lib.WeakRefLib import WeakRefDescriptor, WeakRefConnector
 
 
 menuItem = namedtuple('menuItem', 'name toolTip')
+
+if typing.TYPE_CHECKING:
+    from .TableABC import TableABC
+
+_T = typing.TypeVar('_T', bound="TableABC")
+_Self = typing.TypeVar('_Self')
+
 TableFilterType = typing.Type[_TableFilterABC]
-TableBaseClass = typing.TypeVar('TableBaseClass', bound='TableABC')
 
 
 #=========================================================================================
 # ABCs
 #=========================================================================================
 
-class TableMenuABC(ABC):
+class TableMenuABC(ABC, typing.Generic[_T]):
     """Class to handle adding options to a right-mouse menu.
     """
     name: typing.Optional[str] = None
     _menuType: str = 'TableMenu'
     _enabled: bool = False
-    _parent: TableBaseClass = WeakRefDescriptor()
+    _parent: WeakRefDescriptor[_T] = WeakRefDescriptor()
+    connectToParent = WeakRefConnector(_parent)  # allows connecting methods to the garbage-collection (if required)
 
     # add internal labels here
 
-    def __init__(self, parent: TableBaseClass, enabled: bool = NOTHING):
+    def __init__(self, parent: _T, enabled: bool | type[NOTHING] = NOTHING):
         """Initialise the menu object to the parent-table.
 
         :param parent: QTableView object
@@ -146,17 +164,17 @@ class TableMenuABC(ABC):
     ...
 
 
-class TableHeaderMenuABC(ABC):
+class TableHeaderMenuABC(ABC, typing.Generic[_T]):
     """Class to handle adding options to a right-mouse menu.
     """
     name: typing.Optional[str] = None
     _menuType: str = 'TableHeaderMenu'
     _enabled: bool = True
-    _parent: TableBaseClass = WeakRefDescriptor()
+    _parent: WeakRefDescriptor[_T] = WeakRefDescriptor()
 
     # add internal labels here
 
-    def __init__(self, parent: TableBaseClass, enabled: bool = NOTHING):
+    def __init__(self, parent: _T, enabled: bool = NOTHING):
         """Initialise the menu object to the parent table.
 
         :param parent: QTableView object

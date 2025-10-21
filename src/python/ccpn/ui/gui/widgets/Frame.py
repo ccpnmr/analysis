@@ -59,8 +59,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-10 16:48:09 +0100 (Wed, September 10, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__dateModified__ = "$dateModified: 2025-10-16 14:04:27 +0100 (Thu, October 16, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -113,8 +113,6 @@ class Frame(QtWidgets.QFrame, Base):
 
         super().__init__(parent)
         Base._init(self, setLayout=setLayout, **kwds)
-
-        self._thisparent = parent
 
         #TODO: replace with proper stylesheet routines once implemented
         styleSheet = ''

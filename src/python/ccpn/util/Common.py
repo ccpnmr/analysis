@@ -9,7 +9,7 @@ from __future__ import unicode_literals
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2024"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2025"
 __credits__ = ("Ed Brooksbank, Morgan Hayward, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Daniel Thompson",
                "Gary S Thompson & Geerten W Vuister")
@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2024-12-09 12:39:16 +0000 (Mon, December 09, 2024) $"
-__version__ = "$Revision: 3.2.11 $"
+__dateModified__ = "$dateModified: 2025-10-10 14:33:39 +0100 (Fri, October 10, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,7 +44,7 @@ import inspect
 from itertools import islice, cycle, zip_longest
 from string import whitespace
 from contextlib import suppress
-from typing import Any, Iterable, Iterator
+from typing import Any, Iterable, Iterator, final, Final, TypeAlias
 
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util import Constants
@@ -87,6 +87,44 @@ maxRandomInt = 2000000000
 WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 
 
+@final
+class Unset:
+    """A Class-as-value sentinel that allows adding `type[Unset]` to type-annotations.
+    Alternatively, use `UnsetType`.
+
+    Use the class object itself as a unique marker, for example:
+    ::
+        def checking(value: int | float | type[Unset] = Unset) -> None:
+            if value is Unset:
+                ...
+
+        def checking_type(value: int | float | UnsetType = Unset) -> None:
+            if value is Unset:
+                ...
+
+    or if you prefer to use a constant alias:
+    ::
+        def checking_with_alias(value: int | float | type[Unset] = UNSET) -> None:
+            if value is UNSET:
+                ...
+
+    This class cannot be instantiated or subclassed.
+    """
+
+    def __new__(cls, *args, **kwargs):
+        raise RuntimeError(f"Cannot create instances of {cls.__name__}")
+
+    def __init_subclass__(cls, **kwargs):
+        raise RuntimeError(f"Subclassing of {cls.__name__} is not allowed")
+
+
+# A type alias for the *class object* type:
+UnsetType: TypeAlias = type[Unset]
+# type UnsetType = type[Unset]  # 3.12+ (PEP 695 type statement preferred)
+# Optional: a constant alias for readability
+UNSET: Final[UnsetType] = Unset
+
+
 class Partial_(object):
     """Pure implementation to have better/defined str/repr
     output
@@ -114,6 +152,7 @@ class Partial_(object):
         return f'{self.funcName}({_args},{_kwds})'
 
     __repr__ = __str__
+
 
 # # valid characters for file names
 # # NB string.ascii_letters and string.digits are not compatible
@@ -1095,6 +1134,29 @@ def main():
 
     for i in zipCycle(range(2), range(5), ['a', 'b', 'c'], []):
         print(i)
+
+    # Example usage
+    def checking(value: int | float | type[Unset] = Unset) -> float | None:
+        if value is Unset:
+            # Handle "not provided"
+            print('checking Unset')
+        if isinstance(value, int | float):
+            return float(value)
+
+    # Example usage
+    def checking_with_alias(value: int | float | UnsetType = UNSET) -> float | None:
+        if value is UNSET:
+            # Handle "not provided"
+            print('checking_with_alias UNSET')
+        if isinstance(value, int | float):
+            return float(value)
+
+    print(checking(1))
+    print(checking(23.23))
+    print(checking())
+    print(checking_with_alias(23.23))
+    print(checking_with_alias("not a string"))
+    print(checking_with_alias())
 
 
 if __name__ == '__main__':

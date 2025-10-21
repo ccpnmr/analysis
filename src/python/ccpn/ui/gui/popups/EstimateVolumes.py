@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2025-01-10 16:38:48 +0000 (Fri, January 10, 2025) $"
-__version__ = "$Revision: 3.3.0.develop $"
+__modifiedBy__ = "$modifiedBy: Daniel Thompson $"
+__dateModified__ = "$dateModified: 2025-08-15 14:54:56 +0100 (Fri, August 15, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -123,10 +123,6 @@ class EstimatePeakListVolumesPopup(EstimateVolumesABC):
     def __init__(self, parent, *args, **kwds):
         super().__init__(parent, *args, **kwds)
 
-        # select the first spectrum from the current spectrumDisplay
-        if self.current is not None and self.current.strip is not None and \
-                not self.current.strip.isDeleted and len(self.current.strip.spectra) > 0:
-            self.spectrumPullDown.select(self.current.strip.spectra[0].pid)
 
     def _createWidgets(self):
         """Create the widgets for the popup
@@ -177,6 +173,11 @@ class EstimatePeakListVolumesPopup(EstimateVolumesABC):
         """
         with self.blockWidgetSignals():
             self._changePeakLists()
+
+        # select the first spectrum from the current spectrumDisplay
+        if self.current is not None and self.current.strip is not None and \
+                not self.current.strip.isDeleted and len(self.current.strip.spectra) > 0:
+            self.spectrumPullDown.select(self.current.strip.spectra[0].pid)
 
     def _changePeakLists(self, *args):
         """Update the peakLists in the table from the current spectrum in the pulldown.

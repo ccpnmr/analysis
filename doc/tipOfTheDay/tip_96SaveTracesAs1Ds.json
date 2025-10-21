@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can save the 1D traces going through a peak by <span style=%(purple)s>right-clicking</span> on a selected peak and selecting <span style=%(purple)s>Save trace(s) as 1D</span>. The 1Ds will be listed in the <span style=%(purple)s>Spectra</span> section of the sidebar and stored as .ndf5 format spectra in your project's <span style=%(purple)s>data/spectra</span> folder.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 1,
+  "contents": [
+    "./graphics/SaveTracesAs1Ds.png"
+  ]
+}

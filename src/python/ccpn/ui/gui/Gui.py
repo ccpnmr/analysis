@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-09-09 19:02:06 +0100 (Tue, September 09, 2025) $"
-__version__ = "$Revision: 3.3.2.3 $"
+__dateModified__ = "$dateModified: 2025-10-10 12:35:51 +0100 (Fri, October 10, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1375,7 +1375,17 @@ class Gui(Ui, _Gui_V3_V4):
 
         # check the project name derived from path; not all is allowed
         newName = newPath.basename
-        if (_nameFromPath := checkProjectName(newName, correctName=True)) != newName:
+        if (_nameFromPath := checkProjectName(newName, correctName=False)) != newName:
+            if not _nameFromPath:
+                # Raise popup if the name is too long or contains bad characters,
+                # prevents overwriting original project when the name is clipped.
+                if len(newName) > Project._MAX_PROJECT_NAME_LENGTH:
+                    _msg = (f'Invalid name {newName!r} is too long. The maximum number of characters'
+                            f' for a project name is {Project._MAX_PROJECT_NAME_LENGTH}')
+                else:
+                    _msg = f'Invalid name {newName!r} contains invalid characters'
+                MessageDialog.showWarning(title, _msg, parent=self.mainWindow)
+                return False
             MessageDialog.showInfo(title,
                                    f'Project name will be changed from "{newName}" to "{_nameFromPath}"\n'
                                    f'See console/log for details',

@@ -13,7 +13,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-16 16:52:31 +0100 (Thu, October 16, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-21 16:23:50 +0100 (Tue, October 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -2436,10 +2436,11 @@ class Framework(NotifierBase, GuiBase):
 
         else:
             from ccpn.ui.gui.popups.CopyStripFlippedAxesPopup import CopyStripFlippedSpectraPopup
+            from ccpn.util.Constants import AxisMatch
 
             try:
-                mDict = usePosition and self.current.mouseMovedDict[1]
-                positions = [poss[0] if (poss := mDict.get(ax)) else None
+                codeDict = usePosition and self.current.mouseMovedDict[AxisMatch.CODE]
+                positions = [poss[0] if (codeDict and (poss := codeDict.get(ax))) else None
                              for ax in strp.axisCodes] if usePosition else None
                 popup = CopyStripFlippedSpectraPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
                                                      strip=strp, label=strp.id,

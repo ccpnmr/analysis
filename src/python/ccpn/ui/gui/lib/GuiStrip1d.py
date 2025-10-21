@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-21 16:23:50 +0100 (Tue, October 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -300,8 +300,9 @@ class GuiStrip1d(GuiStrip):
                 newDisplay.displaySpectrum(spectrum)
 
             try:
-                mDict = usePosition and self.current.mouseMovedDict[AxisMatch.CODE]
-                positions = [poss[0] if (poss := mDict.get(ax)) else None
+                codeDict = usePosition and self.current.mouseMovedDict[AxisMatch.CODE]
+                # get the first position in each axis.code list in the mouseDict
+                positions = [poss[0] if (codeDict and (poss := codeDict.get(ax))) else None
                              for ax in self.axisCodes] if usePosition else None
                 copyStripAxisPositionsAndWidths(self, newDisplay.strips[0], positions=positions)
             except Exception as es:
@@ -341,8 +342,9 @@ class GuiStrip1d(GuiStrip):
             return
 
         try:
-            mDict = usePosition and self.current.mouseMovedDict[AxisMatch.CODE]
-            positions = [poss[0] if (poss := mDict.get(ax)) else None
+            codeDict = usePosition and self.current.mouseMovedDict[AxisMatch.CODE]
+            # get the first position in each axis.code list in the mouseDict
+            positions = [poss[0] if (codeDict and (poss := codeDict.get(ax))) else None
                          for ax in self.axisCodes] if usePosition else None
             return self._flipAxes(axisOrderIndices=(int(self.spectrumDisplay._flipped),), positions=positions)
         except Exception as es:

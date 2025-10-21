@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-20 16:39:53 +0100 (Mon, October 20, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-21 16:23:51 +0100 (Tue, October 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -859,10 +859,15 @@ class GuiNdWidget(CcpnGLWidget):
         self._minY = min(self._minY, specVals.minSpectrumFrequency[1])
 
     def _updateMouseDict(self, cursorCoordinate: list[float]) -> _COORDS_TYPE:
+        atTypes: dict[str, list[float]]
+        atCodes: dict[str, list[float]]
+        _atPrt: dict[str, list[float]]
+
         if not (mouseMovedDict := self.current.mouseMovedDict):
             mouseMovedDict = self.current.mouseMovedDict = {}
         # initialise a new mouse moved dict
         xPos = yPos = None
+        mouseMovedDict.clear()
         mouseMovedDict[MOUSEDICTSTRIP] = self.strip
         atTypes = mouseMovedDict[AxisMatch.ISOTOPE] = {}
         atCodes = mouseMovedDict[AxisMatch.CODE] = {}
@@ -871,10 +876,10 @@ class GuiNdWidget(CcpnGLWidget):
 
         # transfer the mouse position from the coords to the mouseMovedDict for the other displays
         for n, (isotope, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self._orderedAxes)):
-            code = axis.code[:chrs].lower()
             ats = atTypes.setdefault(isotope, [])
-            atcs = atCodes.setdefault(code, [])
-            _atp = _atPrt.setdefault(f"{isotope}_{code}", [])
+            atcs = atCodes.setdefault(axis.code, [])
+            code = axis.code[:chrs].lower()
+            _atp = _atPrt.setdefault(code, [])  # f"{isotope}_{code}"
             if n == 0:
                 xPos = pos = _round_to_significant_figures(cursorCoordinate[0])
             elif n == 1:
@@ -1571,10 +1576,15 @@ class Gui1dWidget(CcpnGLWidget):
         self._minY = min(self._minY, specVals.minSpectrumFrequency[1])
 
     def _updateMouseDict(self, cursorCoordinate: list[float]) -> _COORDS_TYPE:
+        atTypes: dict[str, list[float]]
+        atCodes: dict[str, list[float]]
+        _atPrt: dict[str, list[float]]
+
         if not (mouseMovedDict := self.current.mouseMovedDict):
             mouseMovedDict = self.current.mouseMovedDict = {}
         # initialise a new mouse moved dict
         xPos = yPos = None
+        mouseMovedDict.clear()
         mouseMovedDict[MOUSEDICTSTRIP] = self.strip
         atTypes = mouseMovedDict[AxisMatch.ISOTOPE] = {}
         atCodes = mouseMovedDict[AxisMatch.CODE] = {}
@@ -1588,10 +1598,10 @@ class Gui1dWidget(CcpnGLWidget):
 
         # transfer the mouse position from the coords to the mouseMovedDict for the other displays
         for n, (isotope, axis) in enumerate(zip(isoCodes, self._orderedAxes)):
-            code = axis.code[:chrs].lower()
             ats = atTypes.setdefault(isotope, [])
-            atcs = atCodes.setdefault(code, [])
-            _atp = _atPrt.setdefault(f"{isotope}_{code}", [])
+            atcs = atCodes.setdefault(axis.code, [])
+            code = axis.code[:chrs].lower()
+            _atp = _atPrt.setdefault(code, [])  # f"{isotope}_{code}"
             if n == 0:
                 xPos = pos = _round_to_significant_figures(cursorCoordinate[0])
             elif n == 1:

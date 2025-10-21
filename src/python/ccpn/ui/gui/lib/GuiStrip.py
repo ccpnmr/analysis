@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-21 16:23:50 +0100 (Tue, October 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -957,8 +957,9 @@ class GuiStrip(Frame):
 
         allowMenuDuplicates = ((prefs := getPreferences()) and prefs.general.get('allowMenuDuplicates'))
         showBlankDimensions = ((prefs := getPreferences()) and prefs.general.get('showBlankDimensions'))
-        mouseDict = self.current.mouseMovedDict[AxisMatch.CODE]
-        position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
+        codeDict = self.current.mouseMovedDict[AxisMatch.CODE]
+        # get the first position in each axis.code list in the mouseDict
+        position = [poss[0] if (codeDict and (poss := codeDict.get(ax))) else None
                     for ax in self.axisCodes]
         if None in position:
             return
@@ -971,8 +972,9 @@ class GuiStrip(Frame):
     def markAxisIndices(self, indices=None):
         """Mark the X/Y/XY axisCodes by index
         """
-        mouseDict = self.current.mouseMovedDict[AxisMatch.CODE]
-        position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
+        codeDict = self.current.mouseMovedDict[AxisMatch.CODE]
+        # get the first position in each axis.code list in the mouseDict
+        position = [poss[0] if (codeDict and (poss := codeDict.get(ax))) else None
                     for ax in self.axisCodes]
         if indices is None:
             indices = tuple(range(len(self.axisCodes)))
@@ -1099,10 +1101,9 @@ class GuiStrip(Frame):
         """Set up the menu for the main view for marking axis codes
         """
         axisName = axisMenu or self.markAxesMenu
-        mouseDict = self.current.mouseMovedDict[AxisMatch.CODE]
-        # position = [mouseDict[ax][0] if mouseDict[ax] else None
-        #             for ax in self.axisCodes if mouseDict.get(ax)]
-        position = [mouseDict[ax][0] if (mouseDict and ax in mouseDict and mouseDict[ax]) else None
+        codeDict = self.current.mouseMovedDict[AxisMatch.CODE]
+        # get the first position in each axis.code list in the mouseDict
+        position = [poss[0] if (codeDict and (poss := codeDict.get(ax))) else None
                     for ax in self.axisCodes]
         if None in position:
             return
@@ -2258,8 +2259,8 @@ class GuiStrip(Frame):
                 defaultColour = '#FF0000'
 
             # find all the positions valid for this strip
-            mouseDict = self.current.mouseMovedDict[AxisMatch.CODE]
-            positions = [(pos, ax) for ax in self.axisCodes for pos in mouseDict.get(ax, []) if pos is not None]
+            mDict = self.current.mouseMovedDict[AxisMatch.CODE]
+            positions = [(pos, ax) for ax in self.axisCodes for pos in mDict.get(ax, []) if pos is not None]
 
             if axisIndex is not None:
                 # mark only the required axis, should work for 4D and mark all axes

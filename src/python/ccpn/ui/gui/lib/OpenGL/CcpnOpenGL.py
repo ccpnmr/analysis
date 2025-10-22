@@ -60,7 +60,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-17 18:11:09 +0100 (Fri, October 17, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-21 19:01:46 +0100 (Tue, October 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -2090,13 +2090,13 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
         cornerButtons = ((self._lockedStringTrue, self._toggleAxisLocked),
                          (self._fixedStringTrue, self._toggleAxisFixed))
         self._buttonCentres = ()
-        buttonOffset = 0
-        for button, callBack in cornerButtons:
-            w = (button.width / 2)
-            h = (button.height / 2)
-            # define a slightly wider, lower box
-            self._buttonCentres += ((w + 2 + buttonOffset, h - 2, w, h - 3, callBack),)
-            buttonOffset += button.width
+        offset = QtCore.QPoint(0, STRINGOFFSET)  # First position
+        for button, callback in cornerButtons:
+            # font.height is automatically scaled to the devicePixelRatio
+            size = QtCore.QSize(int(button.width), int(button.font.height) - 3)  # Allow for top border of font
+            buttonPos = QtCore.QRect(offset, size)
+            self._buttonCentres += ((buttonPos, callback),)
+            offset.setX(offset.x() + size.width())
         self.stripIDString = GLString(text='', font=smallFont, x=0, y=0, GLContext=self, obj=None)
 
     def getSmallFont(self, transparent=False):
@@ -2260,12 +2260,9 @@ class CcpnGLWidget(QOpenGLWidget, Generic[_CoreStrip, _CoreSpectrumDisplay]):
         """
         if self.AXISLOCKEDBUTTON and (
                 self.AXISLOCKEDBUTTONALLSTRIPS or self.strip == self.strip.spectrumDisplay.strips[0]):
-            for button in self._buttonCentres:
-                minDiff = abs(mx - button[0])
-                maxDiff = abs(my - button[1])
-
-                if (minDiff < button[2]) and (maxDiff < button[3]):
-                    button[4]()
+            for button, callback in self._buttonCentres:
+                if button.contains(QtCore.QPoint(mx, my)):
+                    callback()
                     return True
 
     def mousePressInLabel(self, mx, my, ty):

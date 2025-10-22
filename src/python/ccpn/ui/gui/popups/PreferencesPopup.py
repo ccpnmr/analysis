@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-17 18:11:10 +0100 (Fri, October 17, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-21 19:03:08 +0100 (Tue, October 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -517,7 +517,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                    (self._setExternalProgramsTabWidgets, 'External Programs'),
                                    (self._setAppearanceTabWidgets, 'Appearance'),
                                    (self._setMacroEditorTabWidgets, 'Macro Editor'),
-                                   (self._setPluginsTabWidgents, 'Plugins')
+                                   # (self._setPluginsTabWidgets, 'Plugins')
                                    ):
             fr = ScrollableFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
                                  scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
@@ -882,7 +882,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 2), gridSpan=(1, 1))
 
-    def _setPluginsTabWidgents(self, parent):
+    def _setPluginsTabWidgets(self, parent):
         from ccpn.framework.plugins._PluginPreferencesWidgets import PluginPreferencesFrame
 
         row = 0
@@ -1093,7 +1093,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self._populatePeaksTab()
             self._populateExternalProgramsTab()
             self._populateAppearanceTab()
-            self._populateMacroEditorTab()
+            # self._populateMacroEditorTab()
 
     def setFontText(self, widget, fontString):
         """Set the contents of the widget the details of the font
@@ -1199,8 +1199,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showLastAxisOnlyBox.setChecked(self.preferences.general.lastAxisOnly)
         self.allowMenuDuplicatesBox.setChecked(self.preferences.general.allowMenuDuplicates)
         self.showBlankDimensionsBox.setChecked(self.preferences.general.showBlankDimensions)
-        self.matchAxisCode.setIndex(self.preferences.general.matchAxisCode)
+        self.matchAxisCodeData.setIndex(self.preferences.general.matchAxisCode)
         self.matchNumCharsData.setValue(self.preferences.general.matchNumChars)
+        self._enableNumCharsButtons()
 
         self.axisOrderingOptions.setIndex(self.preferences.general.axisOrderingOptions)
         self.spectrumScalingData.setValue(float(self.preferences.general.scalingFactorStep))
@@ -1351,15 +1352,16 @@ class PreferencesPopup(CcpnDialogMainWidget):
         _makeLine(parent, grid=(row, 0), text="Spectrum Display")
 
         row += 1
-        self.matchAxisCodeLabel = _makeLabel(parent, text="Match axes by", grid=(row, 0))
-        self.matchAxisCode = RadioButtons(parent, texts=['Isotope', 'Axis code'],
-                                          callback=self._queueSetMatchAxisCode,
-                                          direction='h',
-                                          grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                          tipTexts=None,
-                                          )
+        self.matchAxisCodeLabel = _makeLabel(parent, text="Match cursors across\nSpectrumDisplays by",
+                                             grid=(row, 0))
+        self.matchAxisCodeData = RadioButtons(parent, texts=['Isotope', 'Axis code'],
+                                              callback=self._queueSetMatchAxisCode,
+                                              direction='h',
+                                              grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                              tipTexts=None,
+                                              )
         row += 1
-        self.matchNumCharsLabel = _makeLabel(parent, text="Characters to match", grid=(row, 0))
+        self.matchNumCharsLabel = _makeLabel(parent, text="Axis code characters to match", grid=(row, 0))
         self.matchNumCharsData = Spinbox(parent, grid=(row, 1), hAlign='l', gridSpan=(1, 2), min=1, max=5, step=1)
         self.matchNumCharsData.valueChanged.connect(partial(self._queueToggleGeneralOptions, 'matchNumChars'))
 
@@ -2702,14 +2704,15 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetMatchAxisCode(self):
-        value = self.matchAxisCode.getIndex()
+        value = self.matchAxisCodeData.getIndex()
+        self._enableNumCharsButtons()
         if value != self.preferences.general.matchAxisCode:
             return partial(self._setMatchAxisCode, value)
 
     def _setMatchAxisCode(self, value):
         """Set the matching of the axis codes across different strips
         """
-        self.preferences.general.matchAxisCode = value
+        self.preferences.general.matchAxisCodeData = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetMatchNumChars(self):
@@ -2989,6 +2992,12 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useProxyPasswordBox.enableWidget(useProxy)
         self.proxyUsernameData.enableWidget(useProxy and usePW)
         self.proxyPasswordData.enableWidget(useProxy and usePW)
+
+    def _enableNumCharsButtons(self):
+        """Enable/disable numChars spinbox widgets based on check boxes
+        """
+        state = (self.matchAxisCodeData.getIndex() == 1)  # There may be other states in the future
+        self.matchNumCharsData.setEnabled(state)
 
     @queueStateChange(_verifyPopupApply)
     def _queueApplyToSpectrumDisplays(self, option, checked):

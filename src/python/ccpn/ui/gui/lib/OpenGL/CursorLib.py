@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-20 16:39:53 +0100 (Mon, October 20, 2025) $"
+__dateModified__ = "$dateModified: 2025-10-21 16:23:51 +0100 (Tue, October 21, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -421,12 +421,12 @@ class CursorRenderer:
         atCodes = host._orderedAxes
         assert atCodes and len(atCodes) >= 2, "CursorRenderer: _orderedAxes must provide two axes"
 
-        chrs = host._preferences.matchNumChars
+        chrs = max(1, host._preferences.matchNumChars)
         x_code = atCodes[0].code[:chrs].lower()
         y_code = atCodes[1].code[:chrs].lower()
-        codeDict = cast(dict[str, list[float]], coords_dict[AxisMatch.CODE])
-        xPosList = codeDict.get(x_code, [])
-        yPosList = codeDict.get(y_code, [])
+        partDict = cast(dict[str, list[float]], coords_dict[AxisMatch.PARTIAL])
+        xPosList = partDict.get(x_code, [])
+        yPosList = partDict.get(y_code, [])
         return xPosList, yPosList
 
     #-----------------------------------------------------------------------------------------

@@ -146,7 +146,7 @@ def profile(dirPath='~', asText=False):
                 return result
             finally:
                 filename = aPath(dirPath).joinpath(func.__name__ + '.pstat')
-                filename = getSafeFilename(filename, 'w')
+                filename = getSafeFilename(filename, mode='w')
                 profiler.dump_stats(filename)
                 if asText:
                     pstatToText(str(filename))

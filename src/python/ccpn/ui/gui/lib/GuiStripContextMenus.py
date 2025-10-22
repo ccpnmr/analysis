@@ -886,7 +886,7 @@ def _copyYAxisCodeRangeFromStripMenuItem2(strip):
 def _showSpectraOnPhasingItem(strip):
     return _SCMitem(name='Show Spectra on Phasing',
                     typeItem=ItemTypes.get(ITEM), toolTip='Show Spectra while phasing traces are visible',
-                    checkable=True, checked=strip.showSpectraOnPhasing,
+                    checkable=True, checked=strip.showSpectraOnPhasing, shortcut='CH',
                     callback=strip._toggleShowSpectraOnPhasingCallback, stripMethodName='spectraOnPhasingAction')
 
 

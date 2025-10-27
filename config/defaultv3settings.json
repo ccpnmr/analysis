@@ -391,6 +391,9 @@
     "modules": {
         "profileByReference" : {
             "databasePaths" : []
+        },
+        "createDatabaseReference" : {
+            "databasePaths" : []
         }
     }
 }

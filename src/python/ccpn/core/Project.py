@@ -18,9 +18,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-03-24 11:36:32 +0000 (Mon, March 24, 2025) $"
-__version__ = "$Revision: 3.3.1 $"
+__modifiedBy__ = "$modifiedBy: Morgan Hayward $"
+__dateModified__ = "$dateModified: 2025-08-27 08:06:33 +0100 (Wed, August 27, 2025) $"
+__version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -63,7 +63,7 @@ from ccpn.core.lib.ContextManagers import (notificationBlanking, undoBlock, undo
 from ccpn.core.lib.XmlLoader import XmlLoader
 
 from ccpn.util import Logging
-from ccpn.util.ExcelReader import ExcelReader
+# from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger, updateLogger
 from ccpn.util.decorators import logCommand, deprecated
@@ -2785,6 +2785,7 @@ class Project(AbstractWrapperObject):
         :returns list of loaded objects (awaiting adjust ment of excelReader)
         CCPNINTERNAL: used in Excel data loader
         """
+        from ccpn.util.ExcelReader import ExcelReader
 
         with logCommandManager('application.', 'loadData', path):
             with undoBlockWithoutSideBar():

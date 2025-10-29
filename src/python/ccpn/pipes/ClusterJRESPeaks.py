@@ -1,13 +1,15 @@
-
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_METABOLOMICS
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.Label import Label
 from ccpn.util.Logging import getLogger
 from tqdm import tqdm
 from sklearn.cluster import DBSCAN
 import numpy as np
+
 
 ########################################################################################################################
 ###   Attributes:
@@ -17,6 +19,8 @@ import numpy as np
 PipeName = 'Cluster JRES Peaks'
 DefaultEps = 0.001
 DefaultMinSamples = 2
+AssignLonePeaksToMultiplets = 'Assign_Lone_Peaks_To_Multiplets'
+help = {AssignLonePeaksToMultiplets: 'Check to assign lone peaks to their own multiplets'}
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -37,6 +41,8 @@ class ClusterJRESPeaksGuiPipe(GuiPipe):
         super(ClusterJRESPeaksGuiPipe, self)
         GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
         self._parent = parent
+        self.assignLonePeaksToMultipletsLabel = Label(self.pipeFrame, text=AssignLonePeaksToMultiplets, grid=(0, 0))
+        setattr(self, AssignLonePeaksToMultiplets, CheckBox(self.pipeFrame, text='', checked=True, grid=(0, 1), tipText=help[AssignLonePeaksToMultiplets]))
 
 
 ########################################################################################################################
@@ -50,13 +56,14 @@ class ClusterJRESPeaksPipe(SpectraPipe):
     pipeCategory = PIPE_METABOLOMICS
 
     _kwargs = {
-              }
+        }
 
     def runPipe(self, spectra, **kwargs):
         """
         :param data:
         :return:
         """
+        assignLonePeaksToMultiplets = self._kwargs[AssignLonePeaksToMultiplets]
         for spectrum in tqdm(self.inputData):
             if spectrum.axisCodes != ['H', 'H_2']:
                 getLogger().warning('Error: Incorrect axis codes for Spectrum: %s. Expected ["H", "H_2"]' % spectrum.pid)
@@ -65,11 +72,17 @@ class ClusterJRESPeaksPipe(SpectraPipe):
                 dbscan = DBSCAN(eps=0.001, min_samples=2)
                 clusters = dbscan.fit_predict(chemicalShifts.reshape(-1, 1))
                 ml = spectrum.newMultipletList()
+                # Put all the clustered peaks into multiplets.
                 for num in set(clusters):
-                    if num == -1:
+                    if num == -1:  # Skip -1 values so we don't group all solo peaks together.
                         continue
                     peakList = [spectrum.peaks[i] for i in np.where(clusters == num)[0]]
                     ml.newMultiplet(peaks=peakList)
+                # Put all the lone peaks into their own multiplets.
+                if assignLonePeaksToMultiplets:
+                    for index in np.where(clusters == -1)[0]:
+                        peakList = [spectrum.peaks[index]]
+                        ml.newMultiplet(peaks=peakList)
             else:
                 getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)
         return spectra

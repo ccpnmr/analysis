@@ -19,8 +19,8 @@ import numpy as np
 PipeName = 'Cluster JRES Peaks'
 DefaultEps = 0.001
 DefaultMinSamples = 2
-ClusterLonePeaks = 'Cluster_Lone_Peaks'
-help = {ClusterLonePeaks: 'Check to assign lone peaks to their own multiplets'}
+AssignLonePeaksToMultiplets = 'Assign_Lone_Peaks_To_Multiplets'
+help = {AssignLonePeaksToMultiplets: 'Check to assign lone peaks to their own multiplets'}
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -41,8 +41,8 @@ class ClusterJRESPeaksGuiPipe(GuiPipe):
         super(ClusterJRESPeaksGuiPipe, self)
         GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
         self._parent = parent
-        self.clusterLonePeaksLabel = Label(self.pipeFrame, text=ClusterLonePeaks, grid=(0, 0))
-        setattr(self, ClusterLonePeaks, CheckBox(self.pipeFrame, text='', checked=True, grid=(0, 1), tipText=help[ClusterLonePeaks]))
+        self.assignLonePeaksToMultipletsLabel = Label(self.pipeFrame, text=AssignLonePeaksToMultiplets, grid=(0, 0))
+        setattr(self, AssignLonePeaksToMultiplets, CheckBox(self.pipeFrame, text='', checked=True, grid=(0, 1), tipText=help[AssignLonePeaksToMultiplets]))
 
 
 ########################################################################################################################
@@ -63,7 +63,7 @@ class ClusterJRESPeaksPipe(SpectraPipe):
         :param data:
         :return:
         """
-        clusterLonePeaks = self._kwargs[ClusterLonePeaks]
+        assignLonePeaksToMultiplets = self._kwargs[AssignLonePeaksToMultiplets]
         for spectrum in tqdm(self.inputData):
             if spectrum.axisCodes != ['H', 'H_2']:
                 getLogger().warning('Error: Incorrect axis codes for Spectrum: %s. Expected ["H", "H_2"]' % spectrum.pid)
@@ -79,7 +79,7 @@ class ClusterJRESPeaksPipe(SpectraPipe):
                     peakList = [spectrum.peaks[i] for i in np.where(clusters == num)[0]]
                     ml.newMultiplet(peaks=peakList)
                 # Put all the lone peaks into their own multiplets.
-                if clusterLonePeaks:
+                if assignLonePeaksToMultiplets:
                     for index in np.where(clusters == -1)[0]:
                         peakList = [spectrum.peaks[index]]
                         ml.newMultiplet(peaks=peakList)

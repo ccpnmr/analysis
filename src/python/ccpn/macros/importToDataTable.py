@@ -19,7 +19,8 @@ if path.suffix == '.csv':
 elif path.suffix == '.json':
     dfs = {stem: pd.read_json(path)}
 elif path.suffix == '.xlsx':
-    dfs = pd.read_excel(path, sheet_name=None)
+    loadedDfs = pd.read_excel(path, sheet_name=None)
+    dfs = {f'{stem}_{key}': value for key, value in loadedDfs.items()}
 
 for key, value in dfs.items():
     key = key.replace(' ', '_')

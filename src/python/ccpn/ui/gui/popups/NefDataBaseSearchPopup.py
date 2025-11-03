@@ -20,7 +20,7 @@ from ccpn.util.Logging import getLogger
 
 
 class NefDatabaseSearchPopup(CcpnDialog):
-    def __init__(self, project, caller, spectrum, parent=None, title='Default Line Widths', **kwds):
+    def __init__(self, project, caller, spectrum, parent=None, title='Select NEF File', **kwds):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
         self.project = project
         self.caller = caller

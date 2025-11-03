@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Morgan Hayward $"
-__dateModified__ = "$dateModified: 2025-10-16 14:46:01 +0100 (Thu, October 16, 2025) $"
-__version__ = "$Revision: 3.3.3 $"
+__dateModified__ = "$dateModified: 2025-11-03 17:08:37 +0000 (Mon, November 03, 2025) $"
+__version__ = "$Revision: 3.3.5 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,6 +34,7 @@ from ccpn.util.Path import aPath, joinPath
 from ccpn.util.Colour import name2Hex
 from itertools import cycle
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking, progressHandler, rebuildSidebar
+from pathlib import Path
 
 from ccpn.core.Substance import _newSubstance
 from ccpn.core.Sample import _newSample
@@ -783,9 +784,14 @@ class ExcelReader(object):
         Prioritises spectrumGroups column over spectrumGroup column if both are present.
         Collects spectrum group assignments into another dataframe for later parsing.
         """
+        if 'name' not in dataFrame.columns:
+            names = [Path(path).stem for path in dataFrame['spectrumPath']]
+            dataFrame['name'] = names
         columns = ['name', 'spectrumName']
         spectrumGroupDf = None
         if 'spectrumGroups' in dataFrame.columns:
+            if all(dataFrame['spectrumGroups'].isna()):
+                return
             data = {'name': [],
                     'spectrumName': []}
             for index, row in dataFrame.iterrows():
@@ -797,7 +803,10 @@ class ExcelReader(object):
             spectrumGroupDf = pd.DataFrame(data=data, columns=columns)
             spectrumGroupDf.drop_duplicates()
         elif 'spectrumGroupName' in dataFrame.columns:
-            spectrumGroupDf = pd.DataFrame(data=dataFrame[['spectrumGroupName', 'name']], columns=columns)
+            if all(dataFrame['spectrumGroupName'].isna()):
+                return
+            spectrumGroupDf = pd.DataFrame(data=dataFrame[['spectrumGroupName', 'name']])
+            spectrumGroupDf.columns = columns
         if spectrumGroupDf is not None:
             self.dataframes[SPECTRUM_GROUP].append(spectrumGroupDf)
 

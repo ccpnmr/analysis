@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-11-07 13:35:08 +0000 (Fri, November 07, 2025) $"
+__dateModified__ = "$dateModified: 2025-11-07 15:07:35 +0000 (Fri, November 07, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -86,7 +86,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import (GLGRIDLINES, GLAXISLABELS, GL
 #     GLFULLLIST, GLEXTENDEDLIST, GLALIASENABLED, GLALIASLABELSENABLED
 from ccpn.ui.gui.popups.ExportStripToFile import (PAGEPORTRAIT, DEFAULT_FONT, PAGESIZEA6, PAGESIZEA5,
                                                   PAGESIZEA4, PAGESIZEA3, PAGESIZEA2, PAGESIZEA1, PAGESIZEA0,
-                                                  PAGESIZELETTER, PAGESIZES)
+                                                  PAGESIZELETTER, PAGESIZECUSTOM, PAGESIZES)
 # from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
 #     PAGELANDSCAPE, PAGETYPES
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPNG
@@ -124,7 +124,8 @@ PAGEREFERENCE = {PAGESIZEA0    : A0,
                  PAGESIZEA4    : A4,
                  PAGESIZEA5    : A5,
                  PAGESIZEA6    : A6,
-                 PAGESIZELETTER: letter}
+                 PAGESIZELETTER: letter,
+                 PAGESIZECUSTOM: 'Custom'}
 
 
 def alphaClip(value):
@@ -159,7 +160,10 @@ class GLExporter():
 
         # set the page orientation
         pageType = portrait if self.params[GLPAGETYPE] == PAGEPORTRAIT else landscape
-        _pageSize = PAGEREFERENCE.get(self.params[GLPAGESIZE]) or A4
+
+        _pageSize = self.params[GLPAGESIZE]
+        if isinstance(_pageSize, str):
+            _pageSize = PAGEREFERENCE.get(_pageSize) or A4
 
         self._report = Report(filename, pagesize=pageType(_pageSize),
                               leftMargin=1, rightMargin=1, topMargin=1, bottomMargin=1)

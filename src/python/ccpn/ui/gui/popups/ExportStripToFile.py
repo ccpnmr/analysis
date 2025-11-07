@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-11-07 13:35:09 +0000 (Fri, November 07, 2025) $"
+__dateModified__ = "$dateModified: 2025-11-07 15:07:35 +0000 (Fri, November 07, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -126,7 +126,9 @@ PAGESIZEA4 = 'A4'
 PAGESIZEA5 = 'A5'
 PAGESIZEA6 = 'A6'
 PAGESIZELETTER = 'letter'
-PAGESIZES = [PAGESIZEA0, PAGESIZEA1, PAGESIZEA2, PAGESIZEA3, PAGESIZEA4, PAGESIZEA5, PAGESIZEA6, PAGESIZELETTER]
+PAGESIZECUSTOM = 'Custom'
+PAGESIZES = [PAGESIZEA0, PAGESIZEA1, PAGESIZEA2, PAGESIZEA3, PAGESIZEA4,
+             PAGESIZEA5, PAGESIZEA6, PAGESIZELETTER, PAGESIZECUSTOM]
 PAGESIZE = 'pageSize'
 OPTIONSPECTRA = 'Spectra'
 OPTIONPEAKLISTS = 'Peak Lists'
@@ -428,6 +430,18 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.pageSize = PulldownList(sFrame, vAlign='t', grid=(row, 1),
                                      callback=self._queuePageSizeCallback)
         self.pageSize.setData(texts=PAGESIZES)
+        row += 1
+        self.pageSizeX = DoubleSpinBoxCompoundWidget(sFrame, grid=(row, 1), min=1.0, max=999999, decimals=0, step=1,
+                                                     callback=self._queuePageSizeCallback, labelText='X')
+        row += 1
+        self.pageSizeY = DoubleSpinBoxCompoundWidget(sFrame, grid=(row, 1), min=1.0, max=999999, decimals=0, step=1,
+                                                     callback=self._queuePageSizeCallback, labelText='Y', )
+
+        self.dpiLabel = Label(sFrame, text='DPI: 72', grid=(row, 2), hAlign='left', vAlign='centre')
+
+        self.pageSizeX.setVisible(False)
+        self.pageSizeY.setVisible(False)
+        self.dpiLabel.setVisible(False)
 
         row += 1
         Label(sFrame, text='Page orientation', grid=(row, 0), hAlign='left', vAlign='centre')
@@ -1765,7 +1779,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                   if (strip and strip._CcpnGLWidget) else None),
                       GLPRINTTYPE              : self.printType.get(),
                       GLPAGETYPE               : self.pageOrientation.get(),
-                      GLPAGESIZE               : self.pageSize.get(),
+                      GLPAGESIZE               : self._getPageSize(),
                       GLFOREGROUND             : hexToRgbRatio(self.foregroundColour),
                       GLBACKGROUND             : hexToRgbRatio(self.backgroundColour),
                       GLBASETHICKNESS          : self.baseThicknessBox.getValue(),
@@ -2010,14 +2024,34 @@ class ExportStripToFilePopup(ExportDialogABC):
     @queueStateChange(_verifyPopupApply)
     def _queuePageSizeCallback(self, _value):
         value = self.pageSize.get()
+
+        if value == PAGESIZECUSTOM and not self.pageSizeX.isVisible():
+            self.pageSizeX.setVisible(True)
+            self.pageSizeY.setVisible(True)
+            self.dpiLabel.setVisible(True)
+        elif value != PAGESIZECUSTOM and self.pageSizeX.isVisible():
+            self.pageSizeX.setVisible(False)
+            self.pageSizeY.setVisible(False)
+            self.dpiLabel.setVisible(False)
+
         if value != self.printSettings.pageSize:
+            if value == PAGESIZECUSTOM:
+                value = (self.pageSizeX.get(), self.pageSizeY.get())
             return partial(self._setPageSize, value)
 
     def _setPageSize(self, value):
         """Set the page size
-        One of: A0, A1, A2, A3, A4, A5, A6, letter
+        One of: A0, A1, A2, A3, A4, A5, A6, letter, custom
         """
         self.printSettings.pageSize = value
+
+    def _getPageSize(self):
+        value = self.pageSize.get()
+
+        if value == PAGESIZECUSTOM:
+            value = (self.pageSizeX.get(), self.pageSizeY.get())
+
+        return value
 
     @queueStateChange(_verifyPopupApply)
     def _queuePageOrientationCallback(self):

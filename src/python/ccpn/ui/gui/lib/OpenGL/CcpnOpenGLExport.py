@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-08-21 15:19:03 +0100 (Thu, August 21, 2025) $"
+__dateModified__ = "$dateModified: 2025-11-07 13:35:08 +0000 (Fri, November 07, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -498,16 +498,16 @@ class GLExporter():
         if _scaleMode == SCALING_MODES.index(SCALE_PERCENT):
 
             # modify the displayScale
-            self.displayScale = (self._displayScale * (_scalePercent / 100.0)) if (
+            self.displayScaleX = self.displayScaleY = (self._displayScale * (_scalePercent / 100.0)) if (
                     0 <= _scalePercent <= 100) else self._displayScale
-            self.pixWidth = self._pixWidth * self.displayScale
-            self.pixHeight = self._pixHeight * self.displayScale
-            self.fontScale = self._fontScale * self.displayScale
-            self.stripSpacing = self._stripSpacing * self.displayScale
+            self.pixWidth = self._pixWidth * self.displayScaleX
+            self.pixHeight = self._pixHeight * self.displayScaleX
+            self.fontScale = self._fontScale * self.displayScaleX
+            self.stripSpacing = self._stripSpacing * self.displayScaleX
 
         else:
-            _newScale = 1.0
-            _scale = self.params[GLSCALINGBYUNITS]
+            _newScaleX = _newScaleY = 1.0
+            _scaleX, _scaleY = self.params[GLSCALINGBYUNITS]
             try:
                 # scales are ratios
                 # based on self.mainView dimensions and ranges
@@ -528,54 +528,88 @@ class GLExporter():
 
                 if _scaleMode == SCALING_MODES.index(SCALE_CM_UNIT):
                     # this is scaled to 72dpi
-                    if self.params[GLSCALINGAXIS] == 0:
-                        _cms = (self._displayScale * _width * 2.54) / 72.0
-                        _axisScale = abs(_axisL - _axisR)
-                    else:
-                        _cms = (self._displayScale * _height * 2.54) / 72.0
-                        _axisScale = abs(_axisT - _axisB)
-                    _newScale = _scale / (_cms / _axisScale)
+                    # if self.params[GLSCALINGAXIS] == 0:
+                    #     _cms = (self._displayScale * _width * 2.54) / 72.0
+                    #     _axisScale = abs(_axisL - _axisR)
+                    # else:
+                    #     _cms = (self._displayScale * _height * 2.54) / 72.0
+                    #     _axisScale = abs(_axisT - _axisB)
+
+                    _cmsX = (self._displayScale * _width * 2.54) / 72.0
+                    _axisScaleX = abs(_axisL - _axisR)
+                    _cmsY = (self._displayScale * _height * 2.54) / 72.0
+                    _axisScaleY = abs(_axisT - _axisB)
+
+                    _newScaleX = _scaleX / (_cmsX / _axisScaleX)
+                    _newScaleY = _scaleY / (_cmsY / _axisScaleY)
 
                 elif _scaleMode == SCALING_MODES.index(SCALE_UNIT_CM):
-                    if self.params[GLSCALINGAXIS] == 0:
-                        _cms = (self._displayScale * _width * 2.54) / 72.0
-                        _axisScale = abs(_axisL - _axisR)
-                    else:
-                        _cms = (self._displayScale * _height * 2.54) / 72.0
-                        _axisScale = abs(_axisT - _axisB)
-                    _newScale = (_axisScale / _cms) / _scale
+                    # if self.params[GLSCALINGAXIS] == 0:
+                    #     _cms = (self._displayScale * _width * 2.54) / 72.0
+                    #     _axisScale = abs(_axisL - _axisR)
+                    # else:
+                    #     _cms = (self._displayScale * _height * 2.54) / 72.0
+                    #     _axisScale = abs(_axisT - _axisB)
+
+                    _cmsX = (self._displayScale * _width * 2.54) / 72.0
+                    _axisScaleX = abs(_axisL - _axisR)
+
+                    _cmsY = (self._displayScale * _height * 2.54) / 72.0
+                    _axisScaleY = abs(_axisT - _axisB)
+
+                    _newScaleX = (_axisScaleX / _cmsX) / _scaleX
+                    _newScaleY = (_axisScaleY / _cmsY) / _scaleY
 
                 elif _scaleMode == SCALING_MODES.index(SCALE_INCH_UNIT):
-                    if self.params[GLSCALINGAXIS] == 0:
-                        _cms = (self._displayScale * _width) / 72.0
-                        _axisScale = abs(_axisL - _axisR)
-                    else:
-                        _cms = (self._displayScale * _height) / 72.0
-                        _axisScale = abs(_axisT - _axisB)
-                    _newScale = _scale / (_cms / _axisScale)
+                    # if self.params[GLSCALINGAXIS] == 0:
+                    #     _cms = (self._displayScale * _width) / 72.0
+                    #     _axisScale = abs(_axisL - _axisR)
+                    # else:
+                    #     _cms = (self._displayScale * _height) / 72.0
+                    #     _axisScale = abs(_axisT - _axisB)
+
+                    _cmsX = (self._displayScale * _width) / 72.0
+                    _axisScaleX = abs(_axisL - _axisR)
+
+                    _cmsY = (self._displayScale * _height) / 72.0
+                    _axisScaleY = abs(_axisT - _axisB)
+
+                    _newScaleX = _scaleX / (_cmsX / _axisScaleX)
+                    _newScaleY = _scaleY / (_cmsY / _axisScaleY)
 
                 else:
-                    if self.params[GLSCALINGAXIS] == 0:
-                        _cms = (self._displayScale * _width) / 72.0
-                        _axisScale = abs(_axisL - _axisR)
-                    else:
-                        _cms = (self._displayScale * _height) / 72.0
-                        _axisScale = abs(_axisT - _axisB)
-                    _newScale = (_axisScale / _cms) / _scale
+                    # if self.params[GLSCALINGAXIS] == 0:
+                    #     _cms = (self._displayScale * _width) / 72.0
+                    #     _axisScale = abs(_axisL - _axisR)
+                    # else:
+                    #     _cms = (self._displayScale * _height) / 72.0
+                    #     _axisScale = abs(_axisT - _axisB)
+
+                    _cmsX = (self._displayScale * _width) / 72.0
+                    _axisScaleX = abs(_axisL - _axisR)
+
+                    _cmsY = (self._displayScale * _height) / 72.0
+                    _axisScaleY = abs(_axisT - _axisB)
+
+                    _newScaleX = (_axisScaleY / _cmsY) / _scaleX
+                    _newScaleY = (_axisScaleY / _cmsY) / _scaleY
 
             except Exception:
                 # default to full page
-                _newScale = 1.0
+                _newScaleX = 1.0
+                _newScaleY = 1.0
 
             finally:
                 # clip to the percentage range
-                _newScale = max(0.01, min(_newScale, 1.0))
+                self.displayScaleX = max(0.01, min(_newScaleX, 1.0))
+                self.displayScaleY = max(0.01, min(_newScaleY, 1.0))
 
-                self.displayScale = self._displayScale * _newScale
-                self.pixWidth = self._pixWidth * self.displayScale
-                self.pixHeight = self._pixHeight * self.displayScale
-                self.fontScale = self._fontScale * self.displayScale
-                self.stripSpacing = self._stripSpacing * self.displayScale
+                self.pixWidth = self._pixWidth * self.displayScaleX
+                self.pixHeight = self._pixHeight * self.displayScaleY
+
+                self.fontScale = self._fontScale * max(self.displayScaleX, self.displayScaleY)
+                self.stripSpacing = self._stripSpacing * max(self.displayScaleX, self.displayScaleY)
+
 
     def _addBackgroundBox(self, thisPlot):
         """Make a background box to cover the plot area
@@ -654,10 +688,10 @@ class GLExporter():
                       strokeWidth=0.5 * self.baseThickness)
             if self.params[GLSTRIPDIRECTION] == 'Y':
                 pl.moveTo(0, h)
-                pl.lineTo(0, self.displayScale * self.mainView.bottom)
+                pl.lineTo(0, self.displayScaleY * self.mainView.bottom)
             else:
                 pl.moveTo(0, h)
-                pl.lineTo(self.displayScale * self.mainView.width, h)
+                pl.lineTo(self.displayScaleX * self.mainView.width, h)
             gr.add(pl)
 
         # add to the drawing object
@@ -668,11 +702,11 @@ class GLExporter():
         """
         # frame the top-left of the main plot area - after other plotting
         gr = Group()
-        ll = [self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom,
-              self.displayScale * self.mainView.left, self.pixHeight,
-              self.displayScale * self.mainView.width, self.pixHeight,
-              self.displayScale * self.mainView.width, self.displayScale * self.mainView.bottom,
-              self.displayScale * self.mainView.left, self.displayScale * self.mainView.bottom]
+        ll = [self.displayScaleX * self.mainView.left, self.displayScaleY * self.mainView.bottom,
+              self.displayScaleX * self.mainView.left, self.pixHeight,
+              self.displayScaleX * self.mainView.width, self.pixHeight,
+              self.displayScaleX * self.mainView.width, self.displayScaleY * self.mainView.bottom,
+              self.displayScaleX * self.mainView.left, self.displayScaleY * self.mainView.bottom]
 
         pl = Path(fillColor=None,
                   strokeColor=self.foregroundColour if self.params[GLPLOTBORDER] else self.backgroundColour,
@@ -919,10 +953,11 @@ class GLExporter():
             colourGroups = OrderedDict()
             self._appendIndexLineGroup(indArray=self._parent.gridList[0],
                                        colourGroups=colourGroups,
-                                       plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
-                                                PLOTBOTTOM: self.displayScale * self.mainView.bottom,
-                                                PLOTWIDTH : self.displayScale * self.mainView.width,
-                                                PLOTHEIGHT: self.displayScale * self.mainView.height},
+                                       # plotDim={PLOTLEFT  : self.displayScaleY * self.mainView.left,
+                                       #          PLOTBOTTOM: self.displayScaleX * self.mainView.bottom,
+                                       #          PLOTWIDTH : self.displayScaleX * self.mainView.width,
+                                       #          PLOTHEIGHT: self.displayScaleY * self.mainView.height},
+                                       plotDim=self.plotLBWH(self.mainView),
                                        name='grid',
                                        ratioLine=True,
                                        lineWidth=0.5 * self.baseThickness,
@@ -937,10 +972,11 @@ class GLExporter():
             colourGroups = OrderedDict()
             self._appendIndexLineGroup(indArray=self._parent.diagonalSideBandsGLList,
                                        colourGroups=colourGroups,
-                                       plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
-                                                PLOTBOTTOM: self.displayScale * self.mainView.bottom,
-                                                PLOTWIDTH : self.displayScale * self.mainView.width,
-                                                PLOTHEIGHT: self.displayScale * self.mainView.height},
+                                       # plotDim={PLOTLEFT  : self.displayScaleY * self.mainView.left,
+                                       #          PLOTBOTTOM: self.displayScaleX * self.mainView.bottom,
+                                       #          PLOTWIDTH : self.displayScaleX * self.mainView.width,
+                                       #          PLOTHEIGHT: self.displayScaleY * self.mainView.height},
+                                       plotDim=self.plotLBWH(self.mainView),
                                        name='diagonal',
                                        ratioLine=True,
                                        lineWidth=0.5 * self.baseThickness,
@@ -955,10 +991,11 @@ class GLExporter():
             colourGroups = OrderedDict()
             self._appendIndexLineGroup(indArray=self._parent.diagonalGLList,
                                        colourGroups=colourGroups,
-                                       plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
-                                                PLOTBOTTOM: self.displayScale * self.mainView.bottom,
-                                                PLOTWIDTH : self.displayScale * self.mainView.width,
-                                                PLOTHEIGHT: self.displayScale * self.mainView.height},
+                                       # plotDim={PLOTLEFT  : self.displayScaleY * self.mainView.left,
+                                       #          PLOTBOTTOM: self.displayScaleX * self.mainView.bottom,
+                                       #          PLOTWIDTH : self.displayScaleX * self.mainView.width,
+                                       #          PLOTHEIGHT: self.displayScaleY * self.mainView.height},
+                                       plotDim=self.plotLBWH(self.mainView),
                                        name='diagonal',
                                        ratioLine=True,
                                        lineWidth=0.5 * self.baseThickness,
@@ -976,10 +1013,11 @@ class GLExporter():
             colourGroups = OrderedDict()
             self._appendIndexLineGroup(indArray=_drawList,
                                        colourGroups=colourGroups,
-                                       plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
-                                                PLOTBOTTOM: self.displayScale * self.mainView.bottom,
-                                                PLOTWIDTH : self.displayScale * self.mainView.width,
-                                                PLOTHEIGHT: self.displayScale * self.mainView.height},
+                                       # plotDim={PLOTLEFT  : self.displayScaleY * self.mainView.left,
+                                       #          PLOTBOTTOM: self.displayScaleX * self.mainView.bottom,
+                                       #          PLOTWIDTH : self.displayScaleX * self.mainView.width,
+                                       #          PLOTHEIGHT: self.displayScaleY * self.mainView.height},
+                                       plotDim=self.plotLBWH(self.mainView),
                                        name='cursors',
                                        ratioLine=True,
                                        lineWidth=0.5 * self.baseThickness,
@@ -1009,10 +1047,10 @@ class GLExporter():
         newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self._parent.deltaX),
                                             drawString.attribs[1] + (self.fontYOffset * self._parent.deltaY)])
         if self.pointVisible(self._parent, newLine,
-                             x=self.displayScale * self.mainView.left,
-                             y=self.displayScale * self.mainView.bottom,
-                             width=self.displayScale * self.mainView.width,
-                             height=self.displayScale * self.mainView.height):
+                             x=self.displayScaleX * self.mainView.left,
+                             y=self.displayScaleY * self.mainView.bottom,
+                             width=self.displayScaleX * self.mainView.width,
+                             height=self.displayScaleY * self.mainView.height):
             if colourPath not in colourGroups:
                 colourGroups[colourPath] = Group()
 
@@ -1067,10 +1105,10 @@ class GLExporter():
 
         data = _editValues()
         # set the display parameters
-        data.x = _x = self.displayScale * self.mainView.left
-        data.y = _y = self.displayScale * self.mainView.bottom
-        data.width = _width = self.displayScale * self.mainView.width
-        data.height = _height = self.displayScale * self.mainView.height
+        data.x = _x = self.displayScaleX * self.mainView.left
+        data.y = _y = self.displayScaleY * self.mainView.bottom
+        data.width = _width = self.displayScaleX * self.mainView.width
+        data.height = _height = self.displayScaleY * self.mainView.height
         data.index = 0
 
         for spectrumView in self._ordering:
@@ -1168,10 +1206,11 @@ class GLExporter():
         colourGroups = OrderedDict()
         self._appendIndexLineGroup(indArray=self._parent.boundingBoxes,
                                    colourGroups=colourGroups,
-                                   plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
-                                            PLOTBOTTOM: self.displayScale * self.mainView.bottom,
-                                            PLOTWIDTH : self.displayScale * self.mainView.width,
-                                            PLOTHEIGHT: self.displayScale * self.mainView.height},
+                                   # plotDim={PLOTLEFT  : self.displayScaleY * self.mainView.left,
+                                   #          PLOTBOTTOM: self.displayScaleX * self.mainView.bottom,
+                                   #          PLOTWIDTH : self.displayScaleX * self.mainView.width,
+                                   #          PLOTHEIGHT: self.displayScaleY * self.mainView.height},
+                                   plotDim=self.plotLBWH(self.mainView),
                                    name='boundary',
                                    lineWidth=0.5 * self.baseThickness,
                                    vStep=2)
@@ -1311,10 +1350,11 @@ class GLExporter():
         colourGroups = OrderedDict()
         self._appendIndexLineGroup(indArray=self._parent._marksList,
                                    colourGroups=colourGroups,
-                                   plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
-                                            PLOTBOTTOM: self.displayScale * self.mainView.bottom,
-                                            PLOTWIDTH : self.displayScale * self.mainView.width,
-                                            PLOTHEIGHT: self.displayScale * self.mainView.height},
+                                   # plotDim={PLOTLEFT  : self.displayScaleY * self.mainView.left,
+                                   #          PLOTBOTTOM: self.displayScaleX * self.mainView.bottom,
+                                   #          PLOTWIDTH : self.displayScaleX * self.mainView.width,
+                                   #          PLOTHEIGHT: self.displayScaleY * self.mainView.height},
+                                   plotDim=self.plotLBWH(self.mainView),
                                    name='marks',
                                    lineWidth=0.5 * self.baseThickness,
                                    vStep=2)
@@ -1328,10 +1368,11 @@ class GLExporter():
         self._appendIndexLineGroupFill(indArray=self._parent._GLIntegrals._GLSymbols,
                                        listView='integralList',
                                        colourGroups=colourGroups,
-                                       plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
-                                                PLOTBOTTOM: self.displayScale * self.mainView.bottom,
-                                                PLOTWIDTH : self.displayScale * self.mainView.width,
-                                                PLOTHEIGHT: self.displayScale * self.mainView.height},
+                                       # plotDim={PLOTLEFT  : self.displayScaleY * self.mainView.left,
+                                       #          PLOTBOTTOM: self.displayScaleX * self.mainView.bottom,
+                                       #          PLOTWIDTH : self.displayScaleX * self.mainView.width,
+                                       #          PLOTHEIGHT: self.displayScaleY * self.mainView.height},
+                                       plotDim=self.plotLBWH(self.mainView),
                                        name='IntegralListsFill',
                                        fillMode=GL.GL_FILL,
                                        splitGroups=True,
@@ -1354,10 +1395,10 @@ class GLExporter():
                                       and pp in self._parent._GLIntegrals._GLSymbols.keys()
                                       and pp.integralList.pid in self.params[GLSELECTEDPIDS]]
 
-            _x = self.displayScale * self.mainView.left
-            _y = self.displayScale * self.mainView.bottom
-            _width = self.displayScale * self.mainView.width
-            _height = self.displayScale * self.mainView.height
+            _x = self.displayScaleX * self.mainView.left
+            _y = self.displayScaleY * self.mainView.bottom
+            _width = self.displayScaleX * self.mainView.width
+            _height = self.displayScaleY * self.mainView.height
 
             for integralListView in validIntegralListViews:  # spectrumView.integralListViews:
                 mat = None
@@ -1377,10 +1418,11 @@ class GLExporter():
 
                 self._appendIndexLineGroup(indArray=integralSymbols,
                                            colourGroups=colourGroups,
-                                           plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
-                                                    PLOTBOTTOM: self.displayScale * self.mainView.bottom,
-                                                    PLOTWIDTH : self.displayScale * self.mainView.width,
-                                                    PLOTHEIGHT: self.displayScale * self.mainView.height},
+                                           # plotDim={PLOTLEFT  : self.displayScaleY * self.mainView.left,
+                                           #          PLOTBOTTOM: self.displayScaleX * self.mainView.bottom,
+                                           #          PLOTWIDTH : self.displayScaleX * self.mainView.width,
+                                           #          PLOTHEIGHT: self.displayScaleY * self.mainView.height},
+                                           plotDim=self.plotLBWH(self.mainView),
                                            name=f'integralSymbols{integralListView.pid}Fill',
                                            lineWidth=0.5 * self.baseThickness,
                                            fillMode=GL.GL_FILL,
@@ -1389,10 +1431,11 @@ class GLExporter():
                                   name=f'fillRegions{integralListView.pid}')
                 self._appendIndexLineGroup(indArray=integralSymbols,
                                            colourGroups=colourGroups,
-                                           plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
-                                                    PLOTBOTTOM: self.displayScale * self.mainView.bottom,
-                                                    PLOTWIDTH : self.displayScale * self.mainView.width,
-                                                    PLOTHEIGHT: self.displayScale * self.mainView.height},
+                                           # plotDim={PLOTLEFT  : self.displayScaleY * self.mainView.left,
+                                           #          PLOTBOTTOM: self.displayScaleX * self.mainView.bottom,
+                                           #          PLOTWIDTH : self.displayScaleX * self.mainView.width,
+                                           #          PLOTHEIGHT: self.displayScaleY * self.mainView.height},
+                                           plotDim=self.plotLBWH(self.mainView),
                                            name=f'integralSymbols{integralListView.pid}Line',
                                            lineWidth=0.5 * self.baseThickness,
                                            fillMode=GL.GL_LINE,
@@ -1446,10 +1489,11 @@ class GLExporter():
         colourGroups = OrderedDict()
         self._appendIndexLineGroup(indArray=self._parent._externalRegions,
                                    colourGroups=colourGroups,
-                                   plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
-                                            PLOTBOTTOM: self.displayScale * self.mainView.bottom,
-                                            PLOTWIDTH : self.displayScale * self.mainView.width,
-                                            PLOTHEIGHT: self.displayScale * self.mainView.height},
+                                   # plotDim={PLOTLEFT  : self.displayScaleY * self.mainView.left,
+                                   #          PLOTBOTTOM: self.displayScaleX * self.mainView.bottom,
+                                   #          PLOTWIDTH : self.displayScaleX * self.mainView.width,
+                                   #          PLOTHEIGHT: self.displayScaleY * self.mainView.height},
+                                   plotDim=self.plotLBWH(self.mainView),
                                    name='regions',
                                    lineWidth=0.5 * self.baseThickness,
                                    vStep=2)
@@ -1548,10 +1592,10 @@ class GLExporter():
 
                     newLine = [drawString.attribs[0], drawString.attribs[1]]
                     if self.pointVisible(self._parent, newLine,
-                                         x=self.displayScale * self.mainView.left,
-                                         y=self.displayScale * self.mainView.bottom,
-                                         width=self.displayScale * self.mainView.width,
-                                         height=self.displayScale * self.mainView.height):
+                                         x=self.displayScaleX * self.mainView.left,
+                                         y=self.displayScaleY * self.mainView.bottom,
+                                         width=self.displayScaleX * self.mainView.width,
+                                         height=self.displayScaleY * self.mainView.height):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
                         textGroup = drawString.text.split('\n')
@@ -1653,10 +1697,10 @@ class GLExporter():
 
             newLine = [drawString.attribs[0], drawString.attribs[1]]
             if self.pointVisible(self._parent, newLine,
-                                 x=self.displayScale * self.mainView.left,
-                                 y=self.displayScale * self.mainView.bottom,
-                                 width=self.displayScale * self.mainView.width,
-                                 height=self.displayScale * self.mainView.height):
+                                 x=self.displayScaleX * self.mainView.left,
+                                 y=self.displayScaleY * self.mainView.bottom,
+                                 width=self.displayScaleX * self.mainView.width,
+                                 height=self.displayScaleY * self.mainView.height):
                 if colourPath not in colourGroups:
                     colourGroups[colourPath] = Group()
                 self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=False)
@@ -1686,10 +1730,10 @@ class GLExporter():
 
             newLine = [drawString.attribs[0], drawString.attribs[1]]
             if self.pointVisible(self._parent, newLine,
-                                 x=self.displayScale * self.mainView.left,
-                                 y=self.displayScale * self.mainView.bottom,
-                                 width=self.displayScale * self.mainView.width,
-                                 height=self.displayScale * self.mainView.height):
+                                 x=self.displayScaleX * self.mainView.left,
+                                 y=self.displayScaleY * self.mainView.bottom,
+                                 width=self.displayScaleX * self.mainView.width,
+                                 height=self.displayScaleY * self.mainView.height):
                 if colourPath not in colourGroups:
                     colourGroups[colourPath] = Group()
                 self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
@@ -1763,10 +1807,10 @@ class GLExporter():
         Add the infinite lines to the main drawing area.
         """
         colourGroups = OrderedDict()
-        _x = self.displayScale * self.mainView.left
-        _y = self.displayScale * self.mainView.bottom
-        _width = self.displayScale * self.mainView.width
-        _height = self.displayScale * self.mainView.height
+        _x = self.displayScaleX * self.mainView.left
+        _y = self.displayScaleY * self.mainView.bottom
+        _width = self.displayScaleX * self.mainView.width
+        _height = self.displayScaleY * self.mainView.height
 
         for infLine in self._parent._infiniteLines:
             if infLine.visible:
@@ -1811,10 +1855,10 @@ class GLExporter():
                                             drawString.attribs[1] + (self.fontYOffset * self._parent.deltaY)])
 
         if self.pointVisible(self._parent, newLine,
-                             x=self.displayScale * self.mainView.left,
-                             y=self.displayScale * self.mainView.bottom,
-                             width=self.displayScale * self.mainView.width,
-                             height=self.displayScale * self.mainView.height):
+                             x=self.displayScaleX * self.mainView.left,
+                             y=self.displayScaleY * self.mainView.bottom,
+                             width=self.displayScaleX * self.mainView.width,
+                             height=self.displayScaleY * self.mainView.height):
             pass
 
         if colourPath not in colourGroups:
@@ -1832,24 +1876,24 @@ class GLExporter():
         ll2 = None
         if self.rAxis and self.bAxis:
             ll1 = [0.0, 0.0,
-                   0.0, self.displayScale * self.mainView.bottom,
-                   self.displayScale * self.mainView.width, self.displayScale * self.mainView.bottom,
-                   self.displayScale * self.mainView.width, self.pixHeight,
+                   0.0, self.displayScaleX * self.mainView.bottom,
+                   self.displayScaleX * self.mainView.width, self.displayScaleX * self.mainView.bottom,
+                   self.displayScaleX * self.mainView.width, self.pixHeight,
                    self.pixWidth, self.pixHeight,
                    self.pixWidth, 0.0]
             ll2 = [0.0, 0.0, self.pixWidth, 0.0, self.pixWidth, self.pixHeight]
 
         elif self.rAxis:
-            ll1 = [self.displayScale * self.mainView.width, 0.0,
-                   self.displayScale * self.mainView.width, self.pixHeight,
+            ll1 = [self.displayScaleY * self.mainView.width, 0.0,
+                   self.displayScaleY * self.mainView.width, self.pixHeight,
                    self.pixWidth, self.pixHeight,
                    self.pixWidth, 0.0]
             ll2 = [self.pixWidth, 0.0, self.pixWidth, self.pixHeight]
 
         elif self.bAxis:
             ll1 = [0.0, 0.0,
-                   0.0, self.displayScale * self.mainView.bottom,
-                   self.pixWidth, self.displayScale * self.mainView.bottom,
+                   0.0, self.displayScaleX * self.mainView.bottom,
+                   self.pixWidth, self.displayScaleX * self.mainView.bottom,
                    self.pixWidth, 0.0]
             ll2 = [0.0, 0.0, self.pixWidth, 0.0]
 
@@ -1882,10 +1926,11 @@ class GLExporter():
                     # add the vertices for the grid lines
                     self._appendIndexLineGroup(indArray=indArray,
                                                colourGroups=colourGroups,
-                                               plotDim={PLOTLEFT  : self.displayScale * self.rAxisMarkView.left,
-                                                        PLOTBOTTOM: self.displayScale * self.rAxisMarkView.bottom,
-                                                        PLOTWIDTH : self.displayScale * self.rAxisMarkView.width,
-                                                        PLOTHEIGHT: self.displayScale * self.rAxisMarkView.height},
+                                               # plotDim={PLOTLEFT  : self.displayScaleY * self.rAxisMarkView.left,
+                                               #          PLOTBOTTOM: self.displayScaleX * self.rAxisMarkView.bottom,
+                                               #          PLOTWIDTH : self.displayScaleX * self.rAxisMarkView.width,
+                                               #          PLOTHEIGHT: self.displayScaleY * self.rAxisMarkView.height},
+                                               plotDim=self.plotLBWH(self.rAxisMarkView),
                                                name='gridAxes',
                                                setColour=self.foregroundColour,
                                                ratioLine=True,
@@ -1924,10 +1969,11 @@ class GLExporter():
                     # add the vertices for the grid lines
                     self._appendIndexLineGroup(indArray=indArray,
                                                colourGroups=colourGroups,
-                                               plotDim={PLOTLEFT  : self.displayScale * self.bAxisMarkView.left,
-                                                        PLOTBOTTOM: self.displayScale * self.bAxisMarkView.bottom,
-                                                        PLOTWIDTH : self.displayScale * self.bAxisMarkView.width,
-                                                        PLOTHEIGHT: self.displayScale * self.bAxisMarkView.height},
+                                               # plotDim={PLOTLEFT  : self.displayScaleY * self.bAxisMarkView.left,
+                                               #          PLOTBOTTOM: self.displayScaleX * self.bAxisMarkView.bottom,
+                                               #          PLOTWIDTH : self.displayScaleX * self.bAxisMarkView.width,
+                                               #          PLOTHEIGHT: self.displayScaleY * self.bAxisMarkView.height},
+                                               plotDim=self.plotLBWH(self.bAxisMarkView),
                                                name='gridAxes',
                                                setColour=self.foregroundColour,
                                                ratioLine=True,
@@ -2029,10 +2075,10 @@ class GLExporter():
                                                     attribPos[1] + (self.fontYOffset * self._parent.deltaY)])
 
                 if self.pointVisible(self._parent, newLine,
-                                     x=self.displayScale * self.rAxisBarView.left,
-                                     y=self.displayScale * self.rAxisBarView.bottom,
-                                     width=self.displayScale * self.rAxisBarView.width,
-                                     height=self.displayScale * self.rAxisBarView.height):
+                                     x=self.displayScaleX * self.rAxisBarView.left,
+                                     y=self.displayScaleY * self.rAxisBarView.bottom,
+                                     width=self.displayScaleX * self.rAxisBarView.width,
+                                     height=self.displayScaleY * self.rAxisBarView.height):
                     if colourPath not in colourGroups:
                         colourGroups[colourPath] = Group()
 
@@ -2074,10 +2120,10 @@ class GLExporter():
                                                     (self.fontYOffset + attribPos[1]) / self._parent.AXIS_MARGINBOTTOM])
 
                 if self.pointVisible(self._parent, newLine,
-                                     x=self.displayScale * self.bAxisBarView.left,
-                                     y=self.displayScale * self.bAxisBarView.bottom,
-                                     width=self.displayScale * self.bAxisBarView.width,
-                                     height=self.displayScale * self.bAxisBarView.height):
+                                     x=self.displayScaleX * self.bAxisBarView.left,
+                                     y=self.displayScaleY * self.bAxisBarView.bottom,
+                                     width=self.displayScaleX * self.bAxisBarView.width,
+                                     height=self.displayScaleY * self.bAxisBarView.height):
                     if colourPath not in colourGroups:
                         colourGroups[colourPath] = Group()
 
@@ -2221,7 +2267,7 @@ class GLExporter():
 
         with catchExceptions(errorStringTemplate='Error writing SVG file: "%s"', printTraceBack=False):
 
-            if (rows := (self.params[GLSTRIPDIRECTION] == 'Y')):
+            if rows := (self.params[GLSTRIPDIRECTION] == 'Y'):
                 w, h = sum(self.stripWidths), self.stripHeights[0]
                 x = y = 0
             else:
@@ -2251,12 +2297,12 @@ class GLExporter():
     def writeSVGToMem(self):
         """Same as writeSVGFile doesn't save to disk but instead returns a string
         """
-        from reportlab.graphics.renderSVG import SVGCanvas, draw, drawToString
+        from reportlab.graphics.renderSVG import SVGCanvas, draw
         from io import StringIO
 
         with catchExceptions(errorStringTemplate='Error writing SVG file: "%s"', printTraceBack=False):
 
-            if (rows := (self.params[GLSTRIPDIRECTION] == 'Y')):
+            if rows := (self.params[GLSTRIPDIRECTION] == 'Y'):
                 w, h = sum(self.stripWidths), self.stripHeights[0]
                 x = y = 0
             else:
@@ -2675,6 +2721,12 @@ class GLExporter():
             lineList[pp] = x + width * (lineList[pp] - axisL) / (axisR - axisL)
             lineList[pp + 1] = y + height * (lineList[pp + 1] - axisB) / (axisT - axisB)
         return fit
+
+    def plotLBWH(self, view):
+        return {PLOTLEFT  : self.displayScaleX * view.left,
+                PLOTBOTTOM: self.displayScaleY * view.bottom,
+                PLOTWIDTH : self.displayScaleX * view.width,
+                PLOTHEIGHT: self.displayScaleY * view.height}
 
 
 class Clipped_Flowable(Flowable):

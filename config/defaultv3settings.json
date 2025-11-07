@@ -202,7 +202,8 @@
         "dpi"               : 300,
         "scalingMode"       : "Percentage",
         "scalingPercentage" : 80,
-        "scalingUnits"      : 1.0,
+        "scalingUnitsX"      : 1.0,
+        "scalingUnitsY"      : 1.0,
         "scalingAxis"       : "X",
         "useFont"           : false,
         "printOptions"      : {

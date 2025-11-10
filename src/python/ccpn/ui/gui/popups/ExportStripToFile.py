@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-09-02 15:53:03 +0100 (Tue, September 02, 2025) $"
+__dateModified__ = "$dateModified: 2025-11-07 15:07:35 +0000 (Fri, November 07, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from dataclasses import dataclass
 from functools import partial, singledispatchmethod
 from typing import Optional, Callable
 
-from PyQt5.QtCore import QByteArray
+from PyQt5.QtCore import QByteArray, QObject, pyqtSignal, QThread
 
 from ccpn.core.lib.ContextManagers import catchExceptions, queueStateChange
 from ccpn.core.lib.WeakRefLib import WeakRefDescriptor
@@ -52,7 +52,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import (PulldownListCompoundWidget, CheckBoxCompoundWidget,
-                                                 DoubleSpinBoxCompoundWidget)
+                                                 DoubleSpinBoxCompoundWidget, ScientificSpinBoxCompoundWidget)
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
@@ -126,7 +126,9 @@ PAGESIZEA4 = 'A4'
 PAGESIZEA5 = 'A5'
 PAGESIZEA6 = 'A6'
 PAGESIZELETTER = 'letter'
-PAGESIZES = [PAGESIZEA0, PAGESIZEA1, PAGESIZEA2, PAGESIZEA3, PAGESIZEA4, PAGESIZEA5, PAGESIZEA6, PAGESIZELETTER]
+PAGESIZECUSTOM = 'Custom'
+PAGESIZES = [PAGESIZEA0, PAGESIZEA1, PAGESIZEA2, PAGESIZEA3, PAGESIZEA4,
+             PAGESIZEA5, PAGESIZEA6, PAGESIZELETTER, PAGESIZECUSTOM]
 PAGESIZE = 'pageSize'
 OPTIONSPECTRA = 'Spectra'
 OPTIONPEAKLISTS = 'Peak Lists'
@@ -349,6 +351,9 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._copyRangeValue = None
         # self.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
 
+        # self.thread : QThread = QThread()
+        # self.worker = ImageUpdater(image=self._image, parent=self)
+
     @property
     def strips(self) -> list:
         return [self._strips[kk] for kk in sorted(self._strips)]
@@ -425,6 +430,18 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.pageSize = PulldownList(sFrame, vAlign='t', grid=(row, 1),
                                      callback=self._queuePageSizeCallback)
         self.pageSize.setData(texts=PAGESIZES)
+        row += 1
+        self.pageSizeX = DoubleSpinBoxCompoundWidget(sFrame, grid=(row, 1), min=1.0, max=999999, decimals=0, step=1,
+                                                     callback=self._queuePageSizeCallback, labelText='X')
+        row += 1
+        self.pageSizeY = DoubleSpinBoxCompoundWidget(sFrame, grid=(row, 1), min=1.0, max=999999, decimals=0, step=1,
+                                                     callback=self._queuePageSizeCallback, labelText='Y', )
+
+        self.dpiLabel = Label(sFrame, text='DPI: 72', grid=(row, 2), hAlign='left', vAlign='centre')
+
+        self.pageSizeX.setVisible(False)
+        self.pageSizeY.setVisible(False)
+        self.dpiLabel.setVisible(False)
 
         row += 1
         Label(sFrame, text='Page orientation', grid=(row, 0), hAlign='left', vAlign='centre')
@@ -524,6 +541,34 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         Exports a svg to memory based on the params given
         """
+
+        # def _setThreadNone():
+        #     self.thread = None
+        #
+        # print
+        #
+        # if self.thread:
+        #     if self.thread.isRunning():
+        #         print('thread running')
+        #         # self.thread.exit()
+        #         return
+        # if self.thread:
+        #     if self.thread.isRunning():
+        #         self.worker._imageStopFlag = True
+        #     else:
+        #         self.worker._imageStopFlag = False
+        #
+        # self.worker.moveToThread(self.thread)
+        #
+        # self.thread.started.connect(self.worker.run)
+        # self.worker.finished.connect(self.thread.quit)
+        # # self.worker.finished.connect(self.worker.deleteLater)
+        # # self.thread.finished.connect(self.thread.deleteLater)
+        #
+        # self.thread.start()
+
+        # self.thread.finished.connect(_setThreadNone())
+
         if not params:
             return
         if not (glWidgetRef := params[GLWIDGET]) or not (glWidget := glWidgetRef()):
@@ -678,19 +723,32 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.scalingPercentage = DoubleSpinbox(_frame, grid=(_row, 1), min=1.0, max=100.0, decimals=0, step=1,
                                                callback=self._queueScalingPercentageCallback
                                                )
-        self.scalingUnits = ScientificDoubleSpinBox(_frame, grid=(_row, 2), gridSpan=(1, 2), min=0.0, max=1e10,
-                                                    step=0.1,
-                                                    callback=self._queueScalingUnitsCallback,
-                                                    )
-        self.scalingAxis = PulldownListCompoundWidget(_frame, grid=(_row, 4),
-                                                      labelText='Scale Axis', texts=STRIPAXES,
-                                                      tipText='Select the axis to apply the scaling to',
-                                                      callback=self._queueScalingAxisCallback,
-                                                      )
+        self.scalingUnitsXlabel = Label(_frame, grid=(_row, 2), text='X')
+        self.scalingUnitsX = DoubleSpinbox(_frame, grid=(_row, 3), gridSpan=(1, 2), min=0.0, max=1e10,
+                                                     step=0.1,
+                                                     callback=self._queueScalingUnitsXCallback,
+                                                     )
+
+        _row += 1
+
+        self.scalingUnitsYlabel = Label(_frame, grid=(_row, 2), text='Y  ')
+        self.scalingUnitsY = DoubleSpinbox(_frame, grid=(_row, 3), gridSpan=(1, 2), min=0.0, max=1e10,
+                                                     step=0.1,
+                                                     callback=self._queueScalingUnitsYCallback,
+                                                     )
+
+        # self.scalingAxis = PulldownListCompoundWidget(_frame, grid=(_row, 4),
+        #                                               labelText='Scale Axis', texts=STRIPAXES,
+        #                                               tipText='Select the axis to apply the scaling to',
+        #                                               callback=self._queueScalingAxisCallback,
+        #                                               )
+
         self.scalingPercentage.setMinimumCharacters(10)
-        self.scalingUnits.setMinimumCharacters(10)
-        self.scalingUnits.setVisible(False)
-        self.scalingAxis.setVisible(False)
+        self.scalingUnitsX.setMinimumCharacters(10)
+        self.scalingUnitsY.setMinimumCharacters(10)
+        self.scalingUnitsX.setVisible(False)
+        self.scalingUnitsY.setVisible(False)
+        # self.scalingAxis.setVisible(False)
 
     def _setupFontWidget(self, row, userFrame):
         """Set up the widgets for the font frame
@@ -1378,8 +1436,8 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._scalingModeIndex = SCALING_MODES.index(self.printSettings.scalingMode)
         self.scalingMode.select(self.printSettings.scalingMode)
         self.scalingPercentage.set(self.printSettings.scalingPercentage)
-        self.scalingUnits.set(self.printSettings.scalingUnits)
-        self.scalingAxis.select(self.printSettings.scalingAxis)
+        # self.scalingUnits.set(self.printSettings.scalingUnits)
+        # self.scalingAxis.select(self.printSettings.scalingAxis)
 
     def _populateFont(self):
         """Populate the widgets in the font frame
@@ -1721,7 +1779,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                   if (strip and strip._CcpnGLWidget) else None),
                       GLPRINTTYPE              : self.printType.get(),
                       GLPAGETYPE               : self.pageOrientation.get(),
-                      GLPAGESIZE               : self.pageSize.get(),
+                      GLPAGESIZE               : self._getPageSize(),
                       GLFOREGROUND             : hexToRgbRatio(self.foregroundColour),
                       GLBACKGROUND             : hexToRgbRatio(self.backgroundColour),
                       GLBASETHICKNESS          : self.baseThicknessBox.getValue(),
@@ -1744,8 +1802,8 @@ class ExportStripToFilePopup(ExportDialogABC):
                       GLSTRIPREGIONS           : self._stripDict,
                       GLSCALINGMODE            : self.scalingMode.getIndex(),
                       GLSCALINGPERCENT         : self.scalingPercentage.get(),
-                      GLSCALINGBYUNITS         : self.scalingUnits.get(),
-                      GLSCALINGAXIS            : self.scalingAxis.getIndex(),
+                      GLSCALINGBYUNITS         : (self.scalingUnitsX.get(), self.scalingUnitsY.get()),
+                      GLSCALINGAXIS            : None,
                       GLUSEPRINTFONT           : self._useFontCheckbox.isChecked(),
                       GLPRINTFONT              : (self._fontPulldown.get(), self._fontSpinbox.get()),
                       }
@@ -1966,14 +2024,34 @@ class ExportStripToFilePopup(ExportDialogABC):
     @queueStateChange(_verifyPopupApply)
     def _queuePageSizeCallback(self, _value):
         value = self.pageSize.get()
+
+        if value == PAGESIZECUSTOM and not self.pageSizeX.isVisible():
+            self.pageSizeX.setVisible(True)
+            self.pageSizeY.setVisible(True)
+            self.dpiLabel.setVisible(True)
+        elif value != PAGESIZECUSTOM and self.pageSizeX.isVisible():
+            self.pageSizeX.setVisible(False)
+            self.pageSizeY.setVisible(False)
+            self.dpiLabel.setVisible(False)
+
         if value != self.printSettings.pageSize:
+            if value == PAGESIZECUSTOM:
+                value = (self.pageSizeX.get(), self.pageSizeY.get())
             return partial(self._setPageSize, value)
 
     def _setPageSize(self, value):
         """Set the page size
-        One of: A0, A1, A2, A3, A4, A5, A6, letter
+        One of: A0, A1, A2, A3, A4, A5, A6, letter, custom
         """
         self.printSettings.pageSize = value
+
+    def _getPageSize(self):
+        value = self.pageSize.get()
+
+        if value == PAGESIZECUSTOM:
+            value = (self.pageSizeX.get(), self.pageSizeY.get())
+
+        return value
 
     @queueStateChange(_verifyPopupApply)
     def _queuePageOrientationCallback(self):
@@ -2099,8 +2177,11 @@ class ExportStripToFilePopup(ExportDialogABC):
     def _setScalingVisible(self):
         _ind = self._scalingModeIndex
         self.scalingPercentage.setVisible(not _ind)
-        self.scalingUnits.setVisible(bool(_ind))
-        self.scalingAxis.setVisible(bool(_ind))
+        self.scalingUnitsX.setVisible(bool(_ind))
+        self.scalingUnitsXlabel.setVisible(bool(_ind))
+        self.scalingUnitsY.setVisible(bool(_ind))
+        self.scalingUnitsYlabel.setVisible(bool(_ind))
+        # self.scalingAxis.setVisible(bool(_ind))
 
     @queueStateChange(_verifyPopupApply)
     def _queueScalingModeCallback(self, _value) -> Callable | None:
@@ -2124,14 +2205,24 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.printSettings.scalingPercentage = float(value)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueScalingUnitsCallback(self, _value) -> Callable | None:
-        textFromValue = self.scalingUnits.textFromValue
-        oldValue = textFromValue(self.printSettings.scalingUnits or 0.0)
+    def _queueScalingUnitsXCallback(self, _value) -> Callable | None:
+        textFromValue = self.scalingUnitsX.textFromValue
+        oldValue = textFromValue(self.printSettings.scalingUnitsX or 0.0)
         if _value >= 0 and textFromValue(_value) != oldValue:
-            return partial(self._setScalingUnits, _value)
+            return partial(self._setScalingXUnits, _value)
 
-    def _setScalingUnits(self, value):
-        self.printSettings.scalingUnits = float(value)
+    def _setScalingXUnits(self, value):
+        self.printSettings.scalingUnitsX = float(value)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueScalingUnitsYCallback(self, _value) -> Callable | None:
+        textFromValue = self.scalingUnitsY.textFromValue
+        oldValue = textFromValue(self.printSettings.scalingUnitsY or 0.0)
+        if _value >= 0 and textFromValue(_value) != oldValue:
+            return partial(self._setScalingYUnits, _value)
+
+    def _setScalingYUnits(self, value):
+        self.printSettings.scalingUnitsY = float(value)
 
     @queueStateChange(_verifyPopupApply)
     def _queueScalingAxisCallback(self, _value) -> Callable | None:
@@ -2227,6 +2318,41 @@ class ExportStripToFilePopup(ExportDialogABC):
         # NOTE:ED - ranges are currently not saved to preferences correctly
         for k, val in value.items():
             self._localStripDict[k].fromDict(val)
+
+
+class ImageUpdater(QObject):
+    finished = pyqtSignal()
+    progress = pyqtSignal(int)
+
+    def __init__(self, parent, image, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._params = None
+        self.image = image
+        self.parent = parent
+        self._imageStopFlag = False
+
+    def getParams(self):
+        self._params = self.parent.buildParameters()
+
+    def run(self):
+        self.getParams()
+        if not self._params:
+            return
+        if not (glWidgetRef := self._params[GLWIDGET]) or not (glWidget := glWidgetRef()):
+            getLogger().warning(f'{self.__class__.__name__}.exportToFile - glWidget is not defined')
+            return
+        with catchExceptions(errorStringTemplate='Error writing file; "%s"', printTraceBack=True):
+            self._params[GLEXPORTDPI] = 20
+            if svgExport := glWidget.exportToSVG(params=self._params):
+                svg = svgExport.writeSVGToMem()
+                svgExport.clear()
+
+        if self._imageStopFlag:
+            return
+
+        self.image.setSvg(QByteArray(svg.encode()))
+        self.image.repaint()
+        self.finished.emit()
 
 
 def main():

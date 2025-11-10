@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2025-10-21 16:23:51 +0100 (Tue, October 21, 2025) $"
-__version__ = "$Revision: 3.3.3 $"
+__dateModified__ = "$dateModified: 2025-11-10 16:01:10 +0000 (Mon, November 10, 2025) $"
+__version__ = "$Revision: 3.3.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -392,7 +392,9 @@ class CursorRenderer:
         x_order, y_order, dq = _getQuantumOrders(host)
         if host._matchingIsotopeCodes:
             # Only disable double-cursors in these displays
-            sameSd = host.spectrumDisplay == ((st := coords_dict.get("strip")) and st.spectrumDisplay)
+            sameSd = host.spectrumDisplay == ((st := coords_dict.get("strip"))
+                                              and not st.isDeleted and
+                                              st.spectrumDisplay)
 
             if sameSd and not self.doubleCrosshairVisible and dq is QuantumType.NONE:
                 # Non-double quantum display

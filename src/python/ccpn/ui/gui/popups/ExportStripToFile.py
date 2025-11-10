@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-11-07 15:07:35 +0000 (Fri, November 07, 2025) $"
+__dateModified__ = "$dateModified: 2025-11-10 16:06:09 +0000 (Mon, November 10, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -720,22 +720,26 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                       # callback=self._scalingCallback
                                                       callback=self._queueScalingModeCallback,
                                                       )
-        self.scalingPercentage = DoubleSpinbox(_frame, grid=(_row, 1), min=1.0, max=100.0, decimals=0, step=1,
-                                               callback=self._queueScalingPercentageCallback
-                                               )
-        self.scalingUnitsXlabel = Label(_frame, grid=(_row, 2), text='X')
-        self.scalingUnitsX = DoubleSpinbox(_frame, grid=(_row, 3), gridSpan=(1, 2), min=0.0, max=1e10,
+        self.scalingUnitsXlabel = Label(_frame, grid=(_row, 1), text='X')
+        self.scalingPercentageX = DoubleSpinbox(_frame, grid=(_row, 2), min=1.0, max=100.0, decimals=0, step=1,
+                                                callback=self._queueScalingPercentageCallbackX,
+                                                )
+        self.scalingUnitsX = ScientificDoubleSpinBox(_frame, grid=(_row, 2), gridSpan=(1, 2), min=0.0, max=1e10,
                                                      step=0.1,
                                                      callback=self._queueScalingUnitsXCallback,
                                                      )
 
         _row += 1
 
-        self.scalingUnitsYlabel = Label(_frame, grid=(_row, 2), text='Y  ')
-        self.scalingUnitsY = DoubleSpinbox(_frame, grid=(_row, 3), gridSpan=(1, 2), min=0.0, max=1e10,
+        self.scalingUnitsYlabel = Label(_frame, grid=(_row, 1), text='Y  ')
+        self.scalingPercentageY = DoubleSpinbox(_frame, grid=(_row, 2), min=1.0, max=100.0, decimals=0, step=1,
+                                                callback=self._queueScalingPercentageYCallback,
+                                                )
+        self.scalingUnitsY = ScientificDoubleSpinBox(_frame, grid=(_row, 2), gridSpan=(1, 2), min=0.0, max=1e10,
                                                      step=0.1,
                                                      callback=self._queueScalingUnitsYCallback,
                                                      )
+
 
         # self.scalingAxis = PulldownListCompoundWidget(_frame, grid=(_row, 4),
         #                                               labelText='Scale Axis', texts=STRIPAXES,
@@ -743,7 +747,8 @@ class ExportStripToFilePopup(ExportDialogABC):
         #                                               callback=self._queueScalingAxisCallback,
         #                                               )
 
-        self.scalingPercentage.setMinimumCharacters(10)
+        self.scalingPercentageX.setMinimumCharacters(10)
+        self.scalingPercentageY.setMinimumCharacters(10)
         self.scalingUnitsX.setMinimumCharacters(10)
         self.scalingUnitsY.setMinimumCharacters(10)
         self.scalingUnitsX.setVisible(False)
@@ -1435,7 +1440,8 @@ class ExportStripToFilePopup(ExportDialogABC):
         """
         self._scalingModeIndex = SCALING_MODES.index(self.printSettings.scalingMode)
         self.scalingMode.select(self.printSettings.scalingMode)
-        self.scalingPercentage.set(self.printSettings.scalingPercentage)
+        self.scalingPercentageX.set(self.printSettings.scalingPercentageX)
+        self.scalingPercentageY.set(self.printSettings.scalingPercentageY)
         # self.scalingUnits.set(self.printSettings.scalingUnits)
         # self.scalingAxis.select(self.printSettings.scalingAxis)
 
@@ -1801,7 +1807,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                       GLSELECTEDPIDS           : self.treeView.getSelectedObjectsPids(),
                       GLSTRIPREGIONS           : self._stripDict,
                       GLSCALINGMODE            : self.scalingMode.getIndex(),
-                      GLSCALINGPERCENT         : self.scalingPercentage.get(),
+                      GLSCALINGPERCENT         : (self.scalingPercentageX.get(), self.scalingPercentageY.get()),
                       GLSCALINGBYUNITS         : (self.scalingUnitsX.get(), self.scalingUnitsY.get()),
                       GLSCALINGAXIS            : None,
                       GLUSEPRINTFONT           : self._useFontCheckbox.isChecked(),
@@ -2176,12 +2182,11 @@ class ExportStripToFilePopup(ExportDialogABC):
 
     def _setScalingVisible(self):
         _ind = self._scalingModeIndex
-        self.scalingPercentage.setVisible(not _ind)
+        self.scalingPercentageX.setVisible(not _ind)
+        self.scalingPercentageY.setVisible(not _ind)
         self.scalingUnitsX.setVisible(bool(_ind))
-        self.scalingUnitsXlabel.setVisible(bool(_ind))
         self.scalingUnitsY.setVisible(bool(_ind))
-        self.scalingUnitsYlabel.setVisible(bool(_ind))
-        # self.scalingAxis.setVisible(bool(_ind))
+
 
     @queueStateChange(_verifyPopupApply)
     def _queueScalingModeCallback(self, _value) -> Callable | None:
@@ -2195,14 +2200,24 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.printSettings.scalingMode = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueScalingPercentageCallback(self, _value) -> Callable | None:
-        textFromValue = self.scalingPercentage.textFromValue
-        oldValue = textFromValue(self.printSettings.scalingPercentage or 0.0)
+    def _queueScalingPercentageCallbackX(self, _value) -> Callable | None:
+        textFromValue = self.scalingPercentageX.textFromValue
+        oldValue = textFromValue(self.printSettings.scalingPercentageX or 0.0)
         if _value >= 0 and textFromValue(_value) != oldValue:
-            return partial(self._setScalingPercentage, _value)
+            return partial(self._setScalingPercentageX, _value)
 
-    def _setScalingPercentage(self, value):
-        self.printSettings.scalingPercentage = float(value)
+    def _setScalingPercentageX(self, value):
+        self.printSettings.scalingPercentageX = float(value)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueScalingPercentageYCallback(self, _value) -> Callable | None:
+        textFromValue = self.scalingPercentageY.textFromValue
+        oldValue = textFromValue(self.printSettings.scalingPercentageY or 0.0)
+        if _value >= 0 and textFromValue(_value) != oldValue:
+            return partial(self._setScalingPercentageY, _value)
+
+    def _setScalingPercentageY(self, value):
+        self.printSettings.scalingPercentageY = float(value)
 
     @queueStateChange(_verifyPopupApply)
     def _queueScalingUnitsXCallback(self, _value) -> Callable | None:

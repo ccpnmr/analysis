@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Daniel Thompson $"
-__dateModified__ = "$dateModified: 2025-11-07 15:07:35 +0000 (Fri, November 07, 2025) $"
+__dateModified__ = "$dateModified: 2025-11-10 16:06:09 +0000 (Mon, November 10, 2025) $"
 __version__ = "$Revision: 3.3.3 $"
 #=========================================================================================
 # Created
@@ -498,16 +498,21 @@ class GLExporter():
 
         # modify by the print dialog scaling factor
         _scaleMode = self.params[GLSCALINGMODE]
-        _scalePercent = self.params[GLSCALINGPERCENT]
+        _scalePercentX, _scalePercentY = self.params[GLSCALINGPERCENT]
         if _scaleMode == SCALING_MODES.index(SCALE_PERCENT):
 
             # modify the displayScale
-            self.displayScaleX = self.displayScaleY = (self._displayScale * (_scalePercent / 100.0)) if (
-                    0 <= _scalePercent <= 100) else self._displayScale
+            self.displayScaleX = (self._displayScale * (_scalePercentX / 100.0)) if (
+                    0 <= _scalePercentX <= 100) else self._displayScale
+
+            self.displayScaleY = (self._displayScale * (_scalePercentY / 100.0)) if (
+                    0 <= _scalePercentY <= 100) else self._displayScale
+
             self.pixWidth = self._pixWidth * self.displayScaleX
-            self.pixHeight = self._pixHeight * self.displayScaleX
-            self.fontScale = self._fontScale * self.displayScaleX
-            self.stripSpacing = self._stripSpacing * self.displayScaleX
+            self.pixHeight = self._pixHeight * self.displayScaleY
+
+            self.fontScale = self._fontScale * max(self.displayScaleX, self.displayScaleY)
+            self.stripSpacing = self._stripSpacing * max(self.displayScaleX, self.displayScaleY)
 
         else:
             _newScaleX = _newScaleY = 1.0
